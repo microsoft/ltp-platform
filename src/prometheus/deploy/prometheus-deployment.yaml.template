@@ -1,0 +1,100 @@
+# Copyright (c) Microsoft Corporation
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+{% set prometheus_port = cluster_cfg["prometheus"]["port"] %}
+
+{% if cluster_cfg["alert-manager"]["use-pylon"] %}
+{% set external_url = cluster_cfg["pylon"]["uri"] %}
+{% else %}
+{% set external_url = cluster_cfg["prometheus"]["url"] %}
+{% endif %}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      name: prometheus
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus-account
+      hostNetwork: true
+      initContainers:
+      - name: init
+        image: busybox:1.31.1
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: prometheus-data
+          mountPath: /prometheus-data
+        command: ["chown", "-R", "nobody:nogroup", "/prometheus-data"] # prometheus run as nobody:nogroup, refer to: https://github.com/prometheus/prometheus/pull/2859
+      containers:
+      - name: prometheus
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}prometheus:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}
+        resources:
+          limits:
+            memory: "10Gi"
+          requests:
+            memory: "256Mi"
+        {%- endif %}
+        args:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--web.listen-address=0.0.0.0:{{prometheus_port}}'
+          - '--web.external-url={{ external_url }}/prometheus/'
+          - '--web.route-prefix=prometheus'
+          - '--storage.tsdb.path=/prometheus-data'
+          - '--storage.tsdb.retention=31d'
+        ports:
+        - name: web
+          containerPort: {{prometheus_port}}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus
+        - name: alert-rules-volume
+          mountPath: /etc/prometheus-alert
+        - name: record-rules-volume
+          mountPath: /etc/prometheus-record
+        - name: prometheus-data
+          mountPath: /prometheus-data
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: prometheus-configmap
+      - name: alert-rules-volume
+        configMap:
+          name: prometheus-alert
+      - name: record-rules-volume
+        configMap:
+          name: prometheus-record
+      - name: prometheus-data
+        hostPath:
+          path: {{ cluster_cfg["cluster"]["common"]["data-path"] }}/prometheus/data
+      tolerations:
+      - key: node.kubernetes.io/memory-pressure
+        operator: "Exists"
+      - key: node.kubernetes.io/disk-pressure
+        operator: "Exists"

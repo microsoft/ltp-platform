@@ -1,0 +1,63 @@
+2023-02-28 03:15:30,589 [ERROR] - deployment.confStorage.synchronization : Cannot find config.yaml in your config folder.
+2023-02-28 03:15:30,589 [ERROR] - deployment.confStorage.synchronization : Before v1.7.0, this file is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.
+2023-02-28 03:15:30,589 [ERROR] - deployment.confStorage.synchronization : If you have upgraded to v1.7.0, please copy this file to the config folder.
+2023-02-28 03:15:30,589 [ERROR] - deployment.confStorage.synchronization : Cannot find layout.yaml in your config folder.
+2023-02-28 03:15:30,589 [ERROR] - deployment.confStorage.synchronization : Cannot find services-configuration.yaml in your config folder.
+2023-02-28 03:15:43,483 [ERROR] - deployment.confStorage.synchronization : Cannot find config.yaml in your config folder.
+2023-02-28 03:15:43,483 [ERROR] - deployment.confStorage.synchronization : Before v1.7.0, this file is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.
+2023-02-28 03:15:43,483 [ERROR] - deployment.confStorage.synchronization : If you have upgraded to v1.7.0, please copy this file to the config folder.
+2023-02-28 03:15:43,484 [ERROR] - deployment.confStorage.synchronization : Cannot find layout.yaml in your config folder.
+2023-02-28 03:15:43,484 [ERROR] - deployment.confStorage.synchronization : Cannot find services-configuration.yaml in your config folder.
+2023-07-24 02:05:27,659 [ERROR] - deployment.confStorage.synchronization : Cannot find k8s-role-definition.yaml in your config folder.
+2023-07-24 02:05:27,695 [ERROR] - deployment.confStorage.synchronization : Cannot find layout.yaml in your config folder.
+2023-07-24 02:05:27,695 [ERROR] - deployment.confStorage.synchronization : Cannot find kubernetes-configuration.yaml in your config folder.
+2023-07-24 02:05:27,696 [ERROR] - deployment.confStorage.synchronization : Cannot find config.yaml in your config folder.
+2023-07-24 02:05:27,696 [ERROR] - deployment.confStorage.synchronization : Before v1.7.0, this file is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.
+2023-07-24 02:05:27,696 [ERROR] - deployment.confStorage.synchronization : If you have upgraded to v1.7.0, please copy this file to the config folder.
+2023-07-24 02:05:27,696 [ERROR] - deployment.confStorage.synchronization : Cannot find services-configuration.yaml in your config folder.
+2023-07-24 02:05:58,899 [ERROR] - deployment.confStorage.synchronization : Cannot find k8s-role-definition.yaml in your config folder.
+2023-07-24 02:05:58,899 [ERROR] - deployment.confStorage.synchronization : Cannot find layout.yaml in your config folder.
+2023-07-24 02:05:58,899 [ERROR] - deployment.confStorage.synchronization : Cannot find kubernetes-configuration.yaml in your config folder.
+2023-07-24 02:05:58,899 [ERROR] - deployment.confStorage.synchronization : Cannot find config.yaml in your config folder.
+2023-07-24 02:05:58,899 [ERROR] - deployment.confStorage.synchronization : Before v1.7.0, this file is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.
+2023-07-24 02:05:58,899 [ERROR] - deployment.confStorage.synchronization : If you have upgraded to v1.7.0, please copy this file to the config folder.
+2023-07-24 02:05:58,900 [ERROR] - deployment.confStorage.synchronization : Cannot find services-configuration.yaml in your config folder.
+2023-07-24 02:06:09,288 [ERROR] - deployment.confStorage.synchronization : Cannot find k8s-role-definition.yaml in your config folder.
+2023-07-24 02:06:09,288 [ERROR] - deployment.confStorage.synchronization : Cannot find layout.yaml in your config folder.
+2023-07-24 02:06:09,288 [ERROR] - deployment.confStorage.synchronization : Cannot find kubernetes-configuration.yaml in your config folder.
+2023-07-24 02:06:09,288 [ERROR] - deployment.confStorage.synchronization : Cannot find config.yaml in your config folder.
+2023-07-24 02:06:09,288 [ERROR] - deployment.confStorage.synchronization : Before v1.7.0, this file is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.
+2023-07-24 02:06:09,289 [ERROR] - deployment.confStorage.synchronization : If you have upgraded to v1.7.0, please copy this file to the config folder.
+2023-07-24 02:06:09,289 [ERROR] - deployment.confStorage.synchronization : Cannot find services-configuration.yaml in your config folder.
+2023-07-24 02:07:35,542 [ERROR] - deployment.confStorage.synchronization : Cannot find k8s-role-definition.yaml in your config folder.
+2023-07-24 02:07:35,542 [ERROR] - deployment.confStorage.synchronization : Cannot find layout.yaml in your config folder.
+2023-07-24 02:07:35,542 [ERROR] - deployment.confStorage.synchronization : Cannot find kubernetes-configuration.yaml in your config folder.
+2023-07-24 02:07:35,543 [ERROR] - deployment.confStorage.synchronization : Cannot find config.yaml in your config folder.
+2023-07-24 02:07:35,543 [ERROR] - deployment.confStorage.synchronization : Before v1.7.0, this file is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.
+2023-07-24 02:07:35,543 [ERROR] - deployment.confStorage.synchronization : If you have upgraded to v1.7.0, please copy this file to the config folder.
+2023-07-24 02:07:35,543 [ERROR] - deployment.confStorage.synchronization : Cannot find services-configuration.yaml in your config folder.
+2023-07-24 02:07:43,533 [ERROR] - deployment.confStorage.synchronization : Cannot find k8s-role-definition.yaml in your config folder.
+2023-07-24 02:07:43,533 [ERROR] - deployment.confStorage.synchronization : Cannot find layout.yaml in your config folder.
+2023-07-24 02:07:43,533 [ERROR] - deployment.confStorage.synchronization : Cannot find kubernetes-configuration.yaml in your config folder.
+2023-07-24 02:07:43,534 [ERROR] - deployment.confStorage.synchronization : Cannot find config.yaml in your config folder.
+2023-07-24 02:07:43,534 [ERROR] - deployment.confStorage.synchronization : Before v1.7.0, this file is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.
+2023-07-24 02:07:43,534 [ERROR] - deployment.confStorage.synchronization : If you have upgraded to v1.7.0, please copy this file to the config folder.
+2023-07-24 02:07:43,534 [ERROR] - deployment.confStorage.synchronization : Cannot find services-configuration.yaml in your config folder.
+2023-08-29 03:47:18,278 [ERROR] - deployment.confStorage.synchronization : Cannot find k8s-role-definition.yaml in your config folder.
+2023-08-29 03:47:18,286 [ERROR] - deployment.confStorage.synchronization : Cannot find layout.yaml in your config folder.
+2023-08-29 03:47:18,286 [ERROR] - deployment.confStorage.synchronization : Cannot find kubernetes-configuration.yaml in your config folder.
+2023-08-29 03:47:18,286 [ERROR] - deployment.confStorage.synchronization : Cannot find config.yaml in your config folder.
+2023-08-29 03:47:18,286 [ERROR] - deployment.confStorage.synchronization : Before v1.7.0, this file is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.
+2023-08-29 03:47:18,287 [ERROR] - deployment.confStorage.synchronization : If you have upgraded to v1.7.0, please copy this file to the config folder.
+2023-08-29 03:47:18,287 [ERROR] - deployment.confStorage.synchronization : Cannot find services-configuration.yaml in your config folder.
+2023-08-29 03:47:28,192 [ERROR] - deployment.confStorage.synchronization : Cannot find config.yaml in your config folder.
+2023-08-29 03:47:28,193 [ERROR] - deployment.confStorage.synchronization : Before v1.7.0, this file is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.
+2023-08-29 03:47:28,193 [ERROR] - deployment.confStorage.synchronization : If you have upgraded to v1.7.0, please copy this file to the config folder.
+2023-08-29 03:47:28,193 [ERROR] - deployment.confStorage.synchronization : Cannot find layout.yaml in your config folder.
+2023-08-29 03:47:28,193 [ERROR] - deployment.confStorage.synchronization : Cannot find services-configuration.yaml in your config folder.
+2023-11-18 14:46:38,741 [ERROR] - deployment.paiLibrary.common.kubernetes_handler : Exception when calling CoreV1Api->read_namespaced_config_map: (400)
+Reason: Bad Request
+HTTP response headers: HTTPHeaderDict({'Audit-Id': '31514258-21ab-4f37-9995-327426a39c21', 'Content-Length': '183', 'X-Kubernetes-Pf-Prioritylevel-Uid': '62ba523f-3677-4a6f-9f4c-76a9d9269ba6', 'Cache-Control': 'no-cache, private', 'Date': 'Sat, 18 Nov 2023 14:46:39 GMT', 'X-Kubernetes-Pf-Flowschema-Uid': '4c62fd8c-cf3b-4a21-8965-a0b21db2e4e8', 'Content-Type': 'application/json'})
+HTTP response body: {"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"the export parameter, deprecated since v1.14, is no longer supported","reason":"BadRequest","code":400}
+
+

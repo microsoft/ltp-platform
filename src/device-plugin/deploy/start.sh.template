@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Copyright (c) Microsoft Corporation
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+pushd $(dirname "$0") > /dev/null
+
+# Deploy device plugins of computing devices.
+# Computing device refers to the main hardware used in a machine for computing,
+# e.g. GPU, TPU, and NPU. We don't treat CPU as a computing device.
+# In pactice, one computing device usually requires one device plugin in cluster.
+# Users can specify their computing device type in `layout.yaml`,
+# and the specified device types will be added to cluster_cfg['device-plugin']['devices'] automatically.
+
+# Begin: NVIDIA GPU device plugin
+{% if 'nvidia.com/gpu' in cluster_cfg['device-plugin']['devices'] %}
+
+svn cat https://github.com/NVIDIA/k8s-device-plugin.git/tags/1.0.0-beta4/nvidia-device-plugin.yml \
+    | kubectl apply --overwrite=true -f - || exit $?
+
+{% endif %}
+# End: NVIDIA GPU device plugin
+
+# Begin: AMD GPU device plugin
+{% if 'amd.com/gpu' in cluster_cfg['device-plugin']['devices'] %}
+
+svn cat https://github.com/RadeonOpenCompute/k8s-device-plugin.git/trunk/k8s-ds-amdgpu-dp.yaml \
+    | kubectl apply --overwrite=true -f - || exit $?
+
+{% endif %}
+# End: AMD GPU device plugin
+
+# Begin: Enflame DTU device plugin
+{% if 'enflame.com/dtu' in cluster_cfg['device-plugin']['devices'] %}
+
+svn cat https://github.com/enflameenflame/k8s-device-plugin.git/trunk/yaml/enflame-device-plugin.yaml \
+    | kubectl apply --overwrite=true -f - || exit $?
+
+{% endif %}
+# End: Enflame DTU device plugin
+
+# Please add other types of computing devices here.
+# Use comment "Begin: <device plugin name>" and "End: <device plugin name>"
+# Also, the scripts in `delete.sh.template` should also be modified.
+
+# Other devices (except computing devices)
+# Some other device plugins except the computing device plugins are also needed.
+
+# host device plugin
+kubectl apply --overwrite=true -f device-plugin.yaml || exit $?
+
+# Mellanox InfiniBand device plugin
+{% if 'rdma/hca' in cluster_cfg['device-plugin']['devices'] %}
+
+svn cat https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin.git/trunk/example/hca/rdma-hca-node-config.yaml \
+    | kubectl apply --overwrite=true -f - || exit $?
+svn cat https://github.com/Mellanox/k8s-rdma-sriov-dev-plugin.git/trunk/example/device-plugin.yaml \
+    | kubectl apply --overwrite=true -f - || exit $?
+
+{% endif %}
+
+popd > /dev/null

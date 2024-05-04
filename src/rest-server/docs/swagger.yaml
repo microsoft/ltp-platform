@@ -1,0 +1,3387 @@
+openapi: 3.0.1
+info:
+  title: OpenPAI RESTful API
+  description: >
+    Open Platform for AI RESTful API docs.
+    Version 2.0.1: add more examples and fix typos
+    Version 2.0.2: update job detail and job attempt schema
+    Version 2.0.3: update parameters description of get storage list, update storage example and add get job config example
+    Version 2.0.4: add default field in get storage list
+    Version 2.0.5: add more parameters to job list; add submissionTime
+    Version 2.1.0: add add/delete tag api; add tags field in get job detail and get job list; add tags filter in get job list
+    Version 2.1.1: add get event api
+    Version 2.2.0: add get task status api; add jobAttempId filter to job status api and extend job detail schema
+    Version 2.2.1: a user can add/delete tags to/from his/her own jobs
+    version 2.2.2: add get task logs api
+    version 2.2.3: set .jobStatus.appId nullable in get jobAttempt schema
+    version 2.2.4: support sorting by completionTime in get the list of jobs
+    version 2.2.5: add alert related api
+    version 2.2.6: update type of taskUid
+    version 2.2.7: add jobPriority list jobs parameter
+  license:
+    name: MIT License
+    url: "https://github.com/microsoft/pai/blob/master/LICENSE"
+  version: 2.2.7
+externalDocs:
+  description: Find out more about OpenPAI
+  url: "https://github.com/microsoft/pai"
+tags:
+  - name: api
+    description: API information
+  - name: token
+    description: API endpoint for token
+  - name: authn
+    description: Authentication
+  - name: user
+    description: API endpoint for user
+  - name: group
+    description: API endpoint for group
+  - name: virtual cluster
+    description: API endpoint for virtual cluster
+  - name: job
+    description: API endpoint for job
+  - name: storage
+    description: API endpoint for storage
+  - name: job history
+    description: API endpoint for job history
+  - name: alert
+    description: API endpoint for alert
+  - name: kubernetes
+    description: API endpoint for kubernetes info
+paths:
+  /api/v2/info:
+    get:
+      tags:
+        - api
+      summary: Get OpenPAI cluster info.
+      description: Get OpenPAI cluster info.
+      operationId: getClusterInfo
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: PAI RESTfulAPI
+                  version:
+                    type: string
+                    description: cluster version in v0.X.0 format
+                  launcherType:
+                    type: string
+                    enum:
+                      - yarn
+                      - k8s
+                  authnMethod:
+                    type: string
+                    enum:
+                      - basic
+                      - OIDC
+                required:
+                  - name
+                  - version
+                  - launcherType
+                  - authnMethod
+              example:
+                name: "PAI RESTful API"
+                version: "v1.0.1"
+                launcherType: "k8s"
+                authnMethod: "basic"
+  /api/v2/tokens:
+    get:
+      tags:
+        - token
+      summary: Get your currently signed tokens.
+      description: Get your currently signed tokens.
+      operationId: getTokens
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tokens:
+                    type: array
+                    items:
+                      type: string
+                    description: JWT string list
+                required:
+                  - tokens
+              example:
+                tokens:
+                  - "JWT Token Example"
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+  "/api/v2/tokens/{token}":
+    delete:
+      tags:
+        - token
+      summary: Revoke a token.
+      description: Revoke a token.
+      operationId: deleteToken
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/token"
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: revoke successfully
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+  /api/v2/tokens/application:
+    post:
+      tags:
+        - token
+      summary: Create an application access token in the system.
+      description: >
+        Application access token can only be used for job related operations.
+        Application access token has no expiration time and can be revoked
+        manually.
+      operationId: createApplicationToken
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: your access token
+                  application:
+                    type: boolean
+                    description: "true"
+              example:
+                token: "JWT Token Example"
+                application: true
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+  /api/v2/authn/oidc/login:
+    get:
+      tags:
+        - authn
+      summary: User login with Azure AD.
+      description: After call this API in web browser, restserver will redirect your page to Azure AD for authentication. Only be used in webportal.
+      operationId: oidcLogin
+      responses:
+        "302":
+          description: Redirect
+  /api/v2/authn/oidc/logout:
+    get:
+      tags:
+        - authn
+      summary: User logout from Azure AD.
+      description: After call this API in web browser, restserver will redirect your page to Azure AD for logout.
+      operationId: oidcLogout
+      responses:
+        "302":
+          description: Redirect
+  /api/v2/authn/basic/login:
+    post:
+      tags:
+        - authn
+      summary: Get an access token using username and password.
+      description: >-
+        Authenticated and get an access token in the system (basic
+        authentication mode only).
+      operationId: basicLogin
+      requestBody:
+        description: Basic authentication.
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: your username
+                password:
+                  type: string
+                  description: your password
+                expiration:
+                  type: integer
+                  description: expiration time in seconds
+              required:
+                - username
+                - password
+        required: true
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: your access token
+                  user:
+                    type: string
+                    description: username
+                  admin:
+                    type: boolean
+                    description: true if user is admin
+                required:
+                  - token
+                  - user
+                  - admin
+              example:
+                token: "JWT Token Example"
+                user: "user"
+                admin: true
+        "400":
+          description: NoUserError or IncorrectPasswordError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        "404":
+          $ref: "#/components/responses/NoUserError"
+  /api/v2/authn/basic/logout:
+    delete:
+      tags:
+        - authn
+      summary: Logout and revoke the token
+      description: Logout and revoke the token
+      operationId: basicLogout
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: Logout successfully
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+  /api/v2/users:
+    post:
+      tags:
+        - user
+      summary: Create a user in the system.
+      description: "Create a user in the system by admin, basic authentication mode only."
+      operationId: createUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: User account
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: 'username in [\w.-]+ format'
+                password:
+                  type: string
+                  description: password at least 6 characters
+                admin:
+                  type: boolean
+                email:
+                  type: string
+                  description: email address or empty string
+                virtualCluster:
+                  type: array
+                  items:
+                    type: string
+                  description: vc list
+                extension:
+                  type: object
+              required:
+                - username
+                - password
+        required: true
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: User is created successfully
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "409":
+          $ref: "#/components/responses/ConflictUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    get:
+      tags:
+        - user
+      summary: Get all users in the system.
+      description: "Get all users in the system by admin."
+      operationId: getAllUser
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                description: Array with all users in the system.
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserInfo"
+              example:
+                - username: username
+                  admin: true
+                  virtualCluster: []
+                  storageConfig: []
+                  email: "email@test.com"
+                  extension: {}
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    put:
+      tags:
+        - user
+      summary: Update a user in the system.
+      description: >-
+        Update a user in the system.
+        Admin only.
+      operationId: updateUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Update a user
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  required:
+                    - username
+                  properties:
+                    username:
+                      type: string
+                      description: user name
+                    email:
+                      type: string
+                      description: >-
+                        Email address.
+                        Only be allowed in basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                    virtualCluster:
+                      type: array
+                      description: >-
+                        Array of the virtual cluster.
+                        Only be allowed in basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                      items:
+                        type: string
+                        description: virtual cluster name.
+                    admin:
+                      type: boolean
+                      description: >-
+                        Set the user as admin or not.
+                        Only be allowed in basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                    password:
+                      type: string
+                      description: >-
+                        Password.
+                        Only be allowed in basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                    extension:
+                      type: object
+                      description: >-
+                        Extension fields.
+                        Be allowed in both oidc and basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                patch:
+                  type: boolean
+                  default: false
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "update group {username} successfully."
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "404":
+          $ref: "#/components/responses/NoUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  /api/v2/users/me:
+    put:
+      tags:
+        - user
+      summary: Update user's own profile.
+      description: >-
+        Update user's own profile in the system.
+      operationId: updateUserSelf
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Update user's own profile
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  required:
+                    - username
+                  properties:
+                    username:
+                      type: string
+                      description: user name
+                    email:
+                      type: string
+                      description: >-
+                        Email address.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                    newPassword:
+                      type: string
+                      description: >-
+                        New password.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                    oldPassword:
+                      type: string
+                      description: >-
+                        Old password.
+                        When newPassword exists, it's required.
+                        When newPassword doesn't exists, it's useless.
+                    extension:
+                      type: object
+                      description: >-
+                        Extension fields.
+                        Be allowed in both oidc and basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                patch:
+                  type: boolean
+                  default: false
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "update group {username} successfully."
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "404":
+          $ref: "#/components/responses/NoUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/users/{user}":
+    parameters:
+      - $ref: "#/components/parameters/user"
+    get:
+      tags:
+        - user
+      summary: Get a user's data.
+      description: >-
+        Get a user's data.
+      operationId: getUser
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfo"
+              example:
+                username: username
+                admin: true
+                virtualCluster: []
+                storageConfig: []
+                email: "email@test.com"
+                extension: {}
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "404":
+          $ref: "#/components/responses/NoUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    delete:
+      tags:
+        - user
+      summary: Remove a user in the system.
+      description: >-
+        Basic mode only.
+        Admin only.
+        Remove a user in the system.
+      operationId: deleteUser
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: user is removed successfully
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "404":
+          $ref: "#/components/responses/NoUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/users/{user}/group/":
+    parameters:
+      - $ref: "#/components/parameters/user"
+    put:
+      tags:
+        - user
+      summary: Add a group for user.
+      description: >-
+        Admin only.
+        Basic mode only.
+        Add a group to a user's grouplist.
+      operationId: updateUserGroup
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Add a group to user's grouplist
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groupname:
+                  type: string
+                  default: the group will be added into the user's grouplist.
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "User {username} is added into group {groupname}"
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "404":
+          $ref: "#/components/responses/NoUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    delete:
+      tags:
+        - user
+      summary: Remove a group from user's grouplist.
+      description: >-
+        Admin only.
+        Basic mode only.
+        Remove a group from user's grouplist.
+      operationId: deleteUserGroup
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Remove a group from the user's grouplist.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groupname:
+                  type: string
+                  description: the group will be removed from the user's grouplist.
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "User {username} is removed from group {groupname}"
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "404":
+          $ref: "#/components/responses/NoUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/users/{user}/grouplist/":
+    parameters:
+      - $ref: "#/components/parameters/user"
+    put:
+      tags:
+        - user
+      summary: Replace user's grouplist
+      description: >-
+        Admin only.
+        Basic mode only.
+        Update a user's grouplist.
+      operationId: updateUserGrouplist
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Add a group to user's grouplist
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                grouplist:
+                  description: grouplist
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "update user grouplist successfully."
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "404":
+          $ref: "#/components/responses/NoUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  /api/v2/groups:
+    get:
+      tags:
+        - group
+      summary: Get all group objects in the system.
+      description: Get all group objects in the system.
+      operationId: getAllGroup
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                description: Array with all groups in the system.
+                type: array
+                items:
+                  type: object
+                  properties:
+                    groupname:
+                      type: string
+                      description: group name
+                    description:
+                      type: string
+                      description: description for the group
+                    externalName:
+                      type: string
+                      description: the external group name binding with the group in OpenPAI
+                    extension:
+                      type: object
+              example:
+                - groupname: groupName
+                  description: description
+                  externalName: externalName
+                  extension: {}
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    post:
+      tags:
+        - group
+      summary: Create a group in the system.
+      description: >-
+        Create a group in the system.
+        Admin only.
+      operationId: createGroup
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Create a group
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groupname:
+                  type: string
+                  description: group name
+                description:
+                  type: string
+                  description: description for the group
+                externalName:
+                  type: string
+                  description: the external group name binding with the group in OpenPAI
+                extension:
+                  type: object
+              required:
+                - groupname
+        required: true
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: group is created successfully
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    put:
+      tags:
+        - group
+      summary: Update a group in the system.
+      description: >-
+        Update a group in the system.
+        Admin only.
+      operationId: updateGroup
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Update a group
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  required:
+                    - groupname
+                  properties:
+                    groupname:
+                      type: string
+                      description: group name
+                    description:
+                      type: string
+                      description: description for the group
+                    externalName:
+                      type: string
+                      description: the external group name binding with the group in OpenPAI
+                    extension:
+                      type: object
+                patch:
+                  type: boolean
+                  default: false
+        required: true
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "update group {groupname} successfully."
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "404":
+          $ref: "#/components/responses/NoGroupError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/groups/{group}":
+    parameters:
+      - $ref: "#/components/parameters/group"
+    get:
+      tags:
+        - group
+      summary: Get a group in the system.
+      description: >-
+        Get a group in the system.
+      operationId: getGroup
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groupname:
+                    type: string
+                    description: group name
+                  description:
+                    type: string
+                    description: description for the group
+                  externalName:
+                    type: string
+                    description: the external group name binding with the group in OpenPAI
+                  extension:
+                    type: object
+                required:
+                  - groupname
+                  - description
+                  - externalName
+                  - extension
+              example:
+                groupname: groupName
+                description: description
+                externalName: externalName
+                extension: {}
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "404":
+          $ref: "#/components/responses/NoGroupError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    delete:
+      tags:
+        - group
+      summary: Delete a group in the system.
+      description: >-
+        Delete a group in the system.
+        Admin only.
+      operationId: deleteGroup
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: group is removed successfully
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/groups/{group}/userlist":
+    parameters:
+      - $ref: "#/components/parameters/group"
+    get:
+      tags:
+        - group
+      summary: Get the user array of a group in the system.
+      description: Get the user array of a group in the system.
+      operationId: getGroupMembers
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                description: Array with all users in the group.
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                      description: user name
+                    clusterAdmin:
+                      type: boolean
+                      description: Cluster admin or not.
+              example:
+                - username: username
+                  clusterAdmin: false
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  /api/v2/virtual-clusters:
+    get:
+      tags:
+        - virtual cluster
+      summary: Get the list of virtual clusters.
+      description: Get the list of virtual clusters.
+      operationId: listVirtualClusters
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: "#/components/schemas/VirtualCluster"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/virtual-clusters/{vc}":
+    get:
+      tags:
+        - virtual cluster
+      summary: Get virtual cluster status in the system.
+      description: Get virtual cluster status in the system.
+      operationId: getVirtualCluster
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/vc"
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VirtualCluster"
+              example:
+                capacity: 70
+                usedCapacity: 30
+                dedicated: false
+                resourcesUsed:
+                  cpu: 1
+                  memory: 1024
+                  gpu: 1
+                  vCores: 1
+                  GPUs: 1
+                resourcesGuaranteed:
+                  cpu: 2
+                  memory: 2048
+                  gpu: 2
+                  vCores: 2
+                  GPUs: 2
+                resourcesTotal:
+                  cpu: 2
+                  memory: 2048
+                  gpu: 2
+                  vCores: 2
+                  GPUs: 2
+                maxCapacity: 70
+        "404":
+          $ref: "#/components/responses/NoVirtualClusterError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  /api/v2/storages:
+    get:
+      tags:
+        - storage
+      summary: Get storage list (persistent volume claims) for current user.
+      description: Get storage list for which current user has permissions.
+      operationId: getStorages
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: default
+          in: query
+          description: If true, return default storages only.
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageSummary"
+              example:
+                storages:
+                  - name: name
+                    share: true
+                    volumeName: volumeName
+                    default: true
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/storages/{storage}":
+    get:
+      tags:
+        - storage
+      summary: Get storage (persistent volume claim) for the given name.
+      description: Get storage for the given name.
+      operationId: getStorage
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/storage"
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageDetail"
+              example:
+                name: nfs-storage-name
+                share: true
+                volumeName: nfs-volume-name
+                default: true
+                type: nfs
+                data:
+                  server: <ip-address>
+                  path: "/data"
+        "403":
+          description: ForbiddenUserError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                ForbiddenUserError:
+                  value:
+                    code: ForbiddenUserError
+                    message: "User {user} is not allowed to access {storage}."
+        "404":
+          $ref: "#/components/responses/NoStorageError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  /api/v2/jobs:
+    post:
+      tags:
+        - job
+      summary: Submit a job in the system.
+      description: Submit a job in the system.
+      operationId: createJob
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Job protocol
+        content:
+          text/yaml:
+            schema:
+              $ref: "#/components/schemas/JobProtocol"
+        required: true
+      responses:
+        "202":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "update job {job} successfully"
+        "400":
+          $ref: "#/components/responses/NoVirtualClusterError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+        "409":
+          $ref: "#/components/responses/ConflictJobError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    get:
+      tags:
+        - job
+      summary: Get the list of jobs.
+      description: Get the list of jobs.
+      operationId: listJobs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: username
+          in: query
+          description: filter jobs with username
+          schema:
+            type: string
+        - name: vc
+          in: query
+          description: filter jobs with virtual cluster name
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: filter jobs with state
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          description: filter jobs with keyword, we search keyword in user name, job name, and virtual cluster name
+          schema:
+            type: string
+        - name: tagsContain
+          in: query
+          description: filter jobs with tags. When multiple tags are specified, every job selected should have at least one of these tags
+          schema:
+            type: string
+        - name: tagsNotContain
+          in: query
+          description: filter jobs with tags. When multiple tags are specified, every job selected should have none of these tags
+          schema:
+            type: string
+        - name: jobPriority
+          in: query
+          description: filter jobs with jobPriority, fields include oppo, test, prod, and default (default means jobPriorityClass in job config is null)
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: list job offset
+          schema:
+            type: number
+        - name: limit
+          in: query
+          description: list job limit. It has a default number 5000, and its max number is 50000.
+          schema:
+            type: number
+        - name: order
+          in: query
+          description: 'order of job list.
+          It follows the format <field>,<ASC|DESC>, default value is "submissionTime,DESC".
+          Available fields include: jobName, submissionTime, username, vc, retries, totalTaskNumber, totalGpuNumber, state, completionTime, jobPriority.
+          CompletionTime maybe null for some jobs, these jobs will be returned at the end of the list when sorting by ASC order & at the beginning when sorting by DESC order.'
+          schema:
+            type: string
+        - name: withTotalCount
+          in: query
+          description: 'if withTotalCount is "true", the result will contain a "totalCount" and a "data" field, instead of a job list.'
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/JobSummary"
+                  - $ref: "#/components/schemas/JobSummaryWithTotalCount"
+              example:
+                - protocolVersion: "2"
+                  name: job name
+                  username: user name
+                  state: SUCCEEDED
+                  subState: Completed
+                  executionType: STOP
+                  tags: ["abnormal", "low_gpu_utilization"]
+                  retries: 0
+                  submissionTime: 0
+                  createdTime: 0
+                  launchedTime: 0
+                  completedTime: 0
+                  appExitCode: 0
+                  virtualCluster: unknown
+                  jobPriority: prod
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}":
+    get:
+      tags:
+        - job
+      summary: Get job status with the last attempt.
+      description: Get job status with the last attempt.
+      operationId: getJob
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobDetail"
+              example:
+                name: job name
+                tags: ["abnormal", "low_gpu_utilization"]
+                jobStatus:
+                  username: user name
+                  state: SUCCEEDED
+                  subState: Completed
+                  executionType: STOP
+                  retries: 0
+                  submissionTime: 0
+                  createdTime: 0
+                  launchedTime: 0
+                  completedTime: 0
+                  attemptId: 0
+                  attemptState: SUCCEEDED,
+                  appId: id
+                  appCreatedTime: 0
+                  appLaunchedTime: 0
+                  appCompletedTime: 0
+                  appExitCode: 0
+                  virtualCluster: unknown
+                taskRoles:
+                  taskrole:
+                    taskRoleStatus:
+                      name: task role name
+                    taskStatuses:
+                      - taskIndex: 0
+                        taskUid: e0235258-0c4b-11eb-b396-96ba8c8049b4
+                        taskState: SUCCEEDED
+                        attemptId: 0
+                        attemptState: SUCCEEDED
+        "404":
+          $ref: "#/components/responses/NoJobError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}/attempts/{jobAttemptId}":
+    get:
+      tags:
+        - job
+      summary: Get job status with specific job attempt.
+      description: Get job status with specific job attempt.
+      operationId: getJob
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+        - $ref: "#/components/parameters/jobAttemptId"
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobDetail"
+              example:
+                name: job name
+                tags: ["abnormal", "low_gpu_utilization"]
+                jobStatus:
+                  username: user name
+                  state: SUCCEEDED
+                  subState: Completed
+                  executionType: STOP
+                  retries: 0
+                  submissionTime: 0
+                  createdTime: 0
+                  launchedTIme: 0
+                  completedTime: 0
+                  attemptId: 0
+                  attemptState: SUCCEEDED,
+                  appId: id
+                  appCreatedTime: 0
+                  appLaunchedTime: 0
+                  appCompletedTime: 0
+                  appExitCode: 0
+                  virtualCluster: unknown
+                taskRoles:
+                  taskrole:
+                    taskRoleStatus:
+                      name: task role name
+                    taskStatuses:
+                      - taskIndex: 0
+                        taskUid: e0235258-0c4b-11eb-b396-96ba8c8049b4
+                        taskState: SUCCEEDED
+                        attemptId: 0
+                        attemptState: SUCCEEDED
+        "404":
+          $ref: "#/components/responses/NoJobError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}/config":
+    get:
+      tags:
+        - job
+      summary: Get job configuration.
+      description: This API always returns job config in v2 format (text/yaml). Old job config in v1 format will be converted automatically.
+      operationId: getJobConfig
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            text/yaml:
+              schema:
+                $ref: "#/components/schemas/JobProtocol"
+              example:
+                protocolVersion: 2
+                name: jobconfig
+                type: job
+                version: "1.0"
+                prerequisites:
+                  - name: image
+                    type: dockerimage
+                    uri: uri
+                taskRoles:
+                  taskRole:
+                    instances: 1
+                    dockerImage: image
+                    resourcePerInstance:
+                      cpu: 1
+                      memoryMB: 1024
+                      gpu: 1
+                    commands:
+                      - commands
+        "404":
+          description: NoJobError or NoJobConfigError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                NoJobError:
+                  $ref: "#/components/responses/NoJobError/content/application~1json/examples/NoJobError"
+                NoJobConfigError:
+                  $ref: "#/components/responses/NoJobConfigError/content/application~1json/examples/NoJobConfigError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}/executionType":
+    put:
+      tags:
+        - job
+      summary: Start or stop a job.
+      description: Start or stop a job.
+      operationId: updateJobExecutionType
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+      requestBody:
+        description: Execution type
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  enum:
+                    - START
+                    - STOP
+                  description: execution type
+              required:
+                - value
+        required: true
+      responses:
+        "202":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: execute job {job} successfully
+        "400":
+          $ref: "#/components/responses/InvalidParametersError"
+        "404":
+          $ref: "#/components/responses/NoJobError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}/tag":
+    put:
+      tags:
+        - job
+      summary: Add a tag to a job. Admin users can add tags to any job. A non-admin user can add tags to his/her own jobs.
+      description: Add a tag to a job.
+      operationId: addTag
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  description: tag
+              required:
+                - value
+        required: true
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "Add tag {tag} for job {job} successfully."
+        "400":
+          $ref: "#/components/responses/InvalidParametersError"
+        "404":
+          $ref: "#/components/responses/NoJobError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    delete:
+      tags:
+        - job
+      summary: Delete a tag from a job. Admin users can delete tags from any job. A non-admin user can delete tags from his/her own jobs.
+      description: Delete a tag from a job.
+      operationId: deleteTag
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  description: tag
+              required:
+                - value
+        required: true
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "Delete tag {tag} from job {job} successfully."
+        "400":
+          $ref: "#/components/responses/InvalidParametersError"
+        "404":
+          description: NoJobError or NoTagError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                NoJobError:
+                  $ref: "#/components/responses/NoJobError/content/application~1json/examples/NoJobError"
+                NoTagError:
+                  $ref: "#/components/responses/NoTagError/content/application~1json/examples/NoTagError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}/events":
+    get:
+      tags:
+        - job
+      summary: Get events of a job.
+      description: Get events of a job. The events are sorted by "lastTimestamp,DESC".
+      operationId: getEvents
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+        - name: type
+          in: query
+          description: filter events with type. Could be "Warning" or "Normal".
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobEventsWithTotalCount"
+              example:
+                totalCount: 1
+                data:
+                - uid: "b8a87b12-29de-4702-818a-442d5a97623e"
+                  frameworkName: "399af21acb5befd015d4c45f6c7c1eb9"
+                  podUid: "94920b63-f4d6-4c63-b72b-b926b8bc1334"
+                  taskroleName: "taskrole"
+                  taskName: "399af21acb5befd015d4c45f6c7c1eb9-taskrole-11"
+                  taskIndex: 11
+                  type: "Warning"
+                  reason: "FailedScheduling"
+                  message: "0/17 nodes are available: 1 Insufficient memory, 1 node(s) didn't match node selector, 1 node(s) were unschedulable, 14 Insufficient cpu, 16 Insufficient nvidia.com/gpu."
+                  firstTimestamp: "2020-09-29T09:46:42.000Z"
+                  lastTimestamp: "2020-09-29T09:55:53.000Z"
+                  count: 9
+                  sourceComponent: "default-scheduler"
+                  sourceHost: null
+        "404":
+          $ref: "#/components/responses/NoJobError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}/job-attempts/healthz":
+    get:
+      deprecated: true
+      tags:
+        - job history
+      summary: Check if job attempts is healthy.
+      description: Check if job attempts is healthy.
+      operationId: getJobAttemptsHealthz
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+      responses:
+        "200":
+          description: OK
+        "501":
+          description: Not healthy
+  "/api/v2/jobs/{user}~{job}/job-attempts":
+    get:
+      deprecated: true
+      tags:
+        - job history
+      summary: Get all attempts of a job.
+      description: Get all attempts of a job.
+      operationId: getJobAttempts
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JobAttempt"
+                description: job attempts
+              example:
+                - jobName: jobName
+                  frameworkName: frameworkName
+                  uid: uid
+                  userName: userName
+                  state: SUCCEEDED
+                  originState: Completed
+                  attemptIndex: 0
+                  jobStartedTime: 0
+                  attemptStartedTime: 0
+                  attemptCompletedTime: 0
+                  exitCode: 0
+                  exitPhrase: Succeeded
+                  exitType: Succeeded
+                  exitDiagnostics:
+                    diagnosticsSummary: Pod succeeded
+                    runtime:
+                    launcher: Pod succeeded
+                  appExitTriggerMessage: "All Tasks are completed"
+                  appExitTriggerTaskRoleName: taskrole
+                  appExitTriggerTaskIndex: 0
+                  appExitSpec:
+                    code: 0
+                    phrase: Succeeded
+                    issuer: USER_CONTAINER
+                    causer: USER_CONTAINER
+                    type: USER_SUCCESS
+                    stage: COMPLETING
+                    behavior: UNKNOWN
+                    reaction: NEVER_RETRY
+                    repro:
+                      - User program exits with exitcode 0
+                  appExitDiagnostics: Pod succeeded
+                  appExitMessages:
+                    container:
+                    runtime:
+                    launcher: Pod succeeded
+                  totalGpuNumber: 1
+                  totalTaskNumber: 1
+                  totalTaskRoleNumber: 1
+                  taskRoles:
+                    taskrole:
+                      taskRoleStatus:
+                        name: taskrole
+                      taskStatuses:
+                        - taskIndex: 0
+                          taskState: SUCCEEDED
+                          containerId: <container id>
+                          containerIp: <container ip>
+                          containerExitCode: 0
+                  isLatest: true
+        "404":
+          $ref: "#/components/responses/NoJobError"
+        "501":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}/job-attempts/{attemptIndex}":
+    get:
+      deprecated: true
+      tags:
+        - job history
+      summary: Get a specific attempt by attempt index.
+      description: Get a specific attempt by attempt index.
+      operationId: getJobAttempt
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user"
+        - $ref: "#/components/parameters/job"
+        - $ref: "#/components/parameters/attemptIndex"
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobAttempt"
+              example:
+                jobName: jobName
+                frameworkName: frameworkName
+                uid: uid
+                userName: userName
+                state: SUCCEEDED
+                originState: Completed
+                attemptIndex: 0
+                jobStartedTime: 0
+                attemptStartedTime: 0
+                attemptCompletedTime: 0
+                exitCode: 0
+                exitPhrase: Succeeded
+                exitType: Succeeded
+                exitDiagnostics:
+                  diagnosticsSummary: Pod succeeded
+                  runtime:
+                  launcher: Pod succeeded
+                appExitTriggerMessage: "All Tasks are completed"
+                appExitTriggerTaskRoleName: taskrole
+                appExitTriggerTaskIndex: 0
+                appExitSpec:
+                  code: 0
+                  phrase: Succeeded
+                  issuer: USER_CONTAINER
+                  causer: USER_CONTAINER
+                  type: USER_SUCCESS
+                  stage: COMPLETING
+                  behavior: UNKNOWN
+                  reaction: NEVER_RETRY
+                  repro:
+                    - User program exits with exitcode 0
+                appExitDiagnostics: Pod succeeded
+                appExitMessages:
+                  container:
+                  runtime:
+                  launcher: Pod succeeded
+                totalGpuNumber: 1
+                totalTaskNumber: 1
+                totalTaskRoleNumber: 1
+                taskRoles:
+                  taskrole:
+                    taskRoleStatus:
+                      name: taskrole
+                    taskStatuses:
+                      - taskIndex: 0
+                        taskState: SUCCEEDED
+                        containerId: <container id>
+                        containerIp: <container ip>
+                        containerExitCode: 0
+                isLatest: true
+        "404":
+          $ref: "#/components/responses/NoJobError"
+        "501":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}/attempts/{jobAttemptId}/taskRoles/{taskRoleName}/taskIndex/{taskIndex}/attempts":
+    get:
+      tags:
+        - job
+      summary: Get task status.
+      description: Get task status.
+      operationId: getTask
+      security:
+        - bearerAuth: []
+      parameters:
+      - $ref: "#/components/parameters/user"
+      - $ref: "#/components/parameters/job"
+      - $ref: "#/components/parameters/jobAttemptId"
+      - $ref: "#/components/parameters/taskRoleName"
+      - $ref: "#/components/parameters/taskIndex"
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskStatus"
+              example:
+                taskIndex: 0
+                taskUid: e0235258-0c4b-11eb-b396-96ba8c8049b4
+                taskState: STOPPED
+                retries: 1
+                accountableRetries: 1
+                createdTime: 1602480558000
+                launchedTime: 1602480559000
+                completedTime: 1602480603000
+                username: test_user
+                jobName: task_retry_histry_test
+                jobAttemptId: 0
+                taskRoleName: taskrole
+                attempts:
+                  - attemptId: 0
+                    attemptState: FAILED
+                    currentAttemptCreatedTime: 1602480558000
+                    currentAttemptLaunchedTime: 1602480558000
+                    currentAttemptCompletedTime: 1602480570000
+                    containerId: a9f9f1f2-5e43-4423-88c3-022433b8cd7c
+                    containerIp: 10.151.40.34
+                    containerNodeName: node16
+                    containerPorts:
+                      ssh: 37508
+                      http: 24661
+                    containerGpus: null
+                    containerLog: /api/v2/jobs/admin~admin_444da84f/attempts/0/taskRoles/taskrole/taskIndex/0/attempts/2/logs
+                    containerExitCode: -220
+                    containerExitSpec:
+                      code: -220
+                      phrase: FrameworkAttemptCompletion
+                      issuer: PAI_FC
+                      causer: USER_STOP
+                      type: USER_STOP
+                      stage: UNKNOWN
+                      behavior: PERMANENT
+                      reaction: NEVER_RETRY
+                      reason: Stop to complete current job attempt
+                      repro:
+                        - Stop a job with long running container
+                    containerExitDiagnostics: Stop to complete current FrameworkAttempt
+                  - attemptId: 1
+                    attemptState: FAILED
+                    currentAttemptCreatedTime: 1602480591000
+                    currentAttemptLaunchedTime: 1602480591000
+                    currentAttemptCompletedTime: 1602480603000
+                    containerId: a9f9f1f2-5e43-4423-88c3-022433b8cd7c
+                    containerIp: 10.151.40.34
+                    containerNodeName: node16
+                    containerPorts:
+                      ssh: 37508
+                      http: 24661
+                    containerGpus: null
+                    containerLog: /api/v2/jobs/admin~admin_444da84f/attempts/0/taskRoles/taskrole/taskIndex/0/attempts/2/logs
+                    containerExitCode: -220
+                    containerExitSpec:
+                      code: -220
+                      phrase: FrameworkAttemptCompletion
+                      issuer: PAI_FC
+                      causer: USER_STOP
+                      type: USER_STOP
+                      stage: UNKNOWN
+                      behavior: PERMANENT
+                      reaction: NEVER_RETRY
+                      reason: Stop to complete current job attempt
+                      repro:
+                        - Stop a job with long running container
+                    containerExitDiagnostics: Stop to complete current FrameworkAttempt
+        "404":
+          $ref: "#/components/responses/NoTaskError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  "/api/v2/jobs/{user}~{job}/attempts/{jobAttemptId}/taskRoles/{taskRoleName}/taskIndex/{taskIndex}/attempts/{taskAttemptId}/logs":
+    get:
+      tags:
+        - job
+      summary: Get task log list.
+      description: Get task log list.
+      operationId: getTaskLogs
+      security:
+        - bearerAuth: []
+      parameters:
+      - $ref: "#/components/parameters/user"
+      - $ref: "#/components/parameters/job"
+      - $ref: "#/components/parameters/jobAttemptId"
+      - $ref: "#/components/parameters/taskRoleName"
+      - $ref: "#/components/parameters/taskIndex"
+      - $ref: "#/components/parameters/taskAttemptId"
+      - name: tailMode
+        in: query
+        description: getting log content via tail mode. Could be "true" or "false"
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PodLogInfo"
+              example:
+                locations:
+                - name: stderr
+                  uri: "https://mater_ip/log-manager/node_ip/api/v1/logs/user.pai.stderr?username=user&framework-name=34775529adebae576fbc0bf48d835386&pod-uid=07cdd036-1a7c-11eb-830b-000d3ab25bb6&taskrole=taskrole&token=token"
+                - name: all
+                  uri:  "https://mater_ip/log-manager/node_ip/api/v1/logs/user.pai.all?username=user&framework-name=34775529adebae576fbc0bf48d835386&pod-uid=07cdd036-1a7c-11eb-830b-000d3ab25bb6&taskrole=taskrole&token=token"
+                - name: stdout
+                  uri: "https://mater_ip/log-manager/node_ip/api/v1/logs/user.pai.stdout?username=user&framework-name=34775529adebae576fbc0bf48d835386&pod-uid=07cdd036-1a7c-11eb-830b-000d3ab25bb6&taskrole=taskrole&token=token"
+        "404":
+          $ref: "#/components/responses/NoTaskLogError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  /api/v2/kubernetes/nodes:
+    get:
+      tags:
+        - kubernetes
+      summary: Get kubernetes node list.
+      description: Get kubernetes node list. Need administrator permission.
+      operationId: getK8sNodes
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              example:
+                - Please refer to Kubernetes API doc
+                - >-
+                  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#list-node-v1-core
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+  /api/v2/alerts:
+    get:
+      tags:
+        - alert
+      summary: Get related alerts.
+      description: Get related alerts. For admin users, return all the firing alerts; Return only the alerts related to the user's jobs for normal users.
+      operationId: getAlerts
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              example:
+                - Please refer to Prometheus Alerts API:
+                - >-
+                  https://prometheus.io/docs/prometheus/latest/querying/api/#alerts
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+  /api/v2/kubernetes/pods:
+    get:
+      tags:
+        - kubernetes
+      summary: Get kubernetes pod list.
+      description: Get kubernetes pod list. Need administrator permission.
+      operationId: getK8sPods
+      parameters:
+        - name: namespace
+          in: query
+          description: filter pods with namespace
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              example:
+                - Please refer to Kubernetes API doc
+                - >-
+                  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#list-all-namespaces-pod-v1-core
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
+components:
+  parameters:
+    token:
+      name: token
+      in: path
+      description: token
+      required: true
+      schema:
+        type: string
+      example: test-token
+    user:
+      name: user
+      in: path
+      description: user name
+      required: true
+      schema:
+        type: string
+      example: test-user
+    group:
+      name: group
+      in: path
+      description: group name
+      required: true
+      schema:
+        type: string
+      example: test-group
+    vc:
+      name: vc
+      in: path
+      description: virtual cluster name
+      required: true
+      schema:
+        type: string
+      example: test-vc
+    job:
+      name: job
+      in: path
+      description: job name
+      required: true
+      schema:
+        type: string
+    framework:
+      name: framework
+      in: path
+      description: "framework name defined by {user}~{job}"
+      required: true
+      schema:
+        type: string
+    storage:
+      name: storage
+      in: path
+      description: storage name
+      required: true
+      schema:
+        type: string
+    attemptIndex:
+      name: attemptIndex
+      in: path
+      description: attempt index
+      required: true
+      schema:
+        type: string
+    jobAttemptId:
+      name: jobAttemptId
+      in: path
+      description: job attempt id
+      required: true
+      schema:
+        type: string
+    taskRoleName:
+      name: taskRoleName
+      in: path
+      description: task role name
+      required: true
+      schema:
+        type: string
+    taskIndex:
+      name: taskIndex
+      in: path
+      description: task index
+      required: true
+      schema:
+        type: string
+    taskAttemptId:
+      name: taskAttemptId
+      in: path
+      description: task attempt id
+      required: true
+      schema:
+        type: string
+  schemas:
+    Response:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - BadConfigurationError
+            - ConflictJobError
+            - ConflictUserError
+            - ConflictVcError
+            - ForbiddenUserError
+            - ForbiddenKeyError
+            - IncorrectPasswordError
+            - InvalidParametersError
+            - NoApiError
+            - NoJobError
+            - NoJobConfigError
+            - NoJobSshInfoError
+            - NoUserError
+            - NoGroupError
+            - NoVirtualClusterError
+            - ReadOnlyJobError
+            - RemoveAdminError
+            - ReadOnlyVcError
+            - RemoveRunningVcError
+            - UnauthorizedUserError
+            - NoEnoughQuotaError
+            - NotImplementedError
+            - UnknownError
+        message:
+          type: string
+      required:
+        - message
+    JobProtocol:
+      $ref: "https://raw.githubusercontent.com/microsoft/openpai-protocol/master/schemas/v2/schema.yaml#/components/schemas/JobProtocol"
+    JobSummaryWithTotalCount:
+      type: object
+      properties:
+        totalCount:
+          type: number
+          description: total count of jobs with given filters
+        data:
+          $ref: "#/components/schemas/JobSummary"
+      required:
+        - totalCount
+        - data
+    JobEventsWithTotalCount:
+      type: object
+      properties:
+        totalCount:
+          type: number
+          description: total count of events with given filters
+        data:
+          $ref: "#/components/schemas/JobEvents"
+      required:
+        - totalCount
+        - data
+    JobEvents:
+      type: array
+      description: job event list
+      items:
+        type: object
+        properties:
+          uid:
+            type: string
+            description: event uid
+          frameworkName:
+            type: string
+            description: related framework name
+          podUid:
+            type: string
+            description: pod uid of the event
+          taskroleName:
+            type: string
+            description: taskrole name of the event
+          taskName:
+            type: string
+            description: task name of the event
+          taskIndex:
+            type: integer
+            description: task index of the event
+          type:
+            type: string
+            description: type of the event
+            enum:
+              - Normal
+              - Warning
+          reason:
+            type: string
+            description: event reason
+          message:
+            type: string
+            description: event message
+          firstTimestamp:
+            type: string
+            description: firstTimestamp of the event
+          lastTimestamp:
+            type: string
+            description: lastTimestamp of the event
+          count:
+            type: integer
+            description: event count between firstTimestamp and lastTimestamp
+          sourceComponent:
+            type: string
+            description: source component of the event
+          sourceHost:
+            type: string
+            nullable: true
+            description: source host of the event
+        required:
+          - uid
+          - frameworkName
+          - podUid
+          - taskroleName
+          - taskName
+          - taskIndex
+          - type
+          - reason
+          - message
+          - firstTimestamp
+          - lastTimestamp
+          - count
+          - sourceComponent
+          - sourceHost
+    JobSummary:
+      type: array
+      description: job summary list
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+            description: job name
+          username:
+            type: string
+            description: user name or "unknown"
+          state:
+            type: string
+            description: general job state
+            enum:
+              - WAITING
+              - RUNNING
+              - STOPPING
+              - STOPPED
+              - SUCCEEDED
+              - FAILED
+              - UNKNOWN
+          subState:
+            type: string
+            description: job state in framework controller
+            enum:
+              - AttemptCreationPending
+              - AttemptCreationRequested
+              - AttemptPreparing
+              - AttemptRunning
+              - AttemptDeletionPending
+              - AttemptDeletionRequested
+              - AttemptDeleting
+              - AttemptCompleted
+              - Completed
+          executionType:
+            type: string
+            description: start or stop
+            enum:
+              - START
+              - STOP
+          tags:
+            type: array
+            description: tags
+            items:
+              type: string
+          retries:
+            type: integer
+            description: job retried times
+          retryDetails:
+            type: object
+            properties:
+              user:
+                type: integer
+              platform:
+                type: integer
+              resource:
+                type: integer
+          retryDelayTime:
+            type: integer
+            nullable: true
+            description: retry delay time
+          submissionTime:
+            type: integer
+            description: job submitted time, in number of milliseconds since the Unix Epoch.
+          createdTime:
+            type: integer
+            nullable: true
+            description: job created time, in number of milliseconds since the Unix Epoch.
+          launchedTime:
+            type: integer
+            nullable: true
+            description: job launched time, in number of milliseconds since the Unix Epoch.
+          completedTime:
+            type: integer
+            nullable: true
+            description: job completed time, in number of milliseconds since the Unix Epoch.
+          appExitCode:
+            type: integer
+            nullable: true
+            description: job exit code
+          virtualCluster:
+            type: string
+            description: virtual cluster to which the job submitted, or "unknown"
+          totalGpuNumber:
+            type: integer
+            description: total gpu number used in the job
+          totalTaskNumber:
+            type: integer
+            description: total task number used in the job
+          totalTaskRoleNumber:
+            type: integer
+            description: total task role number used in the job
+          debugId:
+            type: string
+            description: md5 hash name for the job in framework controller, used for debug purpose
+          jobPriority:
+            type: string
+            nullable: true
+            description: job priority
+        required:
+          - name
+          - username
+          - virtualCluster
+          - state
+          - subState
+          - executionType
+          - retries
+          - createdTime
+          - completedTime
+          - appExitCode
+    JobDetail:
+      type: object
+      description: job details
+      properties:
+        name:
+          type: string
+          description: job name
+        tags:
+          type: array
+          description: tags
+          items:
+            type: string
+        jobStatus:
+          type: object
+          description: job status
+          properties:
+            username:
+              type: string
+              description: user name or "unknown"
+            state:
+              type: string
+              description: general job state
+              enum:
+                - WAITING
+                - RUNNING
+                - STOPPING
+                - STOPPED
+                - SUCCEEDED
+                - FAILED
+                - UNKNOWN
+            subState:
+              type: string
+              description: job state in framework controller
+              enum:
+                - AttemptCreationPending
+                - AttemptCreationRequested
+                - AttemptPreparing
+                - AttemptRunning
+                - AttemptDeletionPending
+                - AttemptDeletionRequested
+                - AttemptDeleting
+                - AttemptCompleted
+                - Completed
+            executionType:
+              type: string
+              description: start or stop
+              enum:
+                - START
+                - STOP
+            retries:
+              type: integer
+              description: job retried times
+            retryDetails:
+              type: object
+              properties:
+                user:
+                  type: integer
+                platform:
+                  type: integer
+                resource:
+                  type: integer
+            retryDelayTime:
+              type: integer
+              nullable: true
+              description: retry delay time
+            submissionTime:
+              type: integer
+              description: >-
+                job submitted time, in number of milliseconds since the Unix
+                Epoch.
+            createdTime:
+              type: integer
+              nullable: true
+              description: >-
+                job created time, in number of milliseconds since the Unix
+            launchedTime:
+              type: integer
+              nullable: true
+              description: >-
+                job launched time, in number of milliseconds since the Unix
+                Epoch.
+            completedTime:
+              type: integer
+              nullable: true
+              description: >-
+                job completed time, in number of milliseconds since the Unix
+                Epoch.
+            attemptId:
+              type: integer
+            attemptState:
+              type: string
+            appId:
+              type: string
+              nullable: true
+              description: unique id for the job
+            appCreatedTime:
+              type: integer
+              nullable: true
+              description: >-
+                job created time for last attempt, in number of milliseconds
+                since the Unix Epoch.
+            appLaunchedTime:
+              type: integer
+              nullable: true
+              description: >-
+                job launched time for last attempt, in number of milliseconds
+                since the Unix Epoch.
+            appCompletedTime:
+              type: integer
+              nullable: true
+              description: >
+                job completed time for last attempt, in number of milliseconds
+                since the Unix Epoch.
+                To get durations for last attempt:
+                  wholeDuration = completedTime - createdTime;
+                  runningDuration = appCompletedTime - appLaunchedTime;
+                  waitingDuration = wholeDuration - runningDuration.
+                To get durations for all attempts:
+                  runningDuration = sum(appCompletedTime - appLaunchedTime) for all attempts.
+            appExitCode:
+              type: integer
+              nullable: true
+              description: job exit code
+            appExitSpec:
+              type: object
+              nullable: true
+              description: job exit spec
+              properties:
+                code:
+                  type: integer
+                phrase:
+                  type: string
+                issuer:
+                  type: string
+                causer:
+                  type: string
+                type:
+                  type: string
+                stage:
+                  type: string
+                behavior:
+                  type: string
+                reaction:
+                  type: string
+                reason:
+                  type: string
+                repro:
+                  type: array
+                  items:
+                    type: string
+                solution:
+                  type: array
+                  items:
+                    type: string
+            appExitDiagnostics:
+              type: string
+              nullable: true
+              description: job exit diagnostics
+            appExitMessages:
+              type: object
+              nullable: true
+              properties:
+                container:
+                  type: string
+                  nullable: true
+                runtime:
+                  type: string
+                  nullable: true
+                launcher:
+                  type: string
+                  nullable: true
+            appExitTriggerMessage:
+              type: string
+              nullable: true
+              description: job completion message
+            appExitTriggerTaskRoleName:
+              type: string
+              nullable: true
+              description: task role name which triggered job completion
+            appExitTriggerTaskIndex:
+              type: integer
+              nullable: true
+              description: task index which triggered job completion
+            appExitType:
+              type: string
+              nullable: true
+              description: job completion type
+            virtualCluster:
+              type: string
+              description: virtual cluster to which the job submitted, or "unknown"
+          required:
+            - username
+            - virtualCluster
+            - state
+            - subState
+            - executionType
+            - retries
+            - createdTime
+            - completedTime
+            - appCreatedTime
+            - appLaunchedTime
+            - appCompletedTime
+            - appExitCode
+        taskRoles:
+          type: object
+          additionalProperties:
+            type: object
+            description: task role status
+            properties:
+              taskRoleStatus:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: task role name
+                required:
+                  - name
+              taskStatuses:
+                type: array
+                description: task statuses in the task role
+                items:
+                  type: object
+                  properties:
+                    taskIndex:
+                      type: integer
+                      description: task index
+                    taskUid:
+                      type: string
+                    taskState:
+                      type: string
+                      description: task state
+                      enum:
+                        - WAITING
+                        - RUNNING
+                        - STOPPING
+                        - STOPPED
+                        - SUCCEEDED
+                        - FAILED
+                        - UNKNOWN
+                    containerId:
+                      type: string
+                      nullable: true
+                      description: uid of the task container
+                    containerIp:
+                      type: string
+                      nullable: true
+                      description: ip of the task container
+                    containerNodeName:
+                      type: string
+                      nullable: true
+                      description: node name of task container
+                    containerPorts:
+                      type: object
+                      description: ports of the task container
+                    containerGpus:
+                      type: string
+                      nullable: true
+                      description: gpu of the task container
+                    containerLog:
+                      type: string
+                      description: log url of the task container
+                    containerExitCode:
+                      type: integer
+                      nullable: true
+                      description: exit code the task container
+                    containerExitSpec:
+                      type: object
+                      nullable: true
+                      description: container exit spec
+                      properties:
+                        code:
+                          type: integer
+                        phrase:
+                          type: string
+                        issuer:
+                          type: string
+                        causer:
+                          type: string
+                        type:
+                          type: string
+                        stage:
+                          type: string
+                        behavior:
+                          type: string
+                        reaction:
+                          type: string
+                        reason:
+                          type: string
+                        repro:
+                          type: array
+                          items:
+                            type: string
+                        solution:
+                          type: array
+                          items:
+                            type: string
+                    containerExitDiagnostics:
+                      type: string
+                      nullable: true
+                      description: container exit diagnostics
+                    retries:
+                      type: integer
+                    accountableRetries:
+                      type: integer
+                    createdTime:
+                      type: integer
+                      nullable: true
+                      description: >-
+                        task created time, in number of milliseconds since the Unix
+                        Epoch.
+                    launchedTime:
+                      type: integer
+                      nullable: true
+                      description: >-
+                        task launched time, in number of milliseconds since the Unix
+                        Epoch.
+                    completedTime:
+                      type: integer
+                      nullable: true
+                      description: >-
+                        task completion time, in number of milliseconds since the Unix
+                        Epoch.
+                    attemptId:
+                      type: integer
+                    attemptState:
+                      type: string
+                    currentAttemptCreatedTime:
+                      type: integer
+                      nullable: true
+                      description: >-
+                        the current attempt created time, in number of milliseconds since the Unix
+                        Epoch.
+                    currentAttemptLaunchedTime:
+                      type: integer
+                      nullable: true
+                      description: >-
+                        the current attempt launched time, in number of milliseconds since the Unix
+                        Epoch.
+                    currentAttemptCompletedTime:
+                      type: integer
+                      nullable: true
+                      description: >-
+                        the current attempt completion time, in number of milliseconds since the Unix
+                        Epoch.
+                    hived:
+                      type: object
+                      nullable: true
+            required:
+              - taskRoleStatus
+              - taskStatuses
+        debugId:
+          type: string
+          description: md5 hash name for the job in framework controller, used for debug purpose
+      required:
+        - name
+        - jobStatus
+        - taskRoles
+    VirtualCluster:
+      type: object
+      properties:
+        capacity:
+          type: number
+          description: capacity percentage this virtual cluster can use of entire cluster
+        usedCapacity:
+          type: number
+          description: used capacity percentage this virtual cluster can use of entire cluster
+        maxCapacity:
+          type: number
+          description: max capacity percentage this virtual cluster can use of entire cluster
+        dedicated:
+          type: boolean
+          description: dedicated virtual cluster or not
+        resourcesUsed:
+          type: object
+          description: used resources
+          properties:
+            cpu:
+              type: integer
+              description: used cpu number
+            vCores:
+              type: integer
+              description: same as cpu
+            memory:
+              type: integer
+              description: used memory in MB
+            gpu:
+              type: integer
+              description: used gpu number
+            GPUs:
+              type: integer
+              description: same as gpu
+        resourcesGuaranteed:
+          type: object
+          description: guaranteed resources, including used and free
+          properties:
+            cpu:
+              type: integer
+              description: guaranteed cpu number
+            vCores:
+              type: integer
+              description: same as cpu
+            memory:
+              type: integer
+              description: guaranteed memory in MB
+            gpu:
+              type: integer
+              description: guaranteed gpu number
+            GPUs:
+              type: integer
+              description: same as gpu
+        resourcesTotal:
+          type: object
+          description: total resources, including guaranteed and bad
+          properties:
+            cpu:
+              type: integer
+              description: total cpu number
+            vCores:
+              type: integer
+              description: same as cpu
+            memory:
+              type: integer
+              description: total memory in MB
+            gpu:
+              type: integer
+              description: total gpu number
+            GPUs:
+              type: integer
+              description: same as gpu
+      required:
+        - capacity
+        - usedCapacity
+        - maxCapacity
+        - resourcesUsed
+        - resourcesGuaranteed
+        - resourcesTotal
+    StorageSummary:
+      type: object
+      description: summary of configured PV storage
+      properties:
+        storages:
+          type: array
+          items:
+            type: object
+            description: summary of each storage
+            properties:
+              name:
+                type: string
+              share:
+                type: boolean
+              volumeName:
+                type: string
+              default:
+                type: boolean
+            required:
+              - name
+              - share
+              - volumeName
+              - default
+      required:
+        - storages
+    StorageDetail:
+      type: object
+      description: detail of configured PV storage
+      properties:
+        name:
+          type: string
+        share:
+          type: boolean
+        volumeName:
+          type: string
+        type:
+          type: string
+          enum:
+            - nfs
+            - samba
+            - azureFile
+            - azureBlob
+            - other
+            - unknown
+        data:
+          anyOf:
+            - type: object
+              description: nfs type
+              properties:
+                server:
+                  type: string
+                path:
+                  type: string
+              required:
+                - server
+                - path
+            - type: object
+              description: samba type
+              properties:
+                address:
+                  type: string
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - address
+            - type: object
+              description: azureFile type
+              properties:
+                shareName:
+                  type: string
+                accountName:
+                  type: string
+                accountKey:
+                  type: string
+              required:
+                - shareName
+            - type: object
+              description: azureBlob type
+              properties:
+                containerName:
+                  type: string
+                accountName:
+                  type: string
+                accountKey:
+                  type: string
+                accountSASToken:
+                  type: string
+              required:
+                - containerName
+            - type: object
+              description: other/unknown type
+              properties: {}
+        readOnly:
+          type: boolean
+        secretName:
+          type: string
+        mountOptions:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - share
+        - volumeName
+        - type
+        - data
+    JobAttempt:
+      type: object
+      description: job attempt
+      properties:
+        jobName:
+          type: string
+        frameworkName:
+          type: string
+        uid:
+          type: string
+        userName:
+          type: string
+        state:
+          type: string
+        originState:
+          type: string
+          nullable: true
+        attemptIndex:
+          type: integer
+          nullable: true
+        jobStartedTime:
+          type: integer
+          nullable: true
+        attemptStartedTime:
+          type: integer
+          nullable: true
+        attemptCompletedTime:
+          type: integer
+          nullable: true
+        exitCode:
+          type: integer
+          nullable: true
+        exitPhrase:
+          type: string
+          nullable: true
+        exitType:
+          type: string
+          nullable: true
+        exitDiagnostics:
+          type: object
+          nullable: true
+          properties:
+            diagnosticsSummary:
+              type: string
+            runtime:
+              type: object
+              nullable: true
+              properties:
+                exitCode:
+                  type: integer
+                  nullable: true
+                originUserExitCode:
+                  type: integer
+                  nullable: true
+                errorLogs:
+                  type: object
+                  nullable: true
+                  properties:
+                    user:
+                      type: string
+                    platform:
+                      type: string
+                name:
+                  type: string
+            launcher:
+              type: string
+        appExitTriggerMessage:
+          type: string
+          nullable: true
+        appExitTriggerTaskRoleName:
+          type: string
+          nullable: true
+        appExitTriggerTaskIndex:
+          type: integer
+          nullable: true
+        appExitSpec:
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: integer
+            phrase:
+              type: string
+            issuer:
+              type: string
+            causer:
+              type: string
+            type:
+              type: string
+            stage:
+              type: string
+            behavior:
+              type: string
+            reaction:
+              type: string
+            reason:
+              type: string
+            repro:
+              type: array
+              items:
+                type: string
+            solution:
+              type: array
+              items:
+                type: string
+        appExitDiagnostics:
+          type: string
+          nullable: true
+        appExitMessages:
+          type: object
+          nullable: true
+          properties:
+            container:
+              type: string
+              nullable: true
+            runtime:
+              type: object
+              nullable: true
+              properties:
+                exitCode:
+                  type: integer
+                  nullable: true
+                originUserExitCode:
+                  type: integer
+                  nullable: true
+                errorLogs:
+                  type: object
+                  nullable: true
+                  properties:
+                    user:
+                      type: string
+                    platform:
+                      type: string
+                name:
+                  type: string
+            launcher:
+              type: string
+              nullable: true
+        totalGpuNumber:
+          type: integer
+        totalTasknumber:
+          type: integer
+        totalTaskRoleNumber:
+          type: integer
+        taskRoles:
+          type: object
+          properties:
+            taskrole:
+              type: object
+              properties:
+                taskRoleStatus:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+                taskStatuses:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      taskIndex:
+                        type: integer
+                      taskState:
+                        type: string
+                        enum:
+                          - WAITING
+                          - RUNNING
+                          - STOPPING
+                          - STOPPED
+                          - SUCCEEDED
+                          - FAILED
+                          - UNKNOWN
+                      containerId:
+                        type: string
+                        nullable: true
+                      containerIp:
+                        type: string
+                      containerGpus:
+                        type: string
+                        nullable: true
+                      containerLog:
+                        type: string
+                      containerExitCode:
+                        type: integer
+                        nullable: true
+              required:
+                - taskRoleStatus
+                - taskStatuses
+        isLatest:
+          type: boolean
+    TaskStatus:
+      type: object
+      description: task status
+      properties:
+        taskIndex:
+          type: integer
+          description: task index
+        taskUid:
+          type: string
+        taskState:
+          type: string
+          description: task state
+          enum:
+            - WAITING
+            - RUNNING
+            - STOPPING
+            - STOPPED
+            - SUCCEEDED
+            - FAILED
+            - UNKNOWN
+        retries:
+          type: integer
+        accountableRetries:
+          type: integer
+        createdTime:
+          type: integer
+          nullable: true
+          description: >-
+            task created time, in number of milliseconds since the Unix Epoch.
+        launchedTime:
+          type: integer
+          nullable: true
+          description: >-
+            task launched time, in number of milliseconds since the Unix Epoch.
+        completedTime:
+          type: integer
+          nullable: true
+          description: >-
+            task completion time, in number of milliseconds since the Unix Epoch.
+        username:
+          type: string
+        jobName:
+          type: string
+        jobAttemptId:
+          type: integer
+        taskRoleName:
+          type: string
+        attempts:
+          type: array
+          items:
+            type: object
+            description: task attempt specific information
+            properties:
+              attemptId:
+                type: integer
+              attemptState:
+                type: string
+              currentAttemptCreatedTime:
+                type: integer
+                nullable: true
+                description: >-
+                  the current attempt created time, in number of milliseconds since the Unix
+                  Epoch.
+              currentAttemptLaunchedTime:
+                type: integer
+                nullable: true
+                description: >-
+                  the current attempt launched time, in number of milliseconds since the Unix
+                  Epoch.
+              currentAttemptCompletedTime:
+                type: integer
+                nullable: true
+                description: >-
+                  the current attempt completion time, in number of milliseconds since the Unix
+                  Epoch.
+              containerId:
+                type: string
+                nullable: true
+                description: uid of the task container
+              containerIp:
+                type: string
+                nullable: true
+                description: ip of the task container
+              containerNodeName:
+                type: string
+                nullable: true
+                description: node name of task container
+              containerPorts:
+                type: object
+                description: ports of the task container
+              containerGpus:
+                type: string
+                nullable: true
+                description: gpu of the task container
+              containerLog:
+                type: string
+                description: log url of the task container
+              containerExitCode:
+                type: integer
+                nullable: true
+                description: exit code the task container
+              containerExitSpec:
+                type: object
+                nullable: true
+                description: container exit spec
+                properties:
+                  code:
+                    type: integer
+                  phrase:
+                    type: string
+                  issuer:
+                    type: string
+                  causer:
+                    type: string
+                  type:
+                    type: string
+                  stage:
+                    type: string
+                  behavior:
+                    type: string
+                  reaction:
+                    type: string
+                  reason:
+                    type: string
+                  repro:
+                    type: array
+                    items:
+                      type: string
+                  solution:
+                    type: array
+                    items:
+                      type: string
+              containerExitDiagnostics:
+                type: string
+                nullable: true
+                description: container exit diagnostics
+              hived:
+                type: object
+                nullable: true
+                properties:
+                  affinityGroupName:
+                    type: string
+                    nullable: true
+                  lazyPreempted:
+                    type: object
+                    nullable: true
+                  lazyPreemptionStatus:
+                    type: object
+                    nullable: true
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+          description: user name
+        admin:
+          type: boolean
+          description: Admin or not.
+        virtualCluster:
+          type: array
+          description: The list of virtualCluster which the user can access.
+          items:
+            type: string
+            description: virtual cluster name.
+        storageConfig:
+          type: array
+          description: storageconfig string arry
+          items:
+            type: string
+        email:
+          type: string
+          description: email address
+        extension:
+          type: object
+          description: extension field.
+      required:
+        - username
+        - admin
+        - virtualCluster
+        - storageConfig
+        - email
+        - extension
+    PodLogInfo:
+      type: object
+      properties:
+        locations:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                description: log name.
+              uri:
+                type: string
+                description: log content lnk.
+  responses:
+    InvalidParametersError:
+      description: InvalidParametersError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            InvalidParametersError:
+              value:
+                code: InvalidParametersError
+                message: Invalid request parameters.
+    IncorrectPasswordError:
+      description: IncorrectPasswordError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            IncorrectPasswordError:
+              value:
+                code: IncorrectPasswordError
+                message: Password is incorrect.
+    NoVirtualClusterError:
+      description: NoVirtualClusterError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoVirtualClusterError:
+              value:
+                code: NoVirtualClusterError
+                message: "Virtual cluster {vc} is not found."
+    NoGroupError:
+      description: NoGroupError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoGroupError:
+              value:
+                code: NoGroupError
+                message: "Group {groupname} is not found."
+    NoStorageError:
+      description: NoStorageError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoVirtualClusterError:
+              value:
+                code: NoStorageError
+                message: "Storage {storage} is not found."
+    UnauthorizedUserError:
+      description: UnauthorizedUserError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            UnauthorizedUserError:
+              value:
+                code: UnauthorizedUserError
+                message: Guest is not allowed to do this operation.
+    ForbiddenUserError:
+      description: ForbiddenUserError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            ForbiddenUserError:
+              value:
+                code: ForbiddenUserError
+                message: Non-admin is not allow to do this operation.
+            ForbiddenTokenError:
+              value:
+                code: ForbiddenUserError
+                message: Applications are not allowed to do this operation.
+    ForbiddenKeyError:
+      description: ForbiddenKeyError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            ForbiddenKeyError:
+              value:
+                code: ForbiddenKeyError
+                message: Key empty is system reserved and should not be modified!
+    NoUserError:
+      description: NoUserError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoUserError:
+              value:
+                code: NoUserError
+                message: "User {user} is not found."
+    NoJobError:
+      description: NoJobError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoJobError:
+              value:
+                code: NoJobError
+                message: "Job {job} is not found."
+    NoTaskError:
+      description: NoTaskError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoTaskError:
+              value:
+                code: NoTaskError
+                message: "Task {task} is not found."
+    NoTagError:
+      description: NoTagError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoTagError:
+              value:
+                code: NoTagError
+                message: "Tag {tag} is not found for job {job} ."
+    NoJobConfigError:
+      description: NoJobConfigError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoJobConfigError:
+              value:
+                code: NoJobConfigError
+                message: "Config of job {job} is not found."
+    NoJobSshInfoError:
+      description: NoJobSshInfoError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoJobSshInfoError:
+              value:
+                code: NoJobSshInfoError
+                message: "SSH info of job {job} is not found."
+    NoTaskLogError:
+      description: NoTaskLogError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            NoJobSshInfoError:
+              value:
+                code: NoTaskLogError
+                message: "Log of task is not found."
+    ConflictUserError:
+      description: ConflictUserError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            ConflictUserError:
+              value:
+                code: ConflictUserError
+                message: "User name {user} already exists."
+    ConflictJobError:
+      description: ConflictJobError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            ConflictJobError:
+              value:
+                code: ConflictJobError
+                message: "Job name {job} already exists."
+    UnknownError:
+      description: UnknownError
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response"
+          examples:
+            UnknownError:
+              value:
+                code: UnknownError
+                message: Internal error message.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

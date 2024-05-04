@@ -1,0 +1,45 @@
+# Copyright (c) Microsoft Corporation
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+service_type: "common"
+
+server-port: 9186
+rate-limit-api-per-min: 600
+rate-limit-list-job-per-min: 120
+rate-limit-submit-job-per-hour: 3600
+# The schedule port range is [schedule-port-start, schedule-port-end)
+schedule-port-start: 15000
+schedule-port-end: 40000
+jwt-secret: pai-secret
+jwt-expire-time: '7d'
+github-owner: Microsoft
+github-repository: pai
+github-path: marketplace
+debugging-reservation-seconds: 604800
+enable-priority-class: "true"
+sql-max-connection: 50
+# `hived-computing-device-envs` only works when hived scheduler is enabled.
+# It determines the environment variables we inject into the container.
+# e.g. if hived-computing-device-envs is set to 'NVIDIA_VISIBLE_DEVICES,HIVED_VISIBLE_DEVICES',
+# and device 0 and device 1 are used, the container will receive environment variables:
+# NVIDIA_VISIBLE_DEVICES=0,1 and HIVED_VISIBLE_DEVICES=0,1
+# Please also see https://github.com/microsoft/hivedscheduler/blob/master/doc/user-manual.md#scheduling-gpus for reference
+hived-computing-device-envs: 'NVIDIA_VISIBLE_DEVICES,HIVED_VISIBLE_DEVICES'
+log-server: 'log_manager'
+log_azure_storage_account: 'YOUR_AZURE_STORAGE_ACCOUNT'
+log_azure_storage_account_key: 'YOUR_AZURE_STORAGE_ACCOUNT_KEY'
+log_azure_storage_container_name: 'YOUR_AZURE_STORAGE_CONTAINER_NAME'

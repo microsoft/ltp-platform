@@ -1,0 +1,240 @@
+#
+# Health check.
+#
+location = /healthz {
+  default_type text/plain;
+  return 200 "Pylon ready.";
+}
+
+#
+# General-purpose reverse proxy.
+# The proxy to WebHDFS API depends on it.
+#
+
+location ~ ^/a/([^/]+):(\d*)(.*)$ {
+  set $target_host   $1;
+  set $target_port   :$2;
+  set $target_path   $3$is_args$args;
+  if ($target_port = ":0") {
+    set $target_port "";
+  }
+  proxy_pass http://$target_host$target_port$target_path;
+}
+
+#
+# API servers
+#
+
+# PAI REST server
+location ~ ^/rest-server/api(.*)$ {
+  proxy_pass {{REST_SERVER_URI}}/api$1$is_args$args;
+  proxy_redirect {{REST_SERVER_URI}}/api http://$http_host/rest-server/api;
+
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header Accept-Encoding "";
+
+  proxy_set_header    If-None-Match    $request_if_none_match;
+  add_header          Etag             $response_etag;
+}
+
+# Kubernetes API server.
+location ~ ^/kubernetes/api(.*)$ {
+  proxy_pass {{K8S_API_SERVER_URI}}/api$1$is_args$args;
+}
+
+{% if CLUSTER_TYPE == 'yarn' %}
+# WebHDFS API server.
+location ~ ^/webhdfs/api(.*)$ {
+  proxy_pass {{WEBHDFS_URI}}/webhdfs$1$is_args$args;
+  proxy_intercept_errors on;
+  error_page 307 @handle_webhdfs_api_redirect;
+}
+location ~ ^/webhdfs/webhdfs {
+  rewrite ^/webhdfs/webhdfs(.*)$ /webhdfs/api$1 last;
+}
+location @handle_webhdfs_api_redirect {
+  if ($upstream_http_location ~ ^http://([^/]+):(\d+)/(.*)$) {
+    add_header Location $scheme://$http_host/a/$1:$2/$3;
+    return 300 "";
+  }
+}
+{% endif %}
+
+# Prometheus API server.
+location ~ ^/prometheus(.*)$ {
+  proxy_pass {{PROMETHEUS_URI}}/prometheus$1$is_args$args;
+}
+
+# alert-manager server.
+location ~ ^/alert-manager(.*)$ {
+  proxy_pass {{ALERT_MANGER_URI}}/alert-manager$1$is_args$args;
+}
+
+# log-manager server
+location ~ ^/log-manager/([^/]+):(\d+)/(.*)$ {
+  proxy_pass http://$1:$2/$3$is_args$args;
+}
+
+#
+# Other web portals
+#
+
+# Kubernetes dashboard
+location ~ ^/kubernetes-dashboard$ {
+  # Add '/' to the end of the URL, otherwise there will be a 404 error.
+  return 301 $scheme://$http_host$request_uri/;
+}
+location ~ ^/kubernetes-dashboard(.*)$ {
+  proxy_pass {{K8S_DASHBOARD_URI}}$1$is_args$args;
+}
+
+# Grafana
+location ~ ^/grafana$ {
+  # Add '/' to the end of the URL, otherwise there will be a 404 error.
+  return 301 $scheme://$http_host$request_uri/;
+}
+location ~ ^/grafana(.*)$$ {
+  proxy_pass {{GRAFANA_URI}}$1$is_args$args;
+  sub_filter_types *;
+  sub_filter_once off;
+  sub_filter
+    '<base href="/" />'
+    '<base href="/grafana/" />';
+  sub_filter
+    '{{GRAFANA_URI}}'
+    '/grafana';
+  sub_filter
+    '"url":"/'
+    '"url":"./';
+  sub_filter
+    'appSubUrl+"/"'
+    'appSubUrl+"/grafana/"';
+}
+
+{%- if DSHUTTLE_URI %}
+# Dshuttle server
+location ~ ^/dshuttle$ {
+  # Add '/' to the end of the URL, otherwise there will be a 404 error.
+  return 301 $scheme://$http_host$request_uri/;
+}
+location ~ ^/dshuttle/(.*)$ {
+  proxy_pass {{DSHUTTLE_URI}}/$1$is_args$args;
+  sub_filter_types *;
+  sub_filter_once off;
+  sub_filter
+    'href="/'
+    'href="/dshuttle/';
+  sub_filter
+    '<script src="/'
+    '<script src="/dshuttle/';
+  sub_filter
+    'root:"/",overview:"/overview",browse:"/browse",config:"/config",data:"/data",logs:"/logs",metrics:"/metrics",workers:"/workers"'
+    'root:"/dshuttle",overview:"/dshuttle/overview",browse:"/dshuttle/browse",config:"/dshuttle/config",data:"/dshuttle/data",logs:"/dshuttle/logs",metrics:"/dshuttle/metrics",workers:"/dshuttle/workers"';
+  sub_filter
+    '/api'
+    '/dshuttle/api';
+  sub_filter
+    '/browse?path='
+    '/dshuttle/browse?path=';
+  sub_filter
+    'static/media/'
+    'dshuttle/static/media/';
+}
+{%- endif %}
+
+{%- if MARKETPLACE_API_URI %}
+# marketplace rest server
+location ~ ^/marketplace/api$ {
+  # Add '/' to the end of the URL, otherwise there will be a 404 error.
+  return 301 $scheme://$http_host$request_uri/;
+}
+location ~ ^/marketplace/api/(.*)$ {
+  proxy_pass {{MARKETPLACE_API_URI}}/$1$is_args$args;
+}
+{%- endif %}
+
+{%- if MARKETPLACE_WEBPORTAL_PLUGIN %}
+# marketplace webportal plugin
+location ~ ^/marketplace$ {
+  # Add '/' to the end of the URL, otherwise there will be a 404 error.
+  return 301 $scheme://$http_host$request_uri/;
+}
+location ~ ^/marketplace/(.*)$ {
+  proxy_pass {{MARKETPLACE_WEBPORTAL_PLUGIN}}/$1;
+}
+{%- endif %}
+
+{%- if DOCKER_CACHE_PLUGIN %}
+# docker cache plugin
+location ~ ^/registry/cache$ {
+  # Add '/' to the end of the URL, otherwise there will be a 404 error.
+  return 301 $scheme://$http_host$request_uri/;
+}
+location ~ ^/registry/cache/(.*)$ {
+  proxy_pass {{DOCKER_CACHE_PLUGIN}}/$1;
+}
+{%- endif %}
+
+# PAI web portal
+location ~ ^(.*)$ {
+  proxy_pass {{PAI_WEB_PORTAL_URI}}$1$is_args$args;
+  #
+  # Disable compression. Without this line sub_filter won't work.
+  # Ref: https://serverfault.com/a/892447
+  proxy_set_header Accept-Encoding "";
+  #
+  # Enable all types of contents. Without this line javascript files
+  # won't be processed by sub_filter.
+  # Ref: http://nginx.org/en/docs/http/ngx_http_sub_module.html#sub_filter_types
+  sub_filter_types *;
+  #
+  sub_filter_once off;
+  sub_filter
+    '{{REST_SERVER_URI}}'
+    '/rest-server';
+  sub_filter
+    '{{K8S_API_SERVER_URI}}'
+    '/kubernetes';
+  sub_filter
+    '{{PROMETHEUS_URI}}/prometheus'
+    '/prometheus';
+{%- if CLUSTER_TYPE == "yarn" %}
+  sub_filter
+    '{{YARN_WEB_PORTAL_URI}}'
+    '/yarn';
+  # Add '/' to the end of the URL is used to adapt the envrionent with Azure gateway
+{%- endif %}
+  sub_filter
+    '{{K8S_DASHBOARD_URI}}'
+    '/kubernetes-dashboard/';
+  sub_filter
+    '{{GRAFANA_URI}}'
+    '/grafana';
+  sub_filter
+    '{{ALERT_MANGER_URI}}/alert-manager'
+    '/alert-manager';
+{%- if DSHUTTLE_URI %}
+  sub_filter
+    '{{DSHUTTLE_URI}}'
+    '/dshuttle';
+{%- endif %}
+{%- if MARKETPLACE_API_URI %}
+  sub_filter
+    '{{MARKETPLACE_API_URI}}'
+    '/marketplace/api';
+{%- endif %}
+{%- if MARKETPLACE_WEBPORTAL_PLUGIN %}
+  sub_filter
+    '{{MARKETPLACE_WEBPORTAL_PLUGIN}}'
+    '/marketplace';
+{%- endif %}
+{%- if DOCKER_CACHE_PLUGIN %}
+  sub_filter
+    '{{DOCKER_CACHE_PLUGIN}}'
+    '/registry/cache';
+ {%- endif %}
+
+  proxy_set_header    If-None-Match    $request_if_none_match;
+  add_header          Etag             $response_etag;
+}

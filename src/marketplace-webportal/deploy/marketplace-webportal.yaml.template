@@ -1,0 +1,39 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: marketplace-webportal-ds
+spec:
+  selector:
+    matchLabels:
+      app: marketplace-webportal
+  template:
+    metadata:
+      name: marketplace-webportal
+      labels:
+        app: marketplace-webportal
+    spec:
+      hostNetwork: true
+      containers:
+      - name: marketplace-webportal
+        image: openpai/pai-marketplace-webportal:latest
+        imagePullPolicy: Always
+        env:
+        - name: MARKETPLACE_API_URL
+{%- if 'marketplace_api_uri' in cluster_cfg['marketplace-webportal'] %}
+          value: {{ cluster_cfg["marketplace-webportal"]["marketplace_api_uri"] }}
+{%- else %}
+{% if "ssl" in cluster_cfg["pylon"] and cluster_cfg["pylon"]["ssl"] %}
+          value: "{{ cluster_cfg['pylon']['uri-https']}}/marketplace/api"
+{% else %}
+          value: "{{ cluster_cfg['pylon']['uri']}}/marketplace/api"
+{% endif %}
+{%- endif %}
+        - name: SERVER_PORT
+          value: "{{ cluster_cfg["marketplace-webportal"]["server-port"] }}"
+        - name: NPM_INSTALL_TOKEN
+          value: "{{ cluster_cfg["marketplace-webportal"]["npm-install-token"] }}"
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}

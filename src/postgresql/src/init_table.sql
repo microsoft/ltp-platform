@@ -1,0 +1,1 @@
+/* This init script will be run every time when the database container is started. */

@@ -1,0 +1,17 @@
+---
+- name: copy add_docker_cache_config.py script into /tmp
+  copy:
+    src: add_docker_cache_config.py
+    dest: /tmp/add_docker_cache_config.py
+
+- name: run add_docker_cache_config.py script to add docker cache config
+  ansible.builtin.command:
+    argv:
+      - python3
+      - /tmp/add_docker_cache_config.py
+      - "{{ docker_cache_host }}"
+
+- name: Restart service docker config from /etc/docker/daemon.json after update
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted

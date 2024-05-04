@@ -1,0 +1,134 @@
+# Copyright (c) Microsoft Corporation
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: pylon-ds
+spec:
+  selector:
+    matchLabels:
+      app: pylon
+  template:
+    metadata:
+      name: pylon
+      labels:
+        app: pylon
+    spec:
+      hostNetwork: false
+      hostPID: false
+      containers:
+        - name: pylon
+          image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}pylon:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /pylon-config
+              name: pylon-configuration
+{% if 'ssl' in cluster_cfg['pylon'] %}
+            - mountPath: /https-config
+              name: https-configuration
+{% endif %}
+          command:
+            - "/bin/bash"
+            - "/pylon-config/run.sh"
+          env:
+            - name: REST_SERVER_URI
+              value: {{ cluster_cfg['rest-server']['uri'] }}
+            - name: K8S_API_SERVER_URI
+              value: {{ cluster_cfg['layout']['kubernetes']['api-servers-url'] }}
+            - name: CLUSTER_TYPE
+              value: cluster_cfg["cluster"]["common"]["cluster-type"]
+{% if 'ssl' in cluster_cfg['pylon'] %}
+            - name: SSL_ENABLE
+              value: 'true'
+            - name: CRT_NAME
+              value: '{{ cluster_cfg['pylon']['ssl']['crt_name'] }}'
+            - name: KEY_NAME
+              value: '{{ cluster_cfg['pylon']['ssl']['key_name'] }}'
+{% endif %}
+            - name: PROMETHEUS_URI
+              value: {{ cluster_cfg['prometheus']['url'] }}
+            - name: ALERT_MANGER_URI
+              value: {{ cluster_cfg['alert-manager']['url'] }}
+            - name: K8S_DASHBOARD_URI
+              value: {{ cluster_cfg['layout']['kubernetes']['dashboard-url'] }}
+{% if cluster_cfg["cluster"]["common"]["cluster-type"] == "yarn" %}
+{% if cluster_cfg['pylon']['webhdfs-legacy-port'] %}
+            - name: WEBHDFS_LEGACY_PORT
+              value: '{{ cluster_cfg['pylon']['webhdfs-legacy-port'] }}'
+{% endif %}
+            - name: WEBHDFS_URI
+              value: http://{{ cluster_cfg['hadoop-name-node']['master-ip'] }}:5070
+            - name: YARN_WEB_PORTAL_URI
+              value: http://{{ cluster_cfg['hadoop-resource-manager']['master-ip'] }}:8088
+{% endif %}
+            - name: GRAFANA_URI
+              value: {{ cluster_cfg['grafana']['url'] }}
+            - name: PAI_WEB_PORTAL_URI
+              value: {{ cluster_cfg['webportal']['uri'] }}
+{% if cluster_cfg['cluster']['common']['dshuttle'] == 'true' %}
+            - name: DSHUTTLE_URI
+              value: {{ cluster_cfg['dshuttle']['uri'] }}
+{% endif %}
+{% if cluster_cfg['cluster']['common']['marketplace'] == 'true' %}
+            - name: MARKETPLACE_API_URI
+              value: {{ cluster_cfg['marketplace-restserver']['uri']}}
+{% endif %}
+{% if cluster_cfg['cluster']['common']['marketplace'] == 'true' %}
+            - name: MARKETPLACE_WEBPORTAL_PLUGIN
+              value: {{ cluster_cfg['marketplace-webportal']['uri']}}
+{% endif %}
+            - name: DOCKER_CACHE_PLUGIN
+              value: {{ cluster_cfg['docker-cache']['uri']}}
+          ports:
+            - name: pylon
+              containerPort: 80
+              hostPort: {{ cluster_cfg['pylon']['port'] }}
+{% if 'ssl' in cluster_cfg['pylon'] %}
+            - name: pylon-https
+              containerPort: 443
+              hostPort: {{ cluster_cfg['pylon']['ssl']['port'] }}
+{% endif %}
+{% if cluster_cfg["cluster"]["common"]["cluster-type"] == "yarn" %}
+{% if cluster_cfg['pylon']['webhdfs-legacy-port'] %}
+            - name: pylon-webhdfs
+              containerPort: {{ cluster_cfg['pylon']['webhdfs-legacy-port'] }}
+              hostPort: {{ cluster_cfg['pylon']['webhdfs-legacy-port'] }}
+{% endif %}
+{% endif %}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: pylon
+            initialDelaySeconds: 10
+            periodSeconds: 60
+          {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}
+          resources:
+            limits:
+              memory: "1Gi"
+          {%- endif %}
+      imagePullSecrets:
+        - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+      volumes:
+        - name: pylon-configuration
+          configMap:
+            name: pylon-config
+{% if 'ssl' in cluster_cfg['pylon'] %}
+        - name: https-configuration
+          configMap:
+            name: https-config
+{% endif %}
+

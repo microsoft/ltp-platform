@@ -1,0 +1,18 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+service_type: "k8s"
+
+# db_user: user
+# db_password: passwd
+# db: marketplace
+# db_host: postgres
+# db_port: 9291
+server-port: 9292
+# idp_url: <OpenPAI rest-server url>
+
+azure_storage:
+  type: blob
+  storage_account: openpaimarketplace
+  connection_strings: []
+azure_storage_json: ''
