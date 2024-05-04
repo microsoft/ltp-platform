@@ -1,0 +1,68 @@
+; This owners.txt file was initially populated by StartRight. Every code
+; change inside of an Ownership Enforcer enabled branch (such as master) must be
+; approved by at least one expert listed in an applicable owners.txt file. This
+; root owners.txt file is applicable to every change. Targeted experts can be
+; defined by placing an owners.txt file inside any subdirectory. More information
+; about Ownership Enforcer can be found at https://aka.ms/ownershipenforcer.
+guzhao
+mackiezhou
+binov
+joprest
+mifull
+micwilli
+ogoldman
+mattfras
+ekremaksoy
+stanisz
+vajain
+adityabagchi
+yuntchan
+choshenghsun
+yueqianli
+cadewey
+jpricket
+kej
+martwhite
+jeromejansen
+jijos
+souvikde
+yanivbiran
+abhamidipati
+hyildiz
+deiberry
+lucasm
+mipres
+vanyacot
+sanagarwal
+amyhui
+christinetai
+murao
+feliper
+ansja
+tigarcyr
+leeda
+shirleyzhou
+rafaelsalas
+jiy
+chkandaswamy
+lukillgo
+jobriggs
+jeffen
+gourip
+zahess
+remilema
+chanda
+williamgan
+maxwelltrinh
+vikramramesh
+zenaz
+yangwang1
+yuxiangyang
+shuaizhang
+joelkoreth
+bopinzur
+chrussell
+jkatilevsky
+annalabu
+jeffb
+juchiang
