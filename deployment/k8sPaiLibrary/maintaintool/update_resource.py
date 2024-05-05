@@ -19,7 +19,7 @@
 Delete k8s resources using AppsV1Api.
 """
 
-from __future__ import print_function
+
 
 import time
 import argparse
@@ -51,7 +51,7 @@ def delete_resource(apps_v1_api, api_resource, name, namespace='default'):
         api = api_resources[api_resource]
         while True:
             items = api['list'](namespace=namespace).items
-            if name not in map(lambda x: x.metadata.name, items):
+            if name not in [x.metadata.name for x in items]:
                 break
             print('Trying to stop {} ...'.format(name))
             try:

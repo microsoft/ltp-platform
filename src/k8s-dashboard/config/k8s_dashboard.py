@@ -16,7 +16,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 class K8SDashboard(object):
 
@@ -32,7 +32,7 @@ class K8SDashboard(object):
     def run(self):
         com_k8s_dashboard = {}
 
-        masters = filter(lambda host: 'pai-master' in host and host['pai-master'] == 'true', self.cluster_conf["machine-list"])
+        masters = [host for host in self.cluster_conf["machine-list"] if 'pai-master' in host and host['pai-master'] == 'true']
         master_ip = masters[0]['hostip']
         master_name = masters[0]['hostname']
 

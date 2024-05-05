@@ -71,7 +71,7 @@ class service_template_generate:
 
             deploy_rules = self.service_conf['deploy-rules']
             for rule in deploy_rules:
-                for operator, label in rule.items():
+                for operator, label in list(rule.items()):
                     match_expression = dict()
                     if operator.lower() == 'in':
                         match_expression['operator'] = 'In'

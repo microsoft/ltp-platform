@@ -16,8 +16,8 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 from core import build_center
 from core import build_utility
@@ -62,13 +62,13 @@ def main():
     build_parser = subparsers.add_parser('build',help='build service cli')
     build_parser.add_argument(
         '-c', '--config',
-        type=bytes,
+        type=str,
         required=True,
         help='The path of your configuration directory.'
     )
     build_parser.add_argument(
         '-s', '--service',
-        type=bytes,
+        type=str,
         nargs='+',
         help="The service list you want to build"
     )
@@ -78,13 +78,13 @@ def main():
     push_parser = subparsers.add_parser('push',help='push image cli')
     push_parser.add_argument(
         '-c', '--config',
-        type=bytes,
+        type=str,
         required=True,
         help='The path of your configuration directory.'
     )
     push_parser.add_argument(
         '-i', '--imagelist',
-        type=bytes,
+        type=str,
         nargs='+',
         help="The image list you want to push"
     )

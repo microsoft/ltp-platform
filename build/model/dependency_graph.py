@@ -15,8 +15,8 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 
 from core import build_utility
 
@@ -86,7 +86,7 @@ class ServiceGraph(object):
         prev_count = dict()
         ret = list()
         search_queue = list()
-        for name, node in self.services.items():
+        for name, node in list(self.services.items()):
             prev_count[name] = len(node.inedges)
             if prev_count[name] == 0:
                 search_queue.append(name)
@@ -109,7 +109,7 @@ class ServiceGraph(object):
 
 
     def dump(self):
-        for _, service in self.services.items():
+        for _, service in list(self.services.items()):
             service.dump()
 
 

@@ -22,8 +22,8 @@ import subprocess
 import jinja2
 import argparse
 import paramiko
-import etcd
-import common
+import etcd3
+from . import common
 import logging
 import logging.config
 
@@ -314,7 +314,7 @@ class etcdfix:
         host_list = list()
         for host in com['kubernetes']['master-list']:
             host_list.append((com['layout']['machine-list'][host]['hostip'], 4001))
-        client = etcd.Client(host=tuple(host_list), allow_reconnect=True)
+        client = etcd3.Client(host=tuple(host_list), allow_reconnect=True)
 
         etcdid = client.leader['name']
         for host in com['kubernetes']['master-list']:

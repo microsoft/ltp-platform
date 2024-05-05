@@ -43,10 +43,10 @@ class RestServer:
       computing_device_type_list = []
       machine_sku_to_device_type = {
           sku_name: sku_attrs['computing-device']['type']
-          for sku_name, sku_attrs in self.cluster_configuration['machine-sku'].items()
+          for sku_name, sku_attrs in list(self.cluster_configuration['machine-sku'].items())
           if 'computing-device' in sku_attrs
       }
-      workers = list(filter(lambda elem: 'pai-worker' in elem and elem["pai-worker"] == 'true', self.cluster_configuration['machine-list']))
+      workers = list([elem for elem in self.cluster_configuration['machine-list'] if 'pai-worker' in elem and elem["pai-worker"] == 'true'])
       for worker in workers:
         if worker['machine-type'] in machine_sku_to_device_type:
           computing_device_type = machine_sku_to_device_type[worker['machine-type']]

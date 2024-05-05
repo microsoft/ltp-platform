@@ -113,6 +113,6 @@ def load_yaml_config(config_path):
         sys.exit(1)
 
     with open(config_path, "r") as f:
-        cluster_data = yaml.load(f)
+        cluster_data = yaml.safe_load(f)
 
     return cluster_data

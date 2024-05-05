@@ -16,17 +16,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-from __future__ import print_function
+
 
 import os
 import sys
-import time
 import errno
 import logging
 import logging.config
 import yaml
-
-from pprint import pprint
 
 import kubernetes.client
 from kubernetes.client.rest import ApiException
@@ -58,7 +55,7 @@ def create_path(path):
 
 def read_file_from_path(file_path):
     with open(file_path, "r") as fin:
-        file_data = fin.read().decode('utf-8')
+        file_data = fin.read()
     return file_data
 
 
@@ -73,7 +70,7 @@ def load_yaml_config(config_path):
 def write_generated_file(generated_file, file_path):
 
     with open(file_path, "w+") as fout:
-        fout.write(generated_file.encode('utf-8'))
+        fout.write(generated_file)
 
 
 def get_cluster_id(PAI_KUBE_CONFIG_DEFAULT_LOCATION):

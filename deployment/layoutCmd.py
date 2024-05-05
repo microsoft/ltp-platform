@@ -22,7 +22,7 @@ def generate_layout(output_file):
 
     # query k8s nodes
     nodes = v1.list_node(pretty=False, timeout_seconds=56, watch=False)
-    addressesList = map(lambda node: node.status.addresses, nodes.items)
+    addressesList = [node.status.addresses for node in nodes.items]
     machineList = []
     for addresses in addressesList:
         machine = dict()

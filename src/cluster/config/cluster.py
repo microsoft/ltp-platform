@@ -144,11 +144,11 @@ class Cluster:
             base64code = self.execute_shell_with_output(
                 "cat ~/.docker/config.json | base64",
                 "Failed to base64 the docker's config.json"
-            )
+            ).decode("utf-8")
         else:
             self.logger.info("docker registry authentication not provided")
 
-            base64code = "{}".encode("base64")
+            base64code = "{}".encode("base64").decode("utf-8")
 
         docker_registry_configuration["base64code"] = base64code.replace("\n", "")
 

@@ -102,14 +102,12 @@ def list_all_nodes(PAI_KUBE_CONFIG_PATH, include_uninitialized = True):
 def get_configmap(PAI_KUBE_CONFIG_DEFAULT_LOCATION, name, namespace = "default"):
 
     api_instance = get_kubernetes_corev1api(PAI_KUBE_CONFIG_PATH=PAI_KUBE_CONFIG_DEFAULT_LOCATION)
-    exact = True
-    export = True
 
     target_configmap_data = None
     target_configmap_metadata = None
 
     try:
-        api_response = api_instance.read_namespaced_config_map(name, namespace, exact=exact, export=export)
+        api_response = api_instance.read_namespaced_config_map(name, namespace)
         target_configmap_data = api_response.data
         target_configmap_metadata = api_response.metadata
 

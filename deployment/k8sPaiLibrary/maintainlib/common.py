@@ -15,7 +15,7 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from __future__ import print_function
+
 #
 import yaml
 import os
@@ -29,7 +29,7 @@ import tarfile
 import socket
 import logging
 import time
-import etcd
+import etcd3
 import logging.config
 
 
@@ -203,8 +203,7 @@ def sftp_paramiko(src, dst, filename, host_config):
 
     password = password if password is not None else ''
     stdin, stdout, stderr = ssh.exec_command("echo '{0}' | sudo -S mkdir -p {1}".format(password, dst), get_pty=True)
-    for response_msg in stdout:
-        print(response_msg.encode('utf-8').strip('\n'))
+    print(stdout.read().decode('utf-8').strip('\n'))
 
     # Put the file to target Path.
     sftp = ssh.open_sftp()
@@ -257,13 +256,9 @@ def ssh_shell_paramiko_with_result(host_config, commandline):
     ssh.connect(hostname=hostip, port=port, key_filename=key_filename, username=username, password=password)
     stdin, stdout, stderr = ssh.exec_command(commandline, get_pty=True)
     logger.info("Finished executing the command on host [{0}]: {1}".format(hostip, commandline))
-    result_stdout = ""
-    for response_msg in stdout:
-        result_stdout += response_msg
-        print(response_msg.encode('utf-8').strip('\n'))
-    result_stderr = ""
-    for response_msg in stderr:
-        result_stderr += response_msg
+    result_stdout = stdout.read().decode('utf-8')
+    result_stderr = stderr.read().decode('utf-8')
+    print(result_stdout.strip('\n'))
 
     exit_code_ssh = stdout.channel.recv_exit_status()
     if exit_code_ssh != 0:
@@ -309,8 +304,7 @@ def ssh_shell_with_password_input_paramiko(host_config, commandline):
         commandline = commandline.replace('sudo', 'sudo -S', 1)
     stdin, stdout, stderr = ssh.exec_command("echo '{0}' | {1}".format(password, commandline), get_pty=True)
     logger.info("Executing the command on host [{0}]: {1}".format(hostip, commandline))
-    for response_msg in stdout:
-        print (response_msg.encode('utf-8').strip('\n'))
+    print(stdout.read().decode('utf-8').strip('\n'))
 
     exit_code_ssh = stdout.channel.recv_exit_status()
     if exit_code_ssh != 0:
@@ -416,7 +410,7 @@ def get_etcd_leader_node(cluster_cfg):
     for host in com['kubernetes']['master-list']:
         host_list.append((com['layout']['machine-list'][host]['hostip'], 4001))
 
-    client = etcd.Client(host=tuple(host_list), allow_reconnect=True)
+    client = etcd3.Client(host=tuple(host_list), allow_reconnect=True)
 
     etcdid = client.leader['name']
     for host in com['kubernetes']['master-list']:

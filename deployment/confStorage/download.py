@@ -57,7 +57,7 @@ class download_configuration:
             self.logger.error("https://github.com/Microsoft/pai/blob/master/docs/paictl/paictl-manual.md")
             sys.exit(1)
 
-        user_input = raw_input("Please input the cluster-id which you wanna operate: ")
+        user_input = input("Please input the cluster-id which you wanna operate: ")
         if user_input != cluster_id:
             self.logger.error("Ops, maybe you find the wrong cluster. Please check your input and the target cluster.")
             sys.exit(1)
@@ -73,7 +73,7 @@ class download_configuration:
             self.logger.error("The configuration doesn't exists on your cluster. Please upload it first.")
             sys.exit(1)
 
-        if u'config.yaml' not in configuration_dict:
+        if 'config.yaml' not in configuration_dict:
             self.logger.warning("config.yaml doesn't exists on your cluster.")
             self.logger.warning("Before v1.7.0, config.yaml is stored in ~/pai-deploy/cluster-cfg/config.yaml on the dev box machine.")
             self.logger.warning("If you have upgraded to v1.7.0, please copy config.yaml to the config folder and push it to the cluster.")
