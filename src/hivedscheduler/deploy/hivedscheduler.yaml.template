@@ -81,26 +81,19 @@ spec:
       - name: defaultscheduler
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}kube-scheduler:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         imagePullPolicy: Always
-        command: [
-          "sh", "-c",
-          "echo \"apiVersion: kubescheduler.config.k8s.io/v1alpha1\" >> config.yaml &&
-           echo \"kind: KubeSchedulerConfiguration\" >> config.yaml &&
-           echo \"schedulerName: hivedscheduler-ds-{{ vc }}\" >> config.yaml &&
-           echo \"disablePreemption: false\" >> config.yaml &&
-           echo \"percentageOfNodesToScore: 100\" >> config.yaml &&
-           echo \"algorithmSource:\" >> config.yaml &&
-           echo \"  policy:\" >> config.yaml &&
-           echo \"    configMap:\" >> config.yaml &&
-           echo \"      name: hivedscheduler-config\" >> config.yaml &&
-           echo \"      namespace: default\" >> config.yaml &&
-           echo \"leaderElection:\" >> config.yaml &&
-           echo \"  leaderElect: false\" >> config.yaml &&
-           /usr/local/bin/kube-scheduler
+        command:
+        - /usr/local/bin/kube-scheduler
+        - --config=/hivedscheduler-config/hivedscheduler-ds-{{ vc }}.yaml
         {%- if cluster_cfg['cluster']['common']['k8s-rbac'] != 'true' %}
-           --master={{ cluster_cfg['layout']['kubernetes']['api-servers-url'] }}
+        - --master={{ cluster_cfg['layout']['kubernetes']['api-servers-url'] }}
         {%- endif %}
-           --config=config.yaml
-           --feature-gates=PodPriority=true
-           --leader-elect=false
-           --v=4"]
+        - --leader-elect=false
+        - --v=4
+        volumeMounts:
+        - name: hivedscheduler-config
+          mountPath: /hivedscheduler-config
+      volumes:
+      - name: hivedscheduler-config
+        configMap:
+          name: hivedscheduler-config
 {%- endfor %}

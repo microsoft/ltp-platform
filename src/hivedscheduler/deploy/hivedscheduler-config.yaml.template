@@ -21,29 +21,28 @@ metadata:
   name: hivedscheduler-config
   namespace: default
 data:
-  policy.cfg : |
-    {
-      "kind": "Policy",
-      "apiVersion": "v1",
-      "extenders": [
-        {
-          "urlPrefix": "{{ cluster_cfg['hivedscheduler']['webservice'] }}/v1/extender",
-          "filterVerb": "filter",
-          "preemptVerb": "preempt",
-          "bindVerb": "bind",
-          "enableHttps": false,
-          "httpTimeout": 5000000000,
-          "nodeCacheCapable": true,
-          "ignorable": false,
-          "managedResources": [
-            {
-              "name": "hivedscheduler.microsoft.com/pod-scheduling-enable",
-              "ignoredByScheduler": true
-            }
-          ]
-        }
-      ]
-    }
+{%- for vc in cluster_cfg['hivedscheduler']['structured-config']['virtualClusters'] %}
+  hivedscheduler-ds-{{ vc }}.yaml: |
+    apiVersion: kubescheduler.config.k8s.io/v1
+    kind: KubeSchedulerConfiguration
+    profiles:
+      - schedulerName: hivedscheduler-ds-{{ vc }}
+    extenders:
+    - urlPrefix: "{{ cluster_cfg['hivedscheduler']['webservice'] }}/v1/extender"
+      filterVerb: "filter"
+      preemptVerb: "preempt"
+      bindVerb: "bind"
+      enableHTTPS: false
+      httpTimeout: 10s
+      nodeCacheCapable: true
+      ignorable: false
+      managedResources:
+      - name: "hivedscheduler.microsoft.com/pod-scheduling-enable"
+        ignoredByScheduler: true
+    percentageOfNodesToScore: 100
+    leaderElection:
+      leaderElect: false
+{%- endfor %}
   hivedscheduler.yaml: |
     webServerAddress: ":{{ cluster_cfg['hivedscheduler']['webservice-port'] }}"
     waitingPodSchedulingBlockMilliSec: 50
