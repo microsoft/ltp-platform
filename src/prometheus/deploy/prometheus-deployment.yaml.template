@@ -40,15 +40,6 @@ spec:
     spec:
       serviceAccountName: prometheus-account
       hostNetwork: true
-      initContainers:
-      - name: init
-        image: busybox:1.31.1
-        securityContext:
-          runAsUser: 0
-        volumeMounts:
-        - name: prometheus-data
-          mountPath: /prometheus-data
-        command: ["chown", "-R", "nobody:nogroup", "/prometheus-data"] # prometheus run as nobody:nogroup, refer to: https://github.com/prometheus/prometheus/pull/2859
       containers:
       - name: prometheus
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}prometheus:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}

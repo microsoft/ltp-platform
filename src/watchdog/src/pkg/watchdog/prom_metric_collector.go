@@ -23,6 +23,7 @@
 package watchdog
 
 import (
+	"context"
 	"math"
 	"strconv"
 	"sync"
@@ -161,13 +162,14 @@ func NewPromMetricCollector(c *K8sClient, i time.Duration) *PromMetricCollector 
 // Start used to start metrics collection
 func (p *PromMetricCollector) Start() {
 	klog.Info("Start collect prom metrics")
+	ctx := ContextWithCancelOnSignal(context.Background())
 	go func() {
 		tick := time.Tick(p.collectionInterval)
 		for {
 			select {
 			case <-tick:
 				klog.V(3).Infof("Start new a loop to collect metrics")
-				p.collect()
+				p.collect(ctx)
 			case <-p.stopCh:
 				klog.Info("Stopping prom metric collector")
 				p.finishCh <- true
@@ -183,7 +185,7 @@ func (p *PromMetricCollector) Stop() {
 	<-p.finishCh
 }
 
-func (p *PromMetricCollector) collect() {
+func (p *PromMetricCollector) collect(ctx context.Context) {
 	p.mutex.Lock() // To protect metrics from concurrent collects.
 	defer p.mutex.Unlock()
 
@@ -192,7 +194,7 @@ func (p *PromMetricCollector) collect() {
 	var f func()
 
 	var health string
-	f = func() { health, err = p.k8sClient.getServerHealth() }
+	f = func() { health, err = p.k8sClient.getServerHealth(ctx) }
 	observeTime(p.healthzHistogram, f)
 	if err != nil {
 		p.collectionErrors.WithLabelValues(errorTypeHealthz).Inc()
@@ -200,7 +202,7 @@ func (p *PromMetricCollector) collect() {
 	}
 
 	var nodeList *v1.NodeList
-	f = func() { nodeList, err = p.k8sClient.listNodes() }
+	f = func() { nodeList, err = p.k8sClient.listNodes(ctx) }
 	observeTime(p.listNodesHistogram, f)
 	if err != nil {
 		p.collectionErrors.WithLabelValues(errorTyeParse).Inc()
@@ -208,7 +210,7 @@ func (p *PromMetricCollector) collect() {
 	}
 
 	var podList *v1.PodList
-	f = func() { podList, err = p.k8sClient.listPods() }
+	f = func() { podList, err = p.k8sClient.listPods(ctx) }
 	observeTime(p.listPodsHistogram, f)
 	if err != nil {
 		p.collectionErrors.WithLabelValues(errorTyeParse).Inc()

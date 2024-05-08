@@ -23,6 +23,7 @@
 package watchdog
 
 import (
+	"context"
 	"os"
 
 	v1 "k8s.io/api/core/v1"
@@ -83,41 +84,41 @@ func (c *K8sClient) initK8sClient() error {
 	return err
 }
 
-func (c *K8sClient) listPods() (*v1.PodList, error) {
-	return c.kClient.CoreV1().Pods("").List(metav1.ListOptions{})
+func (c *K8sClient) listPods(ctx context.Context) (*v1.PodList, error) {
+	return c.kClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 }
 
-func (c *K8sClient) getServerHealth() (string, error) {
-	resp := c.kClient.RESTClient().Get().Suffix("healthz").Do()
+func (c *K8sClient) getServerHealth(ctx context.Context) (string, error) {
+	resp := c.kClient.RESTClient().Get().Suffix("healthz").Do(ctx)
 	err := resp.Error()
 	body, _ := resp.Raw()
 	return string(body), err
 }
 
-func (c *K8sClient) listNodes() (*v1.NodeList, error) {
-	return c.kClient.CoreV1().Nodes().List(metav1.ListOptions{})
+func (c *K8sClient) listNodes(ctx context.Context) (*v1.NodeList, error) {
+	return c.kClient.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
 }
 
-func (c *K8sClient) listPriorityClasses() (*shedulev1.PriorityClassList, error) {
-	return c.kClient.SchedulingV1().PriorityClasses().List(metav1.ListOptions{})
+func (c *K8sClient) listPriorityClasses(ctx context.Context) (*shedulev1.PriorityClassList, error) {
+	return c.kClient.SchedulingV1().PriorityClasses().List(ctx, metav1.ListOptions{})
 }
 
-func (c *K8sClient) deletePriorityClass(name string) error {
-	return c.kClient.SchedulingV1().PriorityClasses().Delete(name, nil)
+func (c *K8sClient) deletePriorityClass(ctx context.Context, name string) error {
+	return c.kClient.SchedulingV1().PriorityClasses().Delete(ctx, name, metav1.DeleteOptions{})
 }
 
-func (c *K8sClient) listSecrets(namespace string) (*v1.SecretList, error) {
-	return c.kClient.CoreV1().Secrets(namespace).List(metav1.ListOptions{})
+func (c *K8sClient) listSecrets(ctx context.Context, namespace string) (*v1.SecretList, error) {
+	return c.kClient.CoreV1().Secrets(namespace).List(ctx, metav1.ListOptions{})
 }
 
-func (c *K8sClient) deleteSecret(namespace string, name string) error {
-	return c.kClient.CoreV1().Secrets(namespace).Delete(name, nil)
+func (c *K8sClient) deleteSecret(ctx context.Context, namespace string, name string) error {
+	return c.kClient.CoreV1().Secrets(namespace).Delete(ctx, name, metav1.DeleteOptions{})
 }
 
-func (c *K8sClient) listFrameworks(namespace string) (*unstructured.UnstructuredList, error) {
+func (c *K8sClient) listFrameworks(ctx context.Context, namespace string) (*unstructured.UnstructuredList, error) {
 	frameworkRes := schema.GroupVersionResource{Group: "frameworkcontroller.microsoft.com",
 		Version: "v1", Resource: "frameworks"}
-	return c.dClient.Resource(frameworkRes).Namespace(namespace).List(metav1.ListOptions{})
+	return c.dClient.Resource(frameworkRes).Namespace(namespace).List(ctx, metav1.ListOptions{})
 }
 
 func (c *K8sClient) getAPIServerHostName() string {

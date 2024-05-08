@@ -23,6 +23,7 @@
 package watchdog
 
 import (
+	"context"
 	"regexp"
 	"strings"
 	"time"
@@ -87,15 +88,16 @@ func NewGarbageCollector(c *K8sClient, interval time.Duration) *GarbageCollector
 // Start used to start garbage collection
 func (gc *GarbageCollector) Start() {
 	klog.Info("Garbage collection starts")
+	ctx := ContextWithCancelOnSignal(context.Background())
 	go func() {
 		tick := time.Tick(gc.collectionInterval)
 		for {
 			select {
 			case <-tick:
 				klog.V(2).Infof("Start new a loop to collect garbages")
-				gc.collect()
-				gc.removeOrphanPriorityClasses()
-				gc.removeOrphanSecrets()
+				gc.collect(ctx)
+				gc.removeOrphanPriorityClasses(ctx)
+				gc.removeOrphanSecrets(ctx)
 			case <-gc.stopCh:
 				klog.Info("Stopping garbage collector")
 				gc.finishCh <- true
@@ -111,7 +113,7 @@ func (gc *GarbageCollector) Stop() {
 	<-gc.finishCh
 }
 
-func (gc *GarbageCollector) removeOrphanPriorityClasses() int {
+func (gc *GarbageCollector) removeOrphanPriorityClasses(ctx context.Context) int {
 	removedNum := 0 // used for UT
 	for _, pc := range gc.priorityClasses {
 		if !gc.priorityClassNameRegex.MatchString(pc.Name) {
@@ -124,7 +126,7 @@ func (gc *GarbageCollector) removeOrphanPriorityClasses() int {
 		_, exist := gc.frameworkExistMap[frameworkName]
 		if !exist {
 			klog.Infof("Delete orphan priority class %v", pc.Name)
-			err := gc.k8sClient.deletePriorityClass(pc.Name)
+			err := gc.k8sClient.deletePriorityClass(ctx, pc.Name)
 			if err != nil {
 				klog.Warningf("Failed to delete priority class, err: %v", err)
 			} else {
@@ -135,7 +137,7 @@ func (gc *GarbageCollector) removeOrphanPriorityClasses() int {
 	return removedNum
 }
 
-func (gc *GarbageCollector) removeOrphanSecrets() int {
+func (gc *GarbageCollector) removeOrphanSecrets(ctx context.Context) int {
 	removedNum := 0 // used for UT
 	for _, s := range gc.secrets {
 		var frameworkName string
@@ -158,7 +160,7 @@ func (gc *GarbageCollector) removeOrphanSecrets() int {
 		_, exist := gc.frameworkExistMap[frameworkName]
 		if !exist {
 			klog.Infof("Delete orphan secret %v", s.Name)
-			err := gc.k8sClient.deleteSecret("default", s.Name)
+			err := gc.k8sClient.deleteSecret(ctx, "default", s.Name)
 			if err != nil {
 				klog.Warningf("Failed to delete priority class, err: %v", err)
 			} else {
@@ -169,10 +171,10 @@ func (gc *GarbageCollector) removeOrphanSecrets() int {
 	return removedNum
 }
 
-func (gc *GarbageCollector) collect() {
+func (gc *GarbageCollector) collect(ctx context.Context) {
 	namespace := "default"
 	gc.frameworkExistMap, gc.priorityClasses, gc.secrets = make(map[string]bool), nil, nil
-	fList, err := gc.k8sClient.listFrameworks(namespace)
+	fList, err := gc.k8sClient.listFrameworks(ctx, namespace)
 	if err != nil {
 		klog.Warningf("Failed to get frameworks, err: %v", err)
 		return
@@ -182,7 +184,7 @@ func (gc *GarbageCollector) collect() {
 	}
 
 	var pcList *shedulev1.PriorityClassList
-	pcList, err = gc.k8sClient.listPriorityClasses()
+	pcList, err = gc.k8sClient.listPriorityClasses(ctx)
 	if err != nil {
 		klog.Warningf("Failed to get priority classes, err %v", err)
 	} else {
@@ -190,7 +192,7 @@ func (gc *GarbageCollector) collect() {
 	}
 
 	var sList *v1.SecretList
-	sList, err = gc.k8sClient.listSecrets(namespace)
+	sList, err = gc.k8sClient.listSecrets(ctx, namespace)
 	if err != nil {
 		klog.Warningf("Failed to get secrets from, err %v", err)
 	} else {

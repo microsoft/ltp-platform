@@ -23,6 +23,7 @@
 package watchdog
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"testing"
@@ -48,9 +49,9 @@ func TestGarbageCollection(t *testing.T) {
 	os.Setenv("KUBE_APISERVER_ADDRESS", url)
 	c, _ := NewK8sClient()
 	gc := NewGarbageCollector(c, time.Minute)
-	gc.collect()
-	removedPcNum := gc.removeOrphanPriorityClasses()
-	removedSecretNum := gc.removeOrphanSecrets()
+	gc.collect(context.TODO())
+	removedPcNum := gc.removeOrphanPriorityClasses(context.TODO())
+	removedSecretNum := gc.removeOrphanSecrets(context.TODO())
 	assert.Equal(t, 1, removedPcNum)
 	assert.Equal(t, 1, removedSecretNum)
 }

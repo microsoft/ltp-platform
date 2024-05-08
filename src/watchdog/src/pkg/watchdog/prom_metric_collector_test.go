@@ -23,6 +23,7 @@
 package watchdog
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -78,7 +79,7 @@ func TestGeneratePodsMetrics(t *testing.T) {
 				"host_ip": "10.151.41.8", "node_name": "test_node_0", "initialized": "true", "name": "log-manager-ds-nxm2k", "namespace": "default",
 				"phase": "running", "pod_scheduled": "true", "ready": "true", "service_name": "log-manager",
 			}, {
-				"host_ip": "10.151.41.8", "node_name": "test_node_0",  "name": "log-manager-logrotate", "namespace": "default",
+				"host_ip": "10.151.41.8", "node_name": "test_node_0", "name": "log-manager-logrotate", "namespace": "default",
 				"pod_name": "log-manager-ds-nxm2k", "state": "running", "ready": "true", "service_name": "log-manager",
 			},
 			{
@@ -224,7 +225,7 @@ func TestCollectMetrics(t *testing.T) {
 	c, _ := NewK8sClient()
 	pc := NewPromMetricCollector(c, time.Minute)
 
-	pc.collect()
+	pc.collect(context.TODO())
 	metrics := pc.getMetrics()
 
 	// 3 gpu metrics + 1 api server metric + 1 pai node metric +
