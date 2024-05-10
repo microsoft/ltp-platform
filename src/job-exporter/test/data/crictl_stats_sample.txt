@@ -1,0 +1,3 @@
+CONTAINER           NAME                              CPU %               MEM                 DISK                INODES
+2e5eaefe441a6       node-exporter                     0.00                15.22MB             40.96kB             13
+f72ca913776e1       prometheus                        0.02                77.79MB             40.96kB             13

@@ -1,19 +1,6 @@
-# Copyright (c) Microsoft Corporation
-# All rights reserved.
-#
-# MIT License
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 
 import os
 import sys
@@ -29,7 +16,7 @@ sys.path.append(
 
 import collector
 import nvidia
-import docker_inspect
+import container_inspect
 from collector import ContainerCollector
 from collector import GpuCollector
 
@@ -41,7 +28,7 @@ class TestContainerCollector(base.TestBase):
     """
 
     def test_parse_from_labels(self):
-        inspect_result = docker_inspect.InspectResult(
+        inspect_result = container_inspect.InspectResult(
                 "openmindstudio",
                 "trialslot_nnimain_d65bc5ac",
                 "tuner",
@@ -65,21 +52,14 @@ class TestContainerCollector(base.TestBase):
         self.assertEqual(target_labels, labels)
 
     def test_infer_service_name(self):
-        self.assertIsNone(ContainerCollector.infer_service_name(
-            "k8s_POD_alertmanager-7884c59f78-66r86_default_0a32e30a-f6ae-11e8"))
-
-        self.assertEqual(
-                "alertmanager",
-                ContainerCollector.infer_service_name(
-                    "k8s_alertmanager_alertmanager-7884c59f78-66r86_default_0a32e30a-f6ae-11e8-a62d-000d3ab25bb6_2"))
-
-        self.assertIsNone(ContainerCollector.infer_service_name(
-            "k8s_kube-scheduler_kube-scheduler-10.151.40.4_kube-system_f1164d931979939cf0601155df9c748a_6"))
+        self.assertIsNone(ContainerCollector.infer_service_name("autoscaler"))
+        self.assertEqual("prometheus", ContainerCollector.infer_service_name("prometheus"))
+        self.assertIsNone(ContainerCollector.infer_service_name("coredns"))
 
 
-class TestDockerCollector(base.TestBase):
+class TestContainerdDaemonCollector(base.TestBase):
     """
-    Test DockerCollector in collector.py
+    Test ContainerdDaemonCollector in collector.py
     """
 
     def assert_metrics(self, metrics):
@@ -91,21 +71,21 @@ class TestDockerCollector(base.TestBase):
 
     def test_impl(self):
         _, c = collector.instantiate_collector(
-                "test_docker_collector1",
+                "test_containerd_daemon_collector1",
                 0.5,
                 datetime.timedelta(seconds=1),
-                collector.DockerCollector)
+                collector.ContainerdDaemonCollector)
 
         self.assert_metrics(c.collect_impl())
 
     def test_base_collector(self):
-        """ actually setup DockerCollector thread, and test, since this is multi-thread
+        """ actually setup ContainerdDaemonCollector thread, and test, since this is multi-thread
         test case, maybe sensitive to the system load """
         ref = collector.make_collector(
-                "test_docker_collector2",
+                "test_containerd_daemon_collector2",
                 0.5,
                 datetime.timedelta(seconds=10),
-                collector.DockerCollector)
+                collector.ContainerdDaemonCollector)
 
         metrics = None
         for i in range(20):

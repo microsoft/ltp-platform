@@ -59,7 +59,7 @@ class TestNvidia(base.TestBase):
         target_smi_info = {"0": zero, "GPU-57567e11-0be2-381b-5132-2ad95c262e58": zero, "1": one, "GPU-ef1d0068-5bfd-f1e4-7e79-ff35d71d44b8": one}
 
         self.assertEqual(target_smi_info, nvidia_smi_parse_result)
-    
+
     def test_parse_smi_out_of_order_xml_result(self):
         sample_path = "data/nvidia_smi_out_of_order.xml"
         with open(sample_path, "r") as f:

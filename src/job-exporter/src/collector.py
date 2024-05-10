@@ -1,20 +1,6 @@
 #!/usr/bin/env python3
-# Copyright (c) Microsoft Corporation
-# All rights reserved.
-#
-# MIT License
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 
 import re
 import datetime
@@ -31,8 +17,8 @@ from prometheus_client.core import GaugeMetricFamily
 
 import amd
 import network
-import docker_inspect
-import docker_stats
+import container_inspect
+import container_stats
 import nvidia
 import ps
 import utils
@@ -47,9 +33,9 @@ logger = logging.getLogger(__name__)
 iteration_counter = Counter("collector_iteration_count", "total number of iteration",
         ["name"])
 
-def gen_docker_daemon_counter():
-    return GaugeMetricFamily("docker_daemon_count",
-            "count of docker daemon",
+def gen_containerd_daemon_counter():
+    return GaugeMetricFamily("containerd_daemon_count",
+            "count of containerd daemon",
             labels=["error"])
 
 # GPU Common metrics
@@ -310,33 +296,33 @@ def make_collector(name, sleep_time, decay_time, collector_class, *args):
     return atomic_ref
 
 
-class DockerCollector(Collector):
-    cmd_histogram = Histogram("cmd_docker_active_latency_seconds",
-            "Command call latency for checking docker daemon activeness (seconds)")
+class ContainerdDaemonCollector(Collector):
+    cmd_histogram = Histogram("cmd_containerd_active_latency_seconds",
+            "Command call latency for checking containerd daemon activeness (seconds)")
 
     cmd_timeout = 1 # 99th latency is 0.01s
 
     def collect_impl(self):
-        cmd = ["docker", "info"]
+        cmd = ["crictl", "info"]
         error = "ok"
 
         try:
             out = utils.exec_cmd(cmd,
-                    histogram=DockerCollector.cmd_histogram,
-                    timeout=DockerCollector.cmd_timeout)
+                    histogram=ContainerdDaemonCollector.cmd_histogram,
+                    timeout=ContainerdDaemonCollector.cmd_timeout)
 
-            logger.debug("output for docker info is %s", out)
+            logger.debug("output for crictl info is %s", out)
         except subprocess.CalledProcessError as e:
             logger.exception("command '%s' return with error (code %d): %s",
                     cmd, e.returncode, e.output)
             error = str(e)
         except subprocess.TimeoutExpired as e:
-            logger.warning("check docker active timeout")
+            logger.warning("check crictl active timeout")
             error = "timeout"
         except Exception as e:
             error = str(e)
 
-        counter = gen_docker_daemon_counter()
+        counter = gen_containerd_daemon_counter()
         counter.add_metric([error], 1)
 
         return [counter]
@@ -375,14 +361,11 @@ class GpuCollector(Collector):
         for line in content.split("\n"):
             line = line.strip()
             if "pids" in line:
-                if "/docker/" in line:
-                    parts = line.split("/docker/")
-                    if len(parts) == 2 and re.match(u"[0-9a-f]+", parts[1]):
-                        return True, parts[1]
-                elif "/kubepods/" in line:
-                    parts = line.split("/kubepods/")
-                    if len(parts) == 2 and re.match(u"pod[0-9a-f-]+", parts[1]):
-                        return True, parts[1]
+                if "kubepods" in line:
+                    pattern = r'cri-containerd-([a-f0-9]+)\.scope'
+                    match = re.search(pattern, line)
+                    if match:
+                        return True, match.group(1)
                 else:
                     logger.info("unknown format in pid cgroup %s", line)
 
@@ -517,15 +500,15 @@ class GpuCollector(Collector):
 
 
 class ContainerCollector(Collector):
-    stats_histogram = Histogram("cmd_docker_stats_latency_seconds",
-            "Command call latency for docker stats (seconds)")
+    stats_histogram = Histogram("cmd_crictl_stats_latency_seconds",
+            "Command call latency for crictl stats (seconds)")
     stats_timeout = 20
     # 99th latency may larger than 10s,
     # Because prometheus's largest bucket for recording histogram is 10s,
     # we can not get value higher than 10s.
 
-    inspect_histogram = Histogram("cmd_docker_inspect_latency_seconds",
-            "Command call latency for docker inspect (seconds)")
+    inspect_histogram = Histogram("cmd_crictl_inspect_latency_seconds",
+            "Command call latency for crictl inspect (seconds)")
     inspect_timeout = 1 # 99th latency is 0.042s
 
     iftop_histogram = Histogram("cmd_iftop_latency_seconds",
@@ -536,7 +519,7 @@ class ContainerCollector(Collector):
             "Command call latency for lsof (seconds)")
     lsof_timeout = 2 # 99th latency is 0.5s
 
-    pai_services = list(map(lambda s: "k8s_" + s, [
+    pai_services = set([
         # Run in master node
         "rest-server",
         "pylon",
@@ -564,13 +547,11 @@ class ContainerCollector(Collector):
         "dshuttle-worker",
         "dshuttle-job-worker",
         "dshuttle-csi-daemon",
-        "weave",
-        "weave-npc",
         "nvidia-device-plugin-ctr",
         "k8s-host-device",
         "amdgpu",
         "k8s-rdma",
-        ]))
+    ])
 
     def __init__(self, name, sleep_time, atomic_ref, iteration_counter, gpu_info_ref,
             stats_info_ref, interface):
@@ -594,7 +575,7 @@ class ContainerCollector(Collector):
                 ContainerCollector.iftop_histogram,
                 ContainerCollector.iftop_timeout)
 
-        stats_obj = docker_stats.stats(ContainerCollector.stats_histogram,
+        stats_obj = container_stats.stats(ContainerCollector.stats_histogram,
                 ContainerCollector.stats_timeout)
 
         now = datetime.datetime.now()
@@ -649,14 +630,8 @@ class ContainerCollector(Collector):
     def infer_service_name(cls, container_name):
         """ try to infer service name from container_name, if it's container not belongs
         to pai service, will return None """
-        if container_name.startswith("k8s_POD_"):
-            # this is empty container created by k8s for pod
-            return None
-
-        # TODO speed this up, since this is O(n^2)
-        for service_name in cls.pai_services:
-            if container_name.startswith(service_name):
-                return service_name[4:] # remove "k8s_" prefix
+        if container_name in cls.pai_services:
+            return container_name
 
         return None
 
@@ -664,7 +639,7 @@ class ContainerCollector(Collector):
         container_name = utils.walk_json_field_safe(stats, "name")
         pai_service_name = ContainerCollector.infer_service_name(container_name)
 
-        inspect_info = docker_inspect.inspect(container_id,
+        inspect_info = container_inspect.inspect(container_id,
                 ContainerCollector.inspect_histogram,
                 ContainerCollector.inspect_timeout, self.gpu_vendor)
 
@@ -681,6 +656,7 @@ class ContainerCollector(Collector):
         # get network consumption, since all our services/jobs running in host
         # network, and network statistic from docker is not specific to that
         # container. We have to get network statistic by ourselves.
+        # TODO(fix this): we should not using host network and remove this code
         lsof_result = network.lsof(pid,
                 ContainerCollector.lsof_histogram,
                 ContainerCollector.lsof_timeout)
@@ -713,27 +689,19 @@ class ContainerCollector(Collector):
                             labels, nvidia_gpu_status.gpu_mem_util)
 
             gauges.add_value("task_cpu_percent", container_labels, stats["CPUPerc"])
-            gauges.add_value("task_mem_usage_byte", container_labels, stats["MemUsage_Limit"]["usage"])
-            gauges.add_value("task_mem_limit_byte", container_labels, stats["MemUsage_Limit"]["limit"])
+            gauges.add_value("task_mem_usage_byte", container_labels, stats["MemUsageByte"])
             gauges.add_value("task_net_in_byte", container_labels, net_in)
             gauges.add_value("task_net_out_byte", container_labels, net_out)
-            gauges.add_value("task_block_in_byte", container_labels, stats["BlockIO"]["in"])
-            gauges.add_value("task_block_out_byte", container_labels, stats["BlockIO"]["out"])
-            gauges.add_value("task_mem_usage_percent", container_labels, stats["MemPerc"])
         else:
             labels = {"name": pai_service_name}
             gauges.add_value("service_cpu_percent", labels, stats["CPUPerc"])
-            gauges.add_value("service_mem_usage_byte", labels, stats["MemUsage_Limit"]["usage"])
-            gauges.add_value("service_mem_limit_byte", labels, stats["MemUsage_Limit"]["limit"])
-            gauges.add_value("service_mem_usage_percent", labels, stats["MemPerc"])
+            gauges.add_value("service_mem_usage_byte", labels, stats["MemUsageByte"])
             gauges.add_value("service_net_in_byte", labels, net_in)
             gauges.add_value("service_net_out_byte", labels, net_out)
-            gauges.add_value("service_block_in_byte", labels, stats["BlockIO"]["in"])
-            gauges.add_value("service_block_out_byte", labels, stats["BlockIO"]["out"])
 
     def collect_container_metrics(self, stats_obj, gpu_infos, all_conns):
         if stats_obj is None:
-            logger.warning("docker stats returns None")
+            logger.warning("crictl stats returns None")
             return None
 
         gauges = ResourceGauges()
@@ -749,8 +717,8 @@ class ContainerCollector(Collector):
 
 
 class ZombieCollector(Collector):
-    logs_histogram = Histogram("cmd_docker_logs_latency_seconds",
-            "Command call latency for docker logs (seconds)")
+    logs_histogram = Histogram("cmd_crictl_logs_latency_seconds",
+            "Command call latency for crictl logs (seconds)")
     logs_timeout = 1 # 99th latency is 0.04s
 
     zombie_container_count = Gauge("zombie_container_count",
@@ -840,24 +808,24 @@ class ZombieCollector(Collector):
 
         return self.type2_zombies.update(zombie_ids, now)
 
-    def docker_logs(self, container_id, tail="all"):
+    def crictl_logs(self, container_id, tail="-1"):
         try:
             return utils.exec_cmd(
-                    ["docker", "logs", "--tail", str(tail), str(container_id)],
+                    ["crictl", "logs", "--tail", str(tail), str(container_id)],
                     histogram=ZombieCollector.logs_histogram,
                     stderr=subprocess.STDOUT, # also capture stderr output
                     timeout=ZombieCollector.logs_timeout)
         except subprocess.TimeoutExpired as e:
-            logger.warning("docker log timeout")
+            logger.warning("crictl log timeout")
         except subprocess.CalledProcessError as e:
-            logger.warning("docker logs returns %d, output %s", e.returncode, e.output)
+            logger.warning("crictl logs returns %d, output %s", e.returncode, e.output)
         except Exception:
-            logger.exception("exec docker logs error")
+            logger.exception("exec crictl logs error")
 
         return ""
 
     def is_container_exited(self, container_id):
-        logs = self.docker_logs(container_id, tail=50)
+        logs = self.crictl_logs(container_id, tail=50)
         if re.search(u"USER COMMAND END", logs):
             return True
         return False
@@ -870,7 +838,7 @@ class ZombieCollector(Collector):
         return set of container id that deemed as zombie
         """
         if stats is None:
-            logger.warning("docker stats is None")
+            logger.warning("crictl stats is None")
             return
 
         exited_containers = set(filter(self.is_container_exited, stats.keys()))
@@ -881,7 +849,7 @@ class ZombieCollector(Collector):
         return type1_zombies.union(type2_zombies)
 
     def collect_impl(self):
-        # set it to None so if docker-stats hangs till next time we get,
+        # set it to None so if crictl-stats hangs till next time we get,
         # we will get None
         stats_info = self.stats_info_ref.get(datetime.datetime.now())
         all_zombies = self.update_zombie_count(stats_info)

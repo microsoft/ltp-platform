@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 from dataclasses import dataclass
 import json
 import logging
@@ -44,10 +47,12 @@ def parse_smi_json_result(smi_output):
     values = sorted(gpu_infos, key=lambda v: v["PCI Bus"])
     for index, value in enumerate(values):
         gpu_util = float(value["GPU use (%)"])
-        gpu_mem_vram_total = float(value["vram Total Memory (B)"])
-        gpu_mem_vram_used = float(value["vram Total Used Memory (B)"])
+        gpu_mem_vram_total = float(value["VRAM Total Memory (B)"])
+        gpu_mem_vram_used = float(value["VRAM Total Used Memory (B)"])
         gpu_mem_vram_util = gpu_mem_vram_used / gpu_mem_vram_total * 100
-        gpu_temperature = float(value["Temperature (Sensor edge) (C)"])
+        # Change to Sensor Edge in future.
+        # refer: https://rocm.docs.amd.com/projects/rocm_smi_lib/en/latest/doxygen/html/rocm__smi_8h.html#af4ad084051b497ddf4afccc50639de7e
+        gpu_temperature = float(value["Temperature (Sensor junction) (C)"])
         gpu_uuid = str(value["Unique ID"]).strip()
         pci_addr = value["PCI Bus"]
         res[str(index)] = AMDGpuStatus(gpu_util, gpu_mem_vram_util, gpu_uuid,

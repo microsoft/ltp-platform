@@ -17,6 +17,7 @@
 
 import logging
 import unittest
+import os
 
 class TestBase(unittest.TestCase):
     """
@@ -26,3 +27,9 @@ class TestBase(unittest.TestCase):
     def setUpClass(cls):
         logging.basicConfig(format="%(asctime)s - %(levelname)s - %(filename)s:%(lineno)s - %(message)s",
                 level=logging.DEBUG)
+
+    def setUp(self):
+        try:
+            os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        except OSError:
+            pass

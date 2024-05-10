@@ -15,28 +15,31 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM python:3.7
+FROM python:3.10
 
 RUN apt-get update && apt-get install --no-install-recommends -y build-essential git && \
     git clone https://github.com/yadutaf/infilter --depth 1 && \
     cd infilter && make
 
-FROM python:3.7
+FROM python:3.10
 
-RUN curl -SL https://download.docker.com/linux/static/stable/x86_64/docker-17.06.2-ce.tgz \
-    | tar -xzvC /usr/local && \
-    mv /usr/local/docker/* /usr/bin && \
+ENV CRI_VERSION=v1.28.0
+RUN wget https://github.com/kubernetes-sigs/cri-tools/releases/download/$CRI_VERSION/crictl-$CRI_VERSION-linux-amd64.tar.gz && \
+    tar zxvf crictl-$CRI_VERSION-linux-amd64.tar.gz -C /usr/local/bin && \
+    rm crictl-$CRI_VERSION-linux-amd64.tar.gz && \
     apt-get update && apt-get install --no-install-recommends -y iftop lsof && \
     mkdir -p /job_exporter
 
-RUN curl -sL http://repo.radeon.com/rocm/apt/debian/rocm.gpg.key | apt-key add - && \
-    sh -c 'echo deb [arch=amd64] http://repo.radeon.com/rocm/apt/debian/ xenial main > /etc/apt/sources.list.d/rocm.list' && \
+RUN curl -sL http://repo.radeon.com/rocm/rocm.gpg.key | gpg --dearmor -o /usr/share/keyrings/rocm-archive-keyring.gpg && \
+    sh -c 'echo deb [arch=amd64 signed-by=/usr/share/keyrings/rocm-archive-keyring.gpg] http://repo.radeon.com/rocm/apt/debian jammy main > /etc/apt/sources.list.d/rocm.list' && \
     apt-get update && apt-get install --no-install-recommends -y rocm-smi && \
     mkdir -p /opt/rocm && \
     cp -R $(dpkg -L rocm-smi | grep bin$) /opt/rocm && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install prometheus_client twisted
+COPY requirements.txt /job_exporter/
+COPY build/crictl.yaml /etc/crictl.yaml
+RUN pip3 install -r /job_exporter/requirements.txt
 
 COPY --from=0 infilter/infilter /usr/bin
 COPY src/*.py /job_exporter/

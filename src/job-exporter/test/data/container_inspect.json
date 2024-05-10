@@ -1,0 +1,573 @@
+{
+    "status": {
+      "id": "8b770ff4205d8ba6e88aac612d5ed66c53c5618d4df5cab46676f6ebaf2a11b9",
+      "metadata": {
+        "attempt": 0,
+        "name": "hivedscheduler"
+      },
+      "state": "CONTAINER_RUNNING",
+      "createdAt": "2024-05-07T10:54:50.42409299Z",
+      "startedAt": "2024-05-07T10:54:50.454842463Z",
+      "finishedAt": "0001-01-01T00:00:00Z",
+      "exitCode": 0,
+      "image": {
+        "annotations": {},
+        "image": "docker.io/binyangl/hivedscheduler:latest",
+        "userSpecifiedImage": ""
+      },
+      "imageRef": "docker.io/binyangl/hivedscheduler@sha256:5d480bd592d072aee4dea76623e05e194f272bd2d08c6b45fa3b82d184e6831f",
+      "reason": "",
+      "message": "",
+      "labels": {
+        "io.kubernetes.container.name": "hivedscheduler",
+        "io.kubernetes.pod.name": "hivedscheduler-hs-0",
+        "io.kubernetes.pod.namespace": "default",
+        "io.kubernetes.pod.uid": "befa41b2-4616-4232-82b7-2c8f2e3b40ee"
+      },
+      "annotations": {
+        "io.kubernetes.container.hash": "28fe0fdf",
+        "io.kubernetes.container.restartCount": "0",
+        "io.kubernetes.container.terminationMessagePath": "/dev/termination-log",
+        "io.kubernetes.container.terminationMessagePolicy": "File",
+        "io.kubernetes.pod.terminationGracePeriod": "30"
+      },
+      "mounts": [
+        {
+          "containerPath": "/hivedscheduler-config",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/volumes/kubernetes.io~configmap/hivedscheduler-config",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": true,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        },
+        {
+          "containerPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/volumes/kubernetes.io~projected/kube-api-access-lcnlb",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": true,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        },
+        {
+          "containerPath": "/etc/hosts",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/etc-hosts",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": false,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        },
+        {
+          "containerPath": "/dev/termination-log",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/containers/hivedscheduler/4e4f16da",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": false,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        }
+      ],
+      "logPath": "/var/log/pods/default_hivedscheduler-hs-0_befa41b2-4616-4232-82b7-2c8f2e3b40ee/hivedscheduler/0.log",
+      "resources": {
+        "linux": {
+          "cpuPeriod": "100000",
+          "cpuQuota": "0",
+          "cpuShares": "2",
+          "cpusetCpus": "",
+          "cpusetMems": "",
+          "hugepageLimits": [],
+          "memoryLimitInBytes": "0",
+          "memorySwapLimitInBytes": "0",
+          "oomScoreAdj": "1000",
+          "unified": {
+            "memory.oom.group": "1",
+            "memory.swap.max": "0"
+          }
+        },
+        "windows": null
+      }
+    },
+    "info": {
+      "sandboxID": "eacce4007c8ed7e802d7ae341242ac2fe7fc34c5d4903c2dc9c2b4363dfb7715",
+      "pid": 609138,
+      "removing": false,
+      "snapshotKey": "8b770ff4205d8ba6e88aac612d5ed66c53c5618d4df5cab46676f6ebaf2a11b9",
+      "snapshotter": "overlayfs",
+      "runtimeType": "io.containerd.runc.v2",
+      "runtimeOptions": {
+        "binary_name": "/usr/bin/runc",
+        "systemd_cgroup": true
+      },
+      "config": {
+        "metadata": {
+          "name": "hivedscheduler"
+        },
+        "image": {
+          "image": "sha256:63c6c07a8c71440c07072d006ff298fb7148b0d468fb9f99ccf036fea4a5e974"
+        },
+        "command": [
+          "bash",
+          "-c",
+          "cp /hivedscheduler-config/hivedscheduler.yaml . \u0026\u0026 ./start.sh"
+        ],
+        "envs": [
+          {
+            "key": "KUBERNETES_PORT",
+            "value": "tcp://10.0.0.1:443"
+          },
+          {
+            "key": "KUBERNETES_PORT_443_TCP_PORT",
+            "value": "443"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT",
+            "value": "tcp://10.0.155.142:30096"
+          },
+          {
+            "key": "KUBERNETES_SERVICE_HOST",
+            "value": "10.0.0.1"
+          },
+          {
+            "key": "KUBERNETES_SERVICE_PORT",
+            "value": "443"
+          },
+          {
+            "key": "KUBERNETES_SERVICE_PORT_HTTPS",
+            "value": "443"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_ADDR",
+            "value": "10.0.155.142"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_SERVICE_PORT",
+            "value": "30096"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP",
+            "value": "tcp://10.0.155.142:30096"
+          },
+          {
+            "key": "KUBERNETES_PORT_443_TCP",
+            "value": "tcp://10.0.0.1:443"
+          },
+          {
+            "key": "KUBERNETES_PORT_443_TCP_PROTO",
+            "value": "tcp"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_SERVICE_HOST",
+            "value": "10.0.155.142"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PROTO",
+            "value": "tcp"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PORT",
+            "value": "30096"
+          },
+          {
+            "key": "KUBERNETES_PORT_443_TCP_ADDR",
+            "value": "10.0.0.1"
+          }
+        ],
+        "mounts": [
+          {
+            "container_path": "/hivedscheduler-config",
+            "host_path": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/volumes/kubernetes.io~configmap/hivedscheduler-config",
+            "readonly": true
+          },
+          {
+            "container_path": "/var/run/secrets/kubernetes.io/serviceaccount",
+            "host_path": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/volumes/kubernetes.io~projected/kube-api-access-lcnlb",
+            "readonly": true
+          },
+          {
+            "container_path": "/etc/hosts",
+            "host_path": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/etc-hosts"
+          },
+          {
+            "container_path": "/dev/termination-log",
+            "host_path": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/containers/hivedscheduler/4e4f16da"
+          }
+        ],
+        "labels": {
+          "io.kubernetes.container.name": "hivedscheduler",
+          "io.kubernetes.pod.name": "hivedscheduler-hs-0",
+          "io.kubernetes.pod.namespace": "default",
+          "io.kubernetes.pod.uid": "befa41b2-4616-4232-82b7-2c8f2e3b40ee"
+        },
+        "annotations": {
+          "io.kubernetes.container.hash": "28fe0fdf",
+          "io.kubernetes.container.restartCount": "0",
+          "io.kubernetes.container.terminationMessagePath": "/dev/termination-log",
+          "io.kubernetes.container.terminationMessagePolicy": "File",
+          "io.kubernetes.pod.terminationGracePeriod": "30"
+        },
+        "log_path": "hivedscheduler/0.log",
+        "linux": {
+          "resources": {
+            "cpu_period": 100000,
+            "cpu_shares": 2,
+            "oom_score_adj": 1000,
+            "hugepage_limits": [
+              {
+                "page_size": "2MB"
+              },
+              {
+                "page_size": "1GB"
+              }
+            ],
+            "unified": {
+              "memory.oom.group": "1",
+              "memory.swap.max": "0"
+            }
+          },
+          "security_context": {
+            "namespace_options": {
+              "pid": 1
+            },
+            "run_as_user": {},
+            "masked_paths": [
+              "/proc/asound",
+              "/proc/acpi",
+              "/proc/kcore",
+              "/proc/keys",
+              "/proc/latency_stats",
+              "/proc/timer_list",
+              "/proc/timer_stats",
+              "/proc/sched_debug",
+              "/proc/scsi",
+              "/sys/firmware"
+            ],
+            "readonly_paths": [
+              "/proc/bus",
+              "/proc/fs",
+              "/proc/irq",
+              "/proc/sys",
+              "/proc/sysrq-trigger"
+            ],
+            "seccomp": {
+              "profile_type": 1
+            }
+          }
+        }
+      },
+      "runtimeSpec": {
+        "ociVersion": "1.1.0",
+        "process": {
+          "user": {
+            "uid": 0,
+            "gid": 0,
+            "additionalGids": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              6,
+              10,
+              11,
+              20,
+              26,
+              27
+            ]
+          },
+          "args": [
+            "bash",
+            "-c",
+            "cp /hivedscheduler-config/hivedscheduler.yaml . \u0026\u0026 ./start.sh"
+          ],
+          "env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "HOSTNAME=hivedscheduler-hs-0",
+            "INSTALL_DIR=/opt/hivedscheduler/hivedscheduler",
+            "KUBERNETES_PORT=tcp://10.0.0.1:443",
+            "KUBERNETES_PORT_443_TCP_PORT=443",
+            "HIVEDSCHEDULER_SERVICE_PORT=tcp://10.0.155.142:30096",
+            "KUBERNETES_SERVICE_HOST=10.0.0.1",
+            "KUBERNETES_SERVICE_PORT=443",
+            "KUBERNETES_SERVICE_PORT_HTTPS=443",
+            "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_ADDR=10.0.155.142",
+            "HIVEDSCHEDULER_SERVICE_SERVICE_PORT=30096",
+            "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP=tcp://10.0.155.142:30096",
+            "KUBERNETES_PORT_443_TCP=tcp://10.0.0.1:443",
+            "KUBERNETES_PORT_443_TCP_PROTO=tcp",
+            "HIVEDSCHEDULER_SERVICE_SERVICE_HOST=10.0.155.142",
+            "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PROTO=tcp",
+            "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PORT=30096",
+            "KUBERNETES_PORT_443_TCP_ADDR=10.0.0.1"
+          ],
+          "cwd": "/opt/hivedscheduler/hivedscheduler",
+          "capabilities": {
+            "bounding": [
+              "CAP_CHOWN",
+              "CAP_DAC_OVERRIDE",
+              "CAP_FSETID",
+              "CAP_FOWNER",
+              "CAP_MKNOD",
+              "CAP_NET_RAW",
+              "CAP_SETGID",
+              "CAP_SETUID",
+              "CAP_SETFCAP",
+              "CAP_SETPCAP",
+              "CAP_NET_BIND_SERVICE",
+              "CAP_SYS_CHROOT",
+              "CAP_KILL",
+              "CAP_AUDIT_WRITE"
+            ],
+            "effective": [
+              "CAP_CHOWN",
+              "CAP_DAC_OVERRIDE",
+              "CAP_FSETID",
+              "CAP_FOWNER",
+              "CAP_MKNOD",
+              "CAP_NET_RAW",
+              "CAP_SETGID",
+              "CAP_SETUID",
+              "CAP_SETFCAP",
+              "CAP_SETPCAP",
+              "CAP_NET_BIND_SERVICE",
+              "CAP_SYS_CHROOT",
+              "CAP_KILL",
+              "CAP_AUDIT_WRITE"
+            ],
+            "permitted": [
+              "CAP_CHOWN",
+              "CAP_DAC_OVERRIDE",
+              "CAP_FSETID",
+              "CAP_FOWNER",
+              "CAP_MKNOD",
+              "CAP_NET_RAW",
+              "CAP_SETGID",
+              "CAP_SETUID",
+              "CAP_SETFCAP",
+              "CAP_SETPCAP",
+              "CAP_NET_BIND_SERVICE",
+              "CAP_SYS_CHROOT",
+              "CAP_KILL",
+              "CAP_AUDIT_WRITE"
+            ]
+          },
+          "apparmorProfile": "cri-containerd.apparmor.d",
+          "oomScoreAdj": 1000
+        },
+        "root": {
+          "path": "rootfs"
+        },
+        "mounts": [
+          {
+            "destination": "/proc",
+            "type": "proc",
+            "source": "proc",
+            "options": [
+              "nosuid",
+              "noexec",
+              "nodev"
+            ]
+          },
+          {
+            "destination": "/dev",
+            "type": "tmpfs",
+            "source": "tmpfs",
+            "options": [
+              "nosuid",
+              "strictatime",
+              "mode=755",
+              "size=65536k"
+            ]
+          },
+          {
+            "destination": "/dev/pts",
+            "type": "devpts",
+            "source": "devpts",
+            "options": [
+              "nosuid",
+              "noexec",
+              "newinstance",
+              "ptmxmode=0666",
+              "mode=0620",
+              "gid=5"
+            ]
+          },
+          {
+            "destination": "/dev/mqueue",
+            "type": "mqueue",
+            "source": "mqueue",
+            "options": [
+              "nosuid",
+              "noexec",
+              "nodev"
+            ]
+          },
+          {
+            "destination": "/sys",
+            "type": "sysfs",
+            "source": "sysfs",
+            "options": [
+              "nosuid",
+              "noexec",
+              "nodev",
+              "ro"
+            ]
+          },
+          {
+            "destination": "/sys/fs/cgroup",
+            "type": "cgroup",
+            "source": "cgroup",
+            "options": [
+              "nosuid",
+              "noexec",
+              "nodev",
+              "relatime",
+              "ro"
+            ]
+          },
+          {
+            "destination": "/hivedscheduler-config",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/volumes/kubernetes.io~configmap/hivedscheduler-config",
+            "options": [
+              "rbind",
+              "rprivate",
+              "ro"
+            ]
+          },
+          {
+            "destination": "/etc/hosts",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/etc-hosts",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/dev/termination-log",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/containers/hivedscheduler/4e4f16da",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/etc/hostname",
+            "type": "bind",
+            "source": "/var/lib/containerd/io.containerd.grpc.v1.cri/sandboxes/eacce4007c8ed7e802d7ae341242ac2fe7fc34c5d4903c2dc9c2b4363dfb7715/hostname",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/etc/resolv.conf",
+            "type": "bind",
+            "source": "/var/lib/containerd/io.containerd.grpc.v1.cri/sandboxes/eacce4007c8ed7e802d7ae341242ac2fe7fc34c5d4903c2dc9c2b4363dfb7715/resolv.conf",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/dev/shm",
+            "type": "bind",
+            "source": "/run/containerd/io.containerd.grpc.v1.cri/sandboxes/eacce4007c8ed7e802d7ae341242ac2fe7fc34c5d4903c2dc9c2b4363dfb7715/shm",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/var/run/secrets/kubernetes.io/serviceaccount",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/befa41b2-4616-4232-82b7-2c8f2e3b40ee/volumes/kubernetes.io~projected/kube-api-access-lcnlb",
+            "options": [
+              "rbind",
+              "rprivate",
+              "ro"
+            ]
+          }
+        ],
+        "annotations": {
+          "io.kubernetes.cri.container-name": "hivedscheduler",
+          "io.kubernetes.cri.container-type": "container",
+          "io.kubernetes.cri.image-name": "docker.io/binyangl/hivedscheduler:latest",
+          "io.kubernetes.cri.sandbox-id": "eacce4007c8ed7e802d7ae341242ac2fe7fc34c5d4903c2dc9c2b4363dfb7715",
+          "io.kubernetes.cri.sandbox-name": "hivedscheduler-hs-0",
+          "io.kubernetes.cri.sandbox-namespace": "default",
+          "io.kubernetes.cri.sandbox-uid": "befa41b2-4616-4232-82b7-2c8f2e3b40ee"
+        },
+        "linux": {
+          "resources": {
+            "devices": [
+              {
+                "allow": false,
+                "access": "rwm"
+              }
+            ],
+            "memory": {},
+            "cpu": {
+              "shares": 2,
+              "period": 100000
+            },
+            "unified": {
+              "memory.oom.group": "1",
+              "memory.swap.max": "0"
+            }
+          },
+          "cgroupsPath": "kubepods-besteffort-podbefa41b2_4616_4232_82b7_2c8f2e3b40ee.slice:cri-containerd:8b770ff4205d8ba6e88aac612d5ed66c53c5618d4df5cab46676f6ebaf2a11b9",
+          "namespaces": [
+            {
+              "type": "pid"
+            },
+            {
+              "type": "ipc",
+              "path": "/proc/609088/ns/ipc"
+            },
+            {
+              "type": "uts",
+              "path": "/proc/609088/ns/uts"
+            },
+            {
+              "type": "mount"
+            },
+            {
+              "type": "network",
+              "path": "/proc/609088/ns/net"
+            },
+            {
+              "type": "cgroup"
+            }
+          ],
+          "maskedPaths": [
+            "/proc/asound",
+            "/proc/acpi",
+            "/proc/kcore",
+            "/proc/keys",
+            "/proc/latency_stats",
+            "/proc/timer_list",
+            "/proc/timer_stats",
+            "/proc/sched_debug",
+            "/proc/scsi",
+            "/sys/firmware"
+          ],
+          "readonlyPaths": [
+            "/proc/bus",
+            "/proc/fs",
+            "/proc/irq",
+            "/proc/sys",
+            "/proc/sysrq-trigger"
+          ]
+        }
+      }
+    }
+  }

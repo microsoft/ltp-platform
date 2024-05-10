@@ -141,7 +141,7 @@ def parse_smi_xml_result(smi):
         ecc_single = ecc_double = 0
 
         """Here we try to get the ecc error count.
-        If there is no single_bit tag, it means that this GPU do not support 
+        If there is no single_bit tag, it means that this GPU do not support
         """
         try:
             ecc_errors = gpu.getElementsByTagName("ecc_errors")
@@ -182,11 +182,12 @@ def parse_smi_xml_result(smi):
         throttle_reasons = []
         try:
             temp_node = gpu.getElementsByTagName("clocks_throttle_reasons")
-            for node in temp_node[0].childNodes:
-                if node.nodeType != node.ELEMENT_NODE:
-                    continue
-                if node.childNodes[0].data.lower() == "active":
-                    throttle_reasons.append(node.tagName)
+            if len(temp_node) > 0:
+                for node in temp_node[0].childNodes:
+                    if node.nodeType != node.ELEMENT_NODE:
+                        continue
+                    if node.childNodes[0].data.lower() == "active":
+                        throttle_reasons.append(node.tagName)
 
         except Exception:
             logger.warning("Failed to get GPU clock throttle reasons", exc_info=True)

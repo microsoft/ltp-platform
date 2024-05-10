@@ -21,9 +21,7 @@ import logging
 import collections
 import subprocess
 import socket
-import fcntl
-import struct
-import array
+import netifaces
 
 import utils
 
@@ -194,23 +192,15 @@ def format_ip(addr):
 
 def get_interfaces():
     """ get all network interfaces we see, return map with interface name as key, and ip as value """
-    max_possible = 128
-    bytes = max_possible * 32
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    names = array.array("B", b"\0" * bytes)
-    outbytes = struct.unpack("iL", fcntl.ioctl(
-        s.fileno(),
-        0x8912,  # SIOCGIFCONF
-        struct.pack("iL", bytes, names.buffer_info()[0])
-    ))[0]
-
-    namestr = names.tostring()
-
+    interfaces = netifaces.interfaces()
     result = {}
-    for i in range(0, outbytes, 40):
-        name = namestr[i:i+16].split(b"\0", 1)[0].decode("ascii")
-        ip   = namestr[i+20:i+24]
-        result[name] = format_ip(ip)
+    for interface in interfaces:
+        addrs = netifaces.ifaddresses(interface)
+        if netifaces.AF_INET in addrs:
+            for addr in addrs[netifaces.AF_INET]:
+                if "addr" in addr:
+                    result[interface] = addr["addr"]
+                    break
     return result
 
 
