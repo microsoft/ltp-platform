@@ -15,7 +15,7 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM ubuntu:16.04
+FROM ubuntu:22.04
 
 #
 # Preparation
@@ -24,34 +24,34 @@ FROM ubuntu:16.04
 WORKDIR /root/
 
 RUN apt-get update && \
-    apt-get -y install wget build-essential python python-pip git
+    apt-get -y install wget build-essential python3 python3-pip git
 
-RUN pip install jinja2
+RUN pip3 install jinja2
 
-# nginx version 1.13.8
-RUN wget http://nginx.org/download/nginx-1.13.8.tar.gz && \
-    tar -zxf nginx-1.13.8.tar.gz
+# nginx version 1.26.0
+RUN wget https://nginx.org/download/nginx-1.26.0.tar.gz && \
+    tar -zxf nginx-1.26.0.tar.gz
 
-# PCRE version 4.4 - 8.40
-RUN wget https://ftp.pcre.org/pub/pcre/pcre-8.40.tar.gz && \
-    tar -zxf pcre-8.40.tar.gz
+# PCRE version PCRE2-10.43
+RUN wget https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.43/pcre2-10.43.tar.gz && \
+    tar -zxf pcre2-10.43.tar.gz
 
-# zlib version 1.1.3 - 1.2.11
-RUN wget http://www.zlib.net/zlib-1.2.11.tar.gz && \
-    tar -zxf zlib-1.2.11.tar.gz
+# zlib version 1.3.1
+RUN wget https://www.zlib.net/zlib-1.3.1.tar.gz && \
+    tar -zxf zlib-1.3.1.tar.gz
 
-# OpenSSL version 1.0.2 - 1.1.0
-RUN wget https://www.openssl.org/source/old/1.1.0/openssl-1.1.0f.tar.gz && \
-    tar -zxf openssl-1.1.0f.tar.gz
+# OpenSSL 3.3.0
+RUN wget https://www.openssl.org/source/openssl-3.3.0.tar.gz && \
+    tar -zxf openssl-3.3.0.tar.gz
 
 # subs_filter
-RUN git clone git://github.com/yaoweibin/ngx_http_substitutions_filter_module.git
+RUN git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module.git
 
 #
 # Configure nginx build
 #
 
-WORKDIR /root/nginx-1.13.8
+WORKDIR /root/nginx-1.26.0
 
 RUN ./configure \
   # Basic configurations
@@ -69,16 +69,16 @@ RUN ./configure \
   --with-http_stub_status_module \
   --with-http_ssl_module \
   # External modules
-  --with-openssl=../openssl-1.1.0f \
-  --with-pcre=../pcre-8.40 \
-  --with-zlib=../zlib-1.2.11 \
+  --with-openssl=../openssl-3.3.0 \
+  --with-pcre=../pcre2-10.43 \
+  --with-zlib=../zlib-1.3.1 \
   --add-module=/root/ngx_http_substitutions_filter_module
 
 #
 # Make and install nginx
 #
 
-RUN make
+RUN make -j
 
 RUN make install
 

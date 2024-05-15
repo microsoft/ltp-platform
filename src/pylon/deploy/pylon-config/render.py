@@ -26,7 +26,7 @@ for key in os.environ:
 templateString = open('/pylon-config/nginx.conf.template', 'r').read()
 locationCfgTemplateString = open('/pylon-config/location.conf.template', 'r').read()
 
-env.setdefault('PYLON_CONF_ETAG', md5(templateString).hexdigest())
+env.setdefault('PYLON_CONF_ETAG', md5(templateString.encode('utf-8')).hexdigest())
 
 renderedString = Template(templateString).render(env)
 open('/root/nginx.conf', 'w').write(renderedString)
