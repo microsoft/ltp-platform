@@ -84,6 +84,7 @@ async function patchFramework(name, data, namespace = 'default') {
     );
     delete data.status;
   }
+  // https://github.com/kubernetes-client/javascript/blob/8151bff/src/gen/api/customObjectsApi.ts#L1983
   const res = await customObjectsClient.patchNamespacedCustomObject(
     'frameworkcontroller.microsoft.com',
     'v1',
@@ -91,19 +92,21 @@ async function patchFramework(name, data, namespace = 'default') {
     'frameworks',
     name,
     data,
+    ...Array(3), // skip some parameters
     { headers: { 'Content-Type': 'application/merge-patch+json' } },
   );
   return res.response;
 }
 
 async function deleteFramework(name, namespace = 'default') {
+  // https://github.com/kubernetes-client/javascript/blob/8151bff/src/gen/api/customObjectsApi.ts#L671C18-L671C47
   const res = await customObjectsClient.deleteNamespacedCustomObject(
     'frameworkcontroller.microsoft.com',
     'v1',
     namespace,
     'frameworks',
     name,
-    ...Array(4), // skip some parameters
+    ...Array(5), // skip some parameters
     { headers: { propagationPolicy: 'Foreground' } },
   );
   return res.response;
@@ -207,11 +210,12 @@ async function patchSecretOwnerToFramework(secret, frameworkResponse) {
       },
     ],
   };
+  // https://kubernetes-client.github.io/javascript/classes/CoreV1Api.html#patchNamespacedSecret
   const res = await coreV1Client.patchNamespacedSecret(
     secret.metadata.name,
     secret.metadata.namespace,
     { metadata: metadata },
-    ...Array(4), // skip some parameters
+    ...Array(5), // skip some parameters
     { headers: { 'Content-Type': 'application/merge-patch+json' } },
   );
   return res.response;

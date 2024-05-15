@@ -15,19 +15,19 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM ubuntu:16.04
+FROM ubuntu:22.04
 
 RUN apt update
 
-RUN apt install -y wget
+RUN apt install -y wget gnupg2
 
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ jammy-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list
 
 RUN apt update
 
-RUN apt install -y postgresql-client-12
+RUN apt install -y postgresql-client-16
 
 RUN mkdir -p /postgresql_init
 
