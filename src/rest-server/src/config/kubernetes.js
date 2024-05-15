@@ -64,7 +64,7 @@ if (RBAC_IN_CLUSTER === 'false') {
     const cluster = kc.getCurrentCluster();
     apiserverConfig.uri = cluster.server;
     initPromise = kc
-      .applytoHTTPSOptions(httpsOptions)
+      .applyToHTTPSOptions(httpsOptions)
       .then(() => {
         apiserverConfig.headers = httpsOptions.headers;
         apiserverConfig.ca = httpsOptions.ca;

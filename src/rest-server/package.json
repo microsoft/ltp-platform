@@ -1,5 +1,6 @@
 {
   "name": "pai-rest-server",
+  "packageManager": "yarn@4.2.2",
   "version": "0.0.0",
   "description": "RESTful api server for Microsoft Platform for AI",
   "keywords": [
@@ -21,11 +22,11 @@
     "url": "https://github.com/Microsoft/pai/issues"
   },
   "engines": {
-    "node": "^10"
+    "node": "^20"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.5.0",
-    "@kubernetes/client-node": "^0.11.0",
+    "@kubernetes/client-node": "^0.20.0",
     "ajv": "^6.12.3",
     "ajv-merge-patch": "~4.1.0",
     "async": "~2.6.4",
