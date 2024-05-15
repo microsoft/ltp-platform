@@ -19,7 +19,7 @@
 FROM ubuntu:22.04
 
 ENV \
-  GRAFANA_VERSION=10.4.2 \
+  GRAFANA_VERSION=4.6.3 \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
@@ -28,8 +28,8 @@ ENV \
 
 RUN \
   apt-get update && \
-  apt-get -y --force-yes --no-install-recommends install libfontconfig wget ca-certificates adduser libfontconfig1 musl && \
-  wget -O /tmp/grafana.deb https://dl.grafana.com/oss/release/grafana_${GRAFANA_VERSION}_amd64.deb && \
+  apt-get -y --force-yes --no-install-recommends install libfontconfig wget curl ca-certificates adduser libfontconfig1 musl && \
+  wget -O /tmp/grafana.deb https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_${GRAFANA_VERSION}_amd64.deb && \
   dpkg -i /tmp/grafana.deb && \
   rm -f /tmp/grafana.deb && \
   ### branding && \

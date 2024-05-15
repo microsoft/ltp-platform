@@ -40,6 +40,15 @@ spec:
     spec:
       serviceAccountName: prometheus-account
       hostNetwork: true
+      initContainers:
+      - name: init
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}prometheus:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: prometheus-data
+          mountPath: /prometheus-data
+        command: ["chown", "-R", "nobody:nobody", "/prometheus-data"]
       containers:
       - name: prometheus
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}prometheus:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
