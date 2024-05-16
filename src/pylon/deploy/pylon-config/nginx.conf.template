@@ -81,7 +81,6 @@ http {
     listen  443 ssl;
     server_name  localhost;
 
-    ssl on;
     ssl_certificate /root/{{CRT_NAME}};
     ssl_certificate_key /root/{{KEY_NAME}};
 
