@@ -84,7 +84,7 @@ class TestContainerInspect(base.TestBase):
             container_inspect = f.read()
 
         inspect_info = parse_crictl_inspect(container_inspect, GpuVendor.NVIDIA)
-        target_inspect_info = InspectResult(None, None, None, None, None, None, None, 609138)
+        target_inspect_info = InspectResult("binyli", 'binyli~admin_8fc0983c', 'taskrole', '0', '0', '0_b4135b90-4677-412b-863e-1bea1454fadc', 'default', 251276)
         self.assertEqual(target_inspect_info, inspect_info)
 
 

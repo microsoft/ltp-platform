@@ -59,6 +59,8 @@ def parse_crictl_inspect(inspect_output, gpu_vender):
                 m[env["key"]] = env["value"]
 
             # for kube-launcher tasks
+            k = env["key"]
+            v = env["value"] if "value" in env else None
             if k == "FC_TASK_INDEX":
                 m["PAI_TASK_INDEX"] = v
             else:
