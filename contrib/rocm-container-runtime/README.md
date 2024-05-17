@@ -59,3 +59,53 @@ docker run --runtime=rocm -e AMD_VISIBLE_DEVICES=2 --security-opt seccomp=unconf
 ```
 
 > NOTE: To use AMD GPUs in Docker, please follow [ROCm's document](https://rocm.github.io/ROCmInstall.html#Ubuntu) to install drivers first.
+
+Containerd
+-----------
+```toml
+version = 2
+root = "/var/lib/containerd"
+state = "/run/containerd"
+oom_score = 0
+
+[grpc]
+  max_recv_message_size = 16777216
+  max_send_message_size = 16777216
+
+[debug]
+  level = "info"
+
+[metrics]
+  address = ""
+  grpc_histogram = false
+
+[plugins]
+  [plugins."io.containerd.grpc.v1.cri"]
+    sandbox_image = "registry.k8s.io/pause:3.9"
+    max_container_log_line_size = -1
+    enable_unprivileged_ports = false
+    enable_unprivileged_icmp = false
+    [plugins."io.containerd.grpc.v1.cri".containerd]
+      default_runtime_name = "rocm"
+      snapshotter = "overlayfs"
+      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes]
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.rocm]
+          runtime_type = "io.containerd.runc.v2"
+          runtime_engine = ""
+          runtime_root = ""
+          base_runtime_spec = "/etc/containerd/cri-base.json"
+
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.rocm.options]
+            systemdCgroup = true
+            binaryName = "/usr/bin/rocm-container-runtime"
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
+          endpoint = ["https://registry-1.docker.io"]
+```
+
+runtime usage
+-----
+```sh
+sudo ctr run --runc-binary /usr/bin/rocm-container-runtime --env AMD_VISIBLE_DEVICES=0,1,2,3 --user 0:0 --rm -t docker.io/rocm/rocm-terminal:latest rocm-test rocm-smi
+```
