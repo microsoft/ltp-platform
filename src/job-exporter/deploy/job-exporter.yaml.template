@@ -45,7 +45,7 @@ spec:
           periodSeconds: 30
           timeoutSeconds: 10
         command:
-        - "python"
+        - "python3"
         - "/job_exporter/main.py"
         - "--port"
         - "{{ cluster_cfg["job-exporter"]["port"] }}"
