@@ -19,3 +19,4 @@ service_type: "k8s"
 
 devices:
   - "nvidia.com/gpu"
+  - "amd.com/gpu"

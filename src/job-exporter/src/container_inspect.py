@@ -67,7 +67,7 @@ def parse_crictl_inspect(inspect_output, gpu_vender):
                 if k == "NVIDIA_VISIBLE_DEVICES" and gpu_vender == GpuVendor.NVIDIA and v \
                     and v != "all" and v != "void" and v != "none":
                     m["GPU_ID"] = v
-                if k == "PAI_AMD_VISIBLE_DEVICES" and gpu_vender == GpuVendor.AMD and v:
+                if k == "AMD_VISIBLE_DEVICES" and gpu_vender == GpuVendor.AMD and v:
                     m["GPU_ID"] = v
 
             if k == "FC_FRAMEWORK_ATTEMPT_INSTANCE_UID" or k == "APP_ID":

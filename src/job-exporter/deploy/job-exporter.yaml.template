@@ -76,12 +76,10 @@ spec:
         - name: LAUNCHER_TYPE
           value: {{ cluster_cfg["cluster"]["common"]["cluster-type"] }}
         volumeMounts:
-        - mountPath: /var/run/containerd/containerd.sock
-          name: containerd-socket
+        - mountPath: /var/run/containerd
+          name: containerd
         - mountPath: /dev
           name: device-mount
-        - mountPath: /var/drivers/nvidia/current
-          name: driver-path
         - mountPath: /gpu-config
           name: gpu-config
         - mountPath: /var/log/pods
@@ -92,15 +90,12 @@ spec:
           hostPort: {{ cluster_cfg["job-exporter"]["port"] }}
           name: main
       volumes:
-        - name: containerd-socket
+        - name: containerd
           hostPath:
-            path: /var/run/containerd/containerd.sock
+            path: /var/run/containerd
         - name: device-mount
           hostPath:
             path: /dev
-        - name: driver-path
-          hostPath:
-            path: /var/drivers/nvidia/current
         - name: pod-log
           hostPath:
             path: /var/log/pods

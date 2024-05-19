@@ -1,0 +1,851 @@
+{
+    "status": {
+      "id": "8454bdd7fd80daa34a0f69a969eb5a0a619ba9c513975a211e0a94fdd5f26f98",
+      "metadata": {
+        "attempt": 0,
+        "name": "app"
+      },
+      "state": "CONTAINER_RUNNING",
+      "createdAt": "2024-05-19T03:05:26.084742488Z",
+      "startedAt": "2024-05-19T03:05:26.377245993Z",
+      "finishedAt": "0001-01-01T00:00:00Z",
+      "exitCode": 0,
+      "image": {
+        "annotations": {},
+        "image": "docker.io/rocm/pytorch:rocm6.1_ubuntu22.04_py3.10_pytorch_2.1.2",
+        "userSpecifiedImage": ""
+      },
+      "imageRef": "docker.io/rocm/pytorch@sha256:f6ea7cee8aae299c7f6368187df7beed29928850c3929c81e6f24b34271d652b",
+      "reason": "",
+      "message": "",
+      "labels": {
+        "io.kubernetes.container.name": "app",
+        "io.kubernetes.pod.name": "40c2aa60a8395648e7b9fede39cb2f48-taskrole-0",
+        "io.kubernetes.pod.namespace": "default",
+        "io.kubernetes.pod.uid": "cb425efb-a9ab-4c83-a7cb-0177c0808200"
+      },
+      "annotations": {
+        "io.kubernetes.container.hash": "bfdf56f2",
+        "io.kubernetes.container.restartCount": "0",
+        "io.kubernetes.container.terminationMessagePath": "/tmp/pai-termination-log",
+        "io.kubernetes.container.terminationMessagePolicy": "FallbackToLogsOnError",
+        "io.kubernetes.pod.terminationGracePeriod": "30"
+      },
+      "mounts": [
+        {
+          "containerPath": "/dev/shm",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volumes/kubernetes.io~empty-dir/dshm",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": false,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        },
+        {
+          "containerPath": "/usr/local/pai",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volumes/kubernetes.io~empty-dir/pai-vol",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": false,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        },
+        {
+          "containerPath": "/usr/local/pai/logs",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volume-subpaths/host-log/app/2",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": false,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        },
+        {
+          "containerPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volumes/kubernetes.io~projected/kube-api-access-5p2ws",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": true,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        },
+        {
+          "containerPath": "/etc/hosts",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/etc-hosts",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": false,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        },
+        {
+          "containerPath": "/tmp/pai-termination-log",
+          "gidMappings": [],
+          "hostPath": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/containers/app/638bda8e",
+          "propagation": "PROPAGATION_PRIVATE",
+          "readonly": false,
+          "selinuxRelabel": false,
+          "uidMappings": []
+        }
+      ],
+      "logPath": "/var/log/pods/default_40c2aa60a8395648e7b9fede39cb2f48-taskrole-0_cb425efb-a9ab-4c83-a7cb-0177c0808200/app/0.log",
+      "resources": {
+        "linux": {
+          "cpuPeriod": "100000",
+          "cpuQuota": "1100000",
+          "cpuShares": "11264",
+          "cpusetCpus": "",
+          "cpusetMems": "",
+          "hugepageLimits": [],
+          "memoryLimitInBytes": "107374182400",
+          "memorySwapLimitInBytes": "107374182400",
+          "oomScoreAdj": "946",
+          "unified": {
+            "memory.oom.group": "1",
+            "memory.swap.max": "0"
+          }
+        },
+        "windows": null
+      }
+    },
+    "info": {
+      "sandboxID": "878695ecb91429a40ec19b9c4d4402f6a901085a7e025a13544da388325b1b4c",
+      "pid": 2722314,
+      "removing": false,
+      "snapshotKey": "8454bdd7fd80daa34a0f69a969eb5a0a619ba9c513975a211e0a94fdd5f26f98",
+      "snapshotter": "overlayfs",
+      "runtimeType": "io.containerd.runc.v2",
+      "runtimeOptions": {
+        "binary_name": "/usr/bin/rocm-container-runtime",
+        "systemd_cgroup": true
+      },
+      "config": {
+        "metadata": {
+          "name": "app"
+        },
+        "image": {
+          "image": "sha256:bc00f9ae863f685ff071ff3e03747ce03cbc0c8473f3a2e1b2d9a2240e6fd536"
+        },
+        "command": [
+          "/usr/local/pai/runtime"
+        ],
+        "envs": [
+          {
+            "key": "FC_POD_NAME",
+            "value": "40c2aa60a8395648e7b9fede39cb2f48-taskrole-0"
+          },
+          {
+            "key": "FC_FRAMEWORK_ATTEMPT_ID",
+            "value": "0"
+          },
+          {
+            "key": "PAI_JOB_NAME",
+            "value": "binyli~admin_8fc0983c"
+          },
+          {
+            "key": "PAI_TASK_ROLE_LIST",
+            "value": "taskrole"
+          },
+          {
+            "key": "PAI_TASK_ROLE_TASK_COUNT_taskrole",
+            "value": "1"
+          },
+          {
+            "key": "PAI_RESOURCE_taskrole",
+            "value": "1,11,102400,0"
+          },
+          {
+            "key": "PAI_USER_NAME",
+            "value": "binyli"
+          },
+          {
+            "key": "PAI_MIN_SUCCEEDED_TASK_COUNT_taskrole",
+            "value": "1"
+          },
+          {
+            "key": "FC_FRAMEWORK_NAMESPACE",
+            "value": "default"
+          },
+          {
+            "key": "FC_FRAMEWORK_UID",
+            "value": "c8c74124-20b2-4508-8eaa-f19070fa57ea"
+          },
+          {
+            "key": "FC_FRAMEWORK_ATTEMPT_INSTANCE_UID",
+            "value": "0_f3c2300b-b2d1-4c19-aca2-a889ad3fed51"
+          },
+          {
+            "key": "FC_CONFIGMAP_UID",
+            "value": "f3c2300b-b2d1-4c19-aca2-a889ad3fed51"
+          },
+          {
+            "key": "FC_POD_UID",
+            "value": "cb425efb-a9ab-4c83-a7cb-0177c0808200"
+          },
+          {
+            "key": "PAI_FRAMEWORK_NAME",
+            "value": "binyli~admin_8fc0983c"
+          },
+          {
+            "key": "FC_TASK_INDEX",
+            "value": "0"
+          },
+          {
+            "key": "FC_TASK_ATTEMPT_ID",
+            "value": "0"
+          },
+          {
+            "key": "FC_TASKROLE_UID",
+            "value": "41525984-8c10-4386-9762-93948dc81ffc"
+          },
+          {
+            "key": "PAI_TASK_INDEX",
+            "value": "0"
+          },
+          {
+            "key": "PAI_JOB_TASK_COUNT",
+            "value": "1"
+          },
+          {
+            "key": "PAI_TASK_ROLES_NUM",
+            "value": "1"
+          },
+          {
+            "key": "PAI_JOB_TASK_ROLE_COUNT",
+            "value": "1"
+          },
+          {
+            "key": "PAI_CURRENT_TASK_ROLE_NAME",
+            "value": "taskrole"
+          },
+          {
+            "key": "PAI_CURRENT_TASK_ROLE_CURRENT_TASK_INDEX",
+            "value": "0"
+          },
+          {
+            "key": "PAI_DEFAULT_FS_URI"
+          },
+          {
+            "key": "PAI_VIRTUAL_CLUSTER",
+            "value": "default"
+          },
+          {
+            "key": "NVIDIA_VISIBLE_DEVICES",
+            "value": "0"
+          },
+          {
+            "key": "AMD_VISIBLE_DEVICES",
+            "value": "0"
+          },
+          {
+            "key": "FC_TASKROLE_NAME",
+            "value": "taskrole"
+          },
+          {
+            "key": "FC_TASK_UID",
+            "value": "8395e65d-e0b5-428c-a9d9-c8421584cac4"
+          },
+          {
+            "key": "FC_TASK_ATTEMPT_INSTANCE_UID",
+            "value": "0_cb425efb-a9ab-4c83-a7cb-0177c0808200"
+          },
+          {
+            "key": "PAI_TASKS_NUM",
+            "value": "1"
+          },
+          {
+            "key": "PAI_JOB_TASK_ROLE_LIST",
+            "value": "taskrole"
+          },
+          {
+            "key": "FC_FRAMEWORK_NAME",
+            "value": "40c2aa60a8395648e7b9fede39cb2f48"
+          },
+          {
+            "key": "FC_CONFIGMAP_NAME",
+            "value": "40c2aa60a8395648e7b9fede39cb2f48-attempt"
+          },
+          {
+            "key": "PAI_TASK_ROLE_COUNT",
+            "value": "1"
+          },
+          {
+            "key": "PAI_MIN_FAILED_TASK_COUNT_taskrole",
+            "value": "1"
+          },
+          {
+            "key": "PAI_USERNAME",
+            "value": "binyli"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_SERVICE_PORT",
+            "value": "30096"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_SERVICE_HOST",
+            "value": "10.194.34.27"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT",
+            "value": "tcp://10.194.34.27:30096"
+          },
+          {
+            "key": "KUBERNETES_SERVICE_PORT_HTTPS",
+            "value": "443"
+          },
+          {
+            "key": "KUBERNETES_PORT",
+            "value": "tcp://10.192.0.1:443"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PROTO",
+            "value": "tcp"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PORT",
+            "value": "30096"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_ADDR",
+            "value": "10.194.34.27"
+          },
+          {
+            "key": "KUBERNETES_PORT_443_TCP",
+            "value": "tcp://10.192.0.1:443"
+          },
+          {
+            "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP",
+            "value": "tcp://10.194.34.27:30096"
+          },
+          {
+            "key": "KUBERNETES_SERVICE_HOST",
+            "value": "10.192.0.1"
+          },
+          {
+            "key": "KUBERNETES_SERVICE_PORT",
+            "value": "443"
+          },
+          {
+            "key": "KUBERNETES_PORT_443_TCP_PROTO",
+            "value": "tcp"
+          },
+          {
+            "key": "KUBERNETES_PORT_443_TCP_PORT",
+            "value": "443"
+          },
+          {
+            "key": "KUBERNETES_PORT_443_TCP_ADDR",
+            "value": "10.192.0.1"
+          }
+        ],
+        "mounts": [
+          {
+            "container_path": "/dev/shm",
+            "host_path": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volumes/kubernetes.io~empty-dir/dshm"
+          },
+          {
+            "container_path": "/usr/local/pai",
+            "host_path": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volumes/kubernetes.io~empty-dir/pai-vol"
+          },
+          {
+            "container_path": "/usr/local/pai/logs",
+            "host_path": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volume-subpaths/host-log/app/2"
+          },
+          {
+            "container_path": "/var/run/secrets/kubernetes.io/serviceaccount",
+            "host_path": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volumes/kubernetes.io~projected/kube-api-access-5p2ws",
+            "readonly": true
+          },
+          {
+            "container_path": "/etc/hosts",
+            "host_path": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/etc-hosts"
+          },
+          {
+            "container_path": "/tmp/pai-termination-log",
+            "host_path": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/containers/app/638bda8e"
+          }
+        ],
+        "devices": [
+          {
+            "container_path": "/dev/fuse",
+            "host_path": "/dev/fuse",
+            "permissions": "rwm"
+          }
+        ],
+        "labels": {
+          "io.kubernetes.container.name": "app",
+          "io.kubernetes.pod.name": "40c2aa60a8395648e7b9fede39cb2f48-taskrole-0",
+          "io.kubernetes.pod.namespace": "default",
+          "io.kubernetes.pod.uid": "cb425efb-a9ab-4c83-a7cb-0177c0808200"
+        },
+        "annotations": {
+          "io.kubernetes.container.hash": "bfdf56f2",
+          "io.kubernetes.container.restartCount": "0",
+          "io.kubernetes.container.terminationMessagePath": "/tmp/pai-termination-log",
+          "io.kubernetes.container.terminationMessagePolicy": "FallbackToLogsOnError",
+          "io.kubernetes.pod.terminationGracePeriod": "30"
+        },
+        "log_path": "app/0.log",
+        "linux": {
+          "resources": {
+            "cpu_period": 100000,
+            "cpu_quota": 1100000,
+            "cpu_shares": 11264,
+            "memory_limit_in_bytes": 107374182400,
+            "oom_score_adj": 946,
+            "hugepage_limits": [
+              {
+                "page_size": "2MB"
+              },
+              {
+                "page_size": "1GB"
+              }
+            ],
+            "unified": {
+              "memory.oom.group": "1",
+              "memory.swap.max": "0"
+            }
+          },
+          "security_context": {
+            "capabilities": {
+              "add_capabilities": [
+                "SYS_ADMIN",
+                "IPC_LOCK",
+                "DAC_READ_SEARCH"
+              ],
+              "drop_capabilities": [
+                "MKNOD"
+              ]
+            },
+            "namespace_options": {
+              "network": 2,
+              "pid": 1
+            },
+            "run_as_username": "root",
+            "masked_paths": [
+              "/proc/asound",
+              "/proc/acpi",
+              "/proc/kcore",
+              "/proc/keys",
+              "/proc/latency_stats",
+              "/proc/timer_list",
+              "/proc/timer_stats",
+              "/proc/sched_debug",
+              "/proc/scsi",
+              "/sys/firmware"
+            ],
+            "readonly_paths": [
+              "/proc/bus",
+              "/proc/fs",
+              "/proc/irq",
+              "/proc/sys",
+              "/proc/sysrq-trigger"
+            ],
+            "seccomp": {
+              "profile_type": 1
+            },
+            "apparmor_profile": "unconfined"
+          }
+        }
+      },
+      "runtimeSpec": {
+        "ociVersion": "1.1.0",
+        "process": {
+          "user": {
+            "uid": 0,
+            "gid": 0,
+            "additionalGids": [
+              0
+            ]
+          },
+          "args": [
+            "/usr/local/pai/runtime"
+          ],
+          "env": [
+            "PATH=/opt/ompi/bin:/opt/ucx/bin:/opt/cache/bin:/opt/rocm/llvm/bin:/opt/rocm/opencl/bin:/opt/rocm/hip/bin:/opt/rocm/hcc/bin:/opt/rocm/bin:/opt/conda/envs/py_3.10/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "HOSTNAME=pai-worker1",
+            "DEBIAN_FRONTEND=noninteractive",
+            "PYTORCH_ROCM_ARCH=gfx900;gfx906;gfx908;gfx90a;gfx1030;gfx1100;gfx1101;gfx940;gfx941;gfx942",
+            "ANACONDA_PYTHON_VERSION=3.10",
+            "INSTALLED_PROTOBUF=yes",
+            "INSTALLED_DB=yes",
+            "INSTALLED_VISION=yes",
+            "ROCM_PATH=/opt/rocm",
+            "MAGMA_HOME=/opt/rocm/magma",
+            "LANG=C.UTF-8",
+            "LC_ALL=C.UTF-8",
+            "BUILD_ENVIRONMENT=pytorch-linux-jammy-rocm6.1-py3.10",
+            "MAX_JOBS=32",
+            "MPI_HOME=/opt/ompi",
+            "UCX_HOME=/opt/ucx",
+            "LD_LIBRARY_PATH=/opt/ompi/lib:/opt/rocm/lib:/usr/local/lib:",
+            "CI=1",
+            "PYTORCH_TEST_WITH_ROCM=1",
+            "PYTORCH_TESTING_DEVICE_ONLY_FOR=cuda",
+            "HSA_FORCE_FINE_GRAIN_PCIE=1",
+            "FC_POD_NAME=40c2aa60a8395648e7b9fede39cb2f48-taskrole-0",
+            "FC_FRAMEWORK_ATTEMPT_ID=0",
+            "PAI_JOB_NAME=binyli~admin_8fc0983c",
+            "PAI_TASK_ROLE_LIST=taskrole",
+            "PAI_TASK_ROLE_TASK_COUNT_taskrole=1",
+            "PAI_RESOURCE_taskrole=1,11,102400,0",
+            "PAI_USER_NAME=binyli",
+            "PAI_MIN_SUCCEEDED_TASK_COUNT_taskrole=1",
+            "FC_FRAMEWORK_NAMESPACE=default",
+            "FC_FRAMEWORK_UID=c8c74124-20b2-4508-8eaa-f19070fa57ea",
+            "FC_FRAMEWORK_ATTEMPT_INSTANCE_UID=0_f3c2300b-b2d1-4c19-aca2-a889ad3fed51",
+            "FC_CONFIGMAP_UID=f3c2300b-b2d1-4c19-aca2-a889ad3fed51",
+            "FC_POD_UID=cb425efb-a9ab-4c83-a7cb-0177c0808200",
+            "PAI_FRAMEWORK_NAME=binyli~admin_8fc0983c",
+            "FC_TASK_INDEX=0",
+            "FC_TASK_ATTEMPT_ID=0",
+            "FC_TASKROLE_UID=41525984-8c10-4386-9762-93948dc81ffc",
+            "PAI_TASK_INDEX=0",
+            "PAI_JOB_TASK_COUNT=1",
+            "PAI_TASK_ROLES_NUM=1",
+            "PAI_JOB_TASK_ROLE_COUNT=1",
+            "PAI_CURRENT_TASK_ROLE_NAME=taskrole",
+            "PAI_CURRENT_TASK_ROLE_CURRENT_TASK_INDEX=0",
+            "PAI_DEFAULT_FS_URI=",
+            "PAI_VIRTUAL_CLUSTER=default",
+            "NVIDIA_VISIBLE_DEVICES=0",
+            "AMD_VISIBLE_DEVICES=0",
+            "FC_TASKROLE_NAME=taskrole",
+            "FC_TASK_UID=8395e65d-e0b5-428c-a9d9-c8421584cac4",
+            "FC_TASK_ATTEMPT_INSTANCE_UID=0_cb425efb-a9ab-4c83-a7cb-0177c0808200",
+            "PAI_TASKS_NUM=1",
+            "PAI_JOB_TASK_ROLE_LIST=taskrole",
+            "FC_FRAMEWORK_NAME=40c2aa60a8395648e7b9fede39cb2f48",
+            "FC_CONFIGMAP_NAME=40c2aa60a8395648e7b9fede39cb2f48-attempt",
+            "PAI_TASK_ROLE_COUNT=1",
+            "PAI_MIN_FAILED_TASK_COUNT_taskrole=1",
+            "PAI_USERNAME=binyli",
+            "HIVEDSCHEDULER_SERVICE_SERVICE_PORT=30096",
+            "HIVEDSCHEDULER_SERVICE_SERVICE_HOST=10.194.34.27",
+            "HIVEDSCHEDULER_SERVICE_PORT=tcp://10.194.34.27:30096",
+            "KUBERNETES_SERVICE_PORT_HTTPS=443",
+            "KUBERNETES_PORT=tcp://10.192.0.1:443",
+            "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PROTO=tcp",
+            "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PORT=30096",
+            "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_ADDR=10.194.34.27",
+            "KUBERNETES_PORT_443_TCP=tcp://10.192.0.1:443",
+            "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP=tcp://10.194.34.27:30096",
+            "KUBERNETES_SERVICE_HOST=10.192.0.1",
+            "KUBERNETES_SERVICE_PORT=443",
+            "KUBERNETES_PORT_443_TCP_PROTO=tcp",
+            "KUBERNETES_PORT_443_TCP_PORT=443",
+            "KUBERNETES_PORT_443_TCP_ADDR=10.192.0.1"
+          ],
+          "cwd": "/var/lib/jenkins",
+          "capabilities": {
+            "bounding": [
+              "CAP_CHOWN",
+              "CAP_DAC_OVERRIDE",
+              "CAP_FSETID",
+              "CAP_FOWNER",
+              "CAP_NET_RAW",
+              "CAP_SETGID",
+              "CAP_SETUID",
+              "CAP_SETFCAP",
+              "CAP_SETPCAP",
+              "CAP_NET_BIND_SERVICE",
+              "CAP_SYS_CHROOT",
+              "CAP_KILL",
+              "CAP_AUDIT_WRITE",
+              "CAP_SYS_ADMIN",
+              "CAP_IPC_LOCK",
+              "CAP_DAC_READ_SEARCH"
+            ],
+            "effective": [
+              "CAP_CHOWN",
+              "CAP_DAC_OVERRIDE",
+              "CAP_FSETID",
+              "CAP_FOWNER",
+              "CAP_NET_RAW",
+              "CAP_SETGID",
+              "CAP_SETUID",
+              "CAP_SETFCAP",
+              "CAP_SETPCAP",
+              "CAP_NET_BIND_SERVICE",
+              "CAP_SYS_CHROOT",
+              "CAP_KILL",
+              "CAP_AUDIT_WRITE",
+              "CAP_SYS_ADMIN",
+              "CAP_IPC_LOCK",
+              "CAP_DAC_READ_SEARCH"
+            ],
+            "permitted": [
+              "CAP_CHOWN",
+              "CAP_DAC_OVERRIDE",
+              "CAP_FSETID",
+              "CAP_FOWNER",
+              "CAP_NET_RAW",
+              "CAP_SETGID",
+              "CAP_SETUID",
+              "CAP_SETFCAP",
+              "CAP_SETPCAP",
+              "CAP_NET_BIND_SERVICE",
+              "CAP_SYS_CHROOT",
+              "CAP_KILL",
+              "CAP_AUDIT_WRITE",
+              "CAP_SYS_ADMIN",
+              "CAP_IPC_LOCK",
+              "CAP_DAC_READ_SEARCH"
+            ]
+          },
+          "rlimits": [
+            {
+              "type": "RLIMIT_NOFILE",
+              "hard": 65535,
+              "soft": 65535
+            }
+          ],
+          "oomScoreAdj": 946
+        },
+        "root": {
+          "path": "rootfs"
+        },
+        "mounts": [
+          {
+            "destination": "/proc",
+            "type": "proc",
+            "source": "proc",
+            "options": [
+              "nosuid",
+              "noexec",
+              "nodev"
+            ]
+          },
+          {
+            "destination": "/dev",
+            "type": "tmpfs",
+            "source": "tmpfs",
+            "options": [
+              "nosuid",
+              "strictatime",
+              "mode=755",
+              "size=65536k"
+            ]
+          },
+          {
+            "destination": "/dev/pts",
+            "type": "devpts",
+            "source": "devpts",
+            "options": [
+              "nosuid",
+              "noexec",
+              "newinstance",
+              "ptmxmode=0666",
+              "mode=0620",
+              "gid=5"
+            ]
+          },
+          {
+            "destination": "/dev/mqueue",
+            "type": "mqueue",
+            "source": "mqueue",
+            "options": [
+              "nosuid",
+              "noexec",
+              "nodev"
+            ]
+          },
+          {
+            "destination": "/sys",
+            "type": "sysfs",
+            "source": "sysfs",
+            "options": [
+              "nosuid",
+              "noexec",
+              "nodev",
+              "ro"
+            ]
+          },
+          {
+            "destination": "/sys/fs/cgroup",
+            "type": "cgroup",
+            "source": "cgroup",
+            "options": [
+              "nosuid",
+              "noexec",
+              "nodev",
+              "relatime",
+              "ro"
+            ]
+          },
+          {
+            "destination": "/dev/shm",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volumes/kubernetes.io~empty-dir/dshm",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/etc/hosts",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/etc-hosts",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/tmp/pai-termination-log",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/containers/app/638bda8e",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/etc/hostname",
+            "type": "bind",
+            "source": "/var/lib/containerd/io.containerd.grpc.v1.cri/sandboxes/878695ecb91429a40ec19b9c4d4402f6a901085a7e025a13544da388325b1b4c/hostname",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/etc/resolv.conf",
+            "type": "bind",
+            "source": "/var/lib/containerd/io.containerd.grpc.v1.cri/sandboxes/878695ecb91429a40ec19b9c4d4402f6a901085a7e025a13544da388325b1b4c/resolv.conf",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/usr/local/pai",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volumes/kubernetes.io~empty-dir/pai-vol",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/usr/local/pai/logs",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volume-subpaths/host-log/app/2",
+            "options": [
+              "rbind",
+              "rprivate",
+              "rw"
+            ]
+          },
+          {
+            "destination": "/var/run/secrets/kubernetes.io/serviceaccount",
+            "type": "bind",
+            "source": "/var/lib/kubelet/pods/cb425efb-a9ab-4c83-a7cb-0177c0808200/volumes/kubernetes.io~projected/kube-api-access-5p2ws",
+            "options": [
+              "rbind",
+              "rprivate",
+              "ro"
+            ]
+          }
+        ],
+        "annotations": {
+          "io.kubernetes.cri.container-name": "app",
+          "io.kubernetes.cri.container-type": "container",
+          "io.kubernetes.cri.image-name": "docker.io/rocm/pytorch:rocm6.1_ubuntu22.04_py3.10_pytorch_2.1.2",
+          "io.kubernetes.cri.sandbox-id": "878695ecb91429a40ec19b9c4d4402f6a901085a7e025a13544da388325b1b4c",
+          "io.kubernetes.cri.sandbox-name": "40c2aa60a8395648e7b9fede39cb2f48-taskrole-0",
+          "io.kubernetes.cri.sandbox-namespace": "default",
+          "io.kubernetes.cri.sandbox-uid": "cb425efb-a9ab-4c83-a7cb-0177c0808200"
+        },
+        "linux": {
+          "resources": {
+            "devices": [
+              {
+                "allow": false,
+                "access": "rwm"
+              },
+              {
+                "allow": true,
+                "type": "c",
+                "major": 10,
+                "minor": 229,
+                "access": "rwm"
+              }
+            ],
+            "memory": {
+              "limit": 107374182400,
+              "swap": 107374182400
+            },
+            "cpu": {
+              "shares": 11264,
+              "quota": 1100000,
+              "period": 100000
+            },
+            "unified": {
+              "memory.oom.group": "1",
+              "memory.swap.max": "0"
+            }
+          },
+          "cgroupsPath": "kubepods-burstable-podcb425efb_a9ab_4c83_a7cb_0177c0808200.slice:cri-containerd:8454bdd7fd80daa34a0f69a969eb5a0a619ba9c513975a211e0a94fdd5f26f98",
+          "namespaces": [
+            {
+              "type": "pid"
+            },
+            {
+              "type": "ipc",
+              "path": "/proc/2722039/ns/ipc"
+            },
+            {
+              "type": "uts",
+              "path": "/proc/2722039/ns/uts"
+            },
+            {
+              "type": "mount"
+            },
+            {
+              "type": "network",
+              "path": "/proc/2722039/ns/net"
+            },
+            {
+              "type": "cgroup"
+            }
+          ],
+          "devices": [
+            {
+              "path": "/dev/fuse",
+              "type": "c",
+              "major": 10,
+              "minor": 229,
+              "fileMode": 438,
+              "uid": 0,
+              "gid": 0
+            }
+          ],
+          "maskedPaths": [
+            "/proc/asound",
+            "/proc/acpi",
+            "/proc/kcore",
+            "/proc/keys",
+            "/proc/latency_stats",
+            "/proc/timer_list",
+            "/proc/timer_stats",
+            "/proc/sched_debug",
+            "/proc/scsi",
+            "/sys/firmware"
+          ],
+          "readonlyPaths": [
+            "/proc/bus",
+            "/proc/fs",
+            "/proc/irq",
+            "/proc/sys",
+            "/proc/sysrq-trigger"
+          ]
+        }
+      }
+    }
+  }

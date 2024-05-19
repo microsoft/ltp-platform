@@ -67,15 +67,15 @@ class TestContainerInspect(base.TestBase):
             "GPU-7c583998-b3ff-a885-8979-2d32d334cde4", None, None, 3533)
         self.assertEqual(target_inspect_info, inspect_info)
 
-    def test_parse_docker_inspect_amd(self):
-        sample_path = "data/docker_inspect_amd.json"
+    def test_parse_container_inspect_amd(self):
+        sample_path = "data/container_inspect_amd.json"
         with open(sample_path, "r") as f:
             docker_inspect = f.read()
 
         inspect_info = parse_crictl_inspect(docker_inspect, GpuVendor.AMD)
         target_inspect_info = InspectResult(
-            "dgxadmin", "dgxadmin~rocm_pytorch_mnist_a", "worker", "0",
-            "0,1", "0_a12d82af-5ea6-11ea-8a2a-90b11c27f535", "default", 29647)
+            "binyli", "binyli~admin_8fc0983c", "taskrole", "0",
+            "0", "0_f3c2300b-b2d1-4c19-aca2-a889ad3fed51", "default", 2722314)
         self.assertEqual(target_inspect_info, inspect_info)
 
     def test_parse_container_inspect(self):
