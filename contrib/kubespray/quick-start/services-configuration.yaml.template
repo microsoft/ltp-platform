@@ -147,9 +147,15 @@ authentication:
   #  # Required, the client ID of your app in AAD
   #  clientID: ${your_client_id}
   #
-  #  # Required if `responseType` is 'code', 'id_token code' or 'code id_token'.
+  #  # Required if `responseType` is 'code', 'id_token code' or 'code id_token' and certificate is not provided.
   #  # If app key contains '\', replace it with '\\'.
   #  clientSecret: '${your_client_secret}'
+  #
+  #  # Required if `responseType` is 'code', 'id_token code' or 'code id_token' and clientSecret is not provided.
+  #  # If app key contains '\', replace it with '\\'.
+  #  certificate:
+  #    key_path: ${your_certificate_key_path}
+  #    thumbprint: ${your_certificate_thumbprint}
   #
   #  # Optional. The lifetime of nonce in session or cookie, the default value is 3600 (seconds).
   #  nonceLifetime: null

@@ -6,7 +6,7 @@ OIDC-type: aad
 wellKnownURL: {{cluster_cfg['authentication']['AAD']['wellKnownURL']}}
 tenantID: {{ cluster_cfg['authentication']['AAD']['tenantID'] }}
 clientID: {{ cluster_cfg['authentication']['AAD']['clientID'] }}
-clientSecret: {{ cluster_cfg['authentication']['AAD']['clientSecret'] }}
+thumbprint: {{ cluster_cfg['authentication']['AAD']['certificate']['thumbprint'] }}
 redirectUrl: '{{ cluster_cfg['pylon']['uri-https'] }}/rest-server/api/v1/authn/oidc/return'
 nonceLifetime: {{ cluster_cfg['authentication']['AAD']['nonceLifetime'] or null }}
 nonceMaxAmount: {{ cluster_cfg['authentication']['AAD']['nonceMaxAmount'] or null }}

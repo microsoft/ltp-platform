@@ -22,6 +22,7 @@ const querystring = require('querystring');
 const axios = require('axios');
 const createError = require('@pai/utils/error');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
 
 const requestAuthCode = async (req, res, next) => {
   const clientId = authnConfig.OIDCConfig.clientID;
@@ -64,16 +65,51 @@ const requestTokenWithCode = async (req, res, next) => {
     const clientId = authnConfig.OIDCConfig.clientID;
     const redirectUri = authnConfig.OIDCConfig.redirectUrl;
     const grantType = 'authorization_code';
-    const clientSecret = authnConfig.OIDCConfig.clientSecret;
     const requestUrl = authnConfig.OIDCConfig.token_endpoint;
-    const data = {
-      client_id: clientId,
-      scope: scope,
-      code: authCode,
-      redirect_uri: redirectUri,
-      grant_type: grantType,
-      client_secret: clientSecret,
-    };
+    const useSecret = 'clientSecret' in authnConfig.OIDCConfig;
+    var data = {};
+    if (useSecret) {
+      const clientSecret = authnConfig.OIDCConfig.clientSecret
+      data = {
+        client_id: clientId,
+        scope: scope,
+        code: authCode,
+        redirect_uri: redirectUri,
+        grant_type: grantType,
+        client_secret: clientSecret,
+      };
+    } else {
+      const client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+      const privateKey = fs.readFileSync('/auth-configuration/private.pem', 'utf8');
+
+      // Define the JWT payload
+      const payload = {
+        aud: authnConfig.OIDCConfig.token_endpoint,
+        iss: clientId,
+        sub: clientId,
+        jti: Math.random().toString(36).substring(2),
+        exp: Math.floor(Date.now() / 1000) + (60 * 10) // Token expires in 10 minutes
+      };
+
+      // Define the JWT headers
+      const headers = {
+        alg: 'RS256',
+        typ: 'JWT',
+        x5t: Buffer.from(authnConfig.OIDCConfig.thumbprint, 'hex').toString('base64url')
+      };
+
+      // Sign the JWT
+      const jwtAssertion = jwt.sign(payload, privateKey, { algorithm: 'RS256', header: headers });
+      data = {
+        client_id: clientId,
+        scope: scope,
+        code: authCode,
+        redirect_uri: redirectUri,
+        grant_type: grantType,
+        client_assertion_type: client_assertion_type,
+        client_assertion: jwtAssertion,
+      };
+    }
     const response = await axios.post(requestUrl, querystring.stringify(data));
     req.undecodedIDToken = response.data.id_token;
     req.IDToken = jwt.decode(response.data.id_token);

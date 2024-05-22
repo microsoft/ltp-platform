@@ -76,8 +76,8 @@ class Authentication:
                 return False, "tenantID is missing. If you wanna configure AAD-OIDC, you should configure service-configuration.yaml->authentication->AAD->tenantID"
             if "clientID" not in self.service_configuration["AAD"]:
                 return False, "clientID is missing. If you wanna configure AAD-OIDC, you should configure service-configuration.yaml->authentication->AAD->clientID"
-            if "clientSecret" not in self.service_configuration["AAD"]:
-                return False, "ClientSecret is missing. If you wanna configure AAD-OIDC, you should configure service-configuration.yaml->authentication->AAD->ClientSecret"
+            if "clientSecret" not in self.service_configuration["AAD"] and "certificate" not in self.service_configuration["AAD"]:
+                return False, "ClientSecret or Certificate is missing. If you wanna configure AAD-OIDC, you should configure service-configuration.yaml->authentication->AAD->ClientSecret/Certificate"
         return True, None
 
     def run(self):
