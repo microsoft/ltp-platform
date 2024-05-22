@@ -5,6 +5,7 @@ all:
       ip: {{ vm["hostip"] }}
       access_ip: {{ vm["hostip"] }}
       ansible_host: {{ vm["hostip"] }}
+      ansible_port: {{ vm["hostport"] | default(22) }}
       ansible_ssh_user: {{ env["cfg"]['user'] }}
       ansible_ssh_pass: "{{ env["cfg"]['password'] }}"
       ansible_become_pass: "{{ env["cfg"]['password'] }}"
@@ -25,6 +26,7 @@ all:
       ip: {{ vm["hostip"] }}
       access_ip: {{ vm["hostip"] }}
       ansible_host: {{ vm["hostip"] }}
+      ansible_port: {{ vm["hostport"] | default(22) }}
       ansible_ssh_user: {{ env["cfg"]['user'] }}
       ansible_ssh_pass: "{{ env["cfg"]['password'] }}"
       ansible_become_pass: "{{ env["cfg"]['password'] }}"

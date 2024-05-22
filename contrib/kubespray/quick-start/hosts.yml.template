@@ -2,9 +2,10 @@ all:
   hosts:
 {%- for vm in env["masters"] %}
     {{ vm["hostname"] }}:
-      ip: {{ vm["hostip"] }}
-      access_ip: {{ vm["hostip"] }}
+      ip: {{ vm["accessip"] | default(vm["hostip"])}}
+      access_ip: {{ vm["accessip"] | default(vm["hostip"])}}
       ansible_host: {{ vm["hostip"] }}
+      ansible_port: {{ vm["hostport"] | default(22) }}
       ansible_ssh_user: {{ env["cfg"]['user'] }}
       ansible_ssh_pass: "{{ env["cfg"]['password'] }}"
       ansible_become_pass: "{{ env["cfg"]['password'] }}"
@@ -15,9 +16,10 @@ all:
 {%- endfor %}
 {%- for vm in env["workers"] %}
     {{ vm["hostname"] }}:
-      ip: {{ vm["hostip"] }}
-      access_ip: {{ vm["hostip"] }}
+      ip: {{ vm["accessip"] | default(vm["hostip"])}}
+      access_ip: {{ vm["accessip"] | default(vm["hostip"])}}
       ansible_host: {{ vm["hostip"] }}
+      ansible_port: {{ vm["hostport"] | default(22) }}
       ansible_ssh_user: {{ env["cfg"]['user'] }}
       ansible_ssh_pass: "{{ env["cfg"]['password'] }}"
       ansible_become_pass: "{{ env["cfg"]['password'] }}"
@@ -52,5 +54,5 @@ all:
       children:
         kube-node:
         kube-master:
-    calico-rr:
+    cilium:
       hosts: {}

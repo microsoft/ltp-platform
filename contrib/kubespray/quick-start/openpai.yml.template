@@ -142,8 +142,8 @@ kubectl_localhost: true
 # kubelet_max_pods: 110
 
 ## Support custom flags to be passed to kubelet
-kubelet_custom_flags:
-  - "--image-pull-progress-deadline=10m"
+# kubelet_custom_flags:
+#  - "--image-pull-progress-deadline=10m"
 
 # kube_feature_gates: []
 
@@ -404,7 +404,7 @@ hyperkube_download_url: "{{ env['cfg']['hyperkube_download_url'] }}"
 
 # Choose network plugin (cilium, calico, contiv, weave or flannel. Use cni for generic cni plugin)
 # Can also be set to 'cloud', which lets the cloud provider setup appropriate routing
-kube_network_plugin: {{ env["cfg"]['openpai_kube_network_plugin'] | default('calico') }}
+kube_network_plugin: {{ env["cfg"]['openpai_kube_network_plugin'] | default('cilium') }}
 
 {%- if 'openpai_kubespray_extra_var' in env['cfg'] %}
 {% for key in env['cfg']['openpai_kubespray_extra_var'] %}
