@@ -62,6 +62,7 @@ docker run --runtime=rocm -e AMD_VISIBLE_DEVICES=2 --security-opt seccomp=unconf
 
 Containerd
 -----------
+Change config file `/etc/containerd/config.toml` to use rocm-container-runtime as default runtime.
 ```toml
 version = 2
 root = "/var/lib/containerd"
@@ -102,6 +103,11 @@ oom_score = 0
       [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
         [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
           endpoint = ["https://registry-1.docker.io"]
+```
+
+Restart containerd
+```sh
+sudo systemctl restart containerd
 ```
 
 runtime usage
