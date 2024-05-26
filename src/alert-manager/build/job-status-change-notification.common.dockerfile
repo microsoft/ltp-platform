@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM node:dubnium
+FROM node:20
 
 WORKDIR /usr/src/app
 

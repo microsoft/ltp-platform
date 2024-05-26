@@ -1,5 +1,6 @@
 {
   "name": "pai-alert-handler",
+  "packageManager": "yarn@4.2.2",
   "version": "0.0.0",
   "description": "Alert Handler for Microsoft Platform for AI",
   "keywords": [
@@ -16,7 +17,7 @@
     "url": "https://github.com/Microsoft/pai/issues"
   },
   "engines": {
-    "node": "^10"
+    "node": "^20"
   },
   "_moduleAliases": {
     "@alert-handler": "."
@@ -33,7 +34,7 @@
     "prettier": "~2.0.5"
   },
   "dependencies": {
-    "@kubernetes/client-node": "^0.12.2",
+    "@kubernetes/client-node": "0.20.0",
     "axios": "^0.21.2",
     "ejs": "^3.1.5",
     "email-templates": "^7.1.0",

@@ -1,5 +1,6 @@
 {
   "name": "job-status-change-notification",
+  "packageManager": "yarn@4.2.2",
   "version": "1.0.0",
   "description": "Frmework State Notification Poller for Microsoft Platform for AI",
   "keywords": [
@@ -16,7 +17,7 @@
     "url": "https://github.com/Microsoft/pai/issues"
   },
   "engines": {
-    "node": "^10"
+    "node": "^20"
   },
   "_moduleAliases": {
     "@job-status-change-notification": "."
@@ -33,11 +34,11 @@
     "prettier": "~2.0.5"
   },
   "dependencies": {
-    "openpaidbsdk": "file:./openpaidbsdk",
     "axios": "^0.21.2",
     "interval-promise": "^1.4.0",
     "joi": "^14.3.1",
     "module-alias": "^2.2.2",
+    "openpaidbsdk": "file:./openpaidbsdk",
     "sequelize": "^6.6.2",
     "url-join": "^4.0.1",
     "winston": "2"

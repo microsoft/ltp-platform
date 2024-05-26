@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM python:3.7
+FROM python:3.10
 
 COPY ./src/cert-expiration-checker .
 

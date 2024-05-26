@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM nvidia/cuda:9.2-base-ubuntu16.04
+FROM nvidia/cuda:12.2.2-base-ubuntu22.04
 
 COPY ./src/nvidia-gpu-low-perf-fixer .
 
