@@ -299,7 +299,7 @@ docker_image_tag: v1.8.1
 # kubeadm_download_url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubeadm_version }}/bin/linux/{{ image_arch }}/kubeadm"
 # hyperkube_download_url: "https://storage.googleapis.com/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/hyperkube"
 
-# openpai_kube_network_plugin: calico
+# openpai_kube_network_plugin: cilium
 
 # openpai_kubespray_extra_var:
 #   key: value
@@ -317,8 +317,6 @@ docker_image_tag: v1.8.1
 ```
 
 The `user` and `password` is the SSH username and password from dev box machine to master machines and worker machines, you should make sure all masters and workers share the same SSH username and password. As for optional configurations, customize them if you know exactly what they are.
-
-**For Azure Users**: If you are deploying OpenPAI in Azure, please uncomment `openpai_kube_network_plugin: calico` in the config file above, and change it to `openpai_kube_network_plugin: weave`. It is because Azure doesn't support calico. See [here](https://docs.projectcalico.org/reference/public-cloud/azure#why-doesnt-azure-support-calico-networking) for details.
 
 **For those who use workers other than CPU workers and NVIDIA GPU workers**: Now we only support Kubernetes default scheduler (not Hivedscheduler) for devices other than NVIDIA GPU and CPU. Please uncomment `# enable_hived_scheduler: true` and set it to `enable_hived_scheduler: false`.
 

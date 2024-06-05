@@ -29,12 +29,13 @@ echo "Install Python3 and pip"
 sudo apt-get -y update
 sudo apt-get -y install software-properties-common
 sudo apt update
-sudo add-apt-repository ppa:deadsnakes/ppa  
+sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt -y install python3.10 python3.10-distutils
-curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python3.10  
+curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python3.10
 
 
 echo "Install python packages"
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 sudo python3 -m pip install paramiko # need paramiko for ansible-playbook
 sudo python3 -m pip install -r script/requirements.txt
 

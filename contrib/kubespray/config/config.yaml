@@ -78,7 +78,7 @@ docker_image_tag: v1.8.1
 # kubeadm_download_url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubeadm_version }}/bin/linux/{{ image_arch }}/kubeadm"
 # hyperkube_download_url: "https://storage.googleapis.com/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/hyperkube"
 
-# openpai_kube_network_plugin: calico
+# openpai_kube_network_plugin: cilium
 
 # openpai_kubespray_extra_var:
 #   key: value

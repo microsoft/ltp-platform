@@ -7,10 +7,12 @@ echo "pai" > cluster-id
 echo "Generating services configurations..."
 python3 ./contrib/kubespray/script/openpai_generator.py -l ./contrib/kubespray/config/layout.yaml -c ./contrib/kubespray/config/config.yaml -o /cluster-configuration
 
-echo "Pushing cluster config to k8s..." 
+echo "Pushing cluster config to k8s..."
 ./paictl.py config push -p /cluster-configuration -m service < cluster-id
 
 echo "Starting OpenPAI service..."
-./paictl.py service start < cluster-id
+./paictl.py service start -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime \
+  log-manager prometheus grafana alter-manager watchdog internal-storage postgresql frameworkcontroller database-controller \
+  hivedscheduler rest-server webportal pylon < cluster-id
 
 rm cluster-id

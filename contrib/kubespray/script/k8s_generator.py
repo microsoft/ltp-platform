@@ -27,25 +27,6 @@ def main():
     masters, workers = get_masters_workers_from_layout(layout)
     head_node = masters[0]
 
-    if 'openpai_kube_network_plugin' not in cluster_config or cluster_config['openpai_kube_network_plugin'] != 'weave':
-        count_input = 0
-        while True:
-            user_input = input("Are your cluster is in Azure cloud or not? (Y/N) (case sensitive)")
-            if user_input == "N":
-                break
-            if user_input == "Y":
-                break
-            print(" Please type Y or N. It's case sensitive.")
-            count_input = count_input + 1
-            if count_input == 3:
-                logger.error("3 Times.........  Sorry,  we will force stopping your operation.")
-                sys.exit(1)
-        if user_input == "Y" \
-            and ('openpai_kube_network_plugin' not in cluster_config or cluster_config['openpai_kube_network_plugin'] == 'calico'):
-            logger.error("Azure does not support calico, please change the openpai_kube_network_plugin to weave")
-            logger.error("https://docs.projectcalico.org/reference/public-cloud/azure#why-doesnt-azure-support-calico-networking")
-            sys.exit(1)
-
     environment = {
         'masters': masters,
         'workers': workers,

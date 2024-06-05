@@ -290,7 +290,7 @@ docker_image_tag: v1.8.1
 # kubeadm_download_url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubeadm_version }}/bin/linux/{{ image_arch }}/kubeadm"
 # hyperkube_download_url: "https://storage.googleapis.com/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/hyperkube"
 
-# openpai_kube_network_plugin: calico
+# openpai_kube_network_plugin: cilium
 
 # openpai_kubespray_extra_var:
 #   key: value
@@ -309,7 +309,6 @@ docker_image_tag: v1.8.1
 
 `user`和`password`是master机器、worker机器共享的SSH用户名和密码。换句话说，您得确保所有master机器和worker机器有同样的SSH用户名和密码。 其他的配置为可选配置，只有当您清楚地知道它们的含义时，您可以去修改它，否则请不要修改。
 
-**Azure用户请注意**： 如果您在Azure上部署OpenPAI，请去掉`openpai_kube_network_plugin: calico`的注释，并把它修改为`openpai_kube_network_plugin: weave`. 这是因为Azure暂时不支持calico。细节部分请参阅[这个文档](https://docs.projectcalico.org/reference/public-cloud/azure#why-doesnt-azure-support-calico-networking)。
 
 **如果您使用了除了CPU worker和NVIDIA GPU worker之外的worker结点**：对于CPU worker和NVIDIA GPU worker之外的worker种类，目前我们只支持Kubernetes default scheduler (而不是Hivedscheduler)。请去掉`# enable_hived_scheduler: true`的注释，并且将它设置为`enable_hived_scheduler: false`。
 

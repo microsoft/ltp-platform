@@ -1,0 +1,41 @@
+---
+- name: Ensure Git is installed
+  apt:
+   name: git
+   state: present
+
+- name: Clean folder
+  file:
+    path: /tmp/rocm-container-runtime
+    state: absent
+
+- name: Clone the repository
+  git:
+    repo: 'https://github.com/abuccts/rocm-container-runtime'
+    dest: /tmp/rocm-container-runtime
+    version: master
+    force: yes
+
+- name: Install rocm-container-runtime
+  command: "/bin/bash install.sh"
+  args:
+    chdir: '/tmp/rocm-container-runtime'
+
+- name: Replace /etc/containerd/config.toml with new contents
+  copy:
+    src: roles/container-runtime/amd.com_gpu/files/config.toml
+    dest: /etc/containerd/config.toml
+    owner: root
+    group: root
+    mode: '0644'
+    backup: false
+
+- name: Restart containerd service
+  ansible.builtin.service:
+    name: containerd
+    state: restarted
+
+- name: Clean folder
+  ansible.builtin.file:
+    path: /tmp/rocm-container-runtime
+    state: absent

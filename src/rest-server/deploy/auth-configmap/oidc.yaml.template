@@ -6,7 +6,7 @@ OIDC-type: aad
 wellKnownURL: {{cluster_cfg['authentication']['AAD']['wellKnownURL']}}
 tenantID: {{ cluster_cfg['authentication']['AAD']['tenantID'] }}
 clientID: {{ cluster_cfg['authentication']['AAD']['clientID'] }}
-{% if cluster_cfg['authentication']['AAD']['clientSecret'] %}
+{% if cluster_cfg['authentication']['AAD']['certificate'] %}
 thumbprint: {{ cluster_cfg['authentication']['AAD']['certificate']['thumbprint'] }}
 {% else %}
 clientSecret: {{ cluster_cfg['authentication']['AAD']['clientSecret'] }}
