@@ -29,7 +29,7 @@ all:
       ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
 {%- endfor %}
   children:
-    kube-master:
+    kube_control_plane:
       hosts:
         {{ env["head_node"]["hostname"]}}
     kube-node:
@@ -53,6 +53,6 @@ all:
     k8s-cluster:
       children:
         kube-node:
-        kube-master:
+        kube_control_plane:
     cilium:
       hosts: {}

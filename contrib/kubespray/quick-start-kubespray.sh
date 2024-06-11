@@ -51,7 +51,7 @@ echo "Performing ping test..."
 ansible all -i ${HOME}/pai-deploy/cluster-cfg/hosts.yml -m ping || exit $?
 
 echo "Performing pre-check..."
-ansible-playbook -i ${HOME}/pai-pre-check/pre-check.yml set-host-daemon-port-range.yml -e "@${CLUSTER_CONFIG}" || exit $?
+ansible-playbook -i ${HOME}/pai-pre-check/machines.yml set-host-daemon-port-range.yml -e "@${CLUSTER_CONFIG}" || exit $?
 
 echo "Performing pre-installation..."
 ansible-playbook -i ${HOME}/pai-deploy/cluster-cfg/hosts.yml pre-installation.yml || exit $?
@@ -61,3 +61,6 @@ ansible-playbook -i ${HOME}/pai-deploy/cluster-cfg/hosts.yml docker-cache-config
 
 echo "Starting kubernetes..."
 /bin/bash script/kubernetes-boot.sh || exit $?
+
+echo "Post installation"
+/bin/bash post-installation.sh || exit $?
