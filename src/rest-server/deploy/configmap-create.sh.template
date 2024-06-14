@@ -19,9 +19,10 @@
 
 pushd $(dirname "$0") > /dev/null
 
-{% if cluster_cfg['authentication']['OIDC'] and cluster_cfg['authentication']['OIDC']['certificate'] %}
+{% if cluster_cfg['authentication']['AAD'] and cluster_cfg['authentication']['AAD']['certificate'] %}
 kubectl create configmap auth-configuration --from-file=auth-configmap/ \
-  --from-file={{ cluster_cfg['authentication']['AAD']['certificate']['key_path'] }} \
+  --from-file="private.pem"={{ cluster_cfg['authentication']['AAD']['certificate']['keyPath'] }} \
+  --from-file="public.crt"={{ cluster_cfg['authentication']['AAD']['certificate']['certPath'] }} \
   --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
 {% elif cluster_cfg['authentication']['OIDC'] %}
 kubectl create configmap auth-configuration --from-file=auth-configmap/ \

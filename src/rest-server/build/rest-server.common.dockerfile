@@ -15,7 +15,7 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM node:20
+FROM mcr.microsoft.com/cbl-mariner/base/nodejs:18.20-cm2.0
 
 WORKDIR /usr/src/app
 
@@ -24,8 +24,7 @@ ENV NODE_ENV=production \
 
 COPY . .
 
-RUN yarn --no-git-tag-version --new-version version \
-    "$(cat version/PAI.VERSION)"
+RUN corepack enable && corepack install -g yarn@4.2.2
 RUN yarn install
 
 EXPOSE ${SERVER_PORT}

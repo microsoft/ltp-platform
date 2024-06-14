@@ -36,6 +36,15 @@ if (authnConfig.authnMethod === 'OIDC') {
         response.data.authorization_endpoint;
       authnConfig.OIDCConfig.token_endpoint = response.data.token_endpoint;
       authnConfig.OIDCConfig.msgraph_host = response.data.msgraph_host;
+      authnConfig.OIDCConfig.privateKey = fs.readFileSync(
+        '/auth-configuration/private.pem',
+        'utf8',
+      );
+      authnConfig.OIDCConfig.publicKey = fs
+        .readFileSync('/auth-configuration/public.crt', 'utf8')
+        .replace(/-----BEGIN CERTIFICATE-----/g, '')
+        .replace(/-----END CERTIFICATE-----/g, '')
+        .replace(/\n/g, '');
     } catch (error) {
       logger.error('Failed to init OIDC endpoint and graph resource.');
       // eslint-disable-next-line no-console
