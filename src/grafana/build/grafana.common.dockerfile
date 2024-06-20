@@ -19,7 +19,7 @@
 FROM ubuntu:22.04
 
 ENV \
-  GRAFANA_VERSION=4.6.3 \
+  GRAFANA_VERSION=10.4.4 \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
@@ -28,8 +28,8 @@ ENV \
 
 RUN \
   apt-get update && \
-  apt-get -y --force-yes --no-install-recommends install libfontconfig wget curl ca-certificates adduser libfontconfig1 musl && \
-  wget -O /tmp/grafana.deb https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_${GRAFANA_VERSION}_amd64.deb && \
+  apt-get -y --force-yes --no-install-recommends install libfontconfig wget ca-certificates adduser libfontconfig1 musl curl && \
+  wget -O /tmp/grafana.deb https://dl.grafana.com/oss/release/grafana_${GRAFANA_VERSION}_amd64.deb && \
   dpkg -i /tmp/grafana.deb && \
   rm -f /tmp/grafana.deb && \
   ### branding && \
@@ -39,6 +39,9 @@ RUN \
 
 COPY src/run-grafana.sh /usr/local/bin
 COPY src/dashboards/* /usr/local/grafana/dashboards/
+
+RUN sed -i 's/;*\s*allow_embedding\s*=\s*.*/allow_embedding = true/' /etc/grafana/grafana.ini
+RUN sed -i 's/;*\s*root_url\s*=\s*.*/root_url = %(protocol)s:\/\/%(domain)s:%(http_port)s\/grafana\//' /etc/grafana/grafana.ini
 
 
 ENTRYPOINT ["/usr/local/bin/run-grafana.sh"]

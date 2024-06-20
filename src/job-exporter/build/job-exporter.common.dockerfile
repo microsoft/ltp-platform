@@ -44,11 +44,27 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
   && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   sudo \
   libelf1 \
+  ibverbs-utils \
+  bash \
   kmod \
   file \
   python3-dev \
   python3-pip \
   rocm-dev \
+  g++ \
+  numactl \
+  unzip \
+  autoconf \
+  libtool \
+  pkg-config \
+  libgflags-dev \
+  libgtest-dev \
+  libc++-dev \
+  curl \
+  libcap-dev \
+  git \
+  cmake \
+  automake \
   build-essential && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
@@ -60,5 +76,14 @@ RUN pip3 install -r /job_exporter/requirements.txt
 COPY --from=0 infilter/infilter /usr/bin
 COPY src/*.py /job_exporter/
 
-ENV PATH "${PATH}:/opt/rocm/bin"
+ARG BRANCH_OR_TAG=main
 
+# Clone Moneo
+RUN git config --global advice.detachedHead false
+RUN git clone --branch ${BRANCH_OR_TAG} https://github.com/Azure/Moneo.git
+
+# Install RDC
+RUN sudo bash Moneo/src/worker/install/amd.sh
+
+ENV PATH "${PATH}:/opt/rocm/bin"
+COPY build/moneo-*-exporter_entrypoint.sh .

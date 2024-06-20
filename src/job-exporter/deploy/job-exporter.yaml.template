@@ -30,7 +30,6 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: "/metrics"
-        prometheus.io/port: "{{ cluster_cfg["job-exporter"]["port"] }}"
       name: job-exporter
     spec:
       priorityClassName: pai-daemon-priority
@@ -40,7 +39,7 @@ spec:
         livenessProbe: # in case job-exporter hangs
           httpGet:
             path: '/healthz'
-            port: {{ cluster_cfg["job-exporter"]["port"] }}
+            port: {{ cluster_cfg["job-exporter"]["job-port"] }}
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 10
@@ -48,7 +47,7 @@ spec:
         - "python3"
         - "/job_exporter/main.py"
         - "--port"
-        - "{{ cluster_cfg["job-exporter"]["port"] }}"
+        - "{{ cluster_cfg["job-exporter"]["job-port"] }}"
         - "--interval"
         - "{{ cluster_cfg["prometheus"]["scrape_interval"] }}"
         - "--interface"
@@ -86,9 +85,57 @@ spec:
           name: pod-log
         name: job-exporter
         ports:
-        - containerPort: {{ cluster_cfg["job-exporter"]["port"] }}
-          hostPort: {{ cluster_cfg["job-exporter"]["port"] }}
+        - containerPort: {{ cluster_cfg["job-exporter"]["job-port"] }}
+          hostPort: {{ cluster_cfg["job-exporter"]["job-port"] }}
           name: main
+      - name: moneo-gpu-exporter
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - SYS_ADMIN
+        volumeMounts:
+          - mountPath: /dev
+            name: device-mount
+        command:
+        - "bash"
+        - "moneo-gpu-exporter_entrypoint.sh"
+        ports:
+        - containerPort: {{ cluster_cfg["job-exporter"]["gpu-port"] }}
+          hostPort: {{ cluster_cfg["job-exporter"]["gpu-port"] }}
+          name: gpu
+      - name: moneo-net-exporter
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - SYS_ADMIN
+        volumeMounts:
+          - mountPath: /hostsys
+            name: infiniband-sys
+        command:
+        - "bash"
+        - "moneo-net-exporter_entrypoint.sh"
+        ports:
+        - containerPort: {{ cluster_cfg["job-exporter"]["net-port"] }}
+          hostPort: {{ cluster_cfg["job-exporter"]["net-port"] }}
+          name: net
+      - name: moneo-node-exporter
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - SYS_ADMIN
+        command:
+        - "bash"
+        - "moneo-node-exporter_entrypoint.sh"
+        ports:
+        - containerPort: {{ cluster_cfg["job-exporter"]["node-port"] }}
+          hostPort: {{ cluster_cfg["job-exporter"]["node-port"] }}
+          name: node
       volumes:
         - name: containerd
           hostPath:
@@ -102,6 +149,9 @@ spec:
         - name: gpu-config
           configMap:
             name: gpu-configuration
+        - name: infiniband-sys
+          hostPath:
+            path: /sys
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       hostNetwork: true

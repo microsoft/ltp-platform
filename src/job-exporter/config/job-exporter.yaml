@@ -17,6 +17,9 @@
 
 service_type: "common"
 
-port: 9102
+job-port: 9102
+gpu-port: 8000
+net-port: 8001
+node-port: 8002
 logging-level: INFO
 interface: eth0,eno2

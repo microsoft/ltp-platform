@@ -33,6 +33,8 @@ template-list:
   - grafana-configuration/prom-datasource.json
   - grafana-configuration/pai-serviceview-dashboard.json
   - grafana-configuration/pai-tasks-in-node-dashboard.json
+  - grafana-configuration/pai-gpuview-dashboard.json
+  - grafana-configuration/pai-netview-dashboard.json
 
 start-script: start.sh
 stop-script: stop.sh

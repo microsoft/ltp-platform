@@ -7,21 +7,6 @@ location = /healthz {
 }
 
 #
-# General-purpose reverse proxy.
-# The proxy to WebHDFS API depends on it.
-#
-
-location ~ ^/a/([^/]+):(\d*)(.*)$ {
-  set $target_host   $1;
-  set $target_port   :$2;
-  set $target_path   $3$is_args$args;
-  if ($target_port = ":0") {
-    set $target_port "";
-  }
-  proxy_pass http://$target_host$target_port$target_path;
-}
-
-#
 # API servers
 #
 
@@ -42,24 +27,6 @@ location ~ ^/rest-server/api(.*)$ {
 location ~ ^/kubernetes/api(.*)$ {
   proxy_pass {{K8S_API_SERVER_URI}}/api$1$is_args$args;
 }
-
-{% if CLUSTER_TYPE == 'yarn' %}
-# WebHDFS API server.
-location ~ ^/webhdfs/api(.*)$ {
-  proxy_pass {{WEBHDFS_URI}}/webhdfs$1$is_args$args;
-  proxy_intercept_errors on;
-  error_page 307 @handle_webhdfs_api_redirect;
-}
-location ~ ^/webhdfs/webhdfs {
-  rewrite ^/webhdfs/webhdfs(.*)$ /webhdfs/api$1 last;
-}
-location @handle_webhdfs_api_redirect {
-  if ($upstream_http_location ~ ^http://([^/]+):(\d+)/(.*)$) {
-    add_header Location $scheme://$http_host/a/$1:$2/$3;
-    return 300 "";
-  }
-}
-{% endif %}
 
 # Prometheus API server.
 location ~ ^/prometheus(.*)$ {
@@ -94,22 +61,20 @@ location ~ ^/grafana$ {
   # Add '/' to the end of the URL, otherwise there will be a 404 error.
   return 301 $scheme://$http_host$request_uri/;
 }
-location ~ ^/grafana(.*)$$ {
-  proxy_pass {{GRAFANA_URI}}$1$is_args$args;
-  sub_filter_types *;
-  sub_filter_once off;
-  sub_filter
-    '<base href="/" />'
-    '<base href="/grafana/" />';
-  sub_filter
-    '{{GRAFANA_URI}}'
-    '/grafana';
-  sub_filter
-    '"url":"/'
-    '"url":"./';
-  sub_filter
-    'appSubUrl+"/"'
-    'appSubUrl+"/grafana/"';
+
+location ~ ^/grafana/api/live/ {
+  proxy_http_version 1.1;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection "Upgrade";
+  proxy_set_header Host $http_host;
+  proxy_pass {{GRAFANA_URI}};
+  rewrite ^/grafana/?(.*) /$1 break;
+}
+
+location ~ ^/grafana/ {
+  proxy_set_header Host $http_host;
+  proxy_pass {{GRAFANA_URI}};
+  rewrite ^/grafana/?(.*) /$1 break;
 }
 
 {%- if DSHUTTLE_URI %}
