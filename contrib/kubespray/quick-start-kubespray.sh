@@ -63,4 +63,4 @@ echo "Starting kubernetes..."
 /bin/bash script/kubernetes-boot.sh || exit $?
 
 echo "Post installation"
-/bin/bash post-installation.sh || exit $?
+/bin/bash post-installation.sh -l ${LAYOUT} -c ${CLUSTER_CONFIG} || exit $?
