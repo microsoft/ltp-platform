@@ -1,21 +1,21 @@
 #!/bin/bash
 
-if lspci | grep -qi 'vga\|3d\|amd'; then
-    echo "Graphics card detected."
-
+if lspci | grep -qi 'Advanced Micro Devices'; then
+    echo "AMD Graphics Card Detected."
     # Launches AMD RDC Daemon
-    if [ -e /opt/rocm/bin/rdcd ]; then
-        nohup /opt/rocm/bin/rdcd -u </dev/null >/dev/null 2>&1 &
-        echo "rdc Daemon Started!"
-        if [ -e /dev/kfd ] && [ -e /dev/dri ]; then
-            python3 /Moneo/src/worker/exporters/amd_exporter.py &
-            echo "AMD Exporter Started!"
-        else
-            echo "/dev/kdf and /dev/dri not found, AMD Exporter not started."
-        fi
-    fi
+    nohup /opt/rocm/bin/rdcd -u </dev/null >/dev/null 2>&1 &
+    echo "rdc Daemon Started!"
+    python3 /Moneo/src/worker/exporters/amd_exporter.py &
+    echo "AMD Exporter Started!"
+elif lspci | grep -qi 'NVIDIA'; then
+    echo "NVIDIA Graphics card detected."
+    # Launches NVIDIA DCGM Daemon
+    nohup nv-hostengine &
+    echo "DCGM Daemon Started!"
+    python3 /Moneo/src/worker/exporters/nvidia_exporter.py &
+    echo "NVIDIA Exporter Started!"
 else
-    echo "No graphics card detected."
+    echo "No Graphics Card Detected."
     sleep infinity
 fi
 

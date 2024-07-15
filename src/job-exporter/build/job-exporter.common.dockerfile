@@ -15,14 +15,13 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM ubuntu:22.04
+FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04
 
 RUN apt-get update && apt-get install --no-install-recommends -y ca-certificates build-essential git && \
     git clone https://github.com/yadutaf/infilter --depth 1 && \
     cd infilter && make
 
-FROM ubuntu:22.04
-
+FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04
 # Register the ROCM package repository, and install rocm-dev package
 ARG ROCM_VERSION=6.1.1
 ARG AMDGPU_VERSION=6.1.1
@@ -84,6 +83,11 @@ RUN git clone --branch ${BRANCH_OR_TAG} https://github.com/Azure/Moneo.git
 
 # Install RDC
 RUN sudo bash Moneo/src/worker/install/amd.sh
+
+# Install DCGM
+RUN sed -i 's/systemctl --now enable nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
+    sed -i 's/systemctl start nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
+    sudo bash Moneo/src/worker/install/nvidia.sh
 
 ENV PATH "${PATH}:/opt/rocm/bin"
 COPY build/moneo-*-exporter_entrypoint.sh .
