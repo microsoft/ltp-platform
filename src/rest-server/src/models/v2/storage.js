@@ -94,6 +94,14 @@ const convertVolumeDetail = async (pvc) => {
     if (pv.spec.csi.driver === 'dshuttle') {
       storage.type = 'dshuttle';
       storage.data = pv.spec.csi.volumeAttributes;
+    } else if (pv.spec.csi.driver === 'blob.csi.azure.com') {
+      const attributes = pv.spec.csi.volumeAttributes;
+      if (attributes.protocol === 'nfs') {
+        storage.type = 'azureBlob';
+        storage.data = {
+          containerName: attributes.containerName,
+        };
+      }
     }
     storage.readOnly = pv.spec.csi.readOnly === true;
     storage.mountOptions = pv.spec.mountOptions;
