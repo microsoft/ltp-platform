@@ -70,7 +70,7 @@ def parse_crictl_stats(stats):
 def stats(histogram, timeout):
     try:
         result = utils.exec_cmd(
-            ["crictl", "stats", "-o", "table"],
+            ["crictl", "stats", "-ao", "table"],
             histogram=histogram,
             timeout=timeout)
         return parse_crictl_stats(result)

@@ -20,5 +20,5 @@ else
 fi
 
 # Waits for any process to exit and returns the exit status
-wait -n
+wait
 exit $?

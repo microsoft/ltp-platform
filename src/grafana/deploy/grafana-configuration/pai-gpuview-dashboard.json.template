@@ -91,7 +91,7 @@
           "datasource": "PM",
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "rdc_gpu_util{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "expr": "dcgm_gpu_utilization{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor \r\nrdc_gpu_util{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
@@ -193,7 +193,7 @@
         {
           "datasource": "PM",
           "editorMode": "code",
-          "expr": "rdc_gpu_memory_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}/rdc_gpu_memory_total{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}*100",
+          "expr": "(dcgm_mem_copy_utilization{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"})\r\nor \r\n(rdc_gpu_memory_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}/\r\nrdc_gpu_memory_total{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"} * 100)",
           "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
           "range": true,
           "refId": "A"
@@ -307,7 +307,7 @@
         {
           "datasource": "PM",
           "editorMode": "code",
-          "expr": "rdc_gpu_clock{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "expr": "(dcgm_sm_clock{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"})\r\nor\r\n(rdc_gpu_clock{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"})",
           "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
           "range": true,
           "refId": "A"
@@ -403,7 +403,7 @@
         {
           "datasource": "PM",
           "editorMode": "code",
-          "expr": "rdc_mem_clock{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}/1000000",
+          "expr": "dcgm_memory_clock{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor\r\n(rdc_mem_clock{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"} / 1000000)",
           "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
           "range": true,
           "refId": "A"
@@ -512,7 +512,7 @@
         {
           "datasource": "PM",
           "editorMode": "code",
-          "expr": "rdc_gpu_temp{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "expr": "dcgm_gpu_temp{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor \r\nrdc_gpu_temp{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
           "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
           "range": true,
           "refId": "A"
@@ -605,7 +605,7 @@
         {
           "datasource": "PM",
           "editorMode": "code",
-          "expr": "rdc_memory_temp{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}/1000",
+          "expr": "dcgm_memory_temp{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor\r\n(rdc_memory_temp{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"} / 1000)",
           "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
           "range": true,
           "refId": "A"
@@ -715,7 +715,7 @@
         {
           "datasource": "PM",
           "editorMode": "code",
-          "expr": "rdc_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "expr": "dcgm_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor\r\nrdc_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
           "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
           "range": true,
           "refId": "A"
@@ -764,7 +764,7 @@
           "value": "10.188.0.5:8000"
         },
         "datasource": "PM",
-        "definition": "label_values(rdc_gpu_util,instance)",
+        "definition": "label_values(dummy_field,instance)",
         "hide": 0,
         "includeAll": false,
         "label": "Instance",
@@ -773,7 +773,7 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(rdc_gpu_util,instance)",
+          "query": "label_values(dummy_field,instance)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
@@ -793,7 +793,7 @@
           ]
         },
         "datasource": "PM",
-        "definition": "label_values(rdc_memory_temp{instance=~\"$instance(:[0-9]*)?$\"},gpu_id)",
+        "definition": "label_values(dummy_field{instance=~\"$instance(:[0-9]*)?$\"},gpu_id)",
         "hide": 0,
         "includeAll": true,
         "label": "GPU",
@@ -802,7 +802,7 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(rdc_memory_temp{instance=~\"$instance(:[0-9]*)?$\"},gpu_id)",
+          "query": "label_values(dummy_field{instance=~\"$instance(:[0-9]*)?$\"},gpu_id)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,

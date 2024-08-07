@@ -75,11 +75,11 @@ RUN pip3 install -r /job_exporter/requirements.txt
 COPY --from=0 infilter/infilter /usr/bin
 COPY src/*.py /job_exporter/
 
-ARG BRANCH_OR_TAG=main
+ARG BRANCH_OR_TAG='yangwang1/add_dummy_field'
 
 # Clone Moneo
 RUN git config --global advice.detachedHead false
-RUN git clone --branch ${BRANCH_OR_TAG} https://github.com/Azure/Moneo.git
+RUN git clone --branch ${BRANCH_OR_TAG} https://github.com/RyoYang/Moneo.git
 
 # Install RDC
 RUN sudo bash Moneo/src/worker/install/amd.sh
