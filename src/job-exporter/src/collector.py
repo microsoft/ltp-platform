@@ -360,14 +360,13 @@ class GpuCollector(Collector):
 
         for line in content.split("\n"):
             line = line.strip()
-            if "pids" in line:
-                if "kubepods" in line:
-                    pattern = r'cri-containerd-([a-f0-9]+)\.scope'
-                    match = re.search(pattern, line)
-                    if match:
-                        return True, match.group(1)
-                else:
-                    logger.info("unknown format in pid cgroup %s", line)
+            if "kubepods" in line:
+                pattern = r'cri-containerd-([a-f0-9]+)\.scope'
+                match = re.search(pattern, line)
+                if match:
+                    return True, match.group(1)
+            else:
+                logger.info("unknown format in pid cgroup %s", line)
 
         return False, ""
 

@@ -66,6 +66,8 @@ def get_gpu_count(path):
 
         if hostname is not None and gpu_config["nodes"].get(hostname) is not None:
             return gpu_config["nodes"][hostname]["gpuCount"]
+        if hostname is not None and gpu_config["nodes"].get(hostname.lower()) is not None:
+            return gpu_config["nodes"][hostname.lower()]["gpuCount"]
         elif ip is not None and gpu_config["nodes"].get(ip) is not None:
             return gpu_config["nodes"][ip]["gpuCount"]
 

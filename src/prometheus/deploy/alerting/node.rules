@@ -70,6 +70,14 @@ groups:
         annotations:
           summary: "{{$labels.node_name}} ({{$labels.host_ip}})  is not ready"
 
+      - alert: NodeUnschedulable
+        expr: pai_node_count{unschedulable="true"} > 0
+        for: 10m
+        labels:
+          severity: warn
+        annotations:
+          summary: "{{$labels.node_name}} ({{$labels.host_ip}})  is not unschedulable"
+
       - alert: AzureAgentConsumeTooMuchMem
         expr: process_mem_usage_byte{cmd=~".*om[is]agent.*"} > 1073741824 # 1G
         for: 5m
