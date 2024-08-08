@@ -41,7 +41,7 @@ spec:
       hostNetwork: false
       containers:
       - name: alertmanager
-        image: prom/alertmanager:v0.15.1
+        image: prom/alertmanager:v0.27.0
         args:
           - '--config.file=/etc/alertmanager/config.yml'
           - '--storage.path=/alertmanager'

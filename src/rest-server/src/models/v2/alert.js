@@ -43,7 +43,7 @@ const list = async (isAdmin, userName) => {
   if (response.status !== status('OK')) {
     throw createError(response.status, 'UnknownError', response.data.message);
   }
-  const alerts = response.data.data;
+  const alerts = response.data;
   if (isAdmin) {
     return alerts;
   } else {

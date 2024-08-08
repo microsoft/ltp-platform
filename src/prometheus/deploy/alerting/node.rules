@@ -76,7 +76,7 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "{{$labels.node_name}} ({{$labels.host_ip}})  is not unschedulable"
+          summary: "{{$labels.node_name}} ({{$labels.host_ip}}) is unschedulable"
 
       - alert: AzureAgentConsumeTooMuchMem
         expr: process_mem_usage_byte{cmd=~".*om[is]agent.*"} > 1073741824 # 1G
