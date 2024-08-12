@@ -16,7 +16,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": null,
+  "id": 2,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -78,7 +78,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "10.4.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -90,7 +90,7 @@
         {
           "datasource": "PM",
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "dcgm_gpu_utilization{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor \r\nrdc_gpu_util{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -144,7 +144,7 @@
       "dashes": false,
       "datasource": "PM",
       "decimals": 0,
-      "description": "Memory utilization (in %)",
+      "description": "Memory Copy utilization (in %)",
       "fieldConfig": {
         "defaults": {
           "links": []
@@ -181,7 +181,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "10.4.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -201,6 +201,120 @@
       ],
       "thresholds": [],
       "timeRegions": [],
+      "title": "Memory Copy Utilization",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:401",
+          "format": "percent",
+          "label": "",
+          "logBase": 1,
+          "max": "100",
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:402",
+          "format": "percent",
+          "logBase": 1,
+          "max": "100",
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PM",
+      "decimals": 0,
+      "description": "Memory utilization (in %)",
+      "fieldConfig": {
+        "defaults": {
+          "links": [],
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "hiddenSeries": false,
+      "id": 22,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": false,
+        "hideEmpty": false,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 250,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": "PM",
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "gpu_mem_utilization{instance=~\"$instance(:[0-9]*)?$\", minor_number=~\"$gpu_id\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "GPU: {{minor_number}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [
+        {
+          "$$hashKey": "object:525",
+          "colorMode": "background6",
+          "fill": true,
+          "fillColor": "rgba(234, 112, 112, 0.12)",
+          "line": false,
+          "lineColor": "rgba(237, 46, 24, 0.60)",
+          "op": "time"
+        }
+      ],
       "title": "Memory Utilization",
       "tooltip": {
         "shared": true,
@@ -243,7 +357,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 17
       },
       "id": 17,
       "panels": [],
@@ -271,7 +385,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 10
+        "y": 18
       },
       "hiddenSeries": false,
       "id": 2,
@@ -295,7 +409,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "10.4.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -367,7 +481,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 10
+        "y": 18
       },
       "hiddenSeries": false,
       "id": 3,
@@ -391,7 +505,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "10.4.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -444,12 +558,447 @@
     },
     {
       "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 23,
+      "panels": [],
+      "title": "PCIe",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PM",
+      "decimals": 0,
+      "description": "The rate of data transmitted over the PCIe bus, including both protocol headers and data payloads, in bytes per second",
+      "fieldConfig": {
+        "defaults": {
+          "fieldMinMax": false,
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "hiddenSeries": false,
+      "id": 24,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 250,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": "PM",
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "dcgm_pcie_tx_bytes{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "PCIe TX Rate",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:226",
+          "format": "Bps",
+          "label": "",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:227",
+          "format": "decbytes",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PM",
+      "decimals": 0,
+      "description": "The rate of data received over the PCIe bus, including both protocol headers and data payloads, in bytes per second",
+      "fieldConfig": {
+        "defaults": {
+          "fieldMinMax": false,
+          "links": [],
+          "unit": "Bps"
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 27
+      },
+      "hiddenSeries": false,
+      "id": 25,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 250,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": "PM",
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "dcgm_pcie_rx_bytes{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "PCIe RX Rate",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:226",
+          "format": "Bps",
+          "label": "",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:227",
+          "format": "decbytes",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "id": 26,
+      "panels": [],
+      "title": "NVLink",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PM",
+      "decimals": 0,
+      "description": "The rate of data transmitted over NVLink, not including protocol headers, in bytes per second",
+      "fieldConfig": {
+        "defaults": {
+          "fieldMinMax": false,
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 36
+      },
+      "hiddenSeries": false,
+      "id": 27,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 250,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": "PM",
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "dcgm_nvlink_tx_bytes{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "NVLink TX Rate",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:226",
+          "format": "Bps",
+          "label": "",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:227",
+          "format": "decbytes",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PM",
+      "decimals": 0,
+      "description": "The rate of data received  over NVLink, not including protocol headers, in bytes per second",
+      "fieldConfig": {
+        "defaults": {
+          "fieldMinMax": false,
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "hiddenSeries": false,
+      "id": 28,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 250,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": "PM",
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "dcgm_nvlink_rx_bytes{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "NVLink RX Rate",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:226",
+          "format": "Bps",
+          "label": "",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:227",
+          "format": "decbytes",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "collapsed": false,
       "datasource": "PM",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 44
       },
       "id": 19,
       "panels": [],
@@ -476,7 +1025,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 19
+        "y": 45
       },
       "hiddenSeries": false,
       "id": 4,
@@ -500,7 +1049,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "10.4.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -569,7 +1118,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 19
+        "y": 45
       },
       "hiddenSeries": false,
       "id": 5,
@@ -593,7 +1142,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "10.4.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -643,7 +1192,7 @@
       }
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "datasource": {
         "type": "prometheus",
         "uid": "P6FAF8666AEFFE3AA"
@@ -652,107 +1201,109 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 53
       },
       "id": 21,
-      "panels": [],
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "PM",
+          "decimals": 0,
+          "description": "Power usage (in W)",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 54
+          },
+          "hiddenSeries": false,
+          "id": 6,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": false,
+            "hideEmpty": false,
+            "max": true,
+            "min": true,
+            "rightSide": true,
+            "show": true,
+            "sideWidth": 250,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "10.4.4",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": "PM",
+              "editorMode": "code",
+              "expr": "dcgm_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor\r\nrdc_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+              "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "Power Usage",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "watt",
+              "label": "",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "watt",
+              "logBase": 1,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        }
+      ],
       "title": "Power",
       "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "PM",
-      "decimals": 0,
-      "description": "Power usage (in W)",
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 28
-      },
-      "hiddenSeries": false,
-      "id": 6,
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": false,
-        "hideEmpty": false,
-        "max": true,
-        "min": true,
-        "rightSide": true,
-        "show": true,
-        "sideWidth": 250,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "10.4.2",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": "PM",
-          "editorMode": "code",
-          "expr": "dcgm_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor\r\nrdc_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
-          "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "Power Usage",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "watt",
-          "label": "",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "format": "watt",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
     }
   ],
+  "refresh": "",
   "schemaVersion": 39,
   "tags": [],
   "templating": {
@@ -760,10 +1311,13 @@
       {
         "current": {
           "selected": false,
-          "text": "10.188.0.5:8000",
-          "value": "10.188.0.5:8000"
+          "text": "10.16.0.4",
+          "value": "10.16.0.4"
         },
-        "datasource": "PM",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "fdtzgiyd80dfke"
+        },
         "definition": "label_values(dummy_field,instance)",
         "hide": 0,
         "includeAll": false,
@@ -779,7 +1333,7 @@
         "refresh": 1,
         "regex": "/([^:]*)/",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 7,
         "type": "query"
       },
       {
@@ -792,7 +1346,10 @@
             "$__all"
           ]
         },
-        "datasource": "PM",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "fdtzgiyd80dfke"
+        },
         "definition": "label_values(dummy_field{instance=~\"$instance(:[0-9]*)?$\"},gpu_id)",
         "hide": 0,
         "includeAll": true,
@@ -845,5 +1402,5 @@
   },
   "timezone": "browser",
   "title": "GPU Device Counters",
-  "version": 1
+  "version": 7
 }}
