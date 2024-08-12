@@ -23,3 +23,4 @@ net-port: 8001
 node-port: 8002
 logging-level: INFO
 interface: eth0,eno2
+net_exporter_interval: 5

@@ -118,6 +118,7 @@ spec:
         command:
         - "bash"
         - "moneo-net-exporter_entrypoint.sh"
+        - "{{ cluster_cfg["job-exporter"]["net_exporter_interval"] }}"
         ports:
         - containerPort: {{ cluster_cfg["job-exporter"]["net-port"] }}
           hostPort: {{ cluster_cfg["job-exporter"]["net-port"] }}
