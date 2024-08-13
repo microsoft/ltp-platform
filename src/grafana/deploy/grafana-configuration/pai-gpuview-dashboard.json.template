@@ -16,7 +16,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 2,
+  "id": null,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -1193,10 +1193,7 @@
     },
     {
       "collapsed": true,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "P6FAF8666AEFFE3AA"
-      },
+      "datasource": "PM",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1314,10 +1311,7 @@
           "text": "10.16.0.4",
           "value": "10.16.0.4"
         },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "fdtzgiyd80dfke"
-        },
+        "datasource": "PM",
         "definition": "label_values(dummy_field,instance)",
         "hide": 0,
         "includeAll": false,
@@ -1346,10 +1340,7 @@
             "$__all"
           ]
         },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "fdtzgiyd80dfke"
-        },
+        "datasource": "PM",
         "definition": "label_values(dummy_field{instance=~\"$instance(:[0-9]*)?$\"},gpu_id)",
         "hide": 0,
         "includeAll": true,
@@ -1402,5 +1393,5 @@
   },
   "timezone": "browser",
   "title": "GPU Device Counters",
-  "version": 7
+  "version": 1
 }}

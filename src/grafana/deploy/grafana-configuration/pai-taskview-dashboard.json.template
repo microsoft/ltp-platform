@@ -296,44 +296,23 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "avg by (job_name, role_name, task_index) (task_net_in_byte{job_name=~\"$job\"})",
+              "expr": "avg by (job_name, role_name, task_index) (irate(task_net_in_byte{job_name=~\"$job\"}[{{interval}}s]))",
               "format": "time_series",
+              "hide": false,
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "Net In {{'{{role_name}}'}}-{{'{{task_index}}'}}",
-              "metric": "",
               "refId": "A",
-              "step": 600,
-              "target": ""
+              "step": 600
             },
             {
-              "expr": "avg by (job_name, role_name, task_index) (task_net_out_byte{job_name=~\"$job\"})",
+              "expr": "avg by (job_name, role_name, task_index) (irate(task_net_out_byte{job_name=~\"$job\"}[{{interval}}s]))",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "Net Out {{'{{role_name}}'}}-{{'{{task_index}}'}}",
               "refId": "B",
-              "step": 600
-            },
-            {
-              "expr": "avg by (job_name, role_name, task_index) (irate(task_network_receive_bytes_total{job_name=~\"$job\"}[{{interval}}s]))",
-              "format": "time_series",
-              "hide": false,
-              "interval": "",
-              "intervalFactor": 2,
-              "legendFormat": "Net In {{'{{role_name}}'}}-{{'{{task_index}}'}}",
-              "refId": "C",
-              "step": 600
-            },
-            {
-              "expr": "avg by (job_name, role_name, task_index) (irate(task_network_transmit_bytes_total{job_name=~\"$job\"}[{{interval}}s]))",
-              "format": "time_series",
-              "hide": false,
-              "interval": "",
-              "intervalFactor": 2,
-              "legendFormat": "Net Out {{'{{role_name}}'}}-{{'{{task_index}}'}}",
-              "refId": "D",
               "step": 600
             }
           ],

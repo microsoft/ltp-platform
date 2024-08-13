@@ -240,33 +240,18 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "task_net_in_byte{instance=~\"$node(:[0-9]*)?$\"}",
+              "expr": "irate(task_net_in_byte{instance=~\"$node(:[0-9]*)?$\"}[{{interval}}s])",
               "format": "time_series",
-              "hide": false,
               "intervalFactor": 2,
               "legendFormat": "Net In {{'{{'}}job_name{{'}}'}}-{{'{{'}}role_name{{'}}'}}-{{'{{'}}task_index{{'}}'}}",
               "refId": "A"
             },
             {
-              "expr": "task_net_out_byte{instance=~\"$node(:[0-9]*)?$\"}",
+              "expr": "irate(task_net_out_byte{instance=~\"$node(:[0-9]*)?$\"}[{{interval}}s])",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Net Out {{'{{'}}job_name{{'}}'}}-{{'{{'}}role_name{{'}}'}}-{{'{{'}}task_index{{'}}'}}",
               "refId": "B"
-            },
-            {
-              "expr": "irate(task_network_receive_bytes_total{instance=~\"$node(:[0-9]*)?$\"}[{{interval}}s])",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "Net In {{'{{'}}job_name{{'}}'}}-{{'{{'}}role_name{{'}}'}}-{{'{{'}}task_index{{'}}'}}",
-              "refId": "C"
-            },
-            {
-              "expr": "irate(task_network_transmit_bytes_total{instance=~\"$node(:[0-9]*)?$\"}[{{interval}}s])",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "Net Out {{'{{'}}job_name{{'}}'}}-{{'{{'}}role_name{{'}}'}}-{{'{{'}}task_index{{'}}'}}",
-              "refId": "D"
             }
           ],
           "thresholds": [],

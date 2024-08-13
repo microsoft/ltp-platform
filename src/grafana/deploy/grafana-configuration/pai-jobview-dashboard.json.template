@@ -288,44 +288,23 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "avg by (job_name) (task_net_in_byte{job_name=~\"$job\"})",
+              "expr": "avg by (job_name) (irate(task_net_in_byte{job_name=~\"$job\"}[{{interval}}s]))",
               "format": "time_series",
+              "hide": false,
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "Network Inbound",
-              "metric": "",
               "refId": "A",
-              "step": 600,
-              "target": ""
+              "step": 600
             },
             {
-              "expr": "avg by (job_name) (task_net_out_byte{job_name=~\"$job\"})",
+              "expr": "avg by (job_name) (irate(task_net_out_byte{job_name=~\"$job\"}[{{interval}}s]))",
               "format": "time_series",
               "hide": false,
               "interval": "",
               "intervalFactor": 2,
               "legendFormat": "Network Outbound",
               "refId": "B",
-              "step": 600
-            },
-            {
-              "expr": "avg by (job_name) (irate(task_network_receive_bytes_total{job_name=~\"$job\"}[{{interval}}s]))",
-              "format": "time_series",
-              "hide": false,
-              "interval": "",
-              "intervalFactor": 2,
-              "legendFormat": "Network Inbound",
-              "refId": "C",
-              "step": 600
-            },
-            {
-              "expr": "avg by (job_name) (irate(task_network_transmit_bytes_total{job_name=~\"$job\"}[{{interval}}s]))",
-              "format": "time_series",
-              "hide": false,
-              "interval": "",
-              "intervalFactor": 2,
-              "legendFormat": "Network Outbound",
-              "refId": "D",
               "step": 600
             }
           ],
