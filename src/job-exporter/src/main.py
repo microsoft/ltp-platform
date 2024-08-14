@@ -109,7 +109,7 @@ def main(args):
             ("containerd_daemon_collector", interval, decay_time, collector.ContainerdDaemonCollector),
             ("gpu_collector", interval, decay_time, collector.GpuCollector, gpu_info_ref, zombie_info_ref, args.threshold),
             ("container_collector", max(0, interval - 18), decay_time, collector.ContainerCollector,
-                gpu_info_ref, stats_info_ref, args.interface),
+                gpu_info_ref, stats_info_ref),
             ("zombie_collector", interval, decay_time, collector.ZombieCollector, stats_info_ref, zombie_info_ref),
             ("process_collector", interval, decay_time, collector.ProcessCollector),
             ]
@@ -130,7 +130,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", "-p", help="port to expose metrics", default="9102")
     parser.add_argument("--interval", "-i", help="prometheus scrape interval second", type=int, default=30)
-    parser.add_argument("--interface", "-n", help="network interface for job-exporter to listen on", required=True)
     parser.add_argument("--threshold", "-t", help="memory threshold to consider gpu memory leak", type=int, default=20 * 1024 * 1024)
     args = parser.parse_args()
 

@@ -23,12 +23,12 @@ groups:
     - name: gpu_related
       rules:
       - alert: NvidiaSmiLatencyTooLarge
-        expr: histogram_quantile(0.95, sum(rate(cmd_nvidia_smi_latency_seconds_bucket[5m])) by (le, instance)) > 40
+        expr: histogram_quantile(0.95, sum(rate(cmd_nvidia_smi_latency_seconds_bucket[5m])) by (le, instance)) > 30
         for: 5m
         labels:
-          severity: warn
+          severity: error
         annotations:
-          summary: "95th nvidia-smi call latency is larger than 40s in {{$labels.instance}}, should check the gpu status manually"
+          summary: "95th nvidia-smi call latency is larger than 30s in {{$labels.instance}}, should check the gpu status manually"
 
       - alert: NvidiaSmiDoubleEccError
         expr: nvidiasmi_ecc_error_count{type="double"} > 0

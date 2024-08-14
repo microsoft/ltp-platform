@@ -41,26 +41,25 @@ keys = {"PAI_JOB_NAME", "PAI_USER_NAME", "PAI_CURRENT_TASK_ROLE_NAME", "GPU_ID",
         "PAI_TASK_INDEX", "DLWS_JOB_ID", "DLWS_USER_NAME", "PAI_VIRTUAL_CLUSTER"}
 
 
-def parse_crictl_inspect(inspect_output, gpu_vender):
+def parse_nerdctl_inspect(inspect_output, gpu_vender):
     obj = json.loads(inspect_output)
 
     m = {}
 
-    obj_labels = utils.walk_json_field_safe(obj, "status", "labels")
+    obj_labels = utils.walk_json_field_safe(obj, 0, "Labels")
     if obj_labels is not None:
         for k, v in obj_labels.items():
             if k in keys:
                 m[k] = v
 
-    obj_env = utils.walk_json_field_safe(obj, "info", "config", "envs")
+    obj_env = utils.walk_json_field_safe(obj, 0, "Spec", "process", "env")
     if obj_env:
         for env in obj_env:
-            if env["key"] in keys:
-                m[env["key"]] = env["value"]
+            k, v = env.split("=", 1)
+            if k in keys:
+                m[k] = v
 
             # for kube-launcher tasks
-            k = env["key"]
-            v = env["value"] if "value" in env else None
             if k == "FC_TASK_INDEX":
                 m["PAI_TASK_INDEX"] = v
             else:
@@ -73,7 +72,7 @@ def parse_crictl_inspect(inspect_output, gpu_vender):
             if k == "FC_FRAMEWORK_ATTEMPT_INSTANCE_UID" or k == "APP_ID":
                 m["JOB_INSTANCE_ID"] = v
 
-    pid = utils.walk_json_field_safe(obj, "info", "pid")
+    pid = utils.walk_json_field_safe(obj, 0, "Process", "Pid")
 
     return InspectResult(
             m.get("PAI_USER_NAME") or m.get("DLWS_USER_NAME"),
@@ -88,14 +87,14 @@ def parse_crictl_inspect(inspect_output, gpu_vender):
 def inspect(container_id, histogram, timeout, gpu_vender):
     try:
         result = utils.exec_cmd(
-                ["crictl", "inspect", container_id],
+                ["nerdctl", "inspect", container_id, "--namespace", "k8s.io", "--mode", "native"],
                 histogram=histogram,
                 timeout=timeout)
-        return parse_crictl_inspect(result, gpu_vender)
+        return parse_nerdctl_inspect(result, gpu_vender)
     except subprocess.CalledProcessError as e:
         logger.exception("command '%s' return with error (code %d): %s",
                 e.cmd, e.returncode, e.output)
     except subprocess.TimeoutExpired:
-        logger.warning("docker inspect timeout")
+        logger.warning("nerdctl inspect timeout")
     except Exception:
-        logger.exception("exec docker inspect error")
+        logger.exception("exec nerdctl inspect error")

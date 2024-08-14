@@ -15,11 +15,6 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04
-
-RUN apt-get update && apt-get install --no-install-recommends -y ca-certificates build-essential git && \
-    git clone https://github.com/yadutaf/infilter --depth 1 && \
-    cd infilter && make
 
 FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04
 # Register the ROCM package repository, and install rocm-dev package
@@ -27,14 +22,6 @@ ARG ROCM_VERSION=6.1.1
 ARG AMDGPU_VERSION=6.1.1
 ARG APT_PREF="Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600"
 RUN echo "$APT_PREF" > /etc/apt/preferences.d/rocm-pin-600
-
-ENV CRI_VERSION=v1.28.0
-RUN apt-get update && apt-get install --no-install-recommends -y wget ca-certificates
-RUN wget https://github.com/kubernetes-sigs/cri-tools/releases/download/$CRI_VERSION/crictl-$CRI_VERSION-linux-amd64.tar.gz && \
-    tar zxvf crictl-$CRI_VERSION-linux-amd64.tar.gz -C /usr/local/bin && \
-    rm crictl-$CRI_VERSION-linux-amd64.tar.gz && \
-    apt-get update && apt-get install --no-install-recommends -y iftop lsof && \
-    mkdir -p /job_exporter
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl libnuma-dev gnupg \
   && curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - \
@@ -68,13 +55,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /job_exporter/
-COPY build/crictl.yaml /etc/crictl.yaml
-RUN pip3 install -r /job_exporter/requirements.txt
-
-COPY --from=0 infilter/infilter /usr/bin
-COPY src/*.py /job_exporter/
-
 ARG BRANCH_OR_TAG='yangwang1/add_dummy_field'
 
 # Clone Moneo
@@ -91,3 +71,16 @@ RUN sed -i 's/systemctl --now enable nvidia-dcgm/#&/' Moneo/src/worker/install/n
 
 ENV PATH "${PATH}:/opt/rocm/bin"
 COPY build/moneo-*-exporter_entrypoint.sh .
+
+# For the job exporter
+ENV NERDCTL_VERSION=main
+RUN apt-get update && apt-get install --no-install-recommends -y wget ca-certificates
+RUN wget https://paistaticwe.blob.core.windows.net/binaries/nerdctl/nerdctl-${NERDCTL_VERSION} && \
+    chmod +x nerdctl-${NERDCTL_VERSION} && \
+    mv nerdctl-${NERDCTL_VERSION} /usr/local/bin/nerdctl && \
+    mkdir -p /job_exporter
+
+COPY requirements.txt /job_exporter/
+RUN pip3 install -r /job_exporter/requirements.txt
+
+COPY src/*.py /job_exporter/

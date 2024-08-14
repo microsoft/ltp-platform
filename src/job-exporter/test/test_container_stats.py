@@ -9,7 +9,7 @@ import base
 
 sys.path.append(os.path.abspath("../src/"))
 
-from container_stats import parse_crictl_stats, convert_to_byte, parse_usage_limit, parse_io, parse_percentile
+from container_stats import parse_nerdctl_stats, convert_to_byte, parse_usage_limit, parse_io, parse_percentile
 
 PACKAGE_DIRECTORY_COM = os.path.dirname(os.path.abspath(__file__))
 
@@ -18,14 +18,14 @@ class TestDockerStats(base.TestBase):
     Test docker_stats.py
     """
     def test_parse_docker_inspect(self):
-        sample_path = "data/crictl_stats_sample.txt"
+        sample_path = "data/nerdctl_stats_sample.jsonl"
         with open(sample_path, "r") as f:
-            crictl_stats = f.read()
+            nerdctl_stats = f.read()
 
-        stats_info = parse_crictl_stats(crictl_stats)
+        stats_info = parse_nerdctl_stats(nerdctl_stats)
         target_stats_info = {
-            '2e5eaefe441a6': {'id': '2e5eaefe441a6', 'name': 'node-exporter', 'CPUPerc': 0.0, 'MemUsageByte': 15220000.0, 'DiskUsageByte': 40960.0, 'Inodes': 13},
-            'f72ca913776e1': {'id': 'f72ca913776e1', 'name': 'prometheus', 'CPUPerc': 0.02, 'MemUsageByte': 77790000.0, 'DiskUsageByte': 40960.0, 'Inodes': 13},
+            '36c48a34101a769608358410b9d47a1b6569fa077a8d56cfd42927b5da003fed': {'id': '36c48a34101a769608358410b9d47a1b6569fa077a8d56cfd42927b5da003fed', 'name': {'namespace': 'default', 'pod': '02cceae4ebd403b2b367e0376ecce449-worker-8', 'container': 'app'}, 'cpuPerc': 1573.05, 'memPerc': 56.23, 'memUsage': {'usage': 482969072435.2, 'limit': 858993459200.0}, 'netIO': {'in': 578000000000.0, 'out': 31500000000.0}, 'blockIO': {'in': 1180000.0, 'out': 12800000000.0}},
+            '38348f12dad446032ceb67fa73ee745da3a83883643742f425019d29a2f722db': {'id': '38348f12dad446032ceb67fa73ee745da3a83883643742f425019d29a2f722db', 'name': {'namespace': 'default', 'pod': 'job-exporter-7c9mw', 'container': 'moneo-gpu-exporter'}, 'cpuPerc': 6.47, 'memPerc': 0.0, 'memUsage': {'usage': 27315404.8, 'limit': 1.8446744073709552e+19}, 'netIO': {'in': 578000000000.0, 'out': 31500000000.0}, 'blockIO': {'in': 8850000.0, 'out': 205000.0}}
         }
         self.assertEqual(target_stats_info, stats_info)
 

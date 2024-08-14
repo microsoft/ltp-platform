@@ -1,519 +1,49 @@
-{
-  "status": {
-    "id": "fc80e575c3703cd1711c0505d36bdc95a36ef6080e216cb860daf654c581f8da",
-    "metadata": {
-      "attempt": 0,
-      "name": "app"
-    },
-    "state": "CONTAINER_RUNNING",
-    "createdAt": "2024-05-16T08:44:22.18101225Z",
-    "startedAt": "2024-05-16T08:44:22.415694526Z",
-    "finishedAt": "0001-01-01T00:00:00Z",
-    "exitCode": 0,
-    "image": {
-      "annotations": {},
-      "image": "docker.io/pytorch/pytorch:2.3.0-cuda12.1-cudnn8-devel",
-      "userSpecifiedImage": ""
-    },
-    "imageRef": "docker.io/pytorch/pytorch@sha256:1bb28822b361bdb2d8cde5a58f08337490bf6e73fc96b0aa1035268c295f3d00",
-    "reason": "",
-    "message": "",
-    "labels": {
+[
+  {
+    "ID": "36c48a34101a769608358410b9d47a1b6569fa077a8d56cfd42927b5da003fed",
+    "Labels": {
+      "com.nvidia.build.id": "58180998",
+      "com.nvidia.build.ref": "b4202741d89962808ea318dd048d185dafe3367f",
+      "com.nvidia.cublas.version": "12.1.3.1",
+      "com.nvidia.cuda.version": "9.0",
+      "com.nvidia.cudnn.version": "8.9.0.131",
+      "com.nvidia.cufft.version": "11.0.2.4",
+      "com.nvidia.curand.version": "10.3.2.56",
+      "com.nvidia.cusolver.version": "11.4.4.55",
+      "com.nvidia.cusparse.version": "12.0.2.55",
+      "com.nvidia.cutensor.version": "1.7.0.1",
+      "com.nvidia.nccl.version": "2.17.1",
+      "com.nvidia.npp.version": "12.0.2.50",
+      "com.nvidia.nsightcompute.version": "2023.1.0.15",
+      "com.nvidia.nsightsystems.version": "2023.1.1.127",
+      "com.nvidia.nvjpeg.version": "12.1.0.39",
+      "com.nvidia.pytorch.version": "2.1.0a0+fe05266",
+      "com.nvidia.tensorrt.version": "8.6.1.2+cuda12.0.1.011",
+      "com.nvidia.tensorrtoss.version": "23.04",
+      "com.nvidia.volumes.needed": "nvidia_driver",
+      "io.cri-containerd.kind": "container",
       "io.kubernetes.container.name": "app",
-      "io.kubernetes.pod.name": "40c2aa60a8395648e7b9fede39cb2f48-taskrole-0",
+      "io.kubernetes.pod.name": "02cceae4ebd403b2b367e0376ecce449-worker-8",
       "io.kubernetes.pod.namespace": "default",
-      "io.kubernetes.pod.uid": "af384c8c-fa44-4a13-848d-fa017e746eff"
+      "io.kubernetes.pod.uid": "d8d9326b-7126-49d6-8c7d-d8b9d1d28039",
+      "maintainer": "Hugging Face",
+      "org.opencontainers.image.ref.name": "ubuntu",
+      "org.opencontainers.image.version": "20.04"
     },
-    "annotations": {
-      "io.kubernetes.container.hash": "98cf3f1c",
-      "io.kubernetes.container.restartCount": "0",
-      "io.kubernetes.container.terminationMessagePath": "/tmp/pai-termination-log",
-      "io.kubernetes.container.terminationMessagePolicy": "FallbackToLogsOnError",
-      "io.kubernetes.pod.terminationGracePeriod": "30"
-    },
-    "mounts": [
-      {
-        "containerPath": "/dev/shm",
-        "gidMappings": [],
-        "hostPath": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~empty-dir/dshm",
-        "propagation": "PROPAGATION_PRIVATE",
-        "readonly": false,
-        "selinuxRelabel": false,
-        "uidMappings": []
-      },
-      {
-        "containerPath": "/usr/local/pai",
-        "gidMappings": [],
-        "hostPath": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~empty-dir/pai-vol",
-        "propagation": "PROPAGATION_PRIVATE",
-        "readonly": false,
-        "selinuxRelabel": false,
-        "uidMappings": []
-      },
-      {
-        "containerPath": "/usr/local/pai/logs",
-        "gidMappings": [],
-        "hostPath": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volume-subpaths/host-log/app/2",
-        "propagation": "PROPAGATION_PRIVATE",
-        "readonly": false,
-        "selinuxRelabel": false,
-        "uidMappings": []
-      },
-      {
-        "containerPath": "/usr/local/pai/user-extension-secrets",
-        "gidMappings": [],
-        "hostPath": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~secret/user-extension-secrets",
-        "propagation": "PROPAGATION_PRIVATE",
-        "readonly": true,
-        "selinuxRelabel": false,
-        "uidMappings": []
-      },
-      {
-        "containerPath": "/var/run/secrets/kubernetes.io/serviceaccount",
-        "gidMappings": [],
-        "hostPath": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~projected/kube-api-access-bq24r",
-        "propagation": "PROPAGATION_PRIVATE",
-        "readonly": true,
-        "selinuxRelabel": false,
-        "uidMappings": []
-      },
-      {
-        "containerPath": "/etc/hosts",
-        "gidMappings": [],
-        "hostPath": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/etc-hosts",
-        "propagation": "PROPAGATION_PRIVATE",
-        "readonly": false,
-        "selinuxRelabel": false,
-        "uidMappings": []
-      },
-      {
-        "containerPath": "/tmp/pai-termination-log",
-        "gidMappings": [],
-        "hostPath": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/containers/app/f1f806fa",
-        "propagation": "PROPAGATION_PRIVATE",
-        "readonly": false,
-        "selinuxRelabel": false,
-        "uidMappings": []
-      }
-    ],
-    "logPath": "/var/log/pods/default_40c2aa60a8395648e7b9fede39cb2f48-taskrole-0_af384c8c-fa44-4a13-848d-fa017e746eff/app/0.log",
-    "resources": {
-      "linux": {
-        "cpuPeriod": "100000",
-        "cpuQuota": "1100000",
-        "cpuShares": "11264",
-        "cpusetCpus": "",
-        "cpusetMems": "",
-        "hugepageLimits": [],
-        "memoryLimitInBytes": "107374182400",
-        "memorySwapLimitInBytes": "107374182400",
-        "oomScoreAdj": "888",
-        "unified": {
-          "memory.oom.group": "1",
-          "memory.swap.max": "0"
-        }
-      },
-      "windows": null
-    }
-  },
-  "info": {
-    "sandboxID": "de7343a92fc5ba50103e02fef50e6e5e9f95ced792ab52e41eb1bac0a20a96e3",
-    "pid": 251276,
-    "removing": false,
-    "snapshotKey": "fc80e575c3703cd1711c0505d36bdc95a36ef6080e216cb860daf654c581f8da",
-    "snapshotter": "overlayfs",
-    "runtimeType": "io.containerd.runc.v2",
-    "runtimeOptions": {
-      "binary_name": "/usr/bin/nvidia-container-runtime",
-      "systemd_cgroup": true
-    },
-    "config": {
-      "metadata": {
-        "name": "app"
-      },
-      "image": {
-        "image": "sha256:3584aac49cb23ce55c64d9bb96096b22f8b9c94ae5f22de02d7d8581def3ead7"
-      },
-      "command": [
-        "/usr/local/pai/runtime"
-      ],
-      "envs": [
-        {
-          "key": "HIVED_VISIBLE_DEVICES",
-          "value": "0"
-        },
-        {
-          "key": "FC_FRAMEWORK_ATTEMPT_ID",
-          "value": "0"
-        },
-        {
-          "key": "FC_TASKROLE_UID",
-          "value": "7cec36a5-ab0b-4ad1-9307-e82d4876b057"
-        },
-        {
-          "key": "FC_TASK_ATTEMPT_INSTANCE_UID",
-          "value": "0_af384c8c-fa44-4a13-848d-fa017e746eff"
-        },
-        {
-          "key": "PAI_JOB_NAME",
-          "value": "binyli~admin_8fc0983c"
-        },
-        {
-          "key": "PAI_MIN_SUCCEEDED_TASK_COUNT_taskrole",
-          "value": "1"
-        },
-        {
-          "key": "PAI_TASK_ROLES_NUM",
-          "value": "1"
-        },
-        {
-          "key": "PAI_CURRENT_TASK_ROLE_NAME",
-          "value": "taskrole"
-        },
-        {
-          "key": "FC_CONFIGMAP_NAME",
-          "value": "40c2aa60a8395648e7b9fede39cb2f48-attempt"
-        },
-        {
-          "key": "FC_FRAMEWORK_NAME",
-          "value": "40c2aa60a8395648e7b9fede39cb2f48"
-        },
-        {
-          "key": "PAI_DEFAULT_FS_URI"
-        },
-        {
-          "key": "PAI_RESOURCE_taskrole",
-          "value": "1,11,102400,0"
-        },
-        {
-          "key": "PAI_JOB_TASK_ROLE_LIST",
-          "value": "taskrole"
-        },
-        {
-          "key": "PAI_CURRENT_TASK_ROLE_CURRENT_TASK_INDEX",
-          "value": "0"
-        },
-        {
-          "key": "FC_FRAMEWORK_NAMESPACE",
-          "value": "default"
-        },
-        {
-          "key": "FC_CONFIGMAP_UID",
-          "value": "b4135b90-4677-412b-863e-1bea1454fadc"
-        },
-        {
-          "key": "PAI_TASK_ROLE_COUNT",
-          "value": "1"
-        },
-        {
-          "key": "PAI_JOB_TASK_COUNT",
-          "value": "1"
-        },
-        {
-          "key": "FC_FRAMEWORK_ATTEMPT_INSTANCE_UID",
-          "value": "0_b4135b90-4677-412b-863e-1bea1454fadc"
-        },
-        {
-          "key": "FC_POD_UID",
-          "value": "af384c8c-fa44-4a13-848d-fa017e746eff"
-        },
-        {
-          "key": "PAI_TASK_ROLE_LIST",
-          "value": "taskrole"
-        },
-        {
-          "key": "PAI_VIRTUAL_CLUSTER",
-          "value": "default"
-        },
-        {
-          "key": "PAI_USERNAME",
-          "value": "binyli"
-        },
-        {
-          "key": "PAI_TASKS_NUM",
-          "value": "1"
-        },
-        {
-          "key": "PAI_JOB_TASK_ROLE_COUNT",
-          "value": "1"
-        },
-        {
-          "key": "FC_TASK_UID",
-          "value": "f941ad9c-e9fe-4eca-9468-a6fec0574ac8"
-        },
-        {
-          "key": "FC_TASK_ATTEMPT_ID",
-          "value": "0"
-        },
-        {
-          "key": "PAI_TASK_ROLE_TASK_COUNT_taskrole",
-          "value": "1"
-        },
-        {
-          "key": "PAI_TASK_INDEX",
-          "value": "0"
-        },
-        {
-          "key": "FC_TASK_INDEX",
-          "value": "0"
-        },
-        {
-          "key": "FC_POD_NAME",
-          "value": "40c2aa60a8395648e7b9fede39cb2f48-taskrole-0"
-        },
-        {
-          "key": "PAI_FRAMEWORK_NAME",
-          "value": "binyli~admin_8fc0983c"
-        },
-        {
-          "key": "PAI_USER_NAME",
-          "value": "binyli"
-        },
-        {
-          "key": "FC_TASKROLE_NAME",
-          "value": "taskrole"
-        },
-        {
-          "key": "PAI_MIN_FAILED_TASK_COUNT_taskrole",
-          "value": "1"
-        },
-        {
-          "key": "NVIDIA_VISIBLE_DEVICES",
-          "value": "0"
-        },
-        {
-          "key": "FC_FRAMEWORK_UID",
-          "value": "c9696a2e-f669-4585-a8b2-839a3d0cde0f"
-        },
-        {
-          "key": "PYLON_SERVICE_PORT_HTTPS",
-          "value": "443"
-        },
-        {
-          "key": "PYLON_PORT_443_TCP_ADDR",
-          "value": "10.0.167.20"
-        },
-        {
-          "key": "KUBERNETES_PORT_443_TCP",
-          "value": "tcp://10.0.0.1:443"
-        },
-        {
-          "key": "KUBERNETES_PORT_443_TCP_ADDR",
-          "value": "10.0.0.1"
-        },
-        {
-          "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_ADDR",
-          "value": "10.0.155.142"
-        },
-        {
-          "key": "PYLON_SERVICE_HOST",
-          "value": "10.0.167.20"
-        },
-        {
-          "key": "HIVEDSCHEDULER_SERVICE_SERVICE_PORT",
-          "value": "30096"
-        },
-        {
-          "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP",
-          "value": "tcp://10.0.155.142:30096"
-        },
-        {
-          "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PORT",
-          "value": "30096"
-        },
-        {
-          "key": "PYLON_SERVICE_PORT",
-          "value": "80"
-        },
-        {
-          "key": "PYLON_PORT_80_TCP_ADDR",
-          "value": "10.0.167.20"
-        },
-        {
-          "key": "PYLON_SERVICE_PORT_HTTP",
-          "value": "80"
-        },
-        {
-          "key": "PYLON_PORT_80_TCP_PROTO",
-          "value": "tcp"
-        },
-        {
-          "key": "KUBERNETES_SERVICE_PORT_HTTPS",
-          "value": "443"
-        },
-        {
-          "key": "KUBERNETES_PORT_443_TCP_PORT",
-          "value": "443"
-        },
-        {
-          "key": "HIVEDSCHEDULER_SERVICE_PORT",
-          "value": "tcp://10.0.155.142:30096"
-        },
-        {
-          "key": "PYLON_PORT",
-          "value": "tcp://10.0.167.20:80"
-        },
-        {
-          "key": "KUBERNETES_SERVICE_HOST",
-          "value": "10.0.0.1"
-        },
-        {
-          "key": "PYLON_PORT_443_TCP_PORT",
-          "value": "443"
-        },
-        {
-          "key": "KUBERNETES_SERVICE_PORT",
-          "value": "443"
-        },
-        {
-          "key": "KUBERNETES_PORT_443_TCP_PROTO",
-          "value": "tcp"
-        },
-        {
-          "key": "PYLON_PORT_80_TCP",
-          "value": "tcp://10.0.167.20:80"
-        },
-        {
-          "key": "PYLON_PORT_443_TCP",
-          "value": "tcp://10.0.167.20:443"
-        },
-        {
-          "key": "KUBERNETES_PORT",
-          "value": "tcp://10.0.0.1:443"
-        },
-        {
-          "key": "HIVEDSCHEDULER_SERVICE_SERVICE_HOST",
-          "value": "10.0.155.142"
-        },
-        {
-          "key": "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PROTO",
-          "value": "tcp"
-        },
-        {
-          "key": "PYLON_PORT_80_TCP_PORT",
-          "value": "80"
-        },
-        {
-          "key": "PYLON_PORT_443_TCP_PROTO",
-          "value": "tcp"
-        }
-      ],
-      "mounts": [
-        {
-          "container_path": "/dev/shm",
-          "host_path": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~empty-dir/dshm"
-        },
-        {
-          "container_path": "/usr/local/pai",
-          "host_path": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~empty-dir/pai-vol"
-        },
-        {
-          "container_path": "/usr/local/pai/logs",
-          "host_path": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volume-subpaths/host-log/app/2"
-        },
-        {
-          "container_path": "/usr/local/pai/user-extension-secrets",
-          "host_path": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~secret/user-extension-secrets",
-          "readonly": true
-        },
-        {
-          "container_path": "/var/run/secrets/kubernetes.io/serviceaccount",
-          "host_path": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~projected/kube-api-access-bq24r",
-          "readonly": true
-        },
-        {
-          "container_path": "/etc/hosts",
-          "host_path": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/etc-hosts"
-        },
-        {
-          "container_path": "/tmp/pai-termination-log",
-          "host_path": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/containers/app/f1f806fa"
-        }
-      ],
-      "devices": [
-        {
-          "container_path": "/dev/fuse",
-          "host_path": "/dev/fuse",
-          "permissions": "rwm"
-        }
-      ],
-      "labels": {
-        "io.kubernetes.container.name": "app",
-        "io.kubernetes.pod.name": "40c2aa60a8395648e7b9fede39cb2f48-taskrole-0",
-        "io.kubernetes.pod.namespace": "default",
-        "io.kubernetes.pod.uid": "af384c8c-fa44-4a13-848d-fa017e746eff"
-      },
-      "annotations": {
-        "io.kubernetes.container.hash": "98cf3f1c",
-        "io.kubernetes.container.restartCount": "0",
-        "io.kubernetes.container.terminationMessagePath": "/tmp/pai-termination-log",
-        "io.kubernetes.container.terminationMessagePolicy": "FallbackToLogsOnError",
-        "io.kubernetes.pod.terminationGracePeriod": "30"
-      },
-      "log_path": "app/0.log",
-      "linux": {
-        "resources": {
-          "cpu_period": 100000,
-          "cpu_quota": 1100000,
-          "cpu_shares": 11264,
-          "memory_limit_in_bytes": 107374182400,
-          "oom_score_adj": 888,
-          "hugepage_limits": [
-            {
-              "page_size": "2MB"
-            },
-            {
-              "page_size": "1GB"
-            }
-          ],
-          "unified": {
-            "memory.oom.group": "1",
-            "memory.swap.max": "0"
-          }
-        },
-        "security_context": {
-          "capabilities": {
-            "add_capabilities": [
-              "SYS_ADMIN",
-              "IPC_LOCK",
-              "DAC_READ_SEARCH"
-            ],
-            "drop_capabilities": [
-              "MKNOD"
-            ]
-          },
-          "namespace_options": {
-            "network": 2,
-            "pid": 1
-          },
-          "run_as_user": {},
-          "masked_paths": [
-            "/proc/asound",
-            "/proc/acpi",
-            "/proc/kcore",
-            "/proc/keys",
-            "/proc/latency_stats",
-            "/proc/timer_list",
-            "/proc/timer_stats",
-            "/proc/sched_debug",
-            "/proc/scsi",
-            "/sys/firmware"
-          ],
-          "readonly_paths": [
-            "/proc/bus",
-            "/proc/fs",
-            "/proc/irq",
-            "/proc/sys",
-            "/proc/sysrq-trigger"
-          ],
-          "seccomp": {
-            "profile_type": 1
-          },
-          "apparmor_profile": "unconfined"
-        }
+    "Image": "msraairgroup.azurecr.io/huggingface/transformers-pytorch-deepspeed-latest-gpu:latest",
+    "Runtime": {
+      "Name": "io.containerd.runc.v2",
+      "Options": {
+        "type_url": "containerd.runc.v1.Options",
+        "value": "MiEvdXNyL2Jpbi9udmlkaWEtY29udGFpbmVyLXJ1bnRpbWVIAQ=="
       }
     },
-    "runtimeSpec": {
+    "SnapshotKey": "36c48a34101a769608358410b9d47a1b6569fa077a8d56cfd42927b5da003fed",
+    "Snapshotter": "overlayfs",
+    "CreatedAt": "2024-08-09T16:07:17.999769736Z",
+    "UpdatedAt": "2024-08-09T16:07:17.999769736Z",
+    "SandboxID": "",
+    "Spec": {
       "ociVersion": "1.1.0",
       "process": {
         "user": {
@@ -527,115 +57,138 @@
           "/usr/local/pai/runtime"
         ],
         "env": [
-          "PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/opt/conda/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-          "HOSTNAME=aks-gpunp-32081033-vmss000000",
-          "NVARCH=x86_64",
-          "NVIDIA_REQUIRE_CUDA=cuda\u003e=12.1 brand=tesla,driver\u003e=470,driver\u003c471 brand=unknown,driver\u003e=470,driver\u003c471 brand=nvidia,driver\u003e=470,driver\u003c471 brand=nvidiartx,driver\u003e=470,driver\u003c471 brand=geforce,driver\u003e=470,driver\u003c471 brand=geforcertx,driver\u003e=470,driver\u003c471 brand=quadro,driver\u003e=470,driver\u003c471 brand=quadrortx,driver\u003e=470,driver\u003c471 brand=titan,driver\u003e=470,driver\u003c471 brand=titanrtx,driver\u003e=470,driver\u003c471 brand=tesla,driver\u003e=525,driver\u003c526 brand=unknown,driver\u003e=525,driver\u003c526 brand=nvidia,driver\u003e=525,driver\u003c526 brand=nvidiartx,driver\u003e=525,driver\u003c526 brand=geforce,driver\u003e=525,driver\u003c526 brand=geforcertx,driver\u003e=525,driver\u003c526 brand=quadro,driver\u003e=525,driver\u003c526 brand=quadrortx,driver\u003e=525,driver\u003c526 brand=titan,driver\u003e=525,driver\u003c526 brand=titanrtx,driver\u003e=525,driver\u003c526",
-          "NV_CUDA_CUDART_VERSION=12.1.105-1",
-          "NV_CUDA_COMPAT_PACKAGE=cuda-compat-12-1",
-          "CUDA_VERSION=12.1.1",
-          "LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64",
+          "PATH=/usr/local/lib/python3.8/dist-packages/torch_tensorrt/bin:/usr/local/mpi/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ucx/bin:/opt/tensorrt/bin",
+          "HOSTNAME=openpai-00001U",
+          "CUDA_VERSION=12.1.0.023",
+          "CUDA_DRIVER_VERSION=530.30.02",
+          "CUDA_CACHE_DISABLE=1",
+          "NVIDIA_REQUIRE_JETPACK_HOST_MOUNTS=",
+          "_CUDA_COMPAT_PATH=/usr/local/cuda/compat",
+          "ENV=/etc/shinit_v2",
+          "BASH_ENV=/etc/bash.bashrc",
+          "SHELL=/bin/bash",
+          "NVIDIA_REQUIRE_CUDA=cuda\u003e=9.0",
+          "NCCL_VERSION=2.17.1",
+          "CUBLAS_VERSION=12.1.3.1",
+          "CUFFT_VERSION=11.0.2.4",
+          "CURAND_VERSION=10.3.2.56",
+          "CUSPARSE_VERSION=12.0.2.55",
+          "CUSOLVER_VERSION=11.4.4.55",
+          "CUTENSOR_VERSION=1.7.0.1",
+          "NPP_VERSION=12.0.2.50",
+          "NVJPEG_VERSION=12.1.0.39",
+          "CUDNN_VERSION=8.9.0.131",
+          "TRT_VERSION=8.6.1.2+cuda12.0.1.011",
+          "TRTOSS_VERSION=23.04",
+          "NSIGHT_SYSTEMS_VERSION=2023.1.1.127",
+          "NSIGHT_COMPUTE_VERSION=2023.1.0.15",
+          "DALI_VERSION=1.24.0",
+          "DALI_BUILD=7582307",
+          "POLYGRAPHY_VERSION=0.46.2",
+          "TRANSFORMER_ENGINE_VERSION=0.7",
+          "LD_LIBRARY_PATH=/usr/local/lib/python3.8/dist-packages/torch/lib:/usr/local/lib/python3.8/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64",
           "NVIDIA_VISIBLE_DEVICES=all",
-          "NVIDIA_DRIVER_CAPABILITIES=compute,utility",
-          "NV_CUDA_LIB_VERSION=12.1.1-1",
-          "NV_NVTX_VERSION=12.1.105-1",
-          "NV_LIBNPP_VERSION=12.1.0.40-1",
-          "NV_LIBNPP_PACKAGE=libnpp-12-1=12.1.0.40-1",
-          "NV_LIBCUSPARSE_VERSION=12.1.0.106-1",
-          "NV_LIBCUBLAS_PACKAGE_NAME=libcublas-12-1",
-          "NV_LIBCUBLAS_VERSION=12.1.3.1-1",
-          "NV_LIBCUBLAS_PACKAGE=libcublas-12-1=12.1.3.1-1",
-          "NV_LIBNCCL_PACKAGE_NAME=libnccl2",
-          "NV_LIBNCCL_PACKAGE_VERSION=2.17.1-1",
-          "NCCL_VERSION=2.17.1-1",
-          "NV_LIBNCCL_PACKAGE=libnccl2=2.17.1-1+cuda12.1",
-          "NVIDIA_PRODUCT_NAME=CUDA",
-          "NV_CUDA_CUDART_DEV_VERSION=12.1.105-1",
-          "NV_NVML_DEV_VERSION=12.1.105-1",
-          "NV_LIBCUSPARSE_DEV_VERSION=12.1.0.106-1",
-          "NV_LIBNPP_DEV_VERSION=12.1.0.40-1",
-          "NV_LIBNPP_DEV_PACKAGE=libnpp-dev-12-1=12.1.0.40-1",
-          "NV_LIBCUBLAS_DEV_VERSION=12.1.3.1-1",
-          "NV_LIBCUBLAS_DEV_PACKAGE_NAME=libcublas-dev-12-1",
-          "NV_LIBCUBLAS_DEV_PACKAGE=libcublas-dev-12-1=12.1.3.1-1",
-          "NV_CUDA_NSIGHT_COMPUTE_VERSION=12.1.1-1",
-          "NV_CUDA_NSIGHT_COMPUTE_DEV_PACKAGE=cuda-nsight-compute-12-1=12.1.1-1",
-          "NV_NVPROF_VERSION=12.1.105-1",
-          "NV_NVPROF_DEV_PACKAGE=cuda-nvprof-12-1=12.1.105-1",
-          "NV_LIBNCCL_DEV_PACKAGE_NAME=libnccl-dev",
-          "NV_LIBNCCL_DEV_PACKAGE_VERSION=2.17.1-1",
-          "NV_LIBNCCL_DEV_PACKAGE=libnccl-dev=2.17.1-1+cuda12.1",
-          "LIBRARY_PATH=/usr/local/cuda/lib64/stubs",
-          "NV_CUDNN_VERSION=8.9.0.131",
-          "NV_CUDNN_PACKAGE_NAME=libcudnn8",
-          "NV_CUDNN_PACKAGE=libcudnn8=8.9.0.131-1+cuda12.1",
-          "NV_CUDNN_PACKAGE_DEV=libcudnn8-dev=8.9.0.131-1+cuda12.1",
-          "PYTORCH_VERSION=2.3.0",
-          "HIVED_VISIBLE_DEVICES=0",
-          "FC_FRAMEWORK_ATTEMPT_ID=0",
-          "FC_TASKROLE_UID=7cec36a5-ab0b-4ad1-9307-e82d4876b057",
-          "FC_TASK_ATTEMPT_INSTANCE_UID=0_af384c8c-fa44-4a13-848d-fa017e746eff",
-          "PAI_JOB_NAME=binyli~admin_8fc0983c",
-          "PAI_MIN_SUCCEEDED_TASK_COUNT_taskrole=1",
-          "PAI_TASK_ROLES_NUM=1",
-          "PAI_CURRENT_TASK_ROLE_NAME=taskrole",
-          "FC_CONFIGMAP_NAME=40c2aa60a8395648e7b9fede39cb2f48-attempt",
-          "FC_FRAMEWORK_NAME=40c2aa60a8395648e7b9fede39cb2f48",
-          "PAI_DEFAULT_FS_URI=",
-          "PAI_RESOURCE_taskrole=1,11,102400,0",
-          "PAI_JOB_TASK_ROLE_LIST=taskrole",
-          "PAI_CURRENT_TASK_ROLE_CURRENT_TASK_INDEX=0",
+          "NVIDIA_DRIVER_CAPABILITIES=compute,utility,video",
+          "NVIDIA_PRODUCT_NAME=PyTorch",
+          "GDRCOPY_VERSION=2.3",
+          "HPCX_VERSION=2.13",
+          "MOFED_VERSION=5.4-rdmacore36.0",
+          "OPENUCX_VERSION=1.14.0",
+          "OPENMPI_VERSION=4.1.4",
+          "RDMACORE_VERSION=36.0",
+          "OPAL_PREFIX=/opt/hpcx/ompi",
+          "OMPI_MCA_coll_hcoll_enable=0",
+          "LIBRARY_PATH=/usr/local/cuda/lib64/stubs:",
+          "PYTORCH_BUILD_VERSION=2.1.0a0+fe05266",
+          "PYTORCH_VERSION=2.1.0a0+fe05266",
+          "PYTORCH_BUILD_NUMBER=0",
+          "NVIDIA_PYTORCH_VERSION=23.04",
+          "PYVER=3.8",
+          "SETUPTOOLS_USE_DISTUTILS=stdlib",
+          "OPENBLAS_VERSION=0.3.20",
+          "PYTHONIOENCODING=utf-8",
+          "LC_ALL=C.UTF-8",
+          "PIP_DEFAULT_TIMEOUT=100",
+          "NVM_DIR=/usr/local/nvm",
+          "JUPYTER_PORT=8888",
+          "TENSORBOARD_PORT=6006",
+          "TORCH_CUDA_ARCH_LIST=5.2 6.0 6.1 7.0 7.5 8.0 8.6 9.0+PTX",
+          "CUDA_HOME=/usr/local/cuda",
+          "TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=1",
+          "PYTORCH_HOME=/opt/pytorch/pytorch",
+          "USE_EXPERIMENTAL_CUDNN_V8_API=1",
+          "COCOAPI_VERSION=2.0+nv0.7.1",
+          "TORCH_CUDNN_V8_API_ENABLED=1",
+          "CUDA_MODULE_LOADING=LAZY",
+          "NVIDIA_BUILD_ID=58180998",
+          "AMD_VISIBLE_DEVICES=0,1,2,3,4,5,6,7",
           "FC_FRAMEWORK_NAMESPACE=default",
-          "FC_CONFIGMAP_UID=b4135b90-4677-412b-863e-1bea1454fadc",
-          "PAI_TASK_ROLE_COUNT=1",
-          "PAI_JOB_TASK_COUNT=1",
-          "FC_FRAMEWORK_ATTEMPT_INSTANCE_UID=0_b4135b90-4677-412b-863e-1bea1454fadc",
-          "FC_POD_UID=af384c8c-fa44-4a13-848d-fa017e746eff",
-          "PAI_TASK_ROLE_LIST=taskrole",
-          "PAI_VIRTUAL_CLUSTER=default",
-          "PAI_USERNAME=binyli",
-          "PAI_TASKS_NUM=1",
-          "PAI_JOB_TASK_ROLE_COUNT=1",
-          "FC_TASK_UID=f941ad9c-e9fe-4eca-9468-a6fec0574ac8",
+          "FC_FRAMEWORK_ATTEMPT_INSTANCE_UID=0_8e96aa4b-160b-47f0-bd6c-d9b40406be74",
           "FC_TASK_ATTEMPT_ID=0",
-          "PAI_TASK_ROLE_TASK_COUNT_taskrole=1",
-          "PAI_TASK_INDEX=0",
-          "FC_TASK_INDEX=0",
-          "FC_POD_NAME=40c2aa60a8395648e7b9fede39cb2f48-taskrole-0",
-          "PAI_FRAMEWORK_NAME=binyli~admin_8fc0983c",
-          "PAI_USER_NAME=binyli",
-          "FC_TASKROLE_NAME=taskrole",
-          "PAI_MIN_FAILED_TASK_COUNT_taskrole=1",
-          "NVIDIA_VISIBLE_DEVICES=0",
-          "FC_FRAMEWORK_UID=c9696a2e-f669-4585-a8b2-839a3d0cde0f",
-          "PYLON_SERVICE_PORT_HTTPS=443",
-          "PYLON_PORT_443_TCP_ADDR=10.0.167.20",
-          "KUBERNETES_PORT_443_TCP=tcp://10.0.0.1:443",
-          "KUBERNETES_PORT_443_TCP_ADDR=10.0.0.1",
-          "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_ADDR=10.0.155.142",
-          "PYLON_SERVICE_HOST=10.0.167.20",
-          "HIVEDSCHEDULER_SERVICE_SERVICE_PORT=30096",
-          "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP=tcp://10.0.155.142:30096",
-          "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PORT=30096",
+          "PAI_DEFAULT_FS_URI=",
+          "PAI_TASK_INDEX=8",
+          "PAI_TASK_ROLE_COUNT=1",
+          "NVIDIA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7",
+          "FC_CONFIGMAP_NAME=02cceae4ebd403b2b367e0376ecce449-attempt",
+          "FC_CONFIGMAP_UID=8e96aa4b-160b-47f0-bd6c-d9b40406be74",
+          "PAI_MIN_SUCCEEDED_TASK_COUNT_worker=64",
+          "FC_POD_NAME=02cceae4ebd403b2b367e0376ecce449-worker-8",
+          "PAI_TASK_ROLE_TASK_COUNT_worker=64",
+          "PAI_MIN_FAILED_TASK_COUNT_worker=1",
+          "PAI_USERNAME=xiaoliu2",
+          "PAI_JOB_TASK_ROLE_LIST=worker",
+          "FC_FRAMEWORK_UID=ffcea4ef-1c00-4aa0-bf1c-d9a2771b5b25",
+          "PAI_TASK_ROLE_LIST=worker",
+          "PAI_TASKS_NUM=64",
+          "PAI_JOB_TASK_ROLE_COUNT=1",
+          "PAI_JOB_TASK_COUNT=64",
+          "PAI_CURRENT_TASK_ROLE_CURRENT_TASK_INDEX=8",
+          "FC_TASKROLE_NAME=worker",
+          "FC_TASK_INDEX=8",
+          "FC_TASK_UID=c4bd202f-ce47-4074-97ff-cc28d88041e2",
+          "FC_POD_UID=d8d9326b-7126-49d6-8c7d-d8b9d1d28039",
+          "PAI_USER_NAME=xiaoliu2",
+          "PAI_TASK_ROLES_NUM=1",
+          "PAI_CURRENT_TASK_ROLE_NAME=worker",
+          "FC_FRAMEWORK_NAME=02cceae4ebd403b2b367e0376ecce449",
+          "FC_TASKROLE_UID=41fa6bcd-7722-4c26-8ff9-62cd66e503d2",
+          "FC_TASK_ATTEMPT_INSTANCE_UID=0_d8d9326b-7126-49d6-8c7d-d8b9d1d28039",
+          "PAI_JOB_NAME=xiaoliu2~GKV_Pretrain_CA_node64_v3_single",
+          "PAI_RESOURCE_worker=8,88,819200,0",
+          "FC_FRAMEWORK_ATTEMPT_ID=0",
+          "PAI_FRAMEWORK_NAME=xiaoliu2~GKV_Pretrain_CA_node64_v3_single",
+          "PAI_VIRTUAL_CLUSTER=default",
+          "SSH_PROXY_SERVICE_PORT_22_TCP=tcp://10.0.19.64:22",
           "PYLON_SERVICE_PORT=80",
-          "PYLON_PORT_80_TCP_ADDR=10.0.167.20",
-          "PYLON_SERVICE_PORT_HTTP=80",
-          "PYLON_PORT_80_TCP_PROTO=tcp",
+          "PYLON_PORT=tcp://10.0.118.88:80",
+          "PYLON_PORT_443_TCP=tcp://10.0.118.88:443",
+          "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PORT=30096",
+          "PYLON_PORT_80_TCP=tcp://10.0.118.88:80",
+          "HIVEDSCHEDULER_SERVICE_SERVICE_PORT=30096",
+          "HIVEDSCHEDULER_SERVICE_PORT=tcp://10.0.47.162:30096",
           "KUBERNETES_SERVICE_PORT_HTTPS=443",
-          "KUBERNETES_PORT_443_TCP_PORT=443",
-          "HIVEDSCHEDULER_SERVICE_PORT=tcp://10.0.155.142:30096",
-          "PYLON_PORT=tcp://10.0.167.20:80",
-          "KUBERNETES_SERVICE_HOST=10.0.0.1",
-          "PYLON_PORT_443_TCP_PORT=443",
-          "KUBERNETES_SERVICE_PORT=443",
-          "KUBERNETES_PORT_443_TCP_PROTO=tcp",
-          "PYLON_PORT_80_TCP=tcp://10.0.167.20:80",
-          "PYLON_PORT_443_TCP=tcp://10.0.167.20:443",
           "KUBERNETES_PORT=tcp://10.0.0.1:443",
-          "HIVEDSCHEDULER_SERVICE_SERVICE_HOST=10.0.155.142",
-          "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_PROTO=tcp",
+          "KUBERNETES_PORT_443_TCP_ADDR=10.0.0.1",
+          "PYLON_PORT_80_TCP_PROTO=tcp",
+          "PYLON_PORT_443_TCP_PROTO=tcp",
+          "SSH_PROXY_SERVICE_SERVICE_PORT=22",
+          "KUBERNETES_PORT_443_TCP_PORT=443",
           "PYLON_PORT_80_TCP_PORT=80",
-          "PYLON_PORT_443_TCP_PROTO=tcp"
+          "SSH_PROXY_SERVICE_PORT_22_TCP_PROTO=tcp",
+          "SSH_PROXY_SERVICE_PORT_22_TCP_ADDR=10.0.19.64",
+          "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP=tcp://10.0.47.162:30096",
+          "PYLON_SERVICE_HOST=10.0.118.88",
+          "PYLON_SERVICE_PORT_HTTP=80",
+          "PYLON_SERVICE_PORT_HTTPS=443",
+          "PYLON_PORT_443_TCP_ADDR=10.0.118.88",
+          "SSH_PROXY_SERVICE_PORT_22_TCP_PORT=22",
+          "HIVEDSCHEDULER_SERVICE_SERVICE_HOST=10.0.47.162",
+          "PYLON_PORT_443_TCP_PORT=443",
+          "SSH_PROXY_SERVICE_SERVICE_HOST=10.0.19.64",
+          "SSH_PROXY_SERVICE_PORT=tcp://10.0.19.64:22",
+          "HIVEDSCHEDULER_SERVICE_PORT_30096_TCP_ADDR=10.0.47.162",
+          "KUBERNETES_SERVICE_PORT=443",
+          "KUBERNETES_PORT_443_TCP_PROTO=tcp"
         ],
         "cwd": "/workspace",
         "capabilities": {
@@ -694,7 +247,7 @@
             "CAP_DAC_READ_SEARCH"
           ]
         },
-        "oomScoreAdj": 888
+        "oomScoreAdj": 97
       },
       "root": {
         "path": "rootfs"
@@ -770,7 +323,17 @@
         {
           "destination": "/dev/shm",
           "type": "bind",
-          "source": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~empty-dir/dshm",
+          "source": "/var/lib/kubelet/pods/d8d9326b-7126-49d6-8c7d-d8b9d1d28039/volumes/kubernetes.io~empty-dir/dshm",
+          "options": [
+            "rbind",
+            "rprivate",
+            "rw"
+          ]
+        },
+        {
+          "destination": "/mnt/pvc-blob-nfs",
+          "type": "bind",
+          "source": "/var/lib/kubelet/pods/d8d9326b-7126-49d6-8c7d-d8b9d1d28039/volumes/kubernetes.io~csi/pv-blob-nfs/mount",
           "options": [
             "rbind",
             "rprivate",
@@ -780,7 +343,7 @@
         {
           "destination": "/etc/hosts",
           "type": "bind",
-          "source": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/etc-hosts",
+          "source": "/var/lib/kubelet/pods/d8d9326b-7126-49d6-8c7d-d8b9d1d28039/etc-hosts",
           "options": [
             "rbind",
             "rprivate",
@@ -790,7 +353,7 @@
         {
           "destination": "/tmp/pai-termination-log",
           "type": "bind",
-          "source": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/containers/app/f1f806fa",
+          "source": "/var/lib/kubelet/pods/d8d9326b-7126-49d6-8c7d-d8b9d1d28039/containers/app/a6a71e1f",
           "options": [
             "rbind",
             "rprivate",
@@ -800,7 +363,7 @@
         {
           "destination": "/etc/hostname",
           "type": "bind",
-          "source": "/var/lib/containerd/io.containerd.grpc.v1.cri/sandboxes/de7343a92fc5ba50103e02fef50e6e5e9f95ced792ab52e41eb1bac0a20a96e3/hostname",
+          "source": "/var/lib/containerd/io.containerd.grpc.v1.cri/sandboxes/36325c7f079e2ab4bca0ae8412975dfa13e0120cbf9f9670846bd75ed8bd67e1/hostname",
           "options": [
             "rbind",
             "rprivate",
@@ -810,7 +373,7 @@
         {
           "destination": "/etc/resolv.conf",
           "type": "bind",
-          "source": "/var/lib/containerd/io.containerd.grpc.v1.cri/sandboxes/de7343a92fc5ba50103e02fef50e6e5e9f95ced792ab52e41eb1bac0a20a96e3/resolv.conf",
+          "source": "/var/lib/containerd/io.containerd.grpc.v1.cri/sandboxes/36325c7f079e2ab4bca0ae8412975dfa13e0120cbf9f9670846bd75ed8bd67e1/resolv.conf",
           "options": [
             "rbind",
             "rprivate",
@@ -820,7 +383,7 @@
         {
           "destination": "/usr/local/pai",
           "type": "bind",
-          "source": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~empty-dir/pai-vol",
+          "source": "/var/lib/kubelet/pods/d8d9326b-7126-49d6-8c7d-d8b9d1d28039/volumes/kubernetes.io~empty-dir/pai-vol",
           "options": [
             "rbind",
             "rprivate",
@@ -830,7 +393,7 @@
         {
           "destination": "/usr/local/pai/logs",
           "type": "bind",
-          "source": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volume-subpaths/host-log/app/2",
+          "source": "/var/lib/kubelet/pods/d8d9326b-7126-49d6-8c7d-d8b9d1d28039/volume-subpaths/host-log/app/2",
           "options": [
             "rbind",
             "rprivate",
@@ -840,7 +403,7 @@
         {
           "destination": "/usr/local/pai/user-extension-secrets",
           "type": "bind",
-          "source": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~secret/user-extension-secrets",
+          "source": "/var/lib/kubelet/pods/d8d9326b-7126-49d6-8c7d-d8b9d1d28039/volumes/kubernetes.io~secret/user-extension-secrets",
           "options": [
             "rbind",
             "rprivate",
@@ -850,7 +413,7 @@
         {
           "destination": "/var/run/secrets/kubernetes.io/serviceaccount",
           "type": "bind",
-          "source": "/var/lib/kubelet/pods/af384c8c-fa44-4a13-848d-fa017e746eff/volumes/kubernetes.io~projected/kube-api-access-bq24r",
+          "source": "/var/lib/kubelet/pods/d8d9326b-7126-49d6-8c7d-d8b9d1d28039/volumes/kubernetes.io~projected/kube-api-access-7r6s5",
           "options": [
             "rbind",
             "rprivate",
@@ -861,96 +424,198 @@
       "annotations": {
         "io.kubernetes.cri.container-name": "app",
         "io.kubernetes.cri.container-type": "container",
-        "io.kubernetes.cri.image-name": "docker.io/pytorch/pytorch:2.3.0-cuda12.1-cudnn8-devel",
-        "io.kubernetes.cri.sandbox-id": "de7343a92fc5ba50103e02fef50e6e5e9f95ced792ab52e41eb1bac0a20a96e3",
-        "io.kubernetes.cri.sandbox-name": "40c2aa60a8395648e7b9fede39cb2f48-taskrole-0",
+        "io.kubernetes.cri.image-name": "msraairgroup.azurecr.io/huggingface/transformers-pytorch-deepspeed-latest-gpu:latest",
+        "io.kubernetes.cri.sandbox-id": "36325c7f079e2ab4bca0ae8412975dfa13e0120cbf9f9670846bd75ed8bd67e1",
+        "io.kubernetes.cri.sandbox-name": "02cceae4ebd403b2b367e0376ecce449-worker-8",
         "io.kubernetes.cri.sandbox-namespace": "default",
-        "io.kubernetes.cri.sandbox-uid": "af384c8c-fa44-4a13-848d-fa017e746eff"
+        "io.kubernetes.cri.sandbox-uid": "d8d9326b-7126-49d6-8c7d-d8b9d1d28039"
+      }
+    },
+    "Process": {
+      "Pid": 3913655,
+      "Status": {
+        "Status": "running",
+        "ExitStatus": 0,
+        "ExitTime": "0001-01-01T00:00:00Z"
       },
-      "linux": {
-        "resources": {
-          "devices": [
-            {
-              "allow": false,
-              "access": "rwm"
-            },
-            {
-              "allow": true,
-              "type": "c",
-              "major": 10,
-              "minor": 229,
-              "access": "rwm"
-            }
-          ],
-          "memory": {
-            "limit": 107374182400,
-            "swap": 107374182400
+      "NetNS": {
+        "PrimaryInterface": 2,
+        "Interfaces": [
+          {
+            "Index": 1,
+            "MTU": 65536,
+            "Name": "lo",
+            "HardwareAddr": "",
+            "Flags": [
+              "up",
+              "loopback",
+              "running"
+            ],
+            "Addrs": [
+              "127.0.0.1/8",
+              "::1/128"
+            ]
           },
-          "cpu": {
-            "shares": 11264,
-            "quota": 1100000,
-            "period": 100000
+          {
+            "Index": 2,
+            "MTU": 1500,
+            "Name": "eth0",
+            "HardwareAddr": "00:22:48:84:eb:57",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast",
+              "running"
+            ],
+            "Addrs": [
+              "10.16.0.87/24",
+              "fe80::222:48ff:fe84:eb57/64"
+            ]
           },
-          "unified": {
-            "memory.oom.group": "1",
-            "memory.swap.max": "0"
+          {
+            "Index": 3,
+            "MTU": 2044,
+            "Name": "ib0",
+            "HardwareAddr": "00:00:01:49:fe:80:00:00:00:00:00:00:00:15:5d:ff:fd:34:01:8b",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast",
+              "running"
+            ],
+            "Addrs": [
+              "172.16.3.130/16",
+              "fe80::215:5dff:fd34:18b/64"
+            ]
+          },
+          {
+            "Index": 4,
+            "MTU": 2044,
+            "Name": "ib1",
+            "HardwareAddr": "00:00:01:49:fe:80:00:00:00:00:00:00:00:15:5d:ff:fd:34:01:8c",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast",
+              "running"
+            ],
+            "Addrs": [
+              "172.16.3.131/16",
+              "fe80::215:5dff:fd34:18c/64"
+            ]
+          },
+          {
+            "Index": 5,
+            "MTU": 2044,
+            "Name": "ib2",
+            "HardwareAddr": "00:00:01:49:fe:80:00:00:00:00:00:00:00:15:5d:ff:fd:34:01:8d",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast",
+              "running"
+            ],
+            "Addrs": [
+              "172.16.3.132/16",
+              "fe80::215:5dff:fd34:18d/64"
+            ]
+          },
+          {
+            "Index": 6,
+            "MTU": 2044,
+            "Name": "ib3",
+            "HardwareAddr": "00:00:01:49:fe:80:00:00:00:00:00:00:00:15:5d:ff:fd:34:01:8e",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast",
+              "running"
+            ],
+            "Addrs": [
+              "172.16.3.133/16",
+              "fe80::215:5dff:fd34:18e/64"
+            ]
+          },
+          {
+            "Index": 7,
+            "MTU": 2044,
+            "Name": "ib4",
+            "HardwareAddr": "00:00:01:49:fe:80:00:00:00:00:00:00:00:15:5d:ff:fd:34:01:8f",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast",
+              "running"
+            ],
+            "Addrs": [
+              "172.16.3.134/16",
+              "fe80::215:5dff:fd34:18f/64"
+            ]
+          },
+          {
+            "Index": 8,
+            "MTU": 2044,
+            "Name": "ib5",
+            "HardwareAddr": "00:00:01:49:fe:80:00:00:00:00:00:00:00:15:5d:ff:fd:34:01:90",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast",
+              "running"
+            ],
+            "Addrs": [
+              "172.16.3.135/16",
+              "fe80::215:5dff:fd34:190/64"
+            ]
+          },
+          {
+            "Index": 9,
+            "MTU": 2044,
+            "Name": "ib6",
+            "HardwareAddr": "00:00:01:49:fe:80:00:00:00:00:00:00:00:15:5d:ff:fd:34:01:91",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast",
+              "running"
+            ],
+            "Addrs": [
+              "172.16.3.136/16",
+              "fe80::215:5dff:fd34:191/64"
+            ]
+          },
+          {
+            "Index": 10,
+            "MTU": 2044,
+            "Name": "ib7",
+            "HardwareAddr": "00:00:01:49:fe:80:00:00:00:00:00:00:00:15:5d:ff:fd:34:01:92",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast",
+              "running"
+            ],
+            "Addrs": [
+              "172.16.3.137/16",
+              "fe80::215:5dff:fd34:192/64"
+            ]
+          },
+          {
+            "Index": 11,
+            "MTU": 1500,
+            "Name": "docker0",
+            "HardwareAddr": "02:42:c8:e2:85:35",
+            "Flags": [
+              "up",
+              "broadcast",
+              "multicast"
+            ],
+            "Addrs": [
+              "172.17.0.1/16"
+            ]
           }
-        },
-        "cgroupsPath": "kubepods-burstable-podaf384c8c_fa44_4a13_848d_fa017e746eff.slice:cri-containerd:fc80e575c3703cd1711c0505d36bdc95a36ef6080e216cb860daf654c581f8da",
-        "namespaces": [
-          {
-            "type": "pid"
-          },
-          {
-            "type": "ipc",
-            "path": "/proc/244688/ns/ipc"
-          },
-          {
-            "type": "uts",
-            "path": "/proc/244688/ns/uts"
-          },
-          {
-            "type": "mount"
-          },
-          {
-            "type": "network",
-            "path": "/proc/244688/ns/net"
-          },
-          {
-            "type": "cgroup"
-          }
-        ],
-        "devices": [
-          {
-            "path": "/dev/fuse",
-            "type": "c",
-            "major": 10,
-            "minor": 229,
-            "fileMode": 438,
-            "uid": 0,
-            "gid": 0
-          }
-        ],
-        "maskedPaths": [
-          "/proc/asound",
-          "/proc/acpi",
-          "/proc/kcore",
-          "/proc/keys",
-          "/proc/latency_stats",
-          "/proc/timer_list",
-          "/proc/timer_stats",
-          "/proc/sched_debug",
-          "/proc/scsi",
-          "/sys/firmware"
-        ],
-        "readonlyPaths": [
-          "/proc/bus",
-          "/proc/fs",
-          "/proc/irq",
-          "/proc/sys",
-          "/proc/sysrq-trigger"
         ]
       }
     }
   }
-}
+]
