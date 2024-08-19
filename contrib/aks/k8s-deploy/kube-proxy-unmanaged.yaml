@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    component: kube-proxy-unmanaged
+    tier: node
+  name: kube-proxy-unmanaged
+  namespace: kube-system
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      component: kube-proxy-unmanaged
+      tier: node
+  template:
+    metadata:
+      labels:
+        component: kube-proxy-unmanaged
+        tier: node
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.azure.com/managed
+                operator: In
+                values:
+                - "False"
+                - "false"
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
+      containers:
+      - command:
+        - kube-proxy
+        - --conntrack-max-per-core=0
+        - --metrics-bind-address=0.0.0.0:10249
+        - --kubeconfig=/var/lib/kubelet/kubeconfig
+        - --cluster-cidr=100.64.0.0/10
+        - --detect-local-mode=ClusterCIDR
+        - --pod-interface-name-prefix=
+        - --v=3
+        image: mcr.microsoft.com/oss/kubernetes/kube-proxy:v1.26.3
+        imagePullPolicy: IfNotPresent
+        name: kube-proxy
+        resources:
+          requests:
+            cpu: 100m
+        securityContext:
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet
+          name: kubeconfig
+          readOnly: true
+        - mountPath: /etc/kubernetes/certs
+          name: certificates
+          readOnly: true
+        - mountPath: /run/xtables.lock
+          name: iptableslock
+        - mountPath: /lib/modules
+          name: modules
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      initContainers:
+      - command:
+        - /bin/sh
+        - -c
+        - |
+          SYSCTL=/proc/sys/net/netfilter/nf_conntrack_max
+          echo "Current net.netfilter.nf_conntrack_max: $(cat $SYSCTL)"
+          DESIRED=$(awk -F= '/net.netfilter.nf_conntrack_max/ {print $2}' /etc/sysctl.d/999-sysctl-aks.conf)
+          if [ -z "$DESIRED" ]; then
+            DESIRED=$((32768*$(nproc)))
+            if [ $DESIRED -lt 131072 ]; then
+              DESIRED=131072
+            fi
+
+            echo "AKS custom config for net.netfilter.nf_conntrack_max not set."
+            echo "Setting nf_conntrack_max to $DESIRED (32768 * $(nproc) cores, minimum 131072)."
+            echo $DESIRED > $SYSCTL
+          else
+            echo "AKS custom config for net.netfilter.nf_conntrack_max set to $DESIRED."
+            echo "Setting nf_conntrack_max to $DESIRED."
+            echo $DESIRED > $SYSCTL
+          fi
+        image: mcr.microsoft.com/mirror/docker/library/busybox:1.35
+        imagePullPolicy: IfNotPresent
+        name: kube-proxy-bootstrap
+        resources:
+          requests:
+            cpu: 100m
+        securityContext:
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /etc/sysctl.d
+          name: sysctls
+        - mountPath: /lib/modules
+          name: modules
+      priorityClassName: system-node-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: kube-proxy
+      serviceAccountName: kube-proxy
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - key: CriticalAddonsOnly
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /var/lib/kubelet
+          type: ""
+        name: kubeconfig
+      - hostPath:
+          path: /etc/kubernetes/certs
+          type: ""
+        name: certificates
+      - hostPath:
+          path: /run/xtables.lock
+          type: FileOrCreate
+        name: iptableslock
+      - hostPath:
+          path: /etc/sysctl.d
+          type: Directory
+        name: sysctls
+      - hostPath:
+          path: /lib/modules
+          type: Directory
+        name: modules
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
