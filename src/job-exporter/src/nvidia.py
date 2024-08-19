@@ -150,13 +150,25 @@ def parse_smi_xml_result(smi):
                 if len(volatile) > 0:
                     volatile = volatile[0]
                     single = volatile.getElementsByTagName("dram_correctable")[0]
+                    single_sram = volatile.getElementsByTagName("sram_correctable")[0]
                     double = volatile.getElementsByTagName("dram_uncorrectable")[0]
+                    double_sram_secded = volatile.getElementsByTagName("sram_uncorrectable_secded")[0]
+                    double_sram_parity = volatile.getElementsByTagName("sram_uncorrectable_parity")[0]
                     single = single.childNodes[0].data
+                    single_sram = single_sram.childNodes[0].data
                     double = double.childNodes[0].data
+                    double_sram_secded = double_sram_secded.childNodes[0].data
+                    double_sram_parity = double_sram_parity.childNodes[0].data
                     if single != "N/A":
                         ecc_single = int(single)
                     if double != "N/A":
                         ecc_double = int(double)
+                    if single_sram != "N/A":
+                        ecc_single += int(single_sram)
+                    if double_sram_secded != "N/A":
+                        ecc_double += int(double_sram_secded)
+                    if double_sram_parity != "N/A":
+                        ecc_double += int(double_sram_parity)
         except IndexError:
             pass
 
