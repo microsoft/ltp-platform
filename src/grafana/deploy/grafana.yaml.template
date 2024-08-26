@@ -29,7 +29,6 @@ spec:
       labels:
         app: grafana
     spec:
-      hostNetwork: true
       hostPID: false
       volumes:
       - name: grafana-confg-volume
@@ -41,6 +40,7 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: {{ cluster_cfg["grafana"]["port"] }}
+          hostPort: {{ cluster_cfg["grafana"]["port"] }}
           protocol: TCP
         volumeMounts:
         - mountPath: /grafana-configuration
@@ -55,6 +55,7 @@ spec:
         {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}
         resources:
           limits:
+            cpu: 2000m
             memory: "256Mi"
         {%- endif %}
       imagePullSecrets:

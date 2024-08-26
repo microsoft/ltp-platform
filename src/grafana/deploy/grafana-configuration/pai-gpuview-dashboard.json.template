@@ -650,13 +650,112 @@
       }
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PM",
+      "decimals": 1,
+      "description": "The fraction of cycles where data was sent to or received from device memory",
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "hiddenSeries": false,
+      "id": 38,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": true,
+        "max": true,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 200,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": "PM",
+          "editorMode": "code",
+          "expr": "dcgm_dram_active{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "DRAM Active",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:1714",
+          "decimals": 1,
+          "format": "percentunit",
+          "logBase": 1,
+          "max": "1",
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:1715",
+          "decimals": 1,
+          "format": "percentunit",
+          "logBase": 1,
+          "max": "1",
+          "min": "0",
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
       "collapsed": false,
       "datasource": "PM",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 33
       },
       "id": 15,
       "panels": [],
@@ -683,7 +782,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 1
+        "y": 34
       },
       "hiddenSeries": false,
       "id": 8,
@@ -786,7 +885,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 1
+        "y": 34
       },
       "hiddenSeries": false,
       "id": 9,
@@ -886,7 +985,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 42
       },
       "hiddenSeries": false,
       "id": 22,
@@ -926,7 +1025,7 @@
           "expr": "gpu_mem_utilization{instance=~\"$instance(:[0-9]*)?$\", minor_number=~\"$gpu_id\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "GPU {{'{{'}}minor_number{{'}}'}}",
+          "legendFormat": "GPU {{minor_number}}",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -980,112 +1079,13 @@
       }
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "PM",
-      "decimals": 1,
-      "description": "The fraction of cycles where data was sent to or received from device memory",
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 34
-      },
-      "hiddenSeries": false,
-      "id": 38,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": true,
-        "max": true,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "sideWidth": 200,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "10.4.4",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": "PM",
-          "editorMode": "code",
-          "expr": "dcgm_dram_active{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
-          "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "DRAM Active",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1714",
-          "decimals": 1,
-          "format": "percentunit",
-          "logBase": 1,
-          "max": "1",
-          "min": "0",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1715",
-          "decimals": 1,
-          "format": "percentunit",
-          "logBase": 1,
-          "max": "1",
-          "min": "0",
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
       "collapsed": false,
       "datasource": "PM",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 50
       },
       "id": 17,
       "panels": [],
@@ -1113,7 +1113,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 18
+        "y": 51
       },
       "hiddenSeries": false,
       "id": 2,
@@ -1209,7 +1209,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 18
+        "y": 51
       },
       "hiddenSeries": false,
       "id": 3,
@@ -1290,7 +1290,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 59
       },
       "id": 23,
       "panels": [],
@@ -1318,7 +1318,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 27
+        "y": 60
       },
       "hiddenSeries": false,
       "id": 24,
@@ -1421,7 +1421,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 27
+        "y": 60
       },
       "hiddenSeries": false,
       "id": 25,
@@ -1508,7 +1508,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 68
       },
       "id": 26,
       "panels": [],
@@ -1536,7 +1536,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 36
+        "y": 69
       },
       "hiddenSeries": false,
       "id": 27,
@@ -1638,7 +1638,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 36
+        "y": 69
       },
       "hiddenSeries": false,
       "id": 28,
@@ -1741,7 +1741,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 69
+        "y": 77
       },
       "hiddenSeries": false,
       "id": 29,
@@ -1830,7 +1830,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 85
       },
       "id": 19,
       "panels": [],
@@ -1857,7 +1857,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 45
+        "y": 86
       },
       "hiddenSeries": false,
       "id": 4,
@@ -1950,7 +1950,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 45
+        "y": 86
       },
       "hiddenSeries": false,
       "id": 5,
@@ -2024,112 +2024,111 @@
       }
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "datasource": "PM",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 94
       },
       "id": 21,
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "PM",
-          "decimals": 0,
-          "description": "Power usage (in W)",
-          "fieldConfig": {
-            "defaults": {
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 54
-          },
-          "hiddenSeries": false,
-          "id": 6,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": false,
-            "hideEmpty": false,
-            "max": true,
-            "min": true,
-            "rightSide": true,
-            "show": true,
-            "sideWidth": 250,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "percentage": false,
-          "pluginVersion": "10.4.4",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": "PM",
-              "editorMode": "code",
-              "expr": "dcgm_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor\r\nrdc_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
-              "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "Power Usage",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "watt",
-              "label": "",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "format": "watt",
-              "logBase": 1,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        }
-      ],
+      "panels": [],
       "title": "Power",
       "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "PM",
+      "decimals": 0,
+      "description": "Power usage (in W)",
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 95
+      },
+      "hiddenSeries": false,
+      "id": 6,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": false,
+        "hideEmpty": false,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "sideWidth": 250,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.4",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": "PM",
+          "editorMode": "code",
+          "expr": "dcgm_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}\r\nor\r\nrdc_power_usage{instance=~\"$instance(:[0-9]*)?$\", gpu_id=~\"$gpu_id\"}",
+          "legendFormat": "GPU {{'{{'}}gpu_id{{'}}'}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "Power Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "watt",
+          "label": "",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "format": "watt",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
     }
   ],
   "refresh": "",

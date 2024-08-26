@@ -68,14 +68,15 @@ install_datasources() {
   done
 }
 
-
 install_dashboards() {
+  local infinity_uid=$1
   local dashboard
 
   for dashboard in ${DASHBOARDS_PATH}/*
   do
     if [[ -f "${dashboard}" ]]; then
       echo "Installing dashboard ${dashboard}"
+      sed -i "s/<%infinity-uid%>/$infinity_uid/g" ${dashboard}
       if grafana_api POST /api/dashboards/import "" "${dashboard}"; then
         echo "installed ok"
       else
@@ -85,13 +86,32 @@ install_dashboards() {
   done
 }
 
+get_infinity_uid() {
+  cmd="curl -s -H \"Accept: application/json\" ${GRAFANA_URL}/api/datasources/name/infinity | jq -r \".uid\""
+  echo "Running ${cmd}" >&2
+  uid=$(eval "$cmd")
+  exit_status=$?
+  if [ $exit_status -ne 0 ]; then
+    echo "Failed to get infinity datasource uid" >&2
+    return 1
+  fi
+
+  if [ -z "$uid" ]; then
+    echo "Failed to get infinity datasource uid" >&2
+    return 1
+  fi
+  echo "$uid"
+}
+
 configure_grafana() {
   wait_for_api
-  # move js script to the specific dir
-  # http://docs.grafana.org/reference/scripting/#scripted-dashboards
-  cp ${DASHBOARDS_PATH}/*.js /usr/share/grafana/public/dashboards/
   install_datasources
-  install_dashboards
+  local infinity_uid=$(get_infinity_uid)
+  if [ $? -ne 0 ]; then
+    echo "Failed to get infinity datasource uid"
+    infinity_uid=""
+  fi
+  install_dashboards $infinity_uid
 }
 
 mkdir -p /usr/local/grafana/datasources/

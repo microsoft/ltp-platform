@@ -28,7 +28,7 @@ ENV \
 
 RUN \
   apt-get update && \
-  apt-get -y --force-yes --no-install-recommends install libfontconfig wget ca-certificates adduser libfontconfig1 musl curl && \
+  apt-get -y --force-yes --no-install-recommends install libfontconfig wget ca-certificates adduser libfontconfig1 musl curl jq && \
   wget -O /tmp/grafana.deb https://dl.grafana.com/oss/release/grafana_${GRAFANA_VERSION}_amd64.deb && \
   dpkg -i /tmp/grafana.deb && \
   rm -f /tmp/grafana.deb && \
@@ -37,8 +37,11 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
+RUN grafana-cli plugins install yesoreyeram-infinity-datasource && ls /var/lib/grafana/plugins
+RUN mkdir ${GF_PLUGIN_DIR}
+RUN mv /var/lib/grafana/plugins/yesoreyeram-infinity-datasource /grafana-plugins
+
 COPY src/run-grafana.sh /usr/local/bin
-COPY src/dashboards/* /usr/local/grafana/dashboards/
 
 RUN sed -i 's/;*\s*allow_embedding\s*=\s*.*/allow_embedding = true/' /etc/grafana/grafana.ini
 RUN sed -i 's/;*\s*root_url\s*=\s*.*/root_url = %(protocol)s:\/\/%(domain)s:%(http_port)s\/grafana\//' /etc/grafana/grafana.ini

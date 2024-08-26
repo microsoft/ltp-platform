@@ -1,0 +1,21 @@
+{
+  "name": "infinity",
+  "type": "yesoreyeram-infinity-datasource",
+  "typeName": "Infinity",
+  "typeLogoUrl": "public/plugins/yesoreyeram-infinity-datasource/img/icon.svg",
+  "access": "proxy",
+  "url": "",
+  "user": "",
+  "database": "",
+  "basicAuth": false,
+  "isDefault": false,
+  "jsonData": {
+    "allowedHosts": [
+      "http://utilization-reporter-service.default.svc.cluster.local"
+    ],
+    "customHealthCheckEnabled": true,
+    "customHealthCheckUrl": "http://utilization-reporter-service.default.svc.cluster.local/healthz",
+    "global_queries": []
+  },
+  "readOnly": false
+}

@@ -25,9 +25,12 @@ prerequisite:
 
 template-list:
   - grafana.yaml
+  - grafana-configuration/infinity-datasource.json
   - grafana-configuration/pai-clusterview-dashboard.json
+  - grafana-configuration/pai-cluster-utilization-dashboard.json
   - grafana-configuration/pai-nodeview-dashboard.json
   - grafana-configuration/pai-jobview-dashboard.json
+  - grafana-configuration/pai-job-utilization-dashboard.json
   - grafana-configuration/pai-taskroleview-dashboard.json
   - grafana-configuration/pai-taskview-dashboard.json
   - grafana-configuration/prom-datasource.json
