@@ -25,10 +25,9 @@ data:
       root_dir /tmp/fluentd-buffers/
     </system>
   containers.input.conf: |-
-    # FC Docker Container Log:
-    # {"log":"I1024 12:14:54.903623      11 controller.go:1382] [default/efkt168][worker][0]: syncTaskState: Task will be retried: ObjectSnapshot: {\"kind\":\"Framework\"}\n",
-    # "stream":"stderr",
-    # "time":"2019-10-24T12:14:54.9037283Z"}
+    # FC ContainerD Log:
+    # 2024-08-23T05:59:12.287696542Z stderr P I0823 05:59:12.287405      10 controller.go:421] [default/b2f37e98ee425f31fd07367e0cedafc7]: enqueueFrameworkObj: Framework Deleted 919d894d-4b78-415b-acb6-dc463f1ceed9: OnFrameworkDeletion: ObjectSnapshot: {"kind":"3.log", "completionTime":"2024
+    # 2024-08-23T05:59:12.287696542Z stderr F -08-23T05:57:30Z"}
     <source>
       @id fc-objectsnapshots.log
       @type tail
@@ -36,18 +35,17 @@ data:
       pos_file /var/log/fc-objectsnapshots.log.pos
       read_from_head true
       tag fc-objectsnapshots
-      format json
-      time_key time
-      time_format %Y-%m-%dT%H:%M:%S.%NZ
-      keep_time_key true
+      <parse>
+        @type cri
+      </parse>
     </source>
 
-    # Recombine raw log lines in case it was splitted by Docker
-    <filter>
+    <filter fc-objectsnapshots>
       @type concat
-      key log
-      multiline_start_regexp /: ObjectSnapshot: /
-      multiline_end_regexp /\}\n$/
+      key message
+      use_partial_cri_logtag true
+      partial_cri_logtag_key logtag
+      partial_cri_stream_key stream
       separator ""
       flush_interval 30
     </filter>
@@ -56,7 +54,7 @@ data:
     <filter fc-objectsnapshots>
       @type grep
       <regexp>
-        key log
+        key message
         pattern /: ObjectSnapshot: /
       </regexp>
     </filter>
@@ -65,7 +63,7 @@ data:
     # {"objectSnapshot":"{\"kind\":\"Framework\"}\n"}
     <filter fc-objectsnapshots>
       @type parser
-      key_name log
+      key_name message
       reserve_data true
       <parse>
         @type regexp
@@ -119,16 +117,8 @@ data:
     # Remove useless keys
     <filter fc-objectsnapshots>
       @type record_transformer
-      remove_keys log,time,stream,logSeverity,logPid,logSite
+      remove_keys time,stream,logSeverity,logPid,logSite,logTime,logtag,message
     </filter>
-
-    # # Just for debugging
-    # <filter fc-objectsnapshots>
-    #   @type stdout
-    #   <format>
-    #     @type json
-    #   </format>
-    # </filter>
 
     # Output to postgresql
     <match fc-objectsnapshots>

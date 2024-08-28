@@ -15,14 +15,16 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM fluent/fluentd:v1.7-1
+FROM fluent/fluentd:v1.17.1-1.0
 
 USER root
 RUN apk add --no-cache --update --virtual .build-deps \
         sudo build-base ruby-dev make gcc libc-dev postgresql-dev git \
  && apk add --no-cache --update libpq \
  && sudo gem install fluent-plugin-concat \
- && sudo gem install rake bundler pg \
+ && gem install fluent-plugin-parser-cri --no-document \
+ && sudo gem install bundler -v 2.3.27 \
+ && sudo gem install rake pg \
  && sudo apk add ruby-bigdecimal
 
 # Build fluent-plugin-pgjson from scratch
