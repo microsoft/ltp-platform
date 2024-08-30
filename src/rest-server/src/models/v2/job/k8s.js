@@ -373,9 +373,9 @@ const generateTaskRole = (
     };
   }
   // get shared memory size
-  let shmMB = 512;
+  let shmMB = 16384;
   if ('extraContainerOptions' in config.taskRoles[taskRole]) {
-    shmMB = config.taskRoles[taskRole].extraContainerOptions.shmMB || 512;
+    shmMB = config.taskRoles[taskRole].extraContainerOptions.shmMB || shmMB;
   }
   // check InfiniBand device
   const infinibandDevice = Boolean(
