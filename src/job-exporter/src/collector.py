@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
@@ -50,6 +49,11 @@ def gen_gpu_mem_util_gauge():
                              labels=["minor_number", "vender"])
 
 # NVIDIA GPU metrics
+def gen_nvidia_smi_status_gauge():
+    return GaugeMetricFamily("nvidiasmi_status",
+                             "status of nvidia-smi 0 for success, 1 for error",
+                             labels=["error"])
+
 def gen_nvidia_gpu_util_gauge():
     return GaugeMetricFamily("nvidiasmi_utilization_gpu",
             "gpu core utilization of card",
@@ -474,19 +478,27 @@ class GpuCollector(Collector):
             )
             return None
         if self.gpu_vendor == GpuVendor.NVIDIA:
-            gpu_info = nvidia.nvidia_smi(GpuCollector.nvidia_cmd_histogram,
-                    GpuCollector.cmd_timeout)
-
+            gpu_info = None
+            nvidia_smi_status = gen_nvidia_smi_status_gauge()
+            error = "ok"
+            try:
+                gpu_info = nvidia.nvidia_smi(GpuCollector.nvidia_cmd_histogram,
+                        GpuCollector.cmd_timeout)
+            except TimeoutError:
+                error = "timeout"
+            except Exception as e:
+                error = str(e)
+            nvidia_smi_status.add_metric([error], 1)
             logger.debug("get nvidia gpu_info %s", gpu_info)
-
             now = datetime.datetime.now()
             self.gpu_info_ref.set(gpu_info, now)
             zombie_info = self.zombie_info_ref.get(now)
-
             if gpu_info:
-                return GpuCollector.convert_nvidia_gpu_info_to_metrics(gpu_info, zombie_info,
-                        GpuCollector.get_container_id, self.mem_leak_thrashold)
-            return None
+                return (GpuCollector.convert_nvidia_gpu_info_to_metrics
+                        (gpu_info, zombie_info, GpuCollector.get_container_id, self.mem_leak_thrashold)
+                + [nvidia_smi_status])
+            else:
+                return [nvidia_smi_status]
         if self.gpu_vendor == GpuVendor.AMD:
             gpu_info = amd.rocm_smi(GpuCollector.amd_cmd_hostogram,
                          GpuCollector.cmd_timeout)
@@ -790,7 +802,10 @@ class ZombieCollector(Collector):
         except subprocess.TimeoutExpired as e:
             logger.warning("nerdctl log timeout")
         except subprocess.CalledProcessError as e:
-            logger.warning("nerdctl logs returns %d, output %s", e.returncode, e.output)
+            if e.output and "logpath is nil" in e.output.decode('utf-8'):
+                logger.debug("container %s does not have log", container_id)
+            else:
+                logger.warning("nerdctl logs returns %d, output %s", e.returncode, e.output)
         except Exception:
             logger.exception("exec nerdctl logs error")
 

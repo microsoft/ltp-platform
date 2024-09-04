@@ -4,15 +4,11 @@ import argparse
 import logging
 import os
 import json
-import threading
 import signal
 import faulthandler
-import gc
 import datetime
-import shutil
 import sys
 
-import prometheus_client
 from prometheus_client import Gauge
 from prometheus_client.core import REGISTRY
 from prometheus_client.twisted import MetricsResource

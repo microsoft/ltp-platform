@@ -1,20 +1,5 @@
-#!/usr/bin/env python3
-# Copyright (c) Microsoft Corporation
-# All rights reserved.
-#
-# MIT License
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
-# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 
 import logging
 from xml.dom import minidom
@@ -225,15 +210,16 @@ def nvidia_smi(histogram, timeout):
                 histogram=histogram, timeout=timeout)
 
         return parse_smi_xml_result(smi_output)
+    except subprocess.TimeoutExpired:
+        logger.warning("nvidia-smi timeout")
+        raise TimeoutError
     except subprocess.CalledProcessError as e:
         logger.exception("command '%s' return with error (code %d): %s",
                 e.cmd, e.returncode, e.output)
-    except subprocess.TimeoutExpired:
-        logger.warning("nvidia-smi timeout")
+        raise e
     except Exception:
         logger.exception("exec nvidia-smi error")
-
-    return None
+        raise
 
 def construct_gpu_info(statuses):
     """ util for unit test case """

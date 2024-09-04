@@ -396,6 +396,7 @@
             },
             "editorMode": "code",
             "expr": "sum (sum_over_time((task_gpu_percent>0)[$__range:])) / 100",
+            "instant": true,
             "legendFormat": "Utilized GPU Hours",
             "range": true,
             "refId": "Utilized GPU Hours"
@@ -407,6 +408,7 @@
             "editorMode": "code",
             "expr": "(sum(count_over_time((task_gpu_percent>0)[$__range:]))) - (sum (sum_over_time(task_gpu_percent[$__range:])) / 100)",
             "hide": false,
+            "instant": true,
             "interval": "",
             "legendFormat": "Non-Fully Utilized GPU Hours",
             "range": true,
@@ -419,6 +421,7 @@
             "editorMode": "code",
             "expr": "sum (count_over_time((task_gpu_percent==0)[$__range:]))",
             "hide": false,
+            "instant": true,
             "legendFormat": "Idle GPU Hours",
             "range": true,
             "refId": "Idle GPU Hours"

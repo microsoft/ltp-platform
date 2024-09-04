@@ -30,6 +30,14 @@ groups:
         annotations:
           summary: "95th nvidia-smi call latency is larger than 30s in {{$labels.instance}}, should check the gpu status manually"
 
+      - alert: NvidiaSmiFailed
+        expr: nvidiasmi_status{error!="ok"} > 0
+        for: 5m
+        labels:
+          severity: fatal
+        annotations:
+          summary: "nvidia-smi failed in {{$labels.instance}}, error is: {{$labels.error}}"
+
       - alert: NvidiaSmiDoubleEccError
         expr: nvidiasmi_ecc_error_count{type="double"} > 0
         for: 5m
