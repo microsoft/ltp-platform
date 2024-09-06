@@ -546,6 +546,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "PaiServiceMetrics",
+  "title": "Pai Service Metrics",
+  "uid": "PaiServiceMetrics",
   "version": 1
 }}

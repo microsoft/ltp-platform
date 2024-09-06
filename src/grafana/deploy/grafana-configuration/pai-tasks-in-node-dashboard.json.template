@@ -1,5 +1,4 @@
 {% set interval = cluster_cfg["prometheus"]["scrape_interval"]|default(30) * 2 %}
-{% set url = cluster_cfg["grafana"]["url"] %}
 
 {"dashboard": {
   "annotations": {
@@ -21,22 +20,26 @@
   "graphTooltip": 0,
   "hideControls": true,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Resource Util of This Node",
+      "tooltip": "",
+      "type": "link",
+      "url": "d/PaiNodeView/pai-node-view?var-node=$node"
+    }
+  ],
   "refresh": "30s",
   "rows": [
     {
       "collapse": false,
       "height": "30px",
-      "panels": [
-        {
-          "content": "[Resource Util of This Node]({{url}}/dashboard/db/pai_nodeview?var-node=$node) ",
-          "id": 24,
-          "mode": "markdown",
-          "span": 12,
-          "title": "",
-          "type": "text"
-        }
-      ],
+      "panels": [],
       "repeat": null,
       "repeatIteration": null,
       "repeatRowId": null,
@@ -668,7 +671,7 @@
               "decimals": 2,
               "link": true,
               "linkTooltip": "Click to view each task's usage",
-              "linkUrl": "{{url}}/dashboard/db/tasklevelmetrics?var-job=$__cell_4",
+              "linkUrl": "d/TaskLevelMetrics/task-level-metrics?var-job=$__cell_5",
               "pattern": "task_index",
               "thresholds": [],
               "type": "number",
@@ -686,7 +689,7 @@
               "decimals": 2,
               "link": true,
               "linkTooltip": "Click to view each task role's usage",
-              "linkUrl": "{{url}}/dashboard/db/taskrolelevelmetrics?var-job=$__cell_4",
+              "linkUrl": "d/TaskRoleLevelMetrics/task-role-level-metrics?var-job=$__cell_5",
               "pattern": "role_name",
               "thresholds": [],
               "type": "number",
@@ -704,7 +707,7 @@
               "decimals": 2,
               "link": true,
               "linkTooltip": "Click to view job's usage",
-              "linkUrl": "{{url}}/dashboard/db/joblevelmetrics?var-job=$__cell_4",
+              "linkUrl": "d/JobLevelMetrics/job-level-metrics?var-job=$__cell_5",
               "pattern": "job_name",
               "thresholds": [],
               "type": "number",
@@ -809,6 +812,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Tasks in Node",
+  "title": "Tasks in Node Metrics",
+  "uid": "TasksInNodeMetrics",
   "version": 1
 }}

@@ -981,5 +981,6 @@
   },
   "timezone": "browser",
   "title": "Network Counters",
+  "uid": "NetworkCounters",
   "version": 1
 }}

@@ -145,7 +145,7 @@ export function getJobMetricsUrl(jobInfo) {
   } else {
     to = jobInfo.jobStatus.completedTime;
   }
-  return `${config.grafanaUri}/dashboard/db/joblevelmetrics?var-job=${
+  return `${config.grafanaUri}/d/JobLevelMetrics/job-level-metrics?var-job=${
     userName ? `${userName}~${jobName}` : jobName
   }&from=${from}&to=${to}`;
 }

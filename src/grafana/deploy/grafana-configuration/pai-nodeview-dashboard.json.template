@@ -1,5 +1,4 @@
 {% set interval = cluster_cfg["prometheus"]["scrape_interval"]|default(30) * 2 %}
-{% set url = cluster_cfg["grafana"]["url"] %}
 
 {"dashboard": {
   "annotations": {
@@ -21,22 +20,26 @@
   "graphTooltip": 0,
   "hideControls": true,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": false,
+      "title": "All Tasks in This Node",
+      "tooltip": "",
+      "type": "link",
+      "url": "d/TasksInNodeMetrics/tasks-in-node-metrics?var-node=$node"
+    }
+  ],
   "refresh": "30s",
   "rows": [
     {
       "collapse": false,
       "height": "30px",
-      "panels": [
-        {
-          "content": "[All Tasks in This Node]({{url}}/dashboard/db/tasks-in-node?var-node=$node) ",
-          "id": 24,
-          "mode": "markdown",
-          "span": 12,
-          "title": "",
-          "type": "text"
-        }
-      ],
+      "panels": [],
       "repeat": null,
       "repeatIteration": null,
       "repeatRowId": null,
@@ -89,7 +92,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "(sum by (instance) (idelta(node_cpu_seconds_total{instance=~\"$node(:[0-9]*)?$\"}[{{interval}}s])) > bool 0) * (100 - (avg by (instance)(irate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$node(:[0-9]*)?$\"}[{{interval}}s])) * 100))",
+              "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$node(:[0-9]*)?$\"}[{{interval}}s])) * 100)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -717,7 +720,7 @@
               "decimals": 0,
               "link": true,
               "linkTooltip": "Click to view usage of each GPU",
-              "linkUrl": "{{url}}/dashboard/script/gpu.js?orgId=1&host=$__cell_2&rows=$__cell_6",
+              "linkUrl": "d/GpuDeviceCounters/gpu-device-counters?orgId=1&var-instanc=$__cell_2&var-gpu_id=$__cell_6",
               "pattern": "instance",
               "preserveFormat": false,
               "sanitize": false,
@@ -908,6 +911,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "PAI_NodeView",
+  "title": "PAI Node View",
+  "uid": "PaiNodeView",
   "version": 1
 }}

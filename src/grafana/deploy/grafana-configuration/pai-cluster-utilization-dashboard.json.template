@@ -395,10 +395,11 @@
               "type": "prometheus"
             },
             "editorMode": "code",
+            "exemplar": false,
             "expr": "sum (sum_over_time((task_gpu_percent>0)[$__range:])) / 100",
             "instant": true,
             "legendFormat": "Utilized GPU Hours",
-            "range": true,
+            "range": false,
             "refId": "Utilized GPU Hours"
           },
           {
@@ -406,12 +407,13 @@
               "type": "prometheus"
             },
             "editorMode": "code",
+            "exemplar": false,
             "expr": "(sum(count_over_time((task_gpu_percent>0)[$__range:]))) - (sum (sum_over_time(task_gpu_percent[$__range:])) / 100)",
             "hide": false,
             "instant": true,
             "interval": "",
             "legendFormat": "Non-Fully Utilized GPU Hours",
-            "range": true,
+            "range": false,
             "refId": "Non-Fully Utilized GPU Hours"
           },
           {
@@ -419,11 +421,12 @@
               "type": "prometheus"
             },
             "editorMode": "code",
+            "exemplar": false,
             "expr": "sum (count_over_time((task_gpu_percent==0)[$__range:]))",
             "hide": false,
             "instant": true,
             "legendFormat": "Idle GPU Hours",
-            "range": true,
+            "range": false,
             "refId": "Idle GPU Hours"
           }
         ],
@@ -712,6 +715,7 @@
     "timepicker": {},
     "timezone": "browser",
     "title": "Cluster GPU Utilization",
+    "uid": "ClusterGpuUtilization",
     "weekStart": ""
   }
 }

@@ -1,5 +1,4 @@
 {% set interval = cluster_cfg["prometheus"]["scrape_interval"]|default(30) * 2 %}
-{% set url = cluster_cfg["grafana"]["url"] %}
 
 {"dashboard": {
   "annotations": {
@@ -21,24 +20,38 @@
   "graphTooltip": 0,
   "hideControls": false,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Job Level metrics",
+      "tooltip": "",
+      "type": "link",
+      "url": "d/JobLevelMetrics/job-level-metrics?var-job=$job"
+    },
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": true,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Task Level metrics",
+      "tooltip": "",
+      "type": "link",
+      "url": "d/TaskLevelMetrics/task-level-metrics?var-job=$job"
+    }
+  ],
   "refresh": "30s",
   "rows": [
     {
       "collapse": false,
       "height": "30px",
-      "panels": [
-        {
-          "content": "[JobLevelMetrics]({{url}}/dashboard/db/joblevelmetrics?var-job=$job)  | \n [TaskRoleLevelMetrics]({{url}}/dashboard/db/taskrolelevelmetrics?var-job=$job)  |\n [TaskLevelMetrics]({{url}}/dashboard/db/tasklevelmetrics?var-job=$job)",
-          "height": "30px",
-          "id": 24,
-          "links": [],
-          "mode": "markdown",
-          "span": 12,
-          "title": "",
-          "type": "text"
-        }
-      ],
+      "panels": [],
       "repeat": null,
       "repeatIteration": null,
       "repeatRowId": null,
@@ -76,24 +89,7 @@
           },
           "lines": true,
           "linewidth": 1,
-          "links": [
-            {
-              "dashUri": "db/joblevelmetrics",
-              "dashboard": "JobLevelMetrics",
-              "params": "var-job=$job",
-              "targetBlank": true,
-              "title": "JobLevelMetrics",
-              "type": "dashboard"
-            },
-            {
-              "dashUri": "db/tasklevelmetrics",
-              "dashboard": "TaskLevelMetrics",
-              "params": "var-job=$job",
-              "targetBlank": true,
-              "title": "TaskLevelMetrics",
-              "type": "dashboard"
-            }
-          ],
+          "links": [],
           "minSpan": null,
           "nullPointMode": "connected",
           "percentage": true,
@@ -577,22 +573,7 @@
           },
           "lines": true,
           "linewidth": 1,
-          "links": [
-            {
-              "dashUri": "db/joblevelmetrics",
-              "dashboard": "JobLevelMetrics",
-              "params": "var-job=$job",
-              "title": "JobLevelMetrics",
-              "type": "dashboard"
-            },
-            {
-              "dashUri": "db/tasklevelmetrics",
-              "dashboard": "TaskLevelMetrics",
-              "params": "var-job=$job",
-              "title": "TaskLevelMetrics",
-              "type": "dashboard"
-            }
-          ],
+          "links": [],
           "minSpan": null,
           "nullPointMode": "connected",
           "percentage": false,
@@ -722,6 +703,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "TaskRoleLevelMetrics",
+  "title": "Task Role Level Metrics",
+  "uid": "TaskRoleLevelMetrics",
   "version": 15
 }}

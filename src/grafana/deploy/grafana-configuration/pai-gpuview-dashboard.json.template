@@ -2224,5 +2224,6 @@
   },
   "timezone": "browser",
   "title": "GPU Device Counters",
+  "uid": "GpuDeviceCounters",
   "version": 1
 }}

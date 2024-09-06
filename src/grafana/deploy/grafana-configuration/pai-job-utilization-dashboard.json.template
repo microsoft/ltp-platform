@@ -395,6 +395,7 @@
     "timepicker": {},
     "timezone": "browser",
     "title": "Job GPU Utilization",
+    "uid": "JobGpuUtilization",
     "weekStart": ""
   }
 }
