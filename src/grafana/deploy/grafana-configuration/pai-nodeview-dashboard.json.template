@@ -25,7 +25,7 @@
       "asDropdown": false,
       "icon": "dashboard",
       "includeVars": true,
-      "keepTime": false,
+      "keepTime": true,
       "tags": [],
       "targetBlank": false,
       "title": "All Tasks in This Node",
