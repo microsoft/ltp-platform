@@ -52,7 +52,7 @@ def gen_gpu_mem_util_gauge():
 def gen_nvidia_smi_status_gauge():
     return GaugeMetricFamily("nvidiasmi_status",
                              "status of nvidia-smi 0 for success, 1 for error",
-                             labels=["error"])
+                             labels=["error", "node_name"])
 
 def gen_nvidia_gpu_util_gauge():
     return GaugeMetricFamily("nvidiasmi_utilization_gpu",
@@ -488,7 +488,7 @@ class GpuCollector(Collector):
                 error = "timeout"
             except Exception as e:
                 error = str(e)
-            nvidia_smi_status.add_metric([error], 1)
+            nvidia_smi_status.add_metric([error, os.environ.get("NODE_NAME")], 1)
             logger.debug("get nvidia gpu_info %s", gpu_info)
             now = datetime.datetime.now()
             self.gpu_info_ref.set(gpu_info, now)
