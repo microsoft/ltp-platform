@@ -360,89 +360,6 @@ paths:
                   extension: {}
         "500":
           $ref: "#/components/responses/UnknownError"
-    put:
-      tags:
-        - user
-      summary: Update a user in the system.
-      description: >-
-        Update a user in the system.
-        Admin only.
-      operationId: updateUser
-      security:
-        - bearerAuth: []
-      requestBody:
-        description: Update a user
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                data:
-                  type: object
-                  required:
-                    - username
-                  properties:
-                    username:
-                      type: string
-                      description: user name
-                    email:
-                      type: string
-                      description: >-
-                        Email address.
-                        Only be allowed in basic mode.
-                        When patch is false, it's required.
-                        When patch is true, it's optional.
-                    virtualCluster:
-                      type: array
-                      description: >-
-                        Array of the virtual cluster.
-                        Only be allowed in basic mode.
-                        When patch is false, it's required.
-                        When patch is true, it's optional.
-                      items:
-                        type: string
-                        description: virtual cluster name.
-                    admin:
-                      type: boolean
-                      description: >-
-                        Set the user as admin or not.
-                        Only be allowed in basic mode.
-                        When patch is false, it's required.
-                        When patch is true, it's optional.
-                    password:
-                      type: string
-                      description: >-
-                        Password.
-                        Only be allowed in basic mode.
-                        When patch is false, it's required.
-                        When patch is true, it's optional.
-                    extension:
-                      type: object
-                      description: >-
-                        Extension fields.
-                        Be allowed in both oidc and basic mode.
-                        When patch is false, it's required.
-                        When patch is true, it's optional.
-                patch:
-                  type: boolean
-                  default: false
-      responses:
-        "201":
-          description: Succeeded
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Response"
-              example:
-                message: "update group {username} successfully."
-        "401":
-          $ref: "#/components/responses/UnauthorizedUserError"
-        "403":
-          $ref: "#/components/responses/ForbiddenUserError"
-        "404":
-          $ref: "#/components/responses/NoUserError"
-        "500":
-          $ref: "#/components/responses/UnknownError"
   /api/v2/users/me:
     put:
       tags:
@@ -541,6 +458,89 @@ paths:
                 extension: {}
         "401":
           $ref: "#/components/responses/UnauthorizedUserError"
+        "404":
+          $ref: "#/components/responses/NoUserError"
+        "500":
+          $ref: "#/components/responses/UnknownError"
+    put:
+      tags:
+        - user
+      summary: Update a user in the system.
+      description: >-
+        Update a user in the system.
+        Admin only.
+      operationId: updateUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Update a user
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  required:
+                    - username
+                  properties:
+                    username:
+                      type: string
+                      description: user name
+                    email:
+                      type: string
+                      description: >-
+                        Email address.
+                        Only be allowed in basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                    virtualCluster:
+                      type: array
+                      description: >-
+                        Array of the virtual cluster.
+                        Only be allowed in basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                      items:
+                        type: string
+                        description: virtual cluster name.
+                    admin:
+                      type: boolean
+                      description: >-
+                        Set the user as admin or not.
+                        Only be allowed in basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                    password:
+                      type: string
+                      description: >-
+                        Password.
+                        Only be allowed in basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                    extension:
+                      type: object
+                      description: >-
+                        Extension fields.
+                        Be allowed in both oidc and basic mode.
+                        When patch is false, it's required.
+                        When patch is true, it's optional.
+                patch:
+                  type: boolean
+                  default: false
+      responses:
+        "201":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: "update group {username} successfully."
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
         "404":
           $ref: "#/components/responses/NoUserError"
         "500":

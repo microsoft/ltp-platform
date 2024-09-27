@@ -66,7 +66,7 @@ if (authnConfig.authnMethod === 'basic') {
     );
 
   router
-    .route('/')
+    .route('/:username')
     /** Put /api/v2/users */
     .put(
       token.checkNotApplication,
@@ -158,10 +158,11 @@ if (authnConfig.authnMethod === 'basic') {
     );
 } else {
   router
-    .route('/')
+    .route('/:username')
     /** Put /api/v2/users */
     .put(
-      token.checkNotApplication,
+      // allow application with admin permission to change user quota
+      token.check,
       param.validate(userInputSchema.oidcUserUpdateInputSchema),
       token.checkAdmin,
       userController.oidcUserUpdate,

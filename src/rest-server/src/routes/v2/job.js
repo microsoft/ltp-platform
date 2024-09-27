@@ -22,6 +22,7 @@ const token = require('@pai/middlewares/token');
 const controller = require('@pai/controllers/v2/job');
 const taskController = require('@pai/controllers/v2/task');
 const protocol = require('@pai/middlewares/v2/protocol');
+const quota = require('@pai/middlewares/v2/quota');
 const jobAttemptRouter = require('@pai/routes/v2/job-attempt.js');
 const param = require('@pai/middlewares/parameter');
 const tagInputSchema = require('@pai/config/v2/tag');
@@ -34,7 +35,7 @@ router
   /** GET /api/v2/jobs - List job */
   .get(token.check, limiter.listJob, controller.list)
   /** POST /api/v2/jobs - Update job */
-  .post(token.check, limiter.submitJob, protocol.submit, controller.update);
+  .post(token.check, limiter.submitJob, protocol.submit, quota.check, controller.update);
 
 router
   .route('/:frameworkName')

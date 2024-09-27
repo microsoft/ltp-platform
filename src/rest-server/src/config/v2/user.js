@@ -139,7 +139,14 @@ const oidcUserUpdateInputSchema = Joi.object().keys({
     username: Joi.string()
       .regex(/^[\w.-]+$/, 'username')
       .required(),
-    extension: Joi.object().pattern(/\w+/, Joi.required()).default(),
+    extension: Joi.object().keys({
+      quota: Joi.object().keys({
+        maxGpusPerJob: Joi.number().integer().min(-1).required(),
+        expiration: Joi.string().isoDate().required(),
+      }),
+      jobSSH: Joi.object().default({}),
+      sshKeys: Joi.array().default([]),
+    }).default(),
   }),
   patch: Joi.boolean().default(false),
 });
