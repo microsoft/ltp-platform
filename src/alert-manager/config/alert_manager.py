@@ -43,7 +43,7 @@ class AlertManager(object):
                 if set(['html.ejs', 'subject.ejs']).issubset(set(contents)):
                     templates.append(dir_name)
         return templates
-    
+
     def run(self):
         result = update_nested_dict(self.default_service_conf, self.service_conf)
 
@@ -59,26 +59,21 @@ class AlertManager(object):
             email_configured = True
         else:
             email_configured = False
-        
+
         if email_configured:
             result["alert-handler"]["email-configs"]["templates"] = self.get_email_templates()
 
         # check if `pai-bearer-token` is properly configured
         if result.get("pai-bearer-token") is not None:
             token_configured = True
-        # legacy: to be compatible with pai version <= v1.5
-        elif result.get("alert-handler") is not None and \
-            result["alert-handler"].get("pai-bearer-token") is not None:
-            result["pai-bearer-token"] = result["alert-handler"]["pai-bearer-token"]
-            token_configured = True
         else:
             token_configured = False
 
         result["alert-handler"]["configured"] = True
         if email_configured and token_configured:
-            result["actions-available"].extend(["email-admin", "email-user", "stop-jobs", "tag-jobs"])
+            result["actions-available"].extend(["email-admin", "email-user", "stop-jobs", "tag-jobs", "email-group"])
         elif email_configured:
-            result["actions-available"].append("email-admin")
+            result["actions-available"].append("email-admin", "email-group")
         elif token_configured:
             result["actions-available"].extend(["stop-jobs", "tag-jobs"])
 

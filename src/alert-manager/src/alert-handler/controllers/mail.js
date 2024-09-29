@@ -49,43 +49,84 @@ const email = new Email({
 const troubleshootingURL =
   'https://openpai.readthedocs.io/en/latest/manual/cluster-admin/troubleshooting.html';
 
+
+const sendEmail = async (template, receiver, alerts, req, res) => {
+  email
+  .send({
+    template: path.join('/etc/alerthandler/templates/', template),
+    message: {
+      to: receiver,
+    },
+    locals: {
+      cluster_id: process.env.CLUSTER_ID,
+      alerts: alerts,
+      groupLabels: req.body.groupLabels,
+      externalURL: req.body.externalURL,
+      webportalURL: process.env.WEBPORTAL_URI,
+      troubleshootingURL: troubleshootingURL,
+    },
+  })
+  .then(() => {
+    logger.info(
+      `alert-handler successfully send email to ${receiver}`,
+    );
+    res.status(200).json({
+      message: `alert-handler successfully send email to ${receiver}`,
+    });
+  })
+  .catch((error) => {
+    logger.error(`alert-handler failed to send email to ${receiver}`, error);
+    res.status(500).json({
+      message: `alert-handler failed to send email to ${receiver}`,
+    });
+  });
+};
+
 // send email to admin
-const sendEmailToAdmin = (req, res) => {
+const sendEmailToAdmin = async (req, res) => {
   logger.info(
     'alert-handler received `send-email-to-admin` post request from alert-manager.',
   );
   const template = req.query.template
     ? req.query.template
     : 'general-templates';
-  email
-    .send({
-      template: path.join('/etc/alerthandler/templates/', template),
-      message: {
-        to: process.env.EMAIL_CONFIGS_ADMIN_RECEIVER,
-      },
-      locals: {
-        cluster_id: process.env.CLUSTER_ID,
-        alerts: req.body.alerts,
-        groupLabels: req.body.groupLabels,
-        externalURL: req.body.externalURL,
-        webportalURL: process.env.WEBPORTAL_URI,
-        troubleshootingURL: troubleshootingURL,
-      },
-    })
-    .then(() => {
-      logger.info(
-        `alert-handler successfully send email to admin at ${process.env.EMAIL_CONFIGS_ADMIN_RECEIVER}`,
-      );
-      res.status(200).json({
-        message: `alert-handler successfully send email to admin at ${process.env.EMAIL_CONFIGS_ADMIN_RECEIVER}`,
-      });
-    })
-    .catch((error) => {
-      logger.error('alert-handler failed to send email to admin', error);
-      res.status(500).json({
-        message: `alert-handler failed to send email to admin`,
-      });
-    });
+  await sendEmail(template, process.env.EMAIL_CONFIGS_ADMIN_RECEIVER, req.body.alerts, req, res);
+};
+
+// send email to group
+const sendEmailToGroup = async (req, res) => {
+  logger.info(
+    'alert-handler received `send-email-to-group` post request from alert-manager.',
+  );
+
+  // group alerts by groupemail
+  const alerts = req.body.alerts
+  const alertsGrouped = {};
+  alerts.map((alert, index) => {
+    const groupEmail = alert.labels.group_email;
+    if (groupEmail in alertsGrouped) {
+      alertsGrouped[groupEmail].push(alerts[index]);
+    } else {
+      alertsGrouped[groupEmail] = [alerts[index]];
+    }
+  });
+
+  const template = req.query.template
+    ? req.query.template
+    : 'general-templates';
+  if (alertsGrouped) {
+    await Promise.all(
+      Object.keys(alertsGrouped).map(async (groupEmail) => {
+        sendEmail(
+          template,
+          groupEmail,
+          alertsGrouped[groupEmail],
+          req,
+          res,
+        );
+      }),
+    );
+  }
 };
 
 const getUserEmail = async (username, token) => {
@@ -174,4 +215,5 @@ const sendEmailToUser = async (req, res) => {
 module.exports = {
   sendEmailToAdmin,
   sendEmailToUser,
+  sendEmailToGroup,
 };

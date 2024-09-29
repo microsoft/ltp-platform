@@ -1,7 +1,12 @@
 from datetime import timezone, datetime, timedelta
 import logging
 import os
+import uuid
+import urllib3
 import requests
+import markdown
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 CLUSTER_QUERY_STRING = "avg(avg_over_time(nvidiasmi_utilization_gpu[7d]))"
 JOB_GPU_PERCENT = 'avg by (job_name) (avg_over_time(task_gpu_percent[7d]))'
@@ -11,7 +16,7 @@ USER_QUERY_STRING = \
     "(sum by (username) (sum_over_time(task_gpu_percent[7d]))) / (sum by (username) (count_over_time(task_gpu_percent[7d])*100)) * 100"
 
 QUERY_PREFIX = "/prometheus/api/v1/query"
-ALERT_PREFIX = "/alert-manager/api/v1/alerts"
+ALERT_PREFIX = "/alert-manager/api/v2/alerts"
 # only the jobs that are running or completed within 7d should be included
 # currently, we just set the limit to max
 REST_JOB_API_PREFIX = "/rest-server/api/v2/jobs?order=completionTime,DESC"
@@ -159,7 +164,7 @@ def get_usage_info(job_gpu_percent, job_gpu_hours, user_usage_result, rest_url):
 
 
 @enable_request_debug_log
-def collect_metrics(url):
+def collect_metrics_from_prometheus(url):
     query_url = url.rstrip("/") + QUERY_PREFIX
     rest_url = url.rstrip("/") + REST_JOB_API_PREFIX
 
@@ -193,10 +198,32 @@ def collect_metrics(url):
 
 
 @enable_request_debug_log
-def send_alert(pai_url: str, cluster_usage, job_usage, user_usage):
-    trigger_time = str(datetime.now(timezone.utc).date())
-    post_url = pai_url.rstrip("/") + ALERT_PREFIX
+def collect_report_from_lucia(url, token, trace_id):
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "x-lucia-traceId": trace_id,
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "async": False,
+        "stream": False,
+        "data": {
+            "client": "paireporter-openpai_monitor",
+            "message": f"Please generate a cluster utilization report for OpenPAI. end_time is {str(datetime.now(timezone.utc))}, time_offset is {os.environ.get('LUCIA_TIME_OFFSET')}"
+        }
+    }
+    resp = requests.post(url, headers=headers, json=payload, verify=False, timeout=1200)
+    resp.raise_for_status()
+    result = resp.json()
+    # parse the message filed part
+    uid = next(iter(result))
+    message = result[uid]["data"]["messages"][0]["data"]["messages"]["result"]
+    return message
+
+
+def generate_alerts_from_prometheus():
     alerts = []
+    trigger_time = str(datetime.now(timezone.utc).date())
     # for cluster
     alert = {
         "labels": {
@@ -205,11 +232,11 @@ def send_alert(pai_url: str, cluster_usage, job_usage, user_usage):
             "severity": "info",
             "cluster_usage": cluster_usage,
             "trigger_time": trigger_time,
+            "group_email": os.environ.get("REPORT_GROUP_EMAIL"),
         },
         "annotations": {
             "summary": "The cluster usage has been reported, please check your email-box for details."
-        },
-        "generatorURL": "alert/script"
+        }
     }
     alerts.append(alert)
 
@@ -231,8 +258,7 @@ def send_alert(pai_url: str, cluster_usage, job_usage, user_usage):
             },
             "annotations": {
                 "summary": "The cluster usage has been reported, please check your email-box for details."
-            },
-            "generatorURL": "alert/script"
+            }
         }
         alerts.append(alert)
 
@@ -250,11 +276,35 @@ def send_alert(pai_url: str, cluster_usage, job_usage, user_usage):
             },
             "annotations": {
                 "summary": "The cluster usage has been reported, please check your email-box for details."
-            },
-            "generatorURL": "alert/script"
+            }
         }
         alerts.append(alert)
+    return alerts
 
+
+def generate_alerts_from_lucia(message):
+    alerts = []
+    trigger_time = str(datetime.now(timezone.utc).date())
+    alert = {
+        "labels": {
+            "alertname": "cluster-report-lucia",
+            "report_type": "cluster-report-lucia",
+            "severity": "info",
+            "trigger_time": trigger_time,
+            "group_email": os.environ.get("REPORT_GROUP_EMAIL"),
+        },
+        "annotations": {
+            "summary": "Cluster utilization report",
+            "description": markdown.markdown(message, extensions=['tables']), # convert markdown to html
+        }
+    }
+    alerts.append(alert)
+    return alerts
+
+
+@enable_request_debug_log
+def send_alert(pai_url: str, alerts):
+    post_url = pai_url.rstrip("/") + ALERT_PREFIX
     logging.info("Sending alerts to alert-manager...")
     resp = requests.post(post_url, json=alerts)
     resp.raise_for_status()
@@ -262,12 +312,26 @@ def send_alert(pai_url: str, cluster_usage, job_usage, user_usage):
 
 
 def main():
+    REPORT_SOURCE = os.environ.get("REPORT_SOURCE")
     PAI_URI = os.environ.get("PAI_URI")
-    # collect cluster gpu usage information
-    cluster_usage, job_usage, user_usage = collect_metrics(PAI_URI)
-    # send alert to alert manager
-    send_alert(PAI_URI, cluster_usage, job_usage, user_usage)
 
+    if REPORT_SOURCE == "PROMETHEUS":
+        logging.info("Collecting metrics from Prometheus...")
+        # collect cluster gpu usage information
+        cluster_usage, job_usage, user_usage = collect_metrics_from_prometheus(PAI_URI)
+        alerts = generate_alerts_from_prometheus(cluster_usage, job_usage, user_usage)
+
+        # send alert to alert manager
+    elif REPORT_SOURCE == "LUCIA":
+        logging.info("Collecting metrics from Lucia...")
+        # collect cluster gpu usage information
+        message = collect_report_from_lucia(
+            os.environ.get("LUCIA_URL"),
+            os.environ.get("LUCIA_BEARER_TOKEN"),
+            str(uuid.uuid4())
+        )
+        alerts = generate_alerts_from_lucia(message)
+    send_alert(PAI_URI, alerts)
 
 if __name__ == "__main__":
     logging.basicConfig(

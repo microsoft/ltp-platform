@@ -41,6 +41,20 @@ spec:
               value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
             - name: PROMETHEUS_SCRAPE_INTERVAL
               value: "{{ cluster_cfg["prometheus"]["scrape_interval"] }}"
+            - name: REPORT_SOURCE
+    {%- if "lucia" in cluster_cfg["alert-manager"]["cluster-utilization"] %}
+              value: LUCIA
+            - name: LUCIA_URL
+              value: "{{ cluster_cfg["alert-manager"]["cluster-utilization"]["lucia"]["url"] }}"
+            - name: LUCIA_BEARER_TOKEN
+              value: "{{ cluster_cfg["alert-manager"]["cluster-utilization"]["lucia"]["bearer-token"] }}"
+            - name: LUCIA_TIME_OFFSET
+              value: "{{ cluster_cfg["alert-manager"]["cluster-utilization"]["lucia"]["time-offset"] }}"
+    {%- else %}
+              value: PROMETHEUS
+    {%- endif %}
+            - name: REPORT_GROUP_EMAIL
+              value: "{{ cluster_cfg["alert-manager"]["cluster-utilization"]["report_group_email"] }}"
           imagePullSecrets:
           - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
           restartPolicy: OnFailure

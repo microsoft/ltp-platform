@@ -5,7 +5,7 @@ import requests
 import ssl
 from OpenSSL import crypto
 
-ALERT_PREFIX = "/alert-manager/api/v1/alerts"
+ALERT_PREFIX = "/alert-manager/api/v2/alerts"
 APISERVER_CERT_PATH = '/etc/kubernetes/ssl/apiserver.crt'
 alertResidualDays = int(os.environ.get('ALERT_RESIDUAL_DAYS'))
 

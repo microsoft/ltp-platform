@@ -25,10 +25,13 @@ const bearerToken = require('express-bearer-token');
 const actions = require('@alert-handler/routes/actions');
 const k8sController = require('@alert-handler/controllers/kubernetes');
 const logger = require('@alert-handler/common/logger');
+const bodyParser = require('body-parser');
 
 const app = express();
 
-app.use(express.json());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
 app.use(bearerToken());
 
 app.use('/', actions);

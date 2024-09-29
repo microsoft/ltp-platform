@@ -77,8 +77,8 @@ data:
 
     - name: pai-cluster-usage
       webhook_configs:
-      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin/?template=cluster-usage'
+      {% if 'email-group' in cluster_cfg["alert-manager"]["actions-available"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-group/?template=cluster-usage'
         send_resolved: false
       {% endif %}
 
@@ -109,6 +109,12 @@ data:
       {% set template = receiver["actions"]["email-admin"]["template"] %}
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin/?template={{ template }}'
         send_resolved: true
+      {% endif %}
+
+      {% if (receiver["actions"]["email-group"] is defined) and ('email-group' in cluster_cfg["alert-manager"]["actions-available"]) %}
+      {% set template = receiver["actions"]["email-group"]["template"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-group/?template={{ template }}'
+        send_resolved: false
       {% endif %}
 
       {% if (receiver["actions"]["email-user"] is defined) and ('email-user' in cluster_cfg["alert-manager"]["actions-available"]) %}

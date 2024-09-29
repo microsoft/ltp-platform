@@ -8,7 +8,7 @@ const config = require("@job-status-change-notification/common/config");
 
 const URI_ALERT_MANAGER = urljoin(
   config.paiUri,
-  "/alert-manager/api/v1/alerts"
+  "/alert-manager/api/v2/alerts"
 );
 
 // generated alerts for state change: running, succeeded, failed, stopped, retried

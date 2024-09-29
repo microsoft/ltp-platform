@@ -29,6 +29,11 @@ router
   .post(emailController.sendEmailToAdmin);
 
 router
+  .route('/alert-handler/send-email-to-group')
+    /** POST /alert-handler/send-email-to-admin */
+    .post(emailController.sendEmailToGroup);
+
+router
   .route('/alert-handler/send-email-to-user')
   /** POST /alert-handler/send-email-to-user */
   .post(emailController.sendEmailToUser);
