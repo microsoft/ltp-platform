@@ -92,6 +92,13 @@ export function getJobComponentsFromConfig(jobConfig, context) {
   const prerequisites = jobConfig.prerequisites || [];
   const secrets = jobConfig.secrets || {};
   const extras = jobConfig.extras || {};
+  if (!extras.jobStatusChangeNotification) {
+    extras.jobStatusChangeNotification = {
+      running: true,
+      succeeded: true,
+      failed: true,
+    }
+  }
 
   const updatedJobInformation = JobBasicInfo.fromProtocol(jobConfig);
   const updatedParameters = Object.keys(parameters).map(key => {
