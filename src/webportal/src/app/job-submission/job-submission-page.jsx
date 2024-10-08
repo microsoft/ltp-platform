@@ -223,6 +223,11 @@ export const JobSubmissionPage = ({
     const setExtrasValue = async () => {
       const extras = {
         [PAI_PLUGIN]: [],
+        jobStatusChangeNotification: {
+          running: true,
+          succeeded: true,
+          failed: true,
+        },
       };
       // set ssh plugin default value
       const sshPlugin = {

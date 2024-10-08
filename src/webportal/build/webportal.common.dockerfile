@@ -25,7 +25,7 @@ ENV NODE_ENV=production \
 COPY dependency/ ../../
 COPY . .
 
-RUN yarn --no-git-tag-version --new-version version \
+RUN rm -rf .env && yarn --no-git-tag-version --new-version version \
     "$(cat version/PAI.VERSION)"
 RUN npm install json -g
 RUN json -I -f package.json -e "this.commitVersion=\"`cat version/COMMIT.VERSION`\""
