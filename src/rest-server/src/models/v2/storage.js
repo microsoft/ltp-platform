@@ -101,6 +101,11 @@ const convertVolumeDetail = async (pvc) => {
         storage.data = {
           containerName: attributes.containerName,
         };
+      } else if (attributes.protocol === 'fuse') {
+        storage.type = 'azureBlob';
+        storage.data = {
+          containerName: attributes.containerName,
+        };
       }
     }
     storage.readOnly = pv.spec.csi.readOnly === true;
