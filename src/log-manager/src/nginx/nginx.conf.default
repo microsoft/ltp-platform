@@ -34,7 +34,7 @@ server {
     return 200 "Log manager ready.";
   }
 
-  # 
+  #
   # Get log list
   #
   location /api/v1/logs {
@@ -81,11 +81,24 @@ server {
     rewrite_by_lua_file /etc/nginx/lua/get_log_content.lua;
   }
 
-  location ~ /~/(.*)$ {
+  location ~ /~/(current|remotelogs)/(.*)$ {
     internal;
     add_header Accept-Ranges bytes;
     add_header Access-Control-Allow-Origin *;
-    rewrite ^/~/(.*)$ $1 break;
+
+    # Check if the URL contains 'current' or 'remotelogs'
+    set_by_lua $remote_log_dir ' return os.getenv("ARCHIVE_LOG_DIR") ';
+    set $root_dir "/usr/local/pai/logs/";  # Default root for 'current'
+
+    set $matched_part $1;
+    if ($matched_part = "remotelogs") {
+        set $root_dir $remote_log_dir;  # Set the root for 'remotelogs'
+    }
+
+    # Rewrite the URL to remove the '/~/current/' or '/~/remotelogs/' part
+    rewrite ^/~/[^/]+/(.*)$ /$1 break;
+
+    # Lua block for setting Content-Disposition header
     rewrite_by_lua_block {
       local args = ngx.req.get_uri_args()
       local filename = args["filename"]
@@ -96,7 +109,8 @@ server {
       end
     }
 
-    root /usr/local/pai/logs/;
+    # Use the dynamically set root directory
+    root $root_dir;
   }
 }
 

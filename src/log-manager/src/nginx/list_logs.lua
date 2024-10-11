@@ -53,12 +53,34 @@ local log_dir = "/usr/local/pai/logs"..path.normalize("/"..username)..
   path.normalize("/"..framework_name)..path.normalize("/"..taskrole)..path.normalize("/"..pod_uid).."/"
 local api_prefix = "/api/v1/logs/"
 
+local archive_log_dir = os.getenv("ARCHIVE_LOG_DIR")
+local remote_log_dir = nil
+if archive_log_dir and archive_log_dir ~= "" then
+  remote_log_dir = archive_log_dir..path.normalize("/"..username)..
+    path.normalize("/"..framework_name)..path.normalize("/"..taskrole)..path.normalize("/"..pod_uid).."/"
+end
+
 local ret = {}
 
 if not util.is_path_under_log_dir(log_dir) or not path.isdir(log_dir) then
-  ngx.log(ngx.ERR, "log folder not exists")
-  ngx.status = ngx.HTTP_NOT_FOUND
-  return ngx.exit(ngx.HTTP_OK)
+  ngx.log(ngx.INFO, "local log folder not exists")
+  -- If remote_log_dir is defined, try using it as a fallback
+  if remote_log_dir then
+    ngx.log(ngx.INFO, "Falling back to remote log directory")
+    log_dir = remote_log_dir
+
+    -- Check if remote_log_dir exists and is not empty
+    if not path.isdir(remote_log_dir) or util.is_directory_empty(remote_log_dir) then
+      ngx.log(ngx.ERR, "Remote log folder also not found or is empty")
+      ngx.status = ngx.HTTP_NOT_FOUND
+      return ngx.exit(ngx.HTTP_OK)
+    end
+  else
+    -- If remote_log_dir is not defined, return 404
+    ngx.log(ngx.ERR, "ARCHIVE_LOG_DIR is not set or empty, and no valid log directory found")
+    ngx.status = ngx.HTTP_NOT_FOUND
+    return ngx.exit(ngx.HTTP_OK)
+  end
 end
 
 for file in lfs.dir(log_dir) do

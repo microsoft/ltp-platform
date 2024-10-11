@@ -35,11 +35,20 @@ spec:
       hostNetwork: false
       containers:
       - name: log-cleaner
+        {%- if cluster_cfg['log-manager']['remote_storage_pvc'] %}
+        env:
+        - name: ARCHIVE_LOG_DIR
+          value: /usr/local/pai/remotelogs
+        {%- endif %}
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}log-manager-cleaner:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         imagePullPolicy: Always
         volumeMounts:
         - name: pai-log
           mountPath: /usr/local/pai/logs
+        {%- if cluster_cfg['log-manager']['remote_storage_pvc'] %}
+        - name: log-manager-remote-storage
+          mountPath: /usr/local/pai/remotelogs
+        {%- endif %}
         {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}
         resources:
           limits:
@@ -61,6 +70,10 @@ spec:
         volumeMounts:
         - name: pai-log
           mountPath: /usr/local/pai/logs
+        {%- if cluster_cfg['log-manager']['remote_storage_pvc'] %}
+        - name: log-manager-remote-storage
+          mountPath: /usr/local/pai/remotelogs
+        {%- endif %}
         ports:
         - containerPort: 80
           hostPort: {{ cluster_cfg["log-manager"]["port"] }}
@@ -87,10 +100,19 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        {%- if cluster_cfg['log-manager']['remote_storage_pvc'] %}
+        - name: ARCHIVE_LOG_DIR
+          value: /usr/local/pai/remotelogs
+        {%- endif %}
       volumes:
         - name: pai-log
           hostPath:
             path: /var/log/pai
+        {%- if cluster_cfg['log-manager']['remote_storage_pvc'] %}
+        - name: log-manager-remote-storage
+          persistentVolumeClaim:
+            claimName: {{ cluster_cfg['log-manager']['remote_storage_pvc'] }}
+        {%- endif %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       tolerations:

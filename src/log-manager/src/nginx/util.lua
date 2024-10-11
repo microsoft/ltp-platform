@@ -12,15 +12,17 @@
 -- DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+local lfs = require "lfs"
 local path = require "path"
 
 local function is_path_under_log_dir(log_path)
   local real_path = path.abspath(log_path)
+  local remote_log_dir = os.getenv("ARCHIVE_LOG_DIR")
 
-  if not string.match(real_path, "^/usr/local/pai/logs/.*") then
-    return false
+  if string.match(real_path, "^/usr/local/pai/logs/.*") or string.match(real_path, "^"..remote_log_dir.."/.*") then
+    return true
   end
-  return true
+  return false
 end
 
 local function is_input_validated(input)
@@ -30,8 +32,21 @@ local function is_input_validated(input)
   return true
 end
 
+-- dir always contains entries . and ..
+local function is_directory_empty(directory)
+  local count = 0
+  for _ in lfs.dir(directory) do
+    count = count + 1
+    if count > 2 then
+      return false
+    end
+  end
+  return true
+end
+
 return {
   is_path_under_log_dir = is_path_under_log_dir,
   is_input_validated = is_input_validated,
+  is_directory_empty = is_directory_empty
 }
 
