@@ -17,9 +17,8 @@ var kubeconfig = base64ToString(aks.listClusterUserCredential().kubeconfigs[0].v
 var currentVersion = aks.properties.kubernetesVersion
 var currentVersionArray = split(currentVersion, '.')
 
-var kubeletversion = int(currentVersionArray[1]) == 28
-  ? '1.28.5'
-  : int(currentVersionArray[1]) == 27 ? '1.27.9' : '1.26.10'
+var kubeletversion = int(currentVersionArray[1]) == 27
+  ? '1.27.9' : '1.28.5'
 
 var fqdn = aks.properties.fqdn
 var cert = split(substring(kubeconfig, indexOf(kubeconfig, 'certificate-authority-data: ') + 28), '\n')[0]
@@ -29,12 +28,14 @@ var nvidiadaemonscript = 'echo ${loadFileAsBase64('scripts/nvidiadaemon.sh')} | 
 var nvidiacronjobscript = 'echo ${loadFileAsBase64('scripts/nvidiacronjob.sh')} | base64 -d | bash -s'
 var containerdscript = 'echo ${loadFileAsBase64('scripts/containerd.sh')} | base64 -d | bash -s'
 var kubeletmsiscript = 'echo ${loadFileAsBase64('scripts/kubelet-msi.sh')} | base64 -d | bash -s ${fqdn} ${aksbootstrapid.properties.clientId}'
+var vmssraidsetupscript = 'echo ${loadFileAsBase64('scripts/raidsetup.sh')} | base64 -d | bash'
 var kubeletscript = 'echo ${loadFileAsBase64('scripts/kubelet.sh')} | base64 -d | bash -s ${kubeletversion} ${fqdn} ${cert}'
 
 var bootstrapscripts = {
   // Azure SKUs
   Standard_ND96asr_v4: [
     waitdnsready
+    vmssraidsetupscript
     nvidiadaemonscript
     '${nvidiacronjobscript} 1215 1410'
     '${containerdscript} nvidia'
