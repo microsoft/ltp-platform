@@ -1,0 +1,37 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: abnormal-detector
+spec:
+  schedule: "*/30 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: abnormal-detector
+            image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}abnormal-detector:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+            imagePullPolicy: Always
+            env:
+            - name: PAI_URI
+    {%- if "ssl" in cluster_cfg["pylon"] and cluster_cfg["pylon"]["ssl"] %}
+              value: "{{ cluster_cfg['pylon']['uri-https']}}"
+    {%- else %}
+              value: "{{ cluster_cfg['pylon']['uri']}}"
+    {%- endif %}
+            - name: PAI_BEARER_TOKEN
+              value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+            - name: LUCIA_URL
+              value: "{{ cluster_cfg["alert-manager"]["lucia"]["url"] }}"
+            - name: LUCIA_BEARER_TOKEN
+              value: "{{ cluster_cfg["alert-manager"]["lucia"]["bearer-token"] }}"
+            - name: LUCIA_DIAGNOSTIC_TIME_OFFSET
+              value: "{{ cluster_cfg["alert-manager"]["abnormal-detector"]["diagnostic-time-offset"] }}"
+          imagePullSecrets:
+          - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+          restartPolicy: OnFailure
+          nodeSelector:
+            pai-master: "true"

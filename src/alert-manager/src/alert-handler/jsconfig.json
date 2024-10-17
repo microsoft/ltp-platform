@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+      "baseUrl": "./",
+      "paths": {
+        "@alert-handler/*": ["*"]  // Adjust to your folder structure
+      }
+    }
+  }

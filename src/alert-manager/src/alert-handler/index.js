@@ -19,6 +19,9 @@
  * Implementation of Alert Handler.
  */
 
+if (process.env.NODE_ENV === 'development') {
+  require('dotenv').config();
+}
 require('module-alias/register');
 const express = require('express');
 const bearerToken = require('express-bearer-token');

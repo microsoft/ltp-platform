@@ -19,6 +19,7 @@ const express = require('express');
 const emailController = require('@alert-handler/controllers/mail');
 const jobController = require('@alert-handler/controllers/job');
 const nodeController = require('@alert-handler/controllers/node');
+const userController = require('@alert-handler/controllers/user')
 
 const router = express.Router();
 
@@ -59,5 +60,10 @@ router
   .route('/alert-handler/fix-nvidia-gpu-low-perf')
   /** POST /alert-handler/fix-nvidia-gpu-low-perf */
   .post(nodeController.fixNvidiaGPULowPerf);
+
+router
+  .route('/alert-handler/set-quotas')
+  /** POST /alert-handler/set-quota */
+  .post(userController.setQuotas);
 
 module.exports = router;

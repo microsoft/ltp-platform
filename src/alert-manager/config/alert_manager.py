@@ -71,11 +71,11 @@ class AlertManager(object):
 
         result["alert-handler"]["configured"] = True
         if email_configured and token_configured:
-            result["actions-available"].extend(["email-admin", "email-user", "stop-jobs", "tag-jobs", "email-group"])
+            result["actions-available"].extend(["email-admin", "email-user", "stop-jobs", "tag-jobs", "email-group", "set-quota"])
         elif email_configured:
             result["actions-available"].append("email-admin", "email-group")
         elif token_configured:
-            result["actions-available"].extend(["stop-jobs", "tag-jobs"])
+            result["actions-available"].extend(["stop-jobs", "tag-jobs", "set-quota"])
 
         if result.get("cluster-utilization") is not None and \
             result["cluster-utilization"].get("schedule") is not None and \

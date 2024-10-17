@@ -1,0 +1,17 @@
+{
+    "37d33975-c975-4473-9998-09cf88bd4099": {
+        "status": "running",
+        "data": {
+            "messages": [
+                {
+                    "data": {
+                        "messages": {
+                            "result": "{\"abnormal_jobs\": [{\"job_name\": \"NCCL_TEST_40nodes_21850733_27c02a6a_3051f47_42c67a6a_50732c2_5339856b\", \"user\": \"binyli\", \"reason\": \"The job has an extremely low GPU utilization with a significant amount of prolonged idle periods, indicating potential misuse of GPU resources without real usage.\", \"action\": \"terminate\", \"notification\": \"email\"}], \"quota_adjustments\": [{\"user\": \"binyli\", \"reason\": \"The job has an extremely low GPU utilization with a significant amount of prolonged idle periods, indicating potential misuse of GPU resources without real usage.\", \"max_gpus_per_job\": 32, \"expiration\": \"2024-10-14 03:00:00\", \"notification\": \"email\"}]}"
+                        }
+                    },
+                    "status": "running"
+                }
+            ]
+        }
+    }
+}

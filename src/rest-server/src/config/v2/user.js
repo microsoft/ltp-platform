@@ -143,9 +143,9 @@ const oidcUserUpdateInputSchema = Joi.object().keys({
       quota: Joi.object().keys({
         maxGpusPerJob: Joi.number().integer().min(-1).required(),
         expiration: Joi.string().isoDate().required(),
-      }),
-      jobSSH: Joi.object().default({}),
-      sshKeys: Joi.array().default([]),
+      }).optional(),
+      jobSSH: Joi.object().optional(),
+      sshKeys: Joi.array().optional(),
     }).default(),
   }),
   patch: Joi.boolean().default(false),

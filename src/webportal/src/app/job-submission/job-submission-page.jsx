@@ -238,6 +238,7 @@ export const JobSubmissionPage = ({
       };
       extras[PAI_PLUGIN].push(sshPlugin);
 
+
       // set storage plugin default value
       const defaultStorageConfig = [];
       try {

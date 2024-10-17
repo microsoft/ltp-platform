@@ -42,14 +42,14 @@ spec:
             - name: PROMETHEUS_SCRAPE_INTERVAL
               value: "{{ cluster_cfg["prometheus"]["scrape_interval"] }}"
             - name: REPORT_SOURCE
-    {%- if "lucia" in cluster_cfg["alert-manager"]["cluster-utilization"] %}
+    {%- if "lucia" in cluster_cfg["alert-manager"] %}
               value: LUCIA
             - name: LUCIA_URL
-              value: "{{ cluster_cfg["alert-manager"]["cluster-utilization"]["lucia"]["url"] }}"
+              value: "{{ cluster_cfg["alert-manager"]["lucia"]["url"] }}"
             - name: LUCIA_BEARER_TOKEN
-              value: "{{ cluster_cfg["alert-manager"]["cluster-utilization"]["lucia"]["bearer-token"] }}"
+              value: "{{ cluster_cfg["alert-manager"]["lucia"]["bearer-token"] }}"
             - name: LUCIA_TIME_OFFSET
-              value: "{{ cluster_cfg["alert-manager"]["cluster-utilization"]["lucia"]["time-offset"] }}"
+              value: "{{ cluster_cfg["alert-manager"]["cluster-utilization"]["time-offset"] }}"
     {%- else %}
               value: PROMETHEUS
     {%- endif %}

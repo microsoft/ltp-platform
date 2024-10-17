@@ -28,6 +28,7 @@ template-list:
   - alert-manager-configmap.yaml
   - alert-manager-cronjob.yaml
   - alert-manager-cert-expiration-check-cronjob.yaml
+  - alert-manager-abnormal-detector.yaml
   - start.sh
 
 start-script: start.sh

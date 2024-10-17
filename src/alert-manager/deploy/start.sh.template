@@ -37,6 +37,7 @@ kubectl apply --overwrite=true -f alert-manager-deployment.yaml || exit $?
 kubectl apply --overwrite=true -f alert-manager-cert-expiration-check-cronjob.yaml || exit $?
 {% if cluster_cfg["alert-manager"]["cluster-utilization"]["configured"] -%}
 kubectl apply --overwrite=true -f alert-manager-cronjob.yaml || exit $?
+kubectl apply --overwrite=true -f alert-manager-abnormal-detector.yaml || exit $?
 {% endif -%}
 
 sleep 10
