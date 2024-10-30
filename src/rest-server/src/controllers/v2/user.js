@@ -722,7 +722,7 @@ const basicUserUpdate = async (req, res, next) => {
 // OIDC
 // admin and other user share the same update schema in OIDC mode
 const oidcUserUpdate = async (req, res, next) => {
-  const username = req.user.username;
+  const username = req.params.username || req.user.username;
   let userInfo;
   try {
     userInfo = await userModel.getUser(username);

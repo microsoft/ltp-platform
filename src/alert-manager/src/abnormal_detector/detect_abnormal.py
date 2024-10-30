@@ -66,7 +66,7 @@ def get_diagnose_info() -> DiagnoseInfo:
         "async": False,
         "stream": False,
         "data": {
-            "client": "paidectector-openpai_monitor",
+            "client": "openpai-monitor",
             "message": f"I want to detect abnormal behavior of the jobs and users running on Lucia Training platform and take corresponding actions. action is detect-abnormal-behavior, end_time is {trigger_time} and time_offset is {time_offset}"
         }
     }

@@ -1,10 +1,17 @@
+import base64
+from bs4 import BeautifulSoup
 from datetime import timezone, datetime, timedelta
 import logging
-import os
-import uuid
-import urllib3
-import requests
 import markdown
+import http
+import os
+import re
+import requests
+import tempfile
+from urllib.parse import urljoin, urlparse
+import urllib3
+import uuid
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -23,6 +30,8 @@ REST_JOB_API_PREFIX = "/rest-server/api/v2/jobs?order=completionTime,DESC"
 
 TOKEN = os.environ.get('PAI_BEARER_TOKEN')
 PROMETHEUS_SCRAPE_INTERVAL = int(os.environ.get('PROMETHEUS_SCRAPE_INTERVAL'))
+
+SESSION_ID=""
 
 def enable_request_debug_log(func):
     def wrapper(*args, **kwargs):
@@ -204,20 +213,23 @@ def collect_report_from_lucia(url, token, trace_id):
         "x-lucia-traceId": trace_id,
         "Content-Type": "application/json"
     }
+    end_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     payload = {
         "async": False,
         "stream": False,
         "data": {
-            "client": "paireporter-openpai_monitor",
-            "message": f"Please generate a cluster utilization report for OpenPAI. end_time is {str(datetime.now(timezone.utc))}, time_offset is {os.environ.get('LUCIA_TIME_OFFSET')}"
+            "client": "openpai-monitor",
+            "message": f"Please generate a cluster utilization report for OpenPAI. end_time is {end_time}, time_offset is {os.environ.get('LUCIA_TIME_OFFSET')}"
         }
     }
     resp = requests.post(url, headers=headers, json=payload, verify=False, timeout=1200)
     resp.raise_for_status()
     result = resp.json()
     # parse the message filed part
-    uid = next(iter(result))
-    message = result[uid]["data"]["messages"][0]["data"]["messages"]["result"]
+    # TODO(binyli): Avoid using global variable
+    global SESSION_ID
+    SESSION_ID = next(iter(result))
+    message = result[SESSION_ID]["data"]["messages"][0]["data"]["messages"]["result"]
     return message
 
 
@@ -282,9 +294,69 @@ def generate_alerts_from_prometheus():
     return alerts
 
 
-def generate_alerts_from_lucia(message):
+def download_png_files_from_nginx(url, temp_dir):
+    response = requests.get(url, verify=False, timeout=1200)
+    if response.status_code == http.HTTPStatus.OK:
+        # Parse the HTML content
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Find all anchor tags (links)
+        anchor_tags = soup.find_all('a')
+
+        # Filter and download PNG files
+        for tag in anchor_tags:
+            file_link = tag.get('href')
+            if file_link and file_link.endswith('.png'):
+                # Construct the full URL if the file link is relative
+                file_url = urljoin(url, file_link)
+                # Extract the image filename
+                file_name = os.path.basename(file_url)
+                file_path = os.path.join(temp_dir, file_name)
+
+                # Download the image
+                try:
+                    file_data = requests.get(file_url, verify=False)
+                    if file_data.status_code == http.HTTPStatus.OK:
+                        with open(file_path, 'wb') as file:
+                            file.write(file_data.content)
+                        logging.info(f"Downloaded: {file_name} to {file_path}")
+                    else:
+                        logging.error(f"Failed to download: {file_url} (Status code: {file_data.status_code})")
+                except Exception as e:
+                    logging.exception(f"Error downloading {file_url}: {e}")
+    else:
+        logging.error(f"Failed to access {url} (Status code: {response.status_code})")
+
+def convert_markdown_to_html_with_embedded_images(markdown_text, pic_dir):
+    # Find all image references in the markdown text
+    image_pattern = re.compile(r'!\[(.*?)\]\((.*?)\)')
+    matches = image_pattern.findall(markdown_text)
+
+    # Replace image references with base64-encoded versions
+    for alt_text, image_name in matches:
+        image_path = os.path.join(pic_dir, image_name)
+        try:
+            # Read the image file and encode it in base64
+            with open(image_path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                # Determine the image type (assuming png for simplicity, adjust if needed)
+                image_type = image_name.split('.')[-1]
+                image_data_uri = f"data:image/{image_type};base64,{encoded_string}"
+                # Replace the markdown image with the HTML image tag containing base64
+                html_image_tag = f'<img alt="{alt_text}" src="{image_data_uri}" />'
+                markdown_text = markdown_text.replace(f'![{alt_text}]({image_name})', html_image_tag)
+        except FileNotFoundError:
+            logging.exception(f"Image {image_path} not found.")
+    return markdown_text
+
+def generate_alerts_from_lucia(message: str, lucia_url: str, trace_id: str):
     alerts = []
     trigger_time = str(datetime.now(timezone.utc).date())
+    with tempfile.TemporaryDirectory() as temp_dir:
+        parsed_url = urlparse(lucia_url)
+        url = f"{parsed_url.scheme}://{parsed_url.netloc}" + f"/system-files/agents/openpai-monitor/report/{trigger_time}/{SESSION_ID}/{trace_id}/"
+        download_png_files_from_nginx(url, temp_dir)
+        message = convert_markdown_to_html_with_embedded_images(message, temp_dir)
     alert = {
         "labels": {
             "alertname": "cluster-report-lucia",
@@ -324,13 +396,15 @@ def main():
         # send alert to alert manager
     elif REPORT_SOURCE == "LUCIA":
         logging.info("Collecting metrics from Lucia...")
+        trace_id = str(uuid.uuid4())
+        lucia_url = os.environ.get("LUCIA_URL")
         # collect cluster gpu usage information
         message = collect_report_from_lucia(
-            os.environ.get("LUCIA_URL"),
+            lucia_url,
             os.environ.get("LUCIA_BEARER_TOKEN"),
-            str(uuid.uuid4())
+            trace_id
         )
-        alerts = generate_alerts_from_lucia(message)
+        alerts = generate_alerts_from_lucia(message, lucia_url, trace_id)
     send_alert(PAI_URI, alerts)
 
 if __name__ == "__main__":
