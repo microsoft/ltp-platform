@@ -73,12 +73,15 @@ ENV PATH "${PATH}:/opt/rocm/bin"
 COPY build/moneo-*-exporter_entrypoint.sh .
 
 # For the job exporter
-ENV NERDCTL_VERSION=main
+ENV NERDCTL_VERSION=2.0.0-rc.2
 RUN apt-get update && apt-get install --no-install-recommends -y wget ca-certificates
-RUN wget https://paistaticwe.blob.core.windows.net/binaries/nerdctl/nerdctl-${NERDCTL_VERSION} && \
-    chmod +x nerdctl-${NERDCTL_VERSION} && \
-    mv nerdctl-${NERDCTL_VERSION} /usr/local/bin/nerdctl && \
-    mkdir -p /job_exporter
+RUN wget https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz && \
+    mkdir -p /tmp/nerdctl && \
+    tar -xzvf nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz -C /tmp/nerdctl && \
+    mv /tmp/nerdctl/nerdctl /usr/local/bin/nerdctl && \
+    mkdir -p /job_exporter && \
+    rm -rf /tmp/nerdctl && \
+    rm -rf nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz
 
 COPY requirements.txt /job_exporter/
 RUN pip3 install -r /job_exporter/requirements.txt
