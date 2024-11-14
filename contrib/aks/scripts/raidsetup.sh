@@ -34,7 +34,15 @@ mdadm --detail /dev/md0
 mkfs -t ext4 -F /dev/md0
 sleep 5
 lsblk -f
-uuid=\`lsblk /dev/md0 --output UUID --noheadings\`
+for ((i=0; i<10; i++)); do
+  uuid=\$(lsblk /dev/md0 --output UUID --noheadings)
+  if [ -n "\$uuid" ]; then
+    break
+  else
+    echo "UUID not found. Attempt \$((i + 1))/10. Retrying..."
+    sleep 5
+  fi
+done
 
 output="UUID=\$uuid /mntext ext4 errors=remount-ro 0 1"
 if [[ -f /etc/fstab.bak ]]
