@@ -7,6 +7,7 @@ cat > /etc/systemd/system/nvidia-persistenced.service << EOL
 [Unit]
 Description=NVIDIA Persistence Daemon
 Wants=syslog.target
+After=nvidia-fabricmanager.service
 StopWhenUnneeded=true
 [Service]
 Type=forking

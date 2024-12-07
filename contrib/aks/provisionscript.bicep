@@ -56,8 +56,8 @@ var bootstrapscripts = {
   Standard_ND96isr_H100_v5: [
     waitdnsready
     vmssraidsetupscript
-    nvidiadaemonscript
     '${nvidiacronjobscript} 2619 1980'
+    nvidiadaemonscript`
     '${containerdscript} nvidia'
     kubeletmsiscript
     '${kubeletscript} Standard_ND96isr_H100_v5 gpu'
