@@ -26,6 +26,7 @@ var cert = split(substring(kubeconfig, indexOf(kubeconfig, 'certificate-authorit
 var waitdnsready = 'echo ${loadFileAsBase64('scripts/waitdnsready.sh')} | base64 -d | bash -s ${fqdn}'
 var nvidiadaemonscript = 'echo ${loadFileAsBase64('scripts/nvidiadaemon.sh')} | base64 -d | bash -s'
 var nvidiacronjobscript = 'echo ${loadFileAsBase64('scripts/nvidiacronjob.sh')} | base64 -d | bash -s'
+var nvidianvswitch = 'echo ${loadFileAsBase64('scripts/nvidianvswitch.sh')} | base64 -d | bash -s'
 var containerdscript = 'echo ${loadFileAsBase64('scripts/containerd.sh')} | base64 -d | bash -s'
 var kubeletmsiscript = 'echo ${loadFileAsBase64('scripts/kubelet-msi.sh')} | base64 -d | bash -s ${fqdn} ${aksbootstrapid.properties.clientId}'
 var vmssraidsetupscript = 'echo ${loadFileAsBase64('scripts/raidsetup.sh')} | base64 -d | bash'
@@ -56,8 +57,7 @@ var bootstrapscripts = {
   Standard_ND96isr_H100_v5: [
     waitdnsready
     vmssraidsetupscript
-    '${nvidiacronjobscript} 2619 1980'
-    nvidiadaemonscript`
+    '${nvidianvswitch} 2619 1980'
     '${containerdscript} nvidia'
     kubeletmsiscript
     '${kubeletscript} Standard_ND96isr_H100_v5 gpu'
