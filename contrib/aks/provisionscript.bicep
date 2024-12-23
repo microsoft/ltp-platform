@@ -31,6 +31,8 @@ var containerdscript = 'echo ${loadFileAsBase64('scripts/containerd.sh')} | base
 var kubeletmsiscript = 'echo ${loadFileAsBase64('scripts/kubelet-msi.sh')} | base64 -d | bash -s ${fqdn} ${aksbootstrapid.properties.clientId}'
 var vmssraidsetupscript = 'echo ${loadFileAsBase64('scripts/raidsetup.sh')} | base64 -d | bash'
 var kubeletscript = 'echo ${loadFileAsBase64('scripts/kubelet.sh')} | base64 -d | bash -s ${kubeletversion} ${fqdn} ${cert}'
+var tlsscanscript = 'echo ${loadFileAsBase64('scripts/update-tls-scan.sh')} | base64 -d | bash -s'
+var blobproxyscript = 'echo ${loadFileAsBase64('scripts/enable-blob-proxy.sh')} | base64 -d | bash -s'
 
 var bootstrapscripts = {
   // Azure SKUs
@@ -42,6 +44,8 @@ var bootstrapscripts = {
     '${containerdscript} nvidia'
     kubeletmsiscript
     '${kubeletscript} Standard_ND96asr_v4 gpu'
+    tlsscanscript
+    blobproxyscript
   ]
 
   Standard_ND96amsr_A100_v4: [
@@ -52,6 +56,8 @@ var bootstrapscripts = {
     '${containerdscript} nvidia'
     kubeletmsiscript
     '${kubeletscript} Standard_ND96amsr_A100_v4 gpu'
+    tlsscanscript
+    blobproxyscript
   ]
 
   Standard_ND96isr_H100_v5: [
@@ -61,6 +67,8 @@ var bootstrapscripts = {
     '${containerdscript} nvidia'
     kubeletmsiscript
     '${kubeletscript} Standard_ND96isr_H100_v5 gpu'
+    tlsscanscript
+    blobproxyscript
   ]
 
   Standard_E16bs_v5: [
