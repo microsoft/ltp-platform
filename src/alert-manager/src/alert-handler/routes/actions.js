@@ -57,6 +57,16 @@ router
   .post(nodeController.cordonNodes);
 
 router
+  .route('/alert-handler/uncordon-nodes')
+  /** POST /alert-handler/uncordon-nodes */
+  .post(nodeController.uncordonNodes);
+
+router
+  .route('/alert-handler/reboot-nodes')
+  /** POST /alert-handler/reboot-nodes */
+  .post(nodeController.rebootNodes);
+
+router
   .route('/alert-handler/fix-nvidia-gpu-low-perf')
   /** POST /alert-handler/fix-nvidia-gpu-low-perf */
   .post(nodeController.fixNvidiaGPULowPerf);

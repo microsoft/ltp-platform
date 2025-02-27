@@ -32,7 +32,7 @@ groups:
           summary: "{{$labels.name}} in {{$labels.node_name}} ({{$labels.host_ip}})  not running detected"
 
       - alert: PaiServicePodNotReady
-        expr: pai_pod_count{phase="running", ready="false"} > 0
+        expr: pai_pod_count{phase="running",ready="false",node_name!~"aks.*"} > 0
         for: 10m
         labels:
           type: pai_service

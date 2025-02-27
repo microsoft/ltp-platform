@@ -115,6 +115,14 @@ func (mg *metricGenerator) generatePodMetric(pod *v1.Pod) podMetric {
 
 	labels := pod.ObjectMeta.Labels
 	serviceName := labels["app"]
+
+	if serviceName == "" {
+		serviceName = labels["name"]
+		if serviceName == "" {
+			serviceName = labels["k8s-app"]
+		}
+	}
+
 	jobName := labels["jobName"]
 
 	var containerStatuses []containerMetric

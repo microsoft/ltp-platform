@@ -40,6 +40,24 @@ const cordonNode = async (nodeName) => {
   );
 };
 
+const uncordonNode = async (nodeName) => {
+  const headers = {
+    'content-type': 'application/strategic-merge-patch+json',
+  };
+  // set the node unschedulable
+  const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+  return k8sApi.patchNode(
+    nodeName,
+    { spec: { unschedulable: false } },
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    { headers },
+  );
+}
+
 const cordonNodes = (req, res) => {
   logger.info(
     'alert-handler received `cordonNode` post request from alert-manager.',
@@ -72,6 +90,126 @@ const cordonNodes = (req, res) => {
         message: `alert-handler failed to cordon node`,
       });
     });
+};
+
+const uncordonNodes = (req, res) => {
+  logger.info(
+    'alert-handler received `uncordonNode` post request from alert-manager.',
+  );
+
+  // extract nodes to uncordon
+  const nodeNames = req.body.alerts
+    // filter alerts which are firing and contain `node_name` as label
+    .filter((alert) => alert.status === 'firing' && 'node_name' in alert.labels)
+    .map((alert) => alert.labels.node_name);
+
+  if (nodeNames.length === 0) {
+    return res.status(200).json({
+      message: 'No nodes to uncordon.',
+    });
+  }
+  logger.info(`alert-handler will uncordon these nodes: ${nodeNames}`);
+
+  // cordon all these nodes
+  Promise.all(nodeNames.map((nodeName) => uncordonNode(nodeName)))
+    .then((response) => {
+      logger.info(`alert-handler successfully uncordon nodes: ${nodeNames}`);
+      res.status(200).json({
+        message: `alert-handler successfully uncordon nodes`,
+      });
+    })
+    .catch((error) => {
+      logger.error(error);
+      res.status(500).json({
+        message: `alert-handler failed to uncordon node`,
+      });
+    });
+};
+
+const drainNode = async (nodeName) => {
+  logger.info(`Draining node: ${nodeName}`);
+  const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+
+  try {
+    // Get all pods on the node (excluding DaemonSets)
+    const allPods = await k8sApi.listPodForAllNamespaces();
+    const podNames = allPods.body.items.filter(
+      pod => pod.metadata.namespace === 'default' && pod.spec.nodeName === nodeName && !pod.metadata.ownerReferences?.some(ref => ref.kind === 'DaemonSet'))
+      .map(pod => pod.metadata.name);
+
+    if (podNames.length === 0) {
+      logger.info(`No non-DaemonSet pods to evict on ${nodeName}.`);
+      return;
+    }
+
+    // Evict each pod
+    await Promise.all(
+      podNames.map(podName =>
+        k8sApi.deleteNamespacedPod(podName, 'default')
+      )
+    );
+
+    logger.info(`Successfully drained node: ${nodeName}`);
+  } catch (error) {
+    logger.error(`Failed to drain node ${nodeName}: ${error.message}`);
+    throw error;
+  }
+};
+
+
+const getRebootPod = (nodeName) => ({
+  apiVersion: "v1",
+  kind: "Pod",
+  metadata: {
+    name: `node-rebooter-${crypto.createHash('md5').update(nodeName).digest('hex').slice(0, 10)}`, // Shortened for safety
+    namespace: "default",
+    labels: { "created-by": "alert-handler" },
+  },
+  spec: {
+    tolerations: [{ key: "node.kubernetes.io/unschedulable", operator: "Exists" }],
+    hostPID: true,
+    nodeSelector: { "kubernetes.io/hostname": nodeName },
+    containers: [{
+      name: "rebooter",
+      image: "busybox",
+      command: ["sh", "-c", "sleep 5; sync; reboot -f"], // Ensures sync before force reboot
+      securityContext: { privileged: true },
+    }],
+    restartPolicy: "Never",
+  },
+});
+
+const rebootNodes = async (req, res) => {
+  logger.info('alert-handler received `rebootNode` post request from alert-manager.');
+  const nodeNames = req.body.alerts
+    .filter(alert => alert.status === 'firing' && 'node_name' in alert.labels)
+    .map(alert => alert.labels.node_name);
+
+  if (nodeNames.length === 0) {
+    return res.status(200).json({ message: 'No nodes to reboot.' });
+  }
+  logger.info(`alert-handler will reboot these nodes: ${nodeNames}`);
+
+  const results = await Promise.allSettled(nodeNames.map(async (nodeName) => {
+    try {
+      await cordonNode(nodeName);
+      await drainNode(nodeName);
+      const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+      await k8sApi.createNamespacedPod("default", getRebootPod(nodeName));
+      logger.info(`Successfully triggered reboot for node: ${nodeName}`);
+      return { nodeName, status: 'fulfilled' };
+    } catch (error) {
+      logger.error(`Failed to trigger reboot for node ${nodeName}: ${error.message}`);
+      return { nodeName, status: 'rejected', reason: error.message };
+    }
+  }));
+
+  const failedNodes = results.filter(result => result.status === 'rejected').map(result => result.nodeName);
+  if (failedNodes.length > 0) {
+    res.status(500).json({ message: `Failed to trigger reboot for nodes: ${failedNodes.join(', ')}` });
+  } else {
+    res.status(200).json({ message: `Successfully triggered reboot for all nodes` });
+  }
 };
 
 const getK8sV1Job = (jobName, nodeName, minorNumber) => {
@@ -178,4 +316,6 @@ const fixNvidiaGPULowPerf = (req, res) => {
 module.exports = {
   cordonNodes,
   fixNvidiaGPULowPerf,
+  rebootNodes,
+  uncordonNodes,
 };

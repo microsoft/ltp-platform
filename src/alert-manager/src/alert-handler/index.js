@@ -27,6 +27,7 @@ const express = require('express');
 const bearerToken = require('express-bearer-token');
 const actions = require('@alert-handler/routes/actions');
 const k8sController = require('@alert-handler/controllers/kubernetes');
+const cleaner = require('@alert-handler/controllers/rebootcleaner');
 const logger = require('@alert-handler/common/logger');
 const bodyParser = require('body-parser');
 
@@ -46,3 +47,4 @@ app.listen(port, () => {
 
 // check completed jobs which were used to fix NvidiaGPULowPerf issue every 1 hour
 setInterval(k8sController.cleanTTL24HJobs, 60 * 60 * 1000);
+setInterval(cleaner.cleanFinishedRebootPods, 60 * 60 * 1000);

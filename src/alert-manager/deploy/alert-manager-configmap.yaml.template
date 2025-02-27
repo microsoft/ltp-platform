@@ -41,6 +41,14 @@ data:
         match:
           alertname: NvidiaSmiFailed
 
+      - receiver: pai-cordon-nodes
+        match:
+          alertname: PaiServicePodNotReady
+      
+      - receiver: pai-reboot-nodes
+        match:
+          alertname: DmesgGPUFault
+
       - receiver: pai-cluster-usage
         match:
           report_type: cluster-usage
@@ -114,6 +122,28 @@ data:
       webhook_configs:
       {% if 'cordon-nodes' in cluster_cfg["alert-manager"]["actions-available"] %}
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/cordon-nodes'
+        send_resolved: false
+      {% endif %}
+      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
+        send_resolved: true
+      {% endif %}
+    
+    - name: pai-uncordon-nodes
+      webhook_configs:
+      {% if 'uncordon-nodes' in cluster_cfg["alert-manager"]["actions-available"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/uncordon-nodes'
+        send_resolved: false
+      {% endif %}
+      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
+        send_resolved: true
+      {% endif %}
+    
+    - name: pai-reboot-nodes
+      webhook_configs:
+      {% if 'reboot-nodes' in cluster_cfg["alert-manager"]["actions-available"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/reboot-nodes'
         send_resolved: false
       {% endif %}
       {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}

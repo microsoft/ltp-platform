@@ -7,6 +7,8 @@ port: 9093
 actions-available:
 - webportal-notification
 - cordon-nodes
+- uncordon-nodes
+- reboot-nodes
 - fix-nvidia-gpu-low-perf
 alert-handler:
   log-level: 'info'
