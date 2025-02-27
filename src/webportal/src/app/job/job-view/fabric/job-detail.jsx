@@ -130,6 +130,13 @@ class JobDetail extends React.Component {
       if (!isNil(sshInfo)) {
         return;
       }
+
+      // We only need to fetch ssh info once
+      // no matter if we have retreived job info or not
+      if (!this.state.loading) {
+        return;
+      }
+
       try {
         nextState.sshInfo = await fetchSshInfo();
       } catch (err) {

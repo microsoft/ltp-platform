@@ -61,26 +61,17 @@ export async function getJobStatusNumber(isAdmin) {
   }
 
   return wrapper(async () => {
-    const waiting = (await client.httpClient.get(url, undefined, undefined, {
-      ...query,
-      ...{ state: 'WAITING' },
-    })).totalCount;
-    const running = (await client.httpClient.get(url, undefined, undefined, {
-      ...query,
-      ...{ state: 'RUNNING' },
-    })).totalCount;
-    const stopped = (await client.httpClient.get(url, undefined, undefined, {
-      ...query,
-      ...{ state: 'STOPPED' },
-    })).totalCount;
-    const failed = (await client.httpClient.get(url, undefined, undefined, {
-      ...query,
-      ...{ state: 'FAILED' },
-    })).totalCount;
-    const succeeded = (await client.httpClient.get(url, undefined, undefined, {
-      ...query,
-      ...{ state: 'SUCCEEDED' },
-    })).totalCount;
+    const states = ['WAITING', 'RUNNING', 'STOPPED', 'FAILED', 'SUCCEEDED'];
+    const promises = states.map(state =>
+      client.httpClient.get(url, undefined, undefined, {
+        ...query,
+        ...{ state },
+      })
+    );
+    const results = await Promise.all(promises);
+    const [waiting, running, stopped, failed, succeeded] = results.map(
+      result => result.totalCount
+    );
     return { waiting, running, stopped, failed, succeeded };
   });
 }

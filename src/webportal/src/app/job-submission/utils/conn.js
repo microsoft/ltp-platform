@@ -91,37 +91,38 @@ export async function fetchStorageDetails(configNames) {
     const storageSummary = await client.storage.getStorages();
     const defaultStorages = await client.storage.getStorages(true);
     const defaultStorageNames = defaultStorages.storages.map(x => x.name);
-    const details = [];
-    for (const storage of storageSummary.storages) {
-      if (configNames.includes(storage.name)) {
+    const details = await Promise.all(
+      storageSummary.storages
+      .filter(storage => configNames.includes(storage.name))
+      .map(async storage => {
         const detail = await client.storage.getStorage(storage.name);
         if (defaultStorageNames.includes(detail.name)) {
           detail.default = true;
         }
         if (detail.type === 'dshuttle') {
-          const res = await fetch('dshuttle/api/v1/master/info', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (res.ok) {
-            const json = await res.json();
-            if (
-              detail.data.dshuttlePath &&
-              json.mountPoints[detail.data.dshuttlePath]
-            ) {
-              detail.data = {
-                ...detail.data,
-                ...getDeshuttleStorageDetails(
-                  json.mountPoints[detail.data.dshuttlePath],
-                ),
-              };
-            }
+        const res = await fetch('dshuttle/api/v1/master/info', {
+          headers: {
+          Authorization: `Bearer ${token}`,
+          },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (
+          detail.data.dshuttlePath &&
+          json.mountPoints[detail.data.dshuttlePath]
+          ) {
+          detail.data = {
+            ...detail.data,
+            ...getDeshuttleStorageDetails(
+            json.mountPoints[detail.data.dshuttlePath],
+            ),
+          };
           }
         }
-        details.push(detail);
-      }
-    }
+        }
+        return detail;
+      })
+    );
     return details;
   });
 }

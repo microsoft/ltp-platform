@@ -220,9 +220,9 @@ export const createApplicationTokenRequest = () =>
 export const listStorageDetailRequest = async () => {
   return wrapper(async () => {
     const storageSummary = await client.storage.getStorages();
-    const details = [];
     const token = checkToken();
-    for (const storage of storageSummary.storages) {
+
+    const details = await Promise.all(storageSummary.storages.map(async (storage) => {
       const detail = await client.storage.getStorage(storage.name);
       if (detail.type === 'dshuttle') {
         const res = await fetch('dshuttle/api/v1/master/info', {
@@ -245,9 +245,9 @@ export const listStorageDetailRequest = async () => {
           }
         }
       }
+      return detail;
+    }));
 
-      details.push(detail);
-    }
     return details;
   });
 };
