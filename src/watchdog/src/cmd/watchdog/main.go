@@ -59,7 +59,14 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	pc := watchdog.NewPromMetricCollector(client, time.Duration(collectionInterval)*time.Second)
+
+	hivedClient, err := watchdog.NewHivedClient()
+	if err != nil {
+		// we can still run the service without hived client
+		klog.Errorf("Failed to create HivedClient: %v", err)
+	}
+
+	pc := watchdog.NewPromMetricCollector(client, hivedClient, time.Duration(collectionInterval)*time.Second)
 	expoter, err := watchdog.NewExporter(pc)
 	if err != nil {
 		panic(err.Error())

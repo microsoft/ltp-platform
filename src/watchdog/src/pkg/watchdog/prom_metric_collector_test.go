@@ -113,10 +113,15 @@ func TestGenerateNodesMetrics(t *testing.T) {
 	mo := newMockObject("../../testdata/node_list.json", mockNodeListType)
 
 	mg := metricGenerator{}
+
+	moPod = newMockObject("../../testdata/pod_list.json", mockPodListType)
+	podMetrics := mg.generatePodMetrics(moPod.podList)
+	npMap := mg.generateNodeToPodsMap(podMetrics)
+
 	nodeMetrics := mg.generateNodeMetrics(mo.nodeList)
 	assert.Equal(t, 1, len(nodeMetrics))
 
-	metrics := mo.pc.getPaiNodeMetrics(nodeMetrics[0])
+	metrics := mo.pc.getPaiNodeMetrics(nodeMetrics[0], npMap)
 	expectLables := []map[string]string{
 		{
 			"host_ip": "10.151.41.8", "node_name": "test_node_0", "disk_pressure": "false", "memory_pressure": "false",
@@ -132,11 +137,7 @@ func TestGenerateNodesMetrics(t *testing.T) {
 		}
 	}
 
-	mo = newMockObject("../../testdata/pod_list.json", mockPodListType)
-
-	podMetrics := mg.generatePodMetrics(mo.podList)
-	npMap := mg.generateNodeToPodsMap(podMetrics)
-	gpuMetrics := mo.pc.getNodeGpuMetrics(nodeMetrics[0], npMap)
+	gpuMetrics := moPod.pc.getNodeGpuMetrics(nodeMetrics[0], npMap)
 	assert.Equal(t, 3, len(gpuMetrics))
 
 	type pair struct {
@@ -194,8 +195,12 @@ func TestParseDLWSUnschedulableNodes(t *testing.T) {
 	mo := newMockObject("../../testdata/dlws_node_list_with_unschedulable.json", mockNodeListType)
 	mg := metricGenerator{}
 
+	moPod = newMockObject("../../testdata/pod_list.json", mockPodListType)
+	podMetrics := mg.generatePodMetrics(moPod.podList)
+	npMap := mg.generateNodeToPodsMap(podMetrics)
+
 	nodeMetrics := mg.generateNodeMetrics(mo.nodeList)
-	promMetrics := mo.pc.getPaiNodeMetrics(nodeMetrics[0])
+	promMetrics := mo.pc.getPaiNodeMetrics(nodeMetrics[0], npMap)
 	expectLables := []map[string]string{
 		{
 			"host_ip": "192.168.255.1", "node_name": "dltsp40-infra01", "disk_pressure": "false", "memory_pressure": "false",

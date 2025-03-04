@@ -43,6 +43,7 @@ type nodeMetric struct {
 	networkUnavailable string
 	unschedulable      bool
 	isConditionUnknown bool
+	virtualCluster     string
 }
 
 type containerMetric struct {
@@ -66,6 +67,8 @@ type podMetric struct {
 	serviceName        string
 	jobName            string
 	gpuUsed            int
+	virtualCluster     string
+	isPaiWorker        bool
 	containers         []containerMetric
 }
 
@@ -123,6 +126,8 @@ func (mg *metricGenerator) generatePodMetric(pod *v1.Pod) podMetric {
 		}
 	}
 
+	// TODO: I never see this label in real data, so I'm not sure if this is correct
+	// need to confirm with the author
 	jobName := labels["jobName"]
 
 	var containerStatuses []containerMetric
@@ -148,6 +153,15 @@ func (mg *metricGenerator) generatePodMetric(pod *v1.Pod) podMetric {
 		gpuUsed = int(math.Max(float64(limit), float64(request)))
 	}
 
+	// check if the pod is a PAI job
+	// if it is, set the virtualCluster field to the value of the virtualCluster label
+	isPaiWorker := false
+	virtualCluster := ""
+	if val, ok := labels["type"]; ok && val == "kube-launcher-task" {
+		isPaiWorker = true
+		virtualCluster = labels["virtualCluster"]
+	}
+
 	return podMetric{
 		name:               pod.ObjectMeta.Name,
 		namespace:          pod.ObjectMeta.Namespace,
@@ -164,6 +178,8 @@ func (mg *metricGenerator) generatePodMetric(pod *v1.Pod) podMetric {
 		jobName:            jobName,
 		containers:         containerStatuses,
 		gpuUsed:            gpuUsed,
+		isPaiWorker:        isPaiWorker,
+		virtualCluster:     virtualCluster,
 	}
 }
 

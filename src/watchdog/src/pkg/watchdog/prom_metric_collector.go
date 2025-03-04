@@ -68,7 +68,14 @@ var (
 			"pai_node_count",
 			"count of pai node",
 			[]string{
-				"host_ip", "node_name", "disk_pressure", "memory_pressure", "ready", "unschedulable",
+				"host_ip", "node_name", "disk_pressure", "memory_pressure", "ready", "unschedulable", "virtual_cluster",
+			},
+		),
+		"virtualClusterStat": createMetric(
+			"virtual_cluster_stat",
+			"virtual cluster usage statistics",
+			[]string{
+				"vc_stat", "metric", "sku",
 			},
 		),
 	}
@@ -97,11 +104,12 @@ var (
 )
 
 const (
-	errorTyeParse                     = "parse"
+	errorTypeParse                    = "parse"
 	errorTypeUnknownPodCond           = "unknown_pod_cond"
 	errorTypeUnknownNodeCond          = "unknown_node_cond"
 	errorTypeHealthz                  = "healthz"
 	errorTypeUnexpectedContainerState = "unexpected_container_state"
+	errorTypeFailedHivedAccess        = "failed_hived_access"
 )
 
 func observeTime(h prometheus.Histogram, f func()) {
@@ -114,6 +122,7 @@ func observeTime(h prometheus.Histogram, f func()) {
 type PromMetricCollector struct {
 	mutex                sync.Mutex
 	k8sClient            *K8sClient
+	hivedClient          *HivedClient
 	metricGenerator      *metricGenerator
 	collectionErrorTypes []string
 	collectionErrors     *prometheus.CounterVec
@@ -127,9 +136,10 @@ type PromMetricCollector struct {
 }
 
 // NewPromMetricCollector used to create PromMetricCollector instance
-func NewPromMetricCollector(c *K8sClient, i time.Duration) *PromMetricCollector {
+func NewPromMetricCollector(c *K8sClient, hclient *HivedClient, i time.Duration) *PromMetricCollector {
 	return &PromMetricCollector{
-		k8sClient: c,
+		k8sClient:   c,
+		hivedClient: hclient,
 		collectionErrors: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Name: "process_error_log_total",
 			Help: "total count of error log",
@@ -148,7 +158,7 @@ func NewPromMetricCollector(c *K8sClient, i time.Duration) *PromMetricCollector 
 			Help: "Response latency for list nodes from k8s api (seconds)",
 		}),
 		collectionErrorTypes: []string{
-			errorTyeParse,
+			errorTypeParse,
 			errorTypeUnknownPodCond,
 			errorTypeUnknownNodeCond,
 			errorTypeHealthz,
@@ -193,6 +203,18 @@ func (p *PromMetricCollector) collect(ctx context.Context) {
 	var err error
 	var f func()
 
+	if p.hivedClient != nil {
+		vcStats, err := p.hivedClient.GetVirtualClusterStatisticsInfo()
+		if err != nil {
+			p.collectionErrors.WithLabelValues(errorTypeFailedHivedAccess).Inc()
+			klog.Errorf("Failed to get virtual cluster statistics from hived scheduler, error %v", err.Error())
+		} else {
+			if vcStats != nil {
+				p.metrics = append(p.metrics, p.generateVirtualClustersMetrics(vcStats)...)
+			}
+		}
+	}
+
 	var health string
 	f = func() { health, err = p.k8sClient.getServerHealth(ctx) }
 	observeTime(p.healthzHistogram, f)
@@ -205,7 +227,7 @@ func (p *PromMetricCollector) collect(ctx context.Context) {
 	f = func() { nodeList, err = p.k8sClient.listNodes(ctx) }
 	observeTime(p.listNodesHistogram, f)
 	if err != nil {
-		p.collectionErrors.WithLabelValues(errorTyeParse).Inc()
+		p.collectionErrors.WithLabelValues(errorTypeParse).Inc()
 		klog.Errorf("Failed to list nodes, error %v", err.Error())
 	}
 
@@ -213,7 +235,7 @@ func (p *PromMetricCollector) collect(ctx context.Context) {
 	f = func() { podList, err = p.k8sClient.listPods(ctx) }
 	observeTime(p.listPodsHistogram, f)
 	if err != nil {
-		p.collectionErrors.WithLabelValues(errorTyeParse).Inc()
+		p.collectionErrors.WithLabelValues(errorTypeParse).Inc()
 		klog.Errorf("Failed to list pods, error %v", err.Error())
 	}
 
@@ -235,7 +257,7 @@ func (p *PromMetricCollector) collect(ctx context.Context) {
 		}
 
 		p.metrics = append(p.metrics, p.getNodeGpuMetrics(nodeMetric, npMap)...)
-		p.metrics = append(p.metrics, p.getPaiNodeMetrics(nodeMetric)...)
+		p.metrics = append(p.metrics, p.getPaiNodeMetrics(nodeMetric, npMap)...)
 	}
 
 	for _, podMetric := range podMetrics {
@@ -243,7 +265,7 @@ func (p *PromMetricCollector) collect(ctx context.Context) {
 			p.collectionErrors.WithLabelValues(errorTypeUnknownPodCond).Inc()
 		}
 
-		if podMetric.serviceName == "" && podMetric.jobName == "" {
+		if !podMetric.isPaiWorker && podMetric.serviceName == "" && podMetric.jobName == "" {
 			klog.V(4).Infof("Unknown pod %v", podMetric.name)
 			continue
 		}
@@ -268,7 +290,27 @@ func (p *PromMetricCollector) getMetrics() []prometheus.Metric {
 	return dst
 }
 
-func (p *PromMetricCollector) getPaiNodeMetrics(nodeMetric nodeMetric) []prometheus.Metric {
+func (p *PromMetricCollector) generateVirtualClustersMetrics(vcStats map[string]interface{}) []prometheus.Metric {
+	var metrics []prometheus.Metric
+	for stat, value := range vcStats {
+		for metricType, resources := range value.(map[string]interface{}) {
+			for sku, metricValue := range resources.(map[string]interface{}) {
+				metrics = append(metrics, prometheus.MustNewConstMetric(
+					paiMetrics["virtualClusterStat"],
+					prometheus.GaugeValue,
+					metricValue.(float64),
+					stat,
+					metricType,
+					sku,
+				))
+			}
+		}
+	}
+	return metrics
+}
+
+func (p *PromMetricCollector) getPaiNodeMetrics(
+	nodeMetric nodeMetric, npMap map[string][]podMetric) []prometheus.Metric {
 	metrics := make([]prometheus.Metric, 0, 1)
 	metrics = append(metrics, prometheus.MustNewConstMetric(
 		paiMetrics["paiNodeCount"],
@@ -280,6 +322,16 @@ func (p *PromMetricCollector) getPaiNodeMetrics(nodeMetric nodeMetric) []prometh
 		nodeMetric.memoryPressure,
 		nodeMetric.ready,
 		strconv.FormatBool(nodeMetric.unschedulable),
+		func() string {
+			if pods, ok := npMap[nodeMetric.name]; ok {
+				for _, pod := range pods {
+					if pod.isPaiWorker {
+						return pod.virtualCluster
+					}
+				}
+			}
+			return ""
+		}(),
 	))
 	return metrics
 }

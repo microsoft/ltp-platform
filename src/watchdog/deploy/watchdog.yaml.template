@@ -58,6 +58,8 @@ spec:
         - name: KUBE_APISERVER_ADDRESS
           value: "{{ cluster_cfg['layout']['kubernetes']['api-servers-url'] }}"
         {%- endif %}
+        - name: HIVED_WEBSERVICE_URI
+          value: {{ cluster_cfg['hivedscheduler']['webservice'] }}
         command:
           - "./watchdog"
           - "-collection-interval"
