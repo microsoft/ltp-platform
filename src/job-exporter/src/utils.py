@@ -54,6 +54,21 @@ def walk_json_field_safe(obj, *fields):
         return None
 
 
+class EccError(object):
+    """ EccError represents volatile count from one GPU card,
+    see https://developer.download.nvidia.com/compute/DCGM/docs/nvidia-smi-367.38.pdf for more info """
+    def __init__(self, single=0, double=0):
+        self.single = single
+        self.double = double
+
+    def __repr__(self):
+        return "s: %d, d: %d" % (self.single, self.double)
+
+    def __eq__(self, o):
+        return self.single == o.single and \
+                self.double == o.double
+
+
 class GpuVendor(Enum):
     UNKNOWN = "unknown"
     NVIDIA = "nvidia"

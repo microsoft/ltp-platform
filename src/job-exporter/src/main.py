@@ -105,7 +105,7 @@ def main(args):
             ("containerd_daemon_collector", interval, decay_time, collector.ContainerdDaemonCollector),
             ("gpu_collector", interval, decay_time, collector.GpuCollector, gpu_info_ref, zombie_info_ref, args.threshold),
             ("container_collector", max(0, interval - 18), decay_time, collector.ContainerCollector,
-                gpu_info_ref, stats_info_ref),
+                gpu_info_ref, stats_info_ref, args.duration),
             ("zombie_collector", interval, decay_time, collector.ZombieCollector, stats_info_ref, zombie_info_ref),
             ("process_collector", interval, decay_time, collector.ProcessCollector),
             ]
@@ -127,6 +127,7 @@ if __name__ == "__main__":
     parser.add_argument("--port", "-p", help="port to expose metrics", default="9102")
     parser.add_argument("--interval", "-i", help="prometheus scrape interval second", type=int, default=30)
     parser.add_argument("--threshold", "-t", help="memory threshold to consider gpu memory leak", type=int, default=20 * 1024 * 1024)
+    parser.add_argument("--duration", "-d", help="dmesg message before duration minutes ago from now", type=int, default=10)
     args = parser.parse_args()
 
     def get_logging_level():

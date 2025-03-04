@@ -17,10 +17,14 @@ from prometheus_client.core import GaugeMetricFamily
 import amd
 import container_inspect
 import container_stats
+import container_ib_stats
+import container_systemmsg
 import nvidia
 import ps
 import utils
 from utils import GpuVendor
+
+import amdsmi
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +89,11 @@ def gen_nvidia_gpu_performance_state():
             labels=["node_name", "minor_number", "clocks_throttle_reasons"])
 
 # AMD GPU metrics
+def gen_amd_smi_status_gauge():
+    return GaugeMetricFamily("rocmsmi_status",
+                             "status of rocm-smi 0 for success, 1 for error",
+                             labels=["error", "node_name"])
+
 def gen_amd_gpu_util_gauge():
     return GaugeMetricFamily("rocmsmi_utilization_gpu",
             "gpu core utilization of card",
@@ -98,6 +107,16 @@ def gen_amd_gpu_mem_util_gauge():
 def gen_amd_gpu_temperature_gauge():
     return GaugeMetricFamily("rocmsmi_temperature",
             "gpu temperature of card",
+            labels=["minor_number"])
+
+def gen_amd_gpu_ecc_counter():
+    return GaugeMetricFamily("rocmsmi_ecc_error_count",
+            "count of amd ecc error",
+            labels=["node_name", "minor_number", "type"])
+
+def gen_amd_gpu_memory_leak_counter():
+    return GaugeMetricFamily("rocmsmi_memory_leak_count",
+            "count of amd memory leak",
             labels=["minor_number"])
 
 def gen_zombie_process_counter():
@@ -120,6 +139,11 @@ def gen_process_mem_usage_gauge():
             "memory usage of process, to save space in prometheus, we only expose those who consume more than 500Mb of memory",
             labels=["pid", "cmd"])
 
+def gen_system_message_gauge():
+    return GaugeMetricFamily("system_dmesg_status",
+                             "status of system message 0 for success, 1 for error",
+                             labels=["error", "node_name"])
+
 class ResourceGauges(object):
     def __init__(self):
         self.task_labels = [
@@ -134,6 +158,9 @@ class ResourceGauges(object):
 
         self.task_labels_gpu = copy.deepcopy(self.task_labels)
         self.task_labels_gpu.append("minor_number")
+
+        self.task_labels_ib = copy.deepcopy(self.task_labels)
+        self.task_labels_ib.append("ib_port")
 
         self.gauges = {}
 
@@ -160,6 +187,28 @@ class ResourceGauges(object):
         self.add_gauge("task_gpu_mem_percent",
                 "how much percent of gpu memory this task used",
                 self.task_labels_gpu)
+
+        self.add_gauge("task_ib_port_xmit_data",
+                "how much data this task sent through IB port",
+                self.task_labels_ib)
+        self.add_gauge("task_ib_port_rcv_data",
+                "how much data this task received through IB port",
+                self.task_labels_ib)
+        self.add_gauge("task_ib_port_xmit_discards",
+                "how much data this task discarded while sending through IB port",
+                self.task_labels_ib)
+        self.add_gauge("task_ib_port_rcv_errors",
+                "how much errors this task received through IB port",
+                self.task_labels_ib)
+        self.add_gauge("task_ib_port_xmit_constraint_errors",
+                "how much constraint errors this task sent through IB port",
+                self.task_labels_ib)
+        self.add_gauge("task_ib_port_rcv_constraint_errors",
+                "how much constraint errors this task received through IB port",
+                self.task_labels_ib)
+        self.add_gauge("task_ib_port_physical_state",
+                "physical state of IB port",
+                self.task_labels_ib)
 
     def add_task_and_service_gauge(self, name_tmpl, desc_tmpl):
         self.add_gauge(
@@ -352,6 +401,14 @@ class GpuCollector(Collector):
         self.mem_leak_thrashold = mem_leak_thrashold
         self.gpu_vendor = utils.get_gpu_vendor()
 
+        if self.gpu_vendor == GpuVendor.AMD:
+            amdsmi.amdsmi_init()
+            self.device_handlers = amdsmi.amdsmi_get_processor_handles()
+    
+    def __del__(self):
+        if self.gpu_vendor == GpuVendor.AMD:
+            amdsmi.amdsmi_shut_down()
+
     @staticmethod
     def get_container_id(pid):
         """ return two values, the first one is if we found the corresponding
@@ -449,7 +506,7 @@ class GpuCollector(Collector):
         ]
 
     @staticmethod
-    def convert_amd_gpu_info_to_metrics(gpu_info):
+    def convert_amd_gpu_info_to_metrics(gpu_info, zombie_info, pid_to_cid_fn, mem_leak_thrashold, node_name=os.environ.get("NODE_NAME")):
         # common gpu metrics
         gpu_core_util, gpu_mem_util = GpuCollector.gen_common_gpu_gauge()
 
@@ -457,6 +514,12 @@ class GpuCollector(Collector):
         amd_core_utils = gen_amd_gpu_util_gauge()
         amd_mem_utils = gen_amd_gpu_mem_util_gauge()
         amd_gpu_temp = gen_amd_gpu_temperature_gauge()
+        amd_ecc_errors = gen_amd_gpu_ecc_counter()
+        amd_mem_leak = gen_amd_gpu_memory_leak_counter()
+        external_process = gen_gpu_used_by_external_process_counter()
+        zombie_container = gen_gpu_used_by_zombie_container_counter()
+
+        pids_use_gpu = {} # key is gpu minor, value is an array of pid
 
         for minor, info in gpu_info.items():
             gpu_core_util.add_metric([minor, GpuVendor.AMD.value],
@@ -466,9 +529,44 @@ class GpuCollector(Collector):
             amd_core_utils.add_metric([minor], info.gpu_util)
             amd_mem_utils.add_metric([minor], info.gpu_mem_util)
             amd_gpu_temp.add_metric([minor], info.temperature)
+            amd_ecc_errors.add_metric([node_name, minor, "single"], info.ecc_errors.single)
+            amd_ecc_errors.add_metric([node_name, minor, "double"], info.ecc_errors.double)
+
+            # TODO: this piece of code seems not corret, gpu_mem_util is
+            # a percentage number but mem_leak_thrashold is memory size. Need to fix it.
+            if info.gpu_mem_util > mem_leak_thrashold and len(info.pids) == 0:
+                # we found memory leak less than 20M can be mitigated automatically
+                amd_mem_leak.add_metric([minor], 1)
+
+            if len(info.pids) > 0:
+                pids_use_gpu[minor]= info.pids
+
+        logger.debug("pids_use_gpu is %s, zombie_info is %s", pids_use_gpu, zombie_info)
+        if len(pids_use_gpu) > 0:
+            if zombie_info is None:
+                zombie_info = []
+
+            for minor, pids in pids_use_gpu.items():
+                for pid in pids:
+                    found, z_id = pid_to_cid_fn(pid)
+                    logger.debug("pid %s has found %s, z_id %s", pid, found, z_id)
+                    if found:
+                        # NOTE: zombie_info is a set of short docker container id, but
+                        # z_id is full id.
+                        for zombie_id in zombie_info:
+                            if z_id.startswith(zombie_id):
+                                # found corresponding container
+                                zombie_container.add_metric([minor, zombie_id], 1)
+                    else:
+                        external_process.add_metric([minor, str(pid)], 1)
+            if len(zombie_container.samples) > 0 or len(external_process.samples) > 0:
+                logger.warning("found gpu used by external %s, zombie container %s",
+                        external_process, zombie_container)            
+
         return [
-            amd_core_utils, amd_mem_utils, amd_gpu_temp, gpu_core_util,
-            gpu_mem_util
+            amd_core_utils, amd_mem_utils, amd_ecc_errors,
+            amd_mem_leak, external_process, zombie_container,
+            amd_gpu_temp, gpu_core_util, gpu_mem_util
         ]
 
     def collect_impl(self):
@@ -500,14 +598,28 @@ class GpuCollector(Collector):
             else:
                 return [nvidia_smi_status]
         if self.gpu_vendor == GpuVendor.AMD:
-            gpu_info = amd.rocm_smi(GpuCollector.amd_cmd_hostogram,
-                         GpuCollector.cmd_timeout)
-            logger.debug("get amd gpu info %s", gpu_info)
+            gpu_info = None
+            amd_smi_status = gen_amd_smi_status_gauge()
+            error = "ok"
+            try:
+                gpu_info = amd.rocm_smi(GpuCollector.amd_cmd_hostogram,
+                         GpuCollector.cmd_timeout, self.device_handlers)
+            except TimeoutError:
+                error = "timeout"
+            except Exception as e:
+                error = str(e)
+            amd_smi_status.add_metric([error, os.environ.get("NODE_NAME")], 1)
 
-            self.gpu_info_ref.set(gpu_info, datetime.datetime.now())
+            logger.debug("get amd gpu info %s", gpu_info)
+            now = datetime.datetime.now()
+            self.gpu_info_ref.set(gpu_info, now)
+            zombie_info = self.zombie_info_ref.get(now)
             if gpu_info:
-                return GpuCollector.convert_amd_gpu_info_to_metrics(gpu_info)
-            return None
+                return (GpuCollector.convert_amd_gpu_info_to_metrics(
+                    gpu_info, zombie_info, GpuCollector.get_container_id, self.mem_leak_thrashold)
+                + [amd_smi_status])
+            else:
+                return [amd_smi_status]
         return None
 
 
@@ -558,10 +670,11 @@ class ContainerCollector(Collector):
     ])
 
     def __init__(self, name, sleep_time, atomic_ref, iteration_counter, gpu_info_ref,
-            stats_info_ref):
+            stats_info_ref, duration):
         Collector.__init__(self, name, sleep_time, atomic_ref, iteration_counter)
         self.gpu_info_ref = gpu_info_ref
         self.stats_info_ref = stats_info_ref
+        self.duration = duration
 
         self.gpu_vendor = utils.get_gpu_vendor()
 
@@ -576,7 +689,35 @@ class ContainerCollector(Collector):
         logger.debug("gpu_info is %s", gpu_infos)
         logger.debug("stats_obj is %s", stats_obj)
 
-        return self.collect_container_metrics(stats_obj, gpu_infos)
+        # here we process dmesg to get system message
+        dmesg_status = gen_system_message_gauge()
+        node_name = os.environ.get("NODE_NAME")
+        error_flag = False
+        try:
+            system_msgs = container_systemmsg.stats(ContainerCollector.inspect_histogram,
+                                                    ContainerCollector.inspect_timeout,
+                                                    self.duration)
+            if system_msgs:
+                error_flag = True
+                for msg in system_msgs:
+                    dmesg_status.add_metric([msg, node_name], 1)
+        except TimeoutError:
+            error = "timeout"
+            logger.error("Error happens when getting dmesg for node %s with error %s", node_name, error)
+        except Exception as e:
+            error = str(e)
+            logger.error("Error happens when getting dmesg for node %s with error %s", node_name, error)
+
+        # TODO: we ignore the exception or errors when getting system message
+        # and return ok if exception happens
+        if not error_flag:
+            dmesg_status.add_metric(['ok', node_name], 1)
+
+        container_metrics = self.collect_container_metrics(stats_obj, gpu_infos)
+        container_metrics = list(container_metrics) if container_metrics is not None else []
+        container_metrics.append(dmesg_status)
+        return container_metrics
+
 
     @staticmethod
     def parse_from_labels(inspect_info, gpu_infos):
@@ -673,6 +814,45 @@ class ContainerCollector(Collector):
             gauges.add_value("task_block_in_byte", container_labels, stats["blockIO"]["in"])
             gauges.add_value("task_block_out_byte", container_labels, stats["blockIO"]["out"])
             gauges.add_value("task_mem_usage_percent", container_labels, stats["memPerc"])
+
+            # if it is the task, we will check the IB status of the task and
+            # log the statitistics
+            ib_stats = container_ib_stats.stats(container_id,
+                                                ContainerCollector.inspect_histogram,
+                                                ContainerCollector.inspect_timeout)
+            
+            if ib_stats:
+                for ib_port, port_status in ib_stats.items():
+                    ib_labels = copy.deepcopy(container_labels)
+                    ib_labels["ib_port"] = ib_port
+                    if "port_xmit_data" in port_status:
+                        gauges.add_value("task_ib_port_xmit_data", ib_labels, port_status["port_xmit_data"])
+                    else:
+                        logger.warning("port_xmit_data not found in port_status for container %s", container_id)
+                    if "port_rcv_data" in port_status:
+                        gauges.add_value("task_ib_port_rcv_data", ib_labels, port_status["port_rcv_data"])
+                    else:
+                        logger.warning("port_rcv_data not found in port_status for container %s", container_id)
+                    if "port_xmit_discards" in port_status:
+                        gauges.add_value("task_ib_port_xmit_discards", ib_labels, port_status["port_xmit_discards"])
+                    else:
+                        logger.warning("port_xmit_discards not found in port_status for container %s", container_id)
+                    if "port_rcv_errors" in port_status:
+                        gauges.add_value("task_ib_port_rcv_errors", ib_labels, port_status["port_rcv_errors"])
+                    else:
+                        logger.warning("port_rcv_errors not found in port_status for container %s", container_id)
+                    if "port_xmit_constraint_errors" in port_status:
+                        gauges.add_value("task_ib_port_xmit_constraint_errors", ib_labels, port_status["port_xmit_constraint_errors"])
+                    else:
+                        logger.warning("port_xmit_constraint_errors not found in port_status for container %s", container_id)
+                    if "port_rcv_constraint_errors" in port_status:
+                        gauges.add_value("task_ib_port_rcv_constraint_errors", ib_labels, port_status["port_rcv_constraint_errors"])
+                    else:
+                        logger.warning("port_rcv_constraint_errors not found in port_status for container %s", container_id)
+                    if "port_physical_state" in port_status:
+                        gauges.add_value("task_ib_port_physical_state", ib_labels, port_status["port_physical_state"])
+                    else:
+                        logger.warning("port_physical_state not found in port_status for container %s", container_id)
         else:
             labels = {"name": pai_service_name}
             gauges.add_value("service_cpu_percent", labels, stats["cpuPerc"])

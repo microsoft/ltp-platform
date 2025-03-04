@@ -34,21 +34,6 @@ def convert_to_byte(data):
         return number
 
 
-class EccError(object):
-    """ EccError represents volatile count from one GPU card,
-    see https://developer.download.nvidia.com/compute/DCGM/docs/nvidia-smi-367.38.pdf for more info """
-    def __init__(self, single=0, double=0):
-        self.single = single
-        self.double = double
-
-    def __repr__(self):
-        return "s: %d, d: %d" % (self.single, self.double)
-
-    def __eq__(self, o):
-        return self.single == o.single and \
-                self.double == o.double
-
-
 class NvidiaGpuStatus(object):
     """ This object represents status of one GPU card, field meaning:
         gpu_util the gpu util of this gpu, float number, range 0~100
@@ -193,7 +178,7 @@ def parse_smi_xml_result(smi):
                 float(gpu_util),
                 float(gpu_mem_util),
                 pids,
-                EccError(single=ecc_single, double=ecc_double),
+                utils.EccError(single=ecc_single, double=ecc_double),
                 str(gpu_index),
                 uuid,
                 temperature,
