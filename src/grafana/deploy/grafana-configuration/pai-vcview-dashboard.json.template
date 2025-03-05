@@ -31,7 +31,7 @@
         },
         "id": 8,
         "panels": [],
-        "title": "Cluster GPU Utilization",
+        "title": "Virtual Cluster GPU Utilization",
         "type": "row"
       },
       {
@@ -93,7 +93,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum(count_over_time((pai_node_count{node_name!~\"aks-.*\", unschedulable!=\"false\"} or pai_node_count{node_name!~\"aks-.*\", ready!=\"true\"} or pai_node_count{node_name!~\"aks-.*\", disk_pressure!=\"false\"} or pai_node_count{node_name!~\"aks-.*\", memory_pressure!=\"false\"})[$__range:]) * 8)",
+            "expr": "sum(sum_over_time((virtual_cluster_stat{metric=\"resourcesTotal\",sku!~\".*-opp\",vc_stat=\"$virtual_cluster\"})[$__range:]))-sum(sum_over_time((virtual_cluster_stat{metric=\"resourcesGuaranteed\",sku!~\".*-opp\",vc_stat=\"$virtual_cluster\"})[$__range:]))",
             "format": "time_series",
             "instant": true,
             "interval": "",
@@ -107,7 +107,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum(sum_over_time((virtual_cluster_stat{metric=\"resourcesGuaranteed\", sku!~\".*-opp\"})[$__range:])) - sum (count_over_time((task_gpu_percent)[$__range:]))",
+            "expr": "sum(sum_over_time((virtual_cluster_stat{metric=\"resourcesGuaranteed\",sku!~\".*-opp\",vc_stat=\"$virtual_cluster\"})[$__range:])) - sum(count_over_time((task_gpu_percent{virtual_cluster=\"$virtual_cluster\"})[$__range:]))",
             "format": "time_series",
             "hide": false,
             "instant": true,
@@ -121,7 +121,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum (count_over_time((task_gpu_percent)[$__range:]))",
+            "expr": "sum (count_over_time((task_gpu_percent{virtual_cluster=\"$virtual_cluster\"})[$__range:]))",
             "format": "time_series",
             "hide": false,
             "instant": true,
@@ -185,7 +185,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum(count_over_time(pai_node_count{node_name!~\"aks-.*\"}[$__range:]) * 8)",
+            "expr": "sum(sum_over_time((virtual_cluster_stat{metric=\"resourcesTotal\",sku!~\".*-opp\",vc_stat=\"$virtual_cluster\"})[$__range:]))",
             "instant": true,
             "legendFormat": "__auto",
             "range": false,
@@ -247,7 +247,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum(count_over_time((pai_node_count{node_name!~\"aks-.*\", unschedulable!=\"false\"} or pai_node_count{node_name!~\"aks-.*\", ready!=\"true\"} or pai_node_count{node_name!~\"aks-.*\", disk_pressure!=\"false\"} or pai_node_count{node_name!~\"aks-.*\", memory_pressure!=\"false\"})[$__range:]) * 8)",
+            "expr": "sum(sum_over_time((virtual_cluster_stat{metric=\"resourcesTotal\",sku!~\".*-opp\",vc_stat=\"$virtual_cluster\"})[$__range:]))-sum(sum_over_time((virtual_cluster_stat{metric=\"resourcesGuaranteed\",sku!~\".*-opp\",vc_stat=\"$virtual_cluster\"})[$__range:]))",
             "instant": true,
             "legendFormat": "__auto",
             "range": false,
@@ -310,7 +310,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum(sum_over_time((virtual_cluster_stat{metric=\"resourcesGuaranteed\", sku!~\".*-opp\"})[$__range:])) - sum (count_over_time((task_gpu_percent)[$__range:]))",
+            "expr": "sum(sum_over_time((virtual_cluster_stat{metric=\"resourcesGuaranteed\",sku!~\".*-opp\",vc_stat=\"$virtual_cluster\"})[$__range:])) - sum (count_over_time((task_gpu_percent{virtual_cluster=\"$virtual_cluster\"})[$__range:]))",
             "instant": true,
             "legendFormat": "__auto",
             "range": false,
@@ -330,7 +330,7 @@
         },
         "id": 7,
         "panels": [],
-        "title": "Cluster Job GPU Utilization",
+        "title": "Virtual Cluster Job GPU Utilization",
         "type": "row"
       },
       {
@@ -396,7 +396,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum (sum_over_time((task_gpu_percent>0)[$__range:])) / 100",
+            "expr": "sum (sum_over_time((task_gpu_percent{virtual_cluster=\"$virtual_cluster\"}>0)[$__range:])) / 100",
             "instant": true,
             "legendFormat": "Utilized GPU Hours",
             "range": false,
@@ -408,7 +408,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "(sum(count_over_time((task_gpu_percent>0)[$__range:]))) - (sum (sum_over_time(task_gpu_percent[$__range:])) / 100)",
+            "expr": "(sum(count_over_time((task_gpu_percent{virtual_cluster=\"$virtual_cluster\"}>0)[$__range:]))) - (sum (sum_over_time(task_gpu_percent{virtual_cluster=\"$virtual_cluster\"}[$__range:])) / 100)",
             "hide": false,
             "instant": true,
             "interval": "",
@@ -422,7 +422,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum (count_over_time((task_gpu_percent==0)[$__range:]))",
+            "expr": "sum (count_over_time((task_gpu_percent{virtual_cluster=\"$virtual_cluster\"}==0)[$__range:]))",
             "hide": false,
             "instant": true,
             "legendFormat": "Idle GPU Hours",
@@ -485,7 +485,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum (sum_over_time((task_gpu_percent>0)[$__range:])) / 100",
+            "expr": "sum (sum_over_time((task_gpu_percent{virtual_cluster=\"$virtual_cluster\"}>0)[$__range:])) / 100",
             "format": "table",
             "instant": true,
             "legendFormat": "__auto",
@@ -553,7 +553,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "(sum(count_over_time((task_gpu_percent>0)[$__range:]))) - (sum (sum_over_time(task_gpu_percent[$__range:])) / 100)",
+            "expr": "(sum(count_over_time((task_gpu_percent{virtual_cluster=\"$virtual_cluster\"}>0)[$__range:]))) - (sum(sum_over_time(task_gpu_percent{virtual_cluster=\"$virtual_cluster\"}[$__range:])) / 100)",
             "format": "table",
             "instant": true,
             "legendFormat": "__auto",
@@ -617,7 +617,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "sum (count_over_time((task_gpu_percent==0)[$__range:]))",
+            "expr": "sum (count_over_time((task_gpu_percent{virtual_cluster=\"$virtual_cluster\"}==0)[$__range:]))",
             "format": "table",
             "instant": true,
             "legendFormat": "__auto",
@@ -627,86 +627,41 @@
         ],
         "title": "Idle GPU Hours",
         "type": "stat"
-      },
-      {
-        "datasource": {
-          "uid": "<%infinity-uid%>",
-          "type": "yesoreyeram-infinity-datasource"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "red",
-                  "value": null
-                }
-              ]
-            },
-            "color": {
-              "mode": "thresholds"
-            },
-            "unit": "m"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 4,
-          "w": 12,
-          "x": 12,
-          "y": 32
-        },
-        "id": 9,
-        "options": {
-          "reduceOptions": {
-            "values": false,
-            "calcs": [
-              "lastNotNull"
-            ],
-            "fields": ""
-          },
-          "orientation": "auto",
-          "textMode": "auto",
-          "wideLayout": true,
-          "colorMode": "value",
-          "graphMode": "area",
-          "justifyMode": "auto",
-          "showPercentChange": false
-        },
-        "pluginVersion": "10.4.4",
-        "targets": [
-          {
-            "datasource": {
-              "type": "yesoreyeram-infinity-datasource",
-              "uid": "<%infinity-uid%>"
-            },
-            "refId": "A",
-            "type": "json",
-            "source": "url",
-            "format": "table",
-            "url": "http://utilization-reporter-service.default.svc.cluster.local/metrics?start_timestamp=$__from&end_timestamp=$__to",
-            "url_options": {
-              "method": "GET",
-              "data": ""
-            },
-            "root_selector": "cluster_failed_job_gpu_mins",
-            "columns": [],
-            "filters": [],
-            "global_query_id": "",
-            "parser": "backend"
-          }
-        ],
-        "title": "Failed GPU Hours",
-        "type": "stat"
       }
     ],
     "refresh": "",
     "schemaVersion": 39,
     "tags": [],
     "templating": {
-      "list": []
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "virtualcluster",
+            "value": "virtualcluster"
+          },
+          "datasource": {
+            "type": "prometheus"
+          },
+          "definition": "label_values(task_gpu_percent,virtual_cluster)",
+          "hide": 0,
+          "includeAll": false,
+          "label": "virtual_cluster",
+          "multi": false,
+          "name": "virtual_cluster",
+          "options": [],
+          "query": {
+            "qryType": 1,
+            "query": "label_values(task_gpu_percent,virtual_cluster)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          },
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        }
+      ]
     },
     "time": {
       "from": "now-6h",
@@ -714,8 +669,8 @@
     },
     "timepicker": {},
     "timezone": "browser",
-    "title": "Cluster GPU Utilization",
-    "uid": "ClusterGpuUtilization",
+    "title": "Virtual Cluster GPU Utilization",
+    "uid": "VirtualClusterGpuUtilization",
     "weekStart": ""
   }
 }

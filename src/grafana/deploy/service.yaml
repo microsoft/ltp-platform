@@ -38,6 +38,7 @@ template-list:
   - grafana-configuration/pai-tasks-in-node-dashboard.json
   - grafana-configuration/pai-gpuview-dashboard.json
   - grafana-configuration/pai-netview-dashboard.json
+  - grafana-configuration/pai-vcview-dashboard.json
 
 start-script: start.sh
 stop-script: stop.sh
