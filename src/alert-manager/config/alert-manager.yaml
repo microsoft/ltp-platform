@@ -21,7 +21,7 @@ job-status-change-notification:
   configured: False
   log-level: 'info'
   db-poller-max-db-connection: 10
-  db-poller-interval-second: 120
+  db-poller-interval-second: 600
 use-pylon: False
 repeat-interval: '24h'
 cert-expiration-checker:

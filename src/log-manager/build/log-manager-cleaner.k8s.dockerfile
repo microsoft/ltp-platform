@@ -18,7 +18,7 @@
 FROM alpine:3.19.1
 
 # install dev tools
-RUN apk update && apk add --no-cache tini bash findutils
+RUN apk update && apk add --no-cache tini bash findutils rsync
 COPY src/cleaner/ /usr/bin/cleaner/
 ENTRYPOINT ["/sbin/tini","--","/usr/bin/cleaner/entrypoint.sh"]
 

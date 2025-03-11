@@ -22,13 +22,76 @@ const crypto = require('crypto');
 
 kc.loadFromDefault();
 
+async function SyncUserLogs(nodeName) {
+  try {
+    const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+    const allPods = await k8sApi.listPodForAllNamespaces();
+    // Find the log-manager pod running on the specified node
+    const logManagerPod = allPods.body.items.find(pod =>
+      pod.metadata.namespace === 'default' &&
+      pod.spec.nodeName === nodeName &&
+      pod.metadata.name.includes('log-manager')
+    );
+    if (!logManagerPod) {
+      logger.info(`No log-manager pod found on the specified node ${nodeName}.`);
+      return false;
+    }
+    const namespace = logManagerPod.metadata.namespace;
+    const podName = logManagerPod.metadata.name;
+    const containerName = 'log-cleaner';
+
+    const exec = new k8s.Exec(kc);
+    try {
+      await exec.exec(
+        namespace,
+        podName,
+        containerName,
+        ['bash', '-c', '/etc/periodic/daily/rsync_logs'],
+        process.stdout,
+        process.stderr,
+        process.stdin,
+        true
+      );
+      logger.info(`Command executed successfully in ${podName} ${containerName} ${nodeName}`);
+      return true;
+    } catch (error) {
+      logger.error(`Error executing command in pod: ${error.message}`);
+      return false;
+    }
+  } catch (error) {
+    logger.error(`Error fetching pods: ${error.message}`);
+    return false;
+  }
+}
+
+// Retry logic for SyncUserLogs
+const retrySyncUserLogs = async (nodeName, retries) => {
+  let attempts = 0;
+  while (attempts < retries) {
+    let result = await SyncUserLogs(nodeName);
+    if (result) {
+      return;
+    }
+    else {
+      attempts++;
+      logger.log(`SyncUserLogs failed. Attempt ${attempts} of ${retries}`);
+      if (attempts >= retries) {
+        logger.error("Failed to sync user logs after retries.");
+        return
+      }
+      // Wait before retrying
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 seconds before retrying
+    }
+  }
+};
+
 const cordonNode = async (nodeName) => {
   const headers = {
     'content-type': 'application/strategic-merge-patch+json',
   };
-  // set the node unschedulable
+  // Set the node unschedulable
   const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-  return k8sApi.patchNode(
+  const patchNodePromise = k8sApi.patchNode(
     nodeName,
     { spec: { unschedulable: true } },
     undefined,
@@ -38,6 +101,18 @@ const cordonNode = async (nodeName) => {
     undefined,
     { headers },
   );
+
+  const syncLogsPromise = retrySyncUserLogs(nodeName, 2);
+
+  // Return both promises in parallel
+  return Promise.all([patchNodePromise, syncLogsPromise])
+    .then(([patchResponse, syncResponse]) => {
+      return patchResponse; // Return the patch response
+    })
+    .catch((error) => {
+      console.error(`Error while cordoning node ${nodeName}: ${error.message}`);
+      throw new Error(`Failed to cordon node ${nodeName}`);
+    });
 };
 
 const uncordonNode = async (nodeName) => {
@@ -64,10 +139,11 @@ const cordonNodes = (req, res) => {
   );
 
   // extract nodes to cordon
-  const nodeNames = req.body.alerts
-    // filter alerts which are firing and contain `node_name` as label
-    .filter((alert) => alert.status === 'firing' && 'node_name' in alert.labels)
-    .map((alert) => alert.labels.node_name);
+  const nodeNames = [...new Set(
+    req.body.alerts
+      .filter((alert) => alert.status === 'firing' && 'node_name' in alert.labels)
+      .map((alert) => alert.labels.node_name)
+  )];
 
   if (nodeNames.length === 0) {
     return res.status(200).json({
@@ -85,7 +161,7 @@ const cordonNodes = (req, res) => {
       });
     })
     .catch((error) => {
-      logger.error(error);
+      logger.error(error.message);
       res.status(500).json({
         message: `alert-handler failed to cordon node`,
       });
@@ -98,10 +174,11 @@ const uncordonNodes = (req, res) => {
   );
 
   // extract nodes to uncordon
-  const nodeNames = req.body.alerts
-    // filter alerts which are firing and contain `node_name` as label
-    .filter((alert) => alert.status === 'firing' && 'node_name' in alert.labels)
-    .map((alert) => alert.labels.node_name);
+  const nodeNames = [...new Set(
+    req.body.alerts
+      .filter((alert) => alert.status === 'firing' && 'node_name' in alert.labels)
+      .map((alert) => alert.labels.node_name)
+  )];
 
   if (nodeNames.length === 0) {
     return res.status(200).json({
@@ -119,7 +196,7 @@ const uncordonNodes = (req, res) => {
       });
     })
     .catch((error) => {
-      logger.error(error);
+      logger.error(errorl.message);
       res.status(500).json({
         message: `alert-handler failed to uncordon node`,
       });
@@ -303,7 +380,7 @@ const fixNvidiaGPULowPerf = (req, res) => {
         if (error.response && error.response.statusCode === 409) {
           logger.warn(`Kubernetes job ${jobInfo.jobName} already exists.`);
         } else {
-          logger.error(error);
+          logger.error(error.message);
           res.status(500).json({
             message: `Failed to start job to fix NvidiaGPULowPerf`,
           });

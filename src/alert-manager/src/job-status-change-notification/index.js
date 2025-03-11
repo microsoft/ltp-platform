@@ -12,15 +12,19 @@ const config = require("@job-status-change-notification/common/config");
 const {
   getFrameworks,
   updateFrameworkTable,
+  getJobStatusFromLog,
 } = require("@job-status-change-notification/controllers/framework");
 const {
   getJobStatusChangeAlert,
   sendAlerts,
+  uncordonNodes,
+  sendFailedNodeEmailAlert,
 } = require("@job-status-change-notification/controllers/alert");
 
 const handleJobStatusChange = async (framework) => {
   // each framework may have multiple state change alerts
   const infos = [];
+  let checkingLog = false;
   logger.info(`Handling job state change of job ${framework.jobName} ...`);
   if (
     framework.notificationAtRunning &&
@@ -43,6 +47,7 @@ const handleJobStatusChange = async (framework) => {
       fieldToUpdate: "notifiedAtSucceeded",
       valToUpdate: true,
     });
+    checkingLog = true;
   }
   if (
     framework.notificationAtFailed &&
@@ -54,6 +59,7 @@ const handleJobStatusChange = async (framework) => {
       fieldToUpdate: "notifiedAtFailed",
       valToUpdate: true,
     });
+    checkingLog = true
   }
   if (
     framework.notificationAtStopped &&
@@ -89,6 +95,29 @@ const handleJobStatusChange = async (framework) => {
     );
     await sendAlerts(alerts);
 
+    if (checkingLog && framework.jobName.includes("superbench")) {
+      // TODO: using framework labels instead of using job name
+      // and we need update here after the rest-server is updated
+
+      const result = await getJobStatusFromLog(framework.jobName, framework.userName);
+      const goodNodeList = [];
+      const badNodeList = [];
+
+      result.forEach(({ status, nodeName }) => {
+        (status ? goodNodeList : badNodeList).push(nodeName);
+      });
+
+      // Uncordon nodes in goodNodeList
+      if (goodNodeList.length > 0) {
+        await uncordonNodes(goodNodeList);
+      }
+
+      // Send email alert for nodes in badNodeList
+      if (badNodeList.length > 0) {
+        await sendFailedNodeEmailAlert(badNodeList, framework.jobName);
+      }
+    }
+
     // update Framework table for one job
     const updateInfos = {};
     infos.forEach((info) => {
@@ -123,6 +152,10 @@ const pollJobStatusChange = async () => {
 };
 
 // send state change alerts
-interval(pollJobStatusChange, config.pollIntervalSecond * 1000, {
-  stopOnError: false,
-});
+interval(async () => {
+  try {
+    await pollJobStatusChange();
+  } catch (error) {
+    console.error("Error in pollJobStatusChange:", error);
+  }
+}, config.pollIntervalSecond, { stopOnError: false });

@@ -68,8 +68,52 @@ const sendAlerts = async (alerts) => {
   logger.info(`Successfully sent alerts`);
 };
 
+const uncordonNodes = async (nodeList) => {
+  logger.info(`Uncordoning nodes: ${nodeList.join(", ")} ...`);
+
+  // create alerts for uncordon nodes
+  const alerts = nodeList.map(node => ({
+    status: "firing",
+    labels: {
+      alertname: "RecoverValidatedNodes",
+      severity: "info",
+      node_name: node,
+    },
+    annotations: {
+      summary: `The node ${node} has been validated and be uncordoned.`,
+    },
+  }));
+
+  await sendAlerts(alerts);
+
+  logger.info(`Successfully uncordoned nodes: ${nodeList.join(", ")}`);
+}
+
+const sendFailedNodeEmailAlert = async (nodeList, job) => {
+  logger.info(`Sending email alerts for failed nodes: ${nodeList.join(", ")} ...`);
+
+  // create alerts for failed nodes
+  const alerts = nodeList.map(node => ({
+    labels: {
+      alertname: "NotifyUnvalidatedNodes",
+      severity: "warn",
+      node_name: node,
+      job_name: job
+    },
+    annotations: {
+      summary: `The node ${node} has failed to validate for job ${job}.`,
+    },
+  }));
+
+  await sendAlerts(alerts);
+
+  logger.info(`Successfully sent email alerts for failed nodes: ${nodeList.join(", ")} ...`);
+}
+
 // module exports
 module.exports = {
   getJobStatusChangeAlert,
   sendAlerts,
+  uncordonNodes,
+  sendFailedNodeEmailAlert,
 };

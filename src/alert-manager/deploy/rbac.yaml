@@ -19,8 +19,8 @@ rules:
     resources: ["jobs"]
     verbs: ["create", "list", "delete"]
   - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["list", "create", "delete"]
+    resources: ["pods", "pods/attach", "pods/exec", "pods/log"]
+    verbs: ["list", "get", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

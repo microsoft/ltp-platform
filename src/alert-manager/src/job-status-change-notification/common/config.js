@@ -12,6 +12,8 @@ const configSchema = Joi.object()
     maxDatabaseConnection: Joi.number().integer().required(),
     pollIntervalSecond: Joi.number().integer().required(),
     paiUri: Joi.string().uri().required(),
+    restUri: Joi.string().uri().required(),
+    restToken: Joi.string().required(),
   })
   .required();
 
@@ -21,6 +23,8 @@ const config = {
   maxDatabaseConnection: parseInt(process.env.MAX_DB_CONNECTION),
   pollIntervalSecond: parseInt(process.env.POLL_INTERVAL_SECOND),
   paiUri: process.env.PAI_URI,
+  restUri: process.env.REST_SERVER_URI,
+  restToken: process.env.PAI_BEARER_TOKEN,
 };
 
 const { error, value } = configSchema.validate(config);

@@ -62,8 +62,8 @@ end
 
 local ret = {}
 
-if not util.is_path_under_log_dir(log_dir) or not path.isdir(log_dir) then
-  ngx.log(ngx.INFO, "local log folder not exists")
+if not util.is_path_under_log_dir(log_dir) or not path.isdir(log_dir) or util.is_directory_empty(log_dir) then
+  ngx.log(ngx.INFO, "local log folder not exists or is empty")
   -- If remote_log_dir is defined, try using it as a fallback
   if remote_log_dir then
     ngx.log(ngx.INFO, "Falling back to remote log directory")

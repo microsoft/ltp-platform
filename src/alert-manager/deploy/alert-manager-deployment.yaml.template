@@ -117,6 +117,10 @@ spec:
           value: "{{ cluster_cfg['alert-manager']['job-status-change-notification']['db-poller-max-db-connection'] }}"
         - name: DB_CONNECTION_STR
           value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
+        - name: REST_SERVER_URI
+          value: {{ cluster_cfg['rest-server']['uri'] }}
+        - name: PAI_BEARER_TOKEN
+          value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
 {% endif %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
