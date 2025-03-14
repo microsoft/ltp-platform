@@ -50,6 +50,35 @@ spec:
           mountPath: /prometheus-data
         command: ["chown", "-R", "nobody:nobody", "/prometheus-data"]
       containers:
+      {% if cluster_cfg["prometheus"]["remote_write"] %}
+      - name: prom-remotewrite
+        image: {{ cluster_cfg["prometheus"]["remote_write"]["image"] }}
+        imagePullPolicy: Always
+        ports:
+          - name: rw-port
+            containerPort: 8081
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: rw-port
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: rw-port
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        env:
+        - name: INGESTION_URL
+          value: {{ cluster_cfg["prometheus"]["remote_write"]["ingestion_url"] }}
+        - name: LISTENING_PORT
+          value: '8081'
+        - name: IDENTITY_TYPE
+          value: userAssigned
+        - name: AZURE_CLIENT_ID
+          value: {{ cluster_cfg["prometheus"]["remote_write"]["azure_client_id"] }}
+      {% endif %}
       - name: prometheus
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}prometheus:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}

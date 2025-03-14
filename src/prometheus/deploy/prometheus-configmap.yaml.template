@@ -23,6 +23,17 @@ metadata:
   name: prometheus-configmap
 data:
   prometheus.yml: |-
+    global:
+      external_labels:
+        cluster: aks-openpai
+    {% if prome_info["remote_write"] %}
+    remote_write:
+    {% if prom_info["remote_write"]["local_url"] %}
+      - url: {{ prom_info["remote_write"]["local_url"] }}
+    {% else %}
+      - url: "http://localhost:8081/api/v1/write"
+    {% endif %}
+    {% endif %}
     # Scrape config for cluster components.
     rule_files:
       - "/etc/prometheus-alert/*.rules"
