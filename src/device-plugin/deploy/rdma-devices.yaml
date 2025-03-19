@@ -10,7 +10,9 @@ data:
         "configList": [{
              "resourceName": "hca",
              "rdmaHcaMax": 1000,
-             "devices": ["mlx5_ib0", "mlx5_ib1", "mlx5_ib2", "mlx5_ib3", "mlx5_ib4", "mlx5_ib5", "mlx5_ib6", "mlx5_ib7"]
+             "selectors": {
+                "linkTypes": ["infiniband"]
+              }
            }
         ]
     }
