@@ -13,6 +13,7 @@ const databaseModel = new DatabaseModel(
 );
 
 const queryString = '"diagnosis/accept": true';
+const failedReasonString = 'diagnosis/issue_details';
 
 const parseJobLogByNode = async (containerLogUrl) => {
   if (!containerLogUrl.logUrl) {
@@ -52,9 +53,16 @@ const parseJobLogByNode = async (containerLogUrl) => {
   const lines = text.split('\n');
   const acceptedLine = lines.find(line => line.includes(queryString));
   if (acceptedLine) {
-    return { nodeName: containerLogUrl.nodeName, status: true };
+    return { nodeName: containerLogUrl.nodeName, status: true, reason: queryString };
   }
-  return { nodeName: containerLogUrl.nodeName, status: false };
+
+  const failedReason = lines.find(line => line.includes(failedReasonString));
+  if (failedReason) {
+    const reasonString = failedReason.substring(failedReason.indexOf(':') + 1).trim();
+    return { nodeName: containerLogUrl.nodeName, status: false, reason: reasonString };
+  }
+
+  return { nodeName: containerLogUrl.nodeName, status: false, reason: "Unknown" };
 }
 
 const fetchJobInfo = async (jobName) => {
@@ -165,6 +173,8 @@ const getFrameworks = async () => {
       "userName",
       "state",
       "retries",
+      "jobPriority",
+      "virtualCluster",
       "notificationAtRunning",
       "notifiedAtRunning",
       "notificationAtSucceeded",

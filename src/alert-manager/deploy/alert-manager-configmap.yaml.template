@@ -36,18 +36,27 @@ data:
       - receiver: pai-cordon-nodes
         match:
           alertname: NvidiaSmiDoubleEccError
+        continue: true
+
+      - receiver: pai-cordon-nodes
+        match:
+          alertname: CordonValidationFailedNodes
+        continue: true
 
       - receiver: pai-cordon-nodes
         match:
           alertname: NvidiaSmiFailed
+        continue: true
 
       - receiver: pai-cordon-nodes
         match:
           alertname: PaiServicePodNotReady
+        continue: true
       
       - receiver: pai-reboot-nodes
         match:
           alertname: DmesgGPUFault
+        continue: true
 
       - receiver: pai-uncordon-nodes
         match:
@@ -64,6 +73,12 @@ data:
       - receiver: pai-job-status-change
         match:
           alertname: PAIJobStatusChange
+        continue: true
+
+      - receiver: pai-prod-job-status-change
+        match:
+          alertname: PAIProdJobStatusChange
+        continue: true
 
       - receiver: pai-abnormal-job-email
         match:
@@ -124,6 +139,13 @@ data:
         send_resolved: false
         http_config:
           bearer_token: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+      {% endif %}
+    
+    - name: pai-prod-job-status-change
+      webhook_configs:
+      {% if 'email-group' in cluster_cfg["alert-manager"]["actions-available"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-group/?template=job-status-change'
+        send_resolved: false
       {% endif %}
 
     - name: pai-unvalidate-nodes

@@ -121,6 +121,10 @@ spec:
           value: {{ cluster_cfg['rest-server']['uri'] }}
         - name: PAI_BEARER_TOKEN
           value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+        {%- for group in cluster_cfg["alert-manager"]["job-status-change-notification"]["prod_vc"] %}
+        - name: PAI_PROD_JOB_STATUS_CHANGE_GROUP_EMAIL_{{ group | replace('-', '_') }}
+          value: "{{ cluster_cfg['alert-manager']['job-status-change-notification']['prod_vc_group_emails'][group] }}"
+        {%- endfor %}
 {% endif %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}

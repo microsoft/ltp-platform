@@ -12,7 +12,7 @@ const URI_ALERT_MANAGER = urljoin(
 );
 
 // generated alerts for state change: running, succeeded, failed, stopped, retried
-const getJobStatusChangeAlert = (jobName, userName, state, retries = 0) => {
+const getJobStatusChangeAlert = (jobName, userName, state, retries = 0, jobPriority = 'default', vc = 'default') => {
   logger.info(`Generating alerts for job ${jobName} ...`);
   let summary;
   switch (state) {
@@ -35,7 +35,7 @@ const getJobStatusChangeAlert = (jobName, userName, state, retries = 0) => {
       logger.error(`State ${state} unrecognized.`);
   }
 
-  const alert = {
+  let alert = {
     labels: {
       alertname: "PAIJobStatusChange",
       severity: "warn",
@@ -48,7 +48,17 @@ const getJobStatusChangeAlert = (jobName, userName, state, retries = 0) => {
       summary: summary,
     },
   };
-  logger.info(`Successfully generated alerts for user ${userName}, job ${jobName} ...`);
+
+  // Dynamic group email based on vc (virtual cluster)
+  const envKey = `PAI_PROD_JOB_STATUS_CHANGE_GROUP_EMAIL_${vc.replace(/-/g, '_')}`;
+  if (jobPriority === 'prod' && process.env.hasOwnProperty(envKey)) {
+    alert.labels.group_email = process.env[envKey];
+    alert.labels.severity = 'critical';
+    alert.labels.alertname = 'PAIProdJobStatusChange';
+    logger.info(`Successfully generated prod job status change alert for group ${alert.labels.group_email}, job ${jobName} ...`);
+  } else {
+    logger.info(`Successfully generated alerts for user ${userName}, job ${jobName} ...`);
+  }
 
   return alert;
 };
@@ -89,31 +99,55 @@ const uncordonNodes = async (nodeList) => {
   logger.info(`Successfully uncordoned nodes: ${nodeList.join(", ")}`);
 }
 
+const cordonNodes = async (nodeList) => {
+  const nodeNames = nodeList.map(node => node.name);
+  logger.info(`Cordoning nodes: ${nodeNames.join(", ")} ...`);
+
+  // create alerts for cordon nodes
+  const alerts = nodeList.map(node => ({
+    status: "firing",
+    labels: {
+      alertname: "CordonValidationFailedNodes",
+      severity: "info",
+      node_name: node.name,
+    },
+    annotations: {
+      summary: `The node ${node.name} has been validated and cannot be uncordoned due to: ${node.reason}.`,
+    },
+  }));
+
+  await sendAlerts(alerts);
+
+  logger.info(`Successfully cordoned nodes: ${nodeNames.join(", ")}`);
+}
+
 const sendFailedNodeEmailAlert = async (nodeList, job) => {
-  logger.info(`Sending email alerts for failed nodes: ${nodeList.join(", ")} ...`);
+  const nodeNames = nodeList.map(node => node.name);  
+  logger.info(`Sending email alerts for failed nodes: ${nodeNames.join(", ")} ...`);
 
   // create alerts for failed nodes
   const alerts = nodeList.map(node => ({
     labels: {
       alertname: "NotifyUnvalidatedNodes",
       severity: "warn",
-      node_name: node,
+      node_name: node.name,
       job_name: job
     },
     annotations: {
-      summary: `The node ${node} has failed to validate for job ${job}.`,
+      summary: `The node ${node.name} has failed to validate for job ${job}, reason: ${node.reason}.`,
     },
   }));
 
   await sendAlerts(alerts);
 
-  logger.info(`Successfully sent email alerts for failed nodes: ${nodeList.join(", ")} ...`);
+  logger.info(`Successfully sent email alerts for failed nodes: ${nodeNames.join(", ")} ...`);
 }
 
 // module exports
 module.exports = {
   getJobStatusChangeAlert,
   sendAlerts,
+  cordonNodes,
   uncordonNodes,
   sendFailedNodeEmailAlert,
 };

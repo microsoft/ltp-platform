@@ -17,6 +17,7 @@ const {
 const {
   getJobStatusChangeAlert,
   sendAlerts,
+  cordonNodes,
   uncordonNodes,
   sendFailedNodeEmailAlert,
 } = require("@job-status-change-notification/controllers/alert");
@@ -90,7 +91,9 @@ const handleJobStatusChange = async (framework) => {
         framework.jobName,
         framework.userName,
         info.stateToNotify,
-        framework.retries
+        framework.retries,
+        framework.jobPriority,
+        framework.virtualCluster
       )
     );
     await sendAlerts(alerts);
@@ -103,9 +106,17 @@ const handleJobStatusChange = async (framework) => {
       const goodNodeList = [];
       const badNodeList = [];
 
-      result.forEach(({ status, nodeName }) => {
-        (status ? goodNodeList : badNodeList).push(nodeName);
-      });
+      if (Array.isArray(result)) {
+        result.forEach(({ status, nodeName, reason }) => {
+          if (status) {
+            goodNodeList.push(nodeName);
+          } else {
+            badNodeList.push({ name: nodeName, reason: reason });
+          }
+        });
+      } else {
+        logger.error(`Expected result to be an array, but got: ${typeof result}`);
+      }
 
       // Uncordon nodes in goodNodeList
       if (goodNodeList.length > 0) {
@@ -114,7 +125,12 @@ const handleJobStatusChange = async (framework) => {
 
       // Send email alert for nodes in badNodeList
       if (badNodeList.length > 0) {
-        await sendFailedNodeEmailAlert(badNodeList, framework.jobName);
+        try {
+          await cordonNodes(badNodeList);
+          await sendFailedNodeEmailAlert(badNodeList, framework.jobName);
+        } catch (error) {
+          logger.error(`Failed to cordon nodes or send email alert for job ${framework.jobName}:`, error);
+        }
       }
     }
 
