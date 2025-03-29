@@ -31,8 +31,8 @@ router
 
 router
   .route('/alert-handler/send-email-to-group')
-    /** POST /alert-handler/send-email-to-admin */
-    .post(emailController.sendEmailToGroup);
+  /** POST /alert-handler/send-email-to-admin */
+  .post(emailController.sendEmailToGroup);
 
 router
   .route('/alert-handler/send-email-to-user')
@@ -60,6 +60,11 @@ router
   .route('/alert-handler/uncordon-nodes')
   /** POST /alert-handler/uncordon-nodes */
   .post(nodeController.uncordonNodes);
+
+router
+  .route('/alert-handler/drain-nodes')
+  /** POST /alert-handler/drain-nodes */
+  .post(nodeController.drainNodes);
 
 router
   .route('/alert-handler/reboot-nodes')

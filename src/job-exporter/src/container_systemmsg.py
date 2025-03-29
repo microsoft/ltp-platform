@@ -18,6 +18,10 @@ def parse_system_msg_stats(stats: str):
             system_msgs.add("retry page fault")
         if "amdgpu: trn=2 ACK should not assert! wait again !" in data:
             system_msgs.add("amdgpu: trn=2 ACK should not assert! wait again !")
+        if "Fence fallback timer expired on ring sdma" in data:
+            system_msgs.add("Fence fallback timer expired on ring sdma")
+        if "segfault" in data:
+            system_msgs.add("segfault")
     
     return system_msgs
 

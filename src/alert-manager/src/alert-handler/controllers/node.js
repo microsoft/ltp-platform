@@ -256,6 +256,37 @@ const getRebootPod = (nodeName) => ({
   },
 });
 
+const drainNodes = async (req, res) => {
+  logger.info('alert-handler received `drainNode` post request from alert-manager.');
+  const nodeNames = req.body.alerts
+    .filter(alert => alert.status === 'firing' && 'node_name' in alert.labels)
+    .map(alert => alert.labels.node_name);
+
+  if (nodeNames.length === 0) {
+    return res.status(200).json({ message: 'No nodes to reboot.' });
+  }
+  logger.info(`alert-handler will drain these nodes: ${nodeNames}`);
+
+  const results = await Promise.allSettled(nodeNames.map(async (nodeName) => {
+    try {
+      await cordonNode(nodeName);
+      await drainNode(nodeName);
+      logger.info(`Successfully triggered drain for node: ${nodeName}`);
+      return { nodeName, status: 'fulfilled' };
+    } catch (error) {
+      logger.error(`Failed to trigger drain for node ${nodeName}: ${error.message}`);
+      return { nodeName, status: 'rejected', reason: error.message };
+    }
+  }));
+
+  const failedNodes = results.filter(result => result.status === 'rejected').map(result => result.nodeName);
+  if (failedNodes.length > 0) {
+    res.status(500).json({ message: `Failed to trigger drain for nodes: ${failedNodes.join(', ')}` });
+  } else {
+    res.status(200).json({ message: `Successfully triggered drain for all nodes` });
+  }
+};
+
 const rebootNodes = async (req, res) => {
   logger.info('alert-handler received `rebootNode` post request from alert-manager.');
   const nodeNames = req.body.alerts
@@ -393,6 +424,7 @@ const fixNvidiaGPULowPerf = (req, res) => {
 module.exports = {
   cordonNodes,
   fixNvidiaGPULowPerf,
+  drainNodes,
   rebootNodes,
   uncordonNodes,
 };

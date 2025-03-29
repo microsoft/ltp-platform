@@ -33,7 +33,7 @@ data:
       group_by: [alertname, alertstate, severity]
 
       routes:
-      - receiver: pai-cordon-nodes
+      - receiver: pai-drain-nodes
         match:
           alertname: NvidiaSmiDoubleEccError
         continue: true
@@ -53,7 +53,7 @@ data:
           alertname: PaiServicePodNotReady
         continue: true
       
-      - receiver: pai-reboot-nodes
+      - receiver: pai-drain-nodes
         match:
           alertname: DmesgGPUFault
         continue: true
@@ -181,6 +181,17 @@ data:
       webhook_configs:
       {% if 'reboot-nodes' in cluster_cfg["alert-manager"]["actions-available"] %}
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/reboot-nodes'
+        send_resolved: false
+      {% endif %}
+      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
+        send_resolved: true
+      {% endif %}
+
+    - name: pai-drain-nodes
+      webhook_configs:
+      {% if 'drain-nodes' in cluster_cfg["alert-manager"]["actions-available"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/drain-nodes'
         send_resolved: false
       {% endif %}
       {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}

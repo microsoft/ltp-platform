@@ -9,6 +9,7 @@ actions-available:
 - cordon-nodes
 - uncordon-nodes
 - reboot-nodes
+- drain-nodes
 - fix-nvidia-gpu-low-perf
 alert-handler:
   log-level: 'info'
