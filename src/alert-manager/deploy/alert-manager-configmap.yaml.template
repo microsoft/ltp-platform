@@ -42,8 +42,20 @@ data:
         match:
           alertname: CordonValidationFailedNodes
         continue: true
-
+      
       - receiver: pai-cordon-nodes
+        match:
+          report_type: admin-abnormal-node
+          action: cordon
+        continue: true
+      
+      - receiver: pai-uncordon-nodes
+        match:
+          report_type: admin-abnormal-node
+          action: uncordon
+        continue: true
+
+      - receiver: pai-drain-nodes
         match:
           alertname: NvidiaSmiFailed
         continue: true
