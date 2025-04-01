@@ -84,9 +84,9 @@ spec:
         {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}
         resources:
           limits:
-            memory: "10Gi"
+            memory: "20Gi"
           requests:
-            memory: "256Mi"
+            memory: "1Gi"
         {%- endif %}
         args:
           - '--config.file=/etc/prometheus/prometheus.yml'
@@ -94,7 +94,7 @@ spec:
           - '--web.external-url={{ external_url }}/prometheus/'
           - '--web.route-prefix=prometheus'
           - '--storage.tsdb.path=/prometheus-data'
-          - '--storage.tsdb.retention=31d'
+          - '--storage.tsdb.retention.size=8TB'
         ports:
         - name: web
           containerPort: {{prometheus_port}}
