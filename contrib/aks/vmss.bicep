@@ -22,8 +22,21 @@ param sshKeyName string
 param hubsub string
 param hubgroup string
 
+// storage
+param storageIdentityName string
+
 resource aksBootstrapUai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
   name: 'aksbootstrap'
+  scope: resourceGroup(hubsub, hubgroup)
+}
+
+resource aksUai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: 'aks'
+  scope: resourceGroup(hubsub, hubgroup)
+}
+
+resource storageUai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: storageIdentityName
   scope: resourceGroup(hubsub, hubgroup)
 }
 
@@ -32,9 +45,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' existing = {
   scope: resourceGroup(hubsub, hubgroup)
 }
 
-resource nsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
+resource nsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' existing = {
   name: vnetNsgName
-  location: location
+  scope: resourceGroup(hubsub, hubgroup)
 }
 
 resource lbPubIp 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
@@ -119,9 +132,11 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2023-03-01' = {
     LinuxAzSecPackEnableGIG: 'true'
   }
   identity: {
-    type: 'UserAssigned'
+    type: 'SystemAssigned, UserAssigned'
     userAssignedIdentities: {
       '${aksBootstrapUai.id}': {}
+      '${aksUai.id}': {}
+      '${storageUai.id}': {}
     }
   }
   sku: {
@@ -134,7 +149,10 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2023-03-01' = {
     singlePlacementGroup: true
     orchestrationMode: 'Uniform'
     upgradePolicy: {
-      mode: 'Manual'
+      mode: 'Automatic'
+      automaticOSUpgradePolicy: {
+        enableAutomaticOSUpgrade: true
+      }
     }
     platformFaultDomainCount: 1
     virtualMachineProfile: {
@@ -175,8 +193,34 @@ resource vmss 'Microsoft.Compute/virtualMachineScaleSets@2023-03-01' = {
               }
             }
           }
+          {
+            name: 'AADSSHLogin'
+            properties: {
+              publisher: 'Microsoft.Azure.ActiveDirectory'
+              type: 'AADSSHLoginForLinux'
+              typeHandlerVersion: '1.0'
+              autoUpgradeMinorVersion: true
+            }
+          }
+          {
+            name: 'HealthExtension'
+            properties:{
+              publisher: 'Microsoft.ManagedServices'
+              type: 'ApplicationHealthLinux'
+              typeHandlerVersion: '1.0'
+              autoUpgradeMinorVersion: false
+              enableAutomaticUpgrade: true
+              settings: {
+                protocol: 'http'
+                port: 9879
+                requestPath: '/healthz'
+              }
+            }
+
+          }
         ]
       }
+
       osProfile: {
         computerNamePrefix: '${vmssName}-'
         adminUsername: adminUsername

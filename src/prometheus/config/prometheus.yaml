@@ -19,9 +19,12 @@ service_type: "common"
 
 port: 9091
 scrape_interval: 30
-remote_write:
-  # ref: https://github.com/Azure/prometheus-collector/blob/main/REMOTE-WRITE-RELEASENOTES.md
-  image: mcr.microsoft.com/azuremonitor/containerinsights/ciprod/prometheus-remote-write/images:prom-remotewrite-20250214.1
-  local_url: "http://localhost:8081/api/v1/write" 
-  ingestion_url: "https://xxx.monitor.azure.com/api/v1/write"
-  azure_client_id: "00000000-0000-0000-0000-000000000000"
+
+# # By default, do not enable the remote_write feature, which relies 
+# # on the azure monitor workspace and a managed identity 
+# remote_write:
+#   # ref: https://github.com/Azure/prometheus-collector/blob/main/REMOTE-WRITE-RELEASENOTES.md
+#   image: mcr.microsoft.com/azuremonitor/containerinsights/ciprod/prometheus-remote-write/images:prom-remotewrite-20250214.1
+#   local_url: "http://localhost:8081/api/v1/write" 
+#   ingestion_url: "https://xxx.monitor.azure.com/api/v1/write"
+#   azure_client_id: "00000000-0000-0000-0000-000000000000"

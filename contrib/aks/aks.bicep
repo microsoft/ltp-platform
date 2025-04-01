@@ -3,16 +3,26 @@ param location string = resourceGroup().location
 // aks
 param aksSystemNodePoolVmSize string
 param aksSystemNodePoolCount int
+param aksPaiMasterNodePoolVmSize string
+param aksPaiMasterNodePoolCount int
 param tier string
 param kubernetesVersion string
 param supportPlan string
 
 // vnet
 param aksVnetName string
+param aksVnetNsgName string
 param aksVnetAddressPrefix string
 param aksSubnetAddressPrefix string
 param contrainerSubnetAddressPrefix string
 param vmssSubnetAddressPrefix string
+
+// storage
+param storageIdentityName string
+param storageAccountName string
+
+param storageAccountSku string = 'Standard_GRS'
+param storageAccountKind string = 'StorageV2'
 
 // UAI for AKS
 resource aksUai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
@@ -40,6 +50,12 @@ resource aksAcrUai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31'
   name: 'aksacr'
 }
 
+// network security group for AKS
+resource aksNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
+  name: aksVnetNsgName
+  location: location
+}
+
 // network for AKS
 resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
   name: aksVnetName
@@ -55,6 +71,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
         name: 'AKS'
         properties: {
           addressPrefix: aksSubnetAddressPrefix
+          networkSecurityGroup: {
+            id: aksNsg.id
+          }
         }
       }
       {
@@ -69,15 +88,73 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-11-01' = {
               }
             }
           ]
+          networkSecurityGroup: {
+            id: aksNsg.id
+          }
         }
       }
       {
         name: 'vmss'
         properties: {
           addressPrefix: vmssSubnetAddressPrefix
+          networkSecurityGroup: {
+            id: aksNsg.id
+          }
         }
       }
     ]
+  }
+}
+
+// create a managed identity for storage
+resource storageIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  location: location
+  name: storageIdentityName
+}
+
+// create a storage account for AKS as PV
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  name: storageAccountName
+  location: location
+  kind: storageAccountKind
+  sku: {
+    name: storageAccountSku
+  }
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${storageIdentity.id}': {}
+    }
+  }
+  properties: {
+    allowSharedKeyAccess: false
+  }
+}
+
+// Assign Storage Blob Data Owner role to the storage identity
+resource storageIdentityRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storageIdentity.id, 'Storage Blob Data Owner')
+  scope: storageAccount
+  properties: {
+    description: 'Assign Storage Blob Data Owner role to the storage identity'
+    principalId: storageIdentity.properties.principalId
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' // Storage Blob Data Owner
+    )
+  }
+}
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
+  name: 'default'
+  parent: storageAccount
+}
+
+resource storageAccountContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  name: 'user-logs'
+  parent: blobService
+  properties: {
+    publicAccess: 'None'
   }
 }
 
@@ -110,6 +187,25 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-03-02-preview' = {
         osType: 'Linux'
         count: aksSystemNodePoolCount
         vmSize: aksSystemNodePoolVmSize
+        tags: {
+          LinuxAzSecPackEnableGIG: 'true'
+        }
+        identity: {
+          type: 'UserAssigned'
+          userAssignedIdentities: {
+            '${storageIdentity.id}': {}
+          }
+        }
+        // osSKU: 'Ubuntu'
+      }
+      {
+        name: 'paimaster'
+        vnetSubnetID: '${vnet.id}/subnets/AKS'
+        enableAutoScaling: false
+        mode: 'User'
+        osType: 'Linux'
+        count: aksPaiMasterNodePoolCount
+        vmSize: aksPaiMasterNodePoolVmSize
         nodeLabels: {
           'pai-master': 'true'
           'pai-worker': 'false'
@@ -117,9 +213,20 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-03-02-preview' = {
         tags: {
           LinuxAzSecPackEnableGIG: 'true'
         }
-        // osSKU: 'Ubuntu'
+        identity: {
+          type: 'UserAssigned'
+          userAssignedIdentities: {
+            '${storageIdentity.id}': {}
+          }
+        }
       }
     ])
+
+    storageProfile: {
+      blobCSIDriver: {
+        enabled: true
+      }
+    }
 
     disableLocalAccounts: false
 
@@ -147,6 +254,9 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-03-02-preview' = {
       kubeletidentity: {
         resourceId: aksAcrUai.id
       }
+      storageidentity: {
+        resourceId: storageIdentity.id
+      }
     }
 
     networkProfile: {
@@ -154,7 +264,10 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-03-02-preview' = {
       dnsServiceIP: '10.0.0.10'
       serviceCidr: '10.0.0.0/16'
     }
-    autoUpgradeProfile: null
+
+    autoUpgradeProfile: {
+      upgradeChannel: 'patch'
+    }
 
     addonProfiles: {
       azureKeyvaultSecretsProvider: {
@@ -280,5 +393,35 @@ resource configAks 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
     ]
     restartPolicy: 'Never'
     osType: 'Linux'
+  }
+}
+
+// add federated identity credential to the "aksacr" UAI
+resource federatedCrendial 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = {
+  parent: aksAcrUai
+  name: 'aksacrfc'
+  properties: {
+    audiences: [
+      'api://AzureADTokenExchange'
+    ]
+    issuer: aks.properties.oidcIssuerProfile.issuerURL
+    subject: 'system:serviceaccount:kube-system:azure-acr-identity'
+  }
+}
+
+param userID string = az.deployer().objectId
+
+// assign the user as "Azure Kubernetes Service RBAC Cluster Admin" to the aks
+resource aksClusterAdminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aks.id, userID, 'Azure Kubernetes Service RBAC Cluster Admin')
+  scope: aks
+  properties: {
+    description: 'Assign aksClusterAdminRoleAssignment role to the user'
+    principalId: userID
+    principalType: 'User'
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'b1ff04bb-8a4e-4dc4-8eb5-8693973ce19b'
+    ) // Azure Kubernetes Service RBAC Cluster Admin
   }
 }

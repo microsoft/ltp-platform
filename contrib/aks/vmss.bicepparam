@@ -4,15 +4,23 @@ using './vmss.bicep'
 param hubsub = ''
 param hubgroup = ''
 
+// storage
+// this should be the same as in contrib/aks/aks.bicep
+param storageIdentityName = 'pai-storage-identity' 
+
 // vmss
-param vmssSku = 'Standard_D8s_v3'
+param vmssName = 'pai-cpu-vmss'
+// this sku should be set into contrib/aks/provisionscript.bicep
+param vmssSku = 'Standard_D8s_v3' 
 param vmssCount = 1
 param adminUsername = 'azureuser'
 param imageId = 'hpc'
 
 // vnet
-param vnetName = 'openpai-vnet'
-param vnetNsgName = 'openpai-nsg'
+// this should be the vnet of aks set in contrib/aks/aks.bicep
+param vnetName = 'openpai-vnet' 
+// this should be the nsg of aks set in contrib/aks/aks.bicep
+param vnetNsgName = 'openpai-nsg' 
 
 // lb
 param lbPublicIpName = 'openpai-lb-public-ip'

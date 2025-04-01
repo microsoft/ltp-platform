@@ -84,6 +84,13 @@ var bootstrapscripts = {
     kubeletmsiscript
     '${kubeletscript} Standard_D8s_v3 cpu'
   ]
+
+  Standard_E8ds_v4: [
+    waitdnsready
+    '${containerdscript} runc'
+    kubeletmsiscript
+    '${kubeletscript} Standard_E8ds_v4 cpu'
+  ]
 }
 
 output scripts object = reduce(
