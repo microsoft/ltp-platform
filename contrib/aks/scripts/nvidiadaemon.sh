@@ -17,4 +17,5 @@ ExecStopPost=/bin/rm -rf /var/run/nvidia-persistenced
 WantedBy=multi-user.target
 EOL
 
+nvidia-smi -mig DISABLED
 systemctl enable nvidia-persistenced.service

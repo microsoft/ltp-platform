@@ -33,11 +33,16 @@ var vmssraidsetupscript = 'echo ${loadFileAsBase64('scripts/raidsetup.sh')} | ba
 var kubeletscript = 'echo ${loadFileAsBase64('scripts/kubelet.sh')} | base64 -d | bash -s ${kubeletversion} ${fqdn} ${cert}'
 var tlsscanscript = 'echo ${loadFileAsBase64('scripts/update-tls-scan.sh')} | base64 -d | bash -s'
 var blobproxyscript = 'echo ${loadFileAsBase64('scripts/enable-blob-proxy.sh')} | base64 -d | bash -s'
+var configipoibscript = 'echo ${loadFileAsBase64('scripts/config-ipoib.sh')} | base64 -d | bash -s'
+var rocmruntimescript = 'echo ${loadFileAsBase64('scripts/rocm-runtime.sh')} | base64 -d | bash -s'
+var installfusescript = 'echo ${loadFileAsBase64('scripts/install-fuse.sh')} | base64 -d | bash -s'
+var installamdgpudriverscript = 'echo ${loadFileAsBase64('scripts/enable-amd-gpu.sh')} | base64 -d | bash -s'
 
 var bootstrapscripts = {
   // Azure SKUs
   Standard_ND96asr_v4: [
     waitdnsready
+    installfusescript
     vmssraidsetupscript
     nvidiadaemonscript
     '${nvidiacronjobscript} 1215 1410'
@@ -50,6 +55,7 @@ var bootstrapscripts = {
 
   Standard_ND96amsr_A100_v4: [
     waitdnsready
+    installfusescript
     vmssraidsetupscript
     nvidiadaemonscript
     '${nvidiacronjobscript} 1593 1410'
@@ -60,8 +66,23 @@ var bootstrapscripts = {
     blobproxyscript
   ]
 
+  Standard_ND96isr_MI300X_v5: [
+    waitdnsready
+    installamdgpudriverscript
+    installfusescript
+    vmssraidsetupscript
+    rocmruntimescript
+    '${containerdscript} rocm'
+    kubeletmsiscript
+    '${kubeletscript} Standard_ND96isr_MI300X_v5 gpu'
+    tlsscanscript
+    blobproxyscript
+    configipoibscript
+  ]
+
   Standard_ND96isr_H100_v5: [
     waitdnsready
+    installfusescript
     vmssraidsetupscript
     '${nvidianvswitch} 2619 1980'
     '${containerdscript} nvidia'

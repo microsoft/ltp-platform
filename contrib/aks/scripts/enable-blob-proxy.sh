@@ -12,5 +12,4 @@ Unit=blobfuse-proxy.service
 WantedBy=timers.target
 EOL
 
-systemctl enable blobfuse-proxy.timer 
-systemctl start blobfuse-proxy.timer
+systemctl enable blobfuse-proxy.timer
