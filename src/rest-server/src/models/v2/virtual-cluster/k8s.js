@@ -217,7 +217,7 @@ const getVcList = async () => {
     try {
       vcStatus = (
         await axios.get(
-          `${hivedWebserviceUri}/v1/inspect/clusterstatus/virtualclusters/`,
+          `${hivedWebserviceUri}/v1/inspect/clusterstatus/statistics`,
         )
       ).data;
     } catch (error) {
@@ -237,27 +237,45 @@ const getVcList = async () => {
       if (!(vc in vcInfos)) {
         vcInfos[vc] = JSON.parse(JSON.stringify(vcEmpty));
       }
-      const cellQueue = [...vcStatus[vc]];
-      while (cellQueue.length > 0) {
-        const curr = cellQueue.shift();
-        if (curr.cellPriority === -1) {
-          continue;
+
+      // used resources
+      if (!vcStatus[vc].resourcesUsed || Object.keys(vcStatus[vc].resourcesUsed).length === 0) {
+        vcInfos[vc].resourcesUsed = { ...resourcesEmpty };
+      } else {
+        for (const [resourceType, resourceInfo] of Object.entries(vcStatus[vc].resourcesUsed)) {
+          if (resourceType in resourceUnits) {
+            vcInfos[vc].resourcesUsed.cpu = resourceInfo * resourceUnits[resourceType].cpu;
+            vcInfos[vc].resourcesUsed.memory = resourceInfo * resourceUnits[resourceType].memory;
+            vcInfos[vc].resourcesUsed.gpu = resourceInfo * resourceUnits[resourceType].gpu;
+            break;
+          }
         }
-        if (curr.cellChildren) {
-          curr.cellChildren.forEach((cellChild) => {
-            cellChild.leafCellType = curr.leafCellType;
-            cellQueue.push(cellChild);
-          });
-        } else {
-          if (curr.leafCellType in resourceUnits) {
-            const sku = resourceUnits[curr.leafCellType];
-            if (curr.cellHealthiness === 'Healthy') {
-              if (curr.cellState === 'Used') {
-                mergeDict(vcInfos[vc].resourcesUsed, sku, add);
-              }
-              mergeDict(vcInfos[vc].resourcesGuaranteed, sku, add);
-            }
-            mergeDict(vcInfos[vc].resourcesTotal, sku, add);
+      }
+
+      // guaranteed resources
+      if (!vcStatus[vc].resourcesGuaranteed || Object.keys(vcStatus[vc].resourcesGuaranteed).length === 0) {
+        vcInfos[vc].resourcesGuaranteed = { ...resourcesEmpty };
+      } else {
+        for (const [resourceType, resourceInfo] of Object.entries(vcStatus[vc].resourcesGuaranteed)) {
+          if (resourceType in resourceUnits) {
+            vcInfos[vc].resourcesGuaranteed.cpu = resourceInfo * resourceUnits[resourceType].cpu;
+            vcInfos[vc].resourcesGuaranteed.memory = resourceInfo * resourceUnits[resourceType].memory;
+            vcInfos[vc].resourcesGuaranteed.gpu = resourceInfo * resourceUnits[resourceType].gpu;
+            break;
+          }
+        }
+      }
+
+      // total resources
+      if (!vcStatus[vc].resourcesTotal || Object.keys(vcStatus[vc].resourcesTotal).length === 0) {
+        vcInfos[vc].resourcesTotal = { ...resourcesEmpty };
+      } else {
+        for (const [resourceType, resourceInfo] of Object.entries(vcStatus[vc].resourcesTotal)) {
+          if (resourceType in resourceUnits) {
+            vcInfos[vc].resourcesTotal.cpu = resourceInfo * resourceUnits[resourceType].cpu;
+            vcInfos[vc].resourcesTotal.memory = resourceInfo * resourceUnits[resourceType].memory;
+            vcInfos[vc].resourcesTotal.gpu = resourceInfo * resourceUnits[resourceType].gpu;
+            break;
           }
         }
       }
