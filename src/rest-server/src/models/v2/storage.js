@@ -113,6 +113,7 @@ const convertVolumeDetail = async (pvc) => {
       } else if (attributes.protocol === 'fuse') {
         storage.type = 'azureBlob';
         storage.data = {
+          accountName: attributes.storageAccount,
           containerName: attributes.containerName,
         };
       }

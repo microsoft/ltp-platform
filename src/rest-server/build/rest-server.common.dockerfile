@@ -20,7 +20,8 @@ FROM mcr.microsoft.com/cbl-mariner/base/nodejs:18.20-cm2.0
 WORKDIR /usr/src/app
 
 ENV NODE_ENV=production \
-    SERVER_PORT=8080
+    SERVER_PORT=8080 \
+    UV_THREADPOOL_SIZE=8
 
 COPY . .
 
