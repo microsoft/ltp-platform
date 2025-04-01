@@ -40,6 +40,10 @@ async function read(key) {
   try {
     const request = k8sModel.getClient('/api/v1/namespaces/');
     const hexKey = Buffer.from(key).toString('hex');
+
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read user info`);      
     const response = await request.get(
       `${USER_NAMESPACE}/secrets/${hexKey}`.toString(),
       {
@@ -48,6 +52,8 @@ async function read(key) {
         },
       },
     );
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading user info, response time: ${endTime - startTime}ms`);
     const userData = response.data;
     const userInstance = User.createUser({
       username: Buffer.from(userData.data.username, 'base64').toString(),
@@ -78,11 +84,17 @@ async function read(key) {
 async function readAll() {
   try {
     const request = k8sModel.getClient('/api/v1/namespaces/');
+
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read all user info`);
     const response = await request.get(`${USER_NAMESPACE}/secrets`.toString(), {
       headers: {
         Accept: 'application/json',
       },
     });
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading all user info, response time: ${endTime - startTime}ms`);
     const allUserInstance = [];
     const userData = response.data;
     for (const item of userData.items) {
@@ -148,7 +160,12 @@ async function create(key, value) {
         ),
       },
     };
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to create user`);  
     const response = await request.post(`${USER_NAMESPACE}/secrets`, userData);
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished creating user, response time: ${endTime - startTime}ms`);
     return response;
   } catch (error) {
     if (error.response) {
@@ -195,10 +212,15 @@ async function update(key, value, updatePassword = false) {
         ),
       },
     };
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to update user info`);  
     const response = await request.put(
       `${USER_NAMESPACE}/secrets/${hexKey}`,
       userData,
     );
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished updating user info, response time: ${endTime - startTime}ms`);
     return response;
   } catch (error) {
     if (error.response) {
@@ -219,12 +241,20 @@ async function remove(key) {
   try {
     const request = k8sModel.getClient('/api/v1/namespaces/');
     const hexKey = Buffer.from(key).toString('hex');
-    return await request.delete(`${USER_NAMESPACE}/secrets/${hexKey}`, {
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to remove user`);
+    const response = await request.delete(`${USER_NAMESPACE}/secrets/${hexKey}`, {
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
       },
     });
+    
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished removing user, response time: ${endTime - startTime}ms`);
+    
+    return response;
   } catch (error) {
     if (error.response) {
       throw error.response;

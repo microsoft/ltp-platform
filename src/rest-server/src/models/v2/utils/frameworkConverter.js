@@ -259,11 +259,20 @@ const getContainerGpus = async (withoutGetPod, podName) => {
   let containerGpus = null;
   try {
     if (withoutGetPod !== true) {
+
+      const logId = Math.floor(Math.random() * 100000);
+      const startTime = Date.now();
+      logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to get ContainerGpus`);  
+
       const response = await k8sModel
         .getClient()
         .get(launcherConfig.podPath(podName), {
           headers: launcherConfig.requestHeaders,
         });
+
+      const endTime = Date.now();
+      logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished getting ContainerGpus, response time: ${endTime - startTime}ms`);   
+      
       const pod = response.data;
       if (launcherConfig.enabledHived) {
         const isolation =

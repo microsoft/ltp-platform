@@ -39,11 +39,16 @@ async function read(key) {
   try {
     const request = k8sModel.getClient('/api/v1/namespaces');
     const hexKey = Buffer.from(key).toString('hex');
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read group`);      
     const response = await request.get(`${GROUP_NAMESPACE}/secrets/${hexKey}`, {
       headers: {
         Accept: 'application/json',
       },
     });
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading group, response time: ${endTime - startTime}ms`);    
     const groupData = response.data;
     const groupInstance = Group.createGroup({
       groupname: Buffer.from(groupData.data.groupname, 'base64').toString(),
@@ -74,11 +79,19 @@ async function read(key) {
 async function readAll() {
   try {
     const request = k8sModel.getClient('/api/v1/namespaces');
+
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read all group namespaces`);  
+
     const response = await request.get(`${GROUP_NAMESPACE}/secrets`, {
       headers: {
         Accept: 'application/json',
       },
     });
+
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading all group namespaces, response time: ${endTime - startTime}ms`);
     const allGroupInstance = [];
     const groupData = response.data;
     for (const item of groupData.items) {
@@ -141,7 +154,14 @@ async function create(key, value) {
         ).toString('base64'),
       },
     };
-    return await request.post(`${GROUP_NAMESPACE}/secrets`, groupData);
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to create group`);      
+    const response = await request.post(`${GROUP_NAMESPACE}/secrets`, groupData);
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished creating group, response time: ${endTime - startTime}ms`);
+    return response;
+    
   } catch (error) {
     if (error.response) {
       throw error.response;
@@ -181,7 +201,14 @@ async function update(key, value) {
         ).toString('base64'),
       },
     };
-    return await request.put(`${GROUP_NAMESPACE}/secrets/${hexKey}`, groupData);
+
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to update group`);    
+    const response = await request.put(`${GROUP_NAMESPACE}/secrets/${hexKey}`, groupData);
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished updating group, response time: ${endTime - startTime}ms`);
+    return response;
   } catch (error) {
     if (error.response) {
       throw error.response;
@@ -201,12 +228,21 @@ async function remove(key) {
   try {
     const request = k8sModel.getClient('/api/v1/namespaces');
     const hexKey = Buffer.from(key).toString('hex');
-    return await request.delete(`${GROUP_NAMESPACE}/secrets/${hexKey}`, {
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to remove group`);  
+
+    const response = await request.delete(`${GROUP_NAMESPACE}/secrets/${hexKey}`, {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
     });
+
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished removing group, response time: ${endTime - startTime}ms`);
+
+    return response;
   } catch (error) {
     if (error.response) {
       throw error.response;

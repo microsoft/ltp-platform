@@ -21,6 +21,7 @@ const createError = require('@pai/utils/error');
 const user = require('@pai/models/v2/user');
 const secret = require('@pai/models/kubernetes/k8s-secret');
 const kubernetes = require('@pai/models/kubernetes/kubernetes');
+const logger = require('@pai/config/logger');
 
 const convertVolumeSummary = (pvc) => {
   return {
@@ -38,9 +39,17 @@ const convertVolumeDetail = async (pvc) => {
 
   let response;
   try {
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to convert volume detail`);      
+
     response = await kubernetes
       .getClient()
       .get(`/api/v1/persistentvolumes/${storage.volumeName}`);
+
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished converting volume detail, response time: ${endTime - startTime}ms`);
+
   } catch (error) {
     if (error.response != null) {
       response = error.response;
@@ -140,9 +149,18 @@ const convertVolumeDetail = async (pvc) => {
 const list = async (userName, filterDefault = false) => {
   let response;
   try {
+
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to list storage`);
+
     response = await kubernetes
       .getClient()
       .get('/api/v1/namespaces/default/persistentvolumeclaims');
+
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished listing storage, response time: ${endTime - startTime}ms`);
+
   } catch (error) {
     if (error.response != null) {
       response = error.response;
@@ -180,9 +198,16 @@ const list = async (userName, filterDefault = false) => {
 const get = async (storageName, userName) => {
   let response;
   try {
+    
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to get storage`);
     response = await kubernetes
       .getClient()
       .get(`/api/v1/namespaces/default/persistentvolumeclaims/${storageName}`);
+    
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished getting storage, response time: ${endTime - startTime}ms`);
   } catch (error) {
     if (error.response != null) {
       response = error.response;

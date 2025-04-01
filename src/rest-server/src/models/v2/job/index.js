@@ -25,11 +25,19 @@ const k8sModel = require('@pai/models/kubernetes/kubernetes');
 if (config.env !== 'test') {
   // framework controller health check
   (async () => {
+
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to get healthCheckPath`);  
+  
     const response = await k8sModel
       .getClient()
       .get(launcherConfig.healthCheckPath(), {
         headers: launcherConfig.requestHeaders,
       });
+
+      const endTime = Date.now();
+      logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished getting healthCheckPath, response time: ${endTime - startTime}ms`);        
     if (response.status === status('OK')) {
       logger.info('connected to framework controller successfully');
     } else {

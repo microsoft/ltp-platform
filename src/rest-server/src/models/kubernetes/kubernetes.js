@@ -70,11 +70,20 @@ const encodeSelector = (selector = {}, negativeSelector = {}) => {
 const createNamespace = async (namespace) => {
   const client = getClient();
   try {
+
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to creating namespace`);
+
     await client.post('/api/v1/namespaces/', {
       metadata: {
         name: namespace,
       },
     });
+
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished creating namespace, response time: ${endTime - startTime}ms`);    
+
     logger.info(`Namespace ${namespace} created`);
   } catch (err) {
     if (
@@ -92,7 +101,12 @@ const createNamespace = async (namespace) => {
 
 const getNodes = async () => {
   const client = getClient();
+  const logId = Math.floor(Math.random() * 100000);
+  const startTime = Date.now();
+  logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to get nodes`);  
   const res = await client.get('api/v1/nodes');
+  const endTime = Date.now();
+  logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished getting nodes, response time: ${endTime - startTime}ms`);  
   return res.data;
 };
 
@@ -104,7 +118,16 @@ const getPods = async (options = {}, headers = {}) => {
   if (namespace) {
     url = `/api/v1/namespaces/${namespace}/pods`;
   }
+
+  const logId = Math.floor(Math.random() * 100000);
+  const startTime = Date.now();
+  logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to get pods`);  
+  
   const res = await client.get(url, { params, headers });
+
+  const endTime = Date.now();
+  logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished getting pods, response time: ${endTime - startTime}ms`);  
+
   return res.data;
 };
 

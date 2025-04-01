@@ -21,6 +21,7 @@ const {
   getClient,
   patchOption,
 } = require('@pai/models/kubernetes/kubernetes');
+const logger = require('@pai/config/logger');
 
 const initClient = (namespace) => {
   if (!namespace) {
@@ -77,7 +78,12 @@ const get = async (namespace, name, options = {}) => {
   }
 
   try {
+    const logId = Math.floor(Math.random() * 100000);
+    const startTime = Date.now();
+    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to get secret`);
     const response = await client.get(`/${secretName}`);
+    const endTime = Date.now();
+    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished getting secret, response time: ${endTime - startTime}ms`);
     return deserialize(response.data.data);
   } catch (err) {
     if (err.response && err.response.status === 404 && err.response.data) {
@@ -104,7 +110,12 @@ const list = async (namespace, labelSelector) => {
         params.continue = continueValue;
       }
       // request
+      const logId = Math.floor(Math.random() * 100000);
+      const startTime = Date.now();
+      logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to list secret`);  
       response = await client.get('/', { params });
+      const endTime = Date.now();
+      logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished listing secret, response time: ${endTime - startTime}ms`);      
     } catch (err) {
       if (err.response && err.response.status === 410) {
         // restart
@@ -137,6 +148,9 @@ const create = async (namespace, name, data, options = {}) => {
     secretName = Buffer.from(name).toString(encode);
   }
 
+  const logId = Math.floor(Math.random() * 100000);
+  const startTime = Date.now();
+  logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to create secret`);  
   const response = await client.post('/', {
     metadata: {
       name: secretName,
@@ -146,6 +160,10 @@ const create = async (namespace, name, data, options = {}) => {
     type: type,
     data: serialize(data),
   });
+
+  const endTime = Date.now();
+  logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished creating secret, response time: ${endTime - startTime}ms`);  
+
   return response.data;
 };
 
@@ -156,6 +174,11 @@ const replace = async (namespace, name, data, options = {}) => {
     secretName = Buffer.from(secretName).toString(encode);
   }
   const client = initClient(namespace);
+
+  const logId = Math.floor(Math.random() * 100000);
+  const startTime = Date.now();
+  logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to replace secret`);  
+
   const response = client.put(`/${secretName}`, {
     metadata: {
       name: secretName,
@@ -164,6 +187,10 @@ const replace = async (namespace, name, data, options = {}) => {
     },
     data: serialize(data),
   });
+
+  const endTime = Date.now();
+  logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished replacing secret, response time: ${endTime - startTime}ms`);  
+
   return response.data;
 };
 
@@ -174,7 +201,16 @@ const remove = async (namespace, name, options = {}) => {
     secretName = Buffer.from(name).toString(encode);
   }
   const client = initClient(namespace);
+
+  const logId = Math.floor(Math.random() * 100000);
+  const startTime = Date.now();
+  logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to remove secret`);  
+
   await client.delete(`/${secretName}`);
+
+  const endTime = Date.now();
+  logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished removing secret, response time: ${endTime - startTime}ms`);
+
 };
 
 const patchMetadata = async (namespace, name, metadata, options = {}) => {
@@ -184,7 +220,16 @@ const patchMetadata = async (namespace, name, metadata, options = {}) => {
     secretName = Buffer.from(name).toString(encode);
   }
   const client = initClient(namespace);
+
+  const logId = Math.floor(Math.random() * 100000);
+  const startTime = Date.now();
+  logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to patching secret`);
+
   await client.patch(`/${secretName}`, { metadata: metadata }, patchOption);
+
+
+  const endTime = Date.now();
+  logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished patching secret, response time: ${endTime - startTime}ms`);  
 };
 
 module.exports = {

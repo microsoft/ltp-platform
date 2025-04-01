@@ -59,9 +59,18 @@ paiConfigData = value;
 
 const fetchPAIVersion = async () => {
   const client = k8sModel.getClient();
+
+  const logId = Math.floor(Math.random() * 100000);
+  const startTime = Date.now();
+  logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to fetch PAI version`);
+  
   const res = await client.get(
     '/api/v1/namespaces/default/configmaps/pai-version',
   );
+
+  const endTime = Date.now();
+  logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished fatching PAI version, response time: ${endTime - startTime}ms`);
+
   const version = get(res.data, 'data["PAI.VERSION"]');
   if (version) {
     return version.trim();
