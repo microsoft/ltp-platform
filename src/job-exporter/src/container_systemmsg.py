@@ -14,8 +14,8 @@ def parse_system_msg_stats(stats: str):
     lines = stats.strip().splitlines()
     system_msgs = set()
     for data in lines:
-        if "retry page fault" in data:
-            system_msgs.add("retry page fault")
+        if "no-retry page fault" in data:
+            system_msgs.add("no-retry page fault")
         if "amdgpu: trn=2 ACK should not assert! wait again !" in data:
             system_msgs.add("amdgpu: trn=2 ACK should not assert! wait again !")
         if "Fence fallback timer expired on ring sdma" in data:

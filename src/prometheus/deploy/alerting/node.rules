@@ -28,7 +28,7 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "Free space in {{$labels.device}} from {{$labels.instance}} is less than 20% (current value is: {{ $value }})"
+          summary: "Free space in {{$labels.device}} from instance: {{$labels.instance}} is less than 20% (current value is: {{ $value }})"
 
       - alert: NodeMemoryUsage
         expr: (node_memory_MemTotal_bytes - (node_memory_MemFree_bytes+node_memory_Buffers_bytes+node_memory_Cached_bytes )) / node_memory_MemTotal_bytes * 100 > 95
@@ -36,7 +36,7 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "Memory usage in {{$labels.instance}} is above 95% (current value is: {{ $value }})"
+          summary: "Memory usage in instance: {{$labels.instance}} is above 95% (current value is: {{ $value }})"
 
       - alert: NodeCPUUsage
         expr: (100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 98
@@ -44,7 +44,7 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "CPU usage in {{$labels.instance}} is above 98% (current value is: {{ $value }})"
+          summary: "CPU usage in instance: {{$labels.instance}} is above 98% (current value is: {{ $value }})"
 
       - alert: NodeDiskPressure
         expr: pai_node_count{disk_pressure="true"} > 0
@@ -52,7 +52,7 @@ groups:
         labels:
           severity: error
         annotations:
-          summary: "{{$labels.node_name}} ({{$labels.host_ip}}) is under disk pressure"
+          summary: "node_name: {{$labels.node_name}} ({{$labels.host_ip}}) is under disk pressure"
 
       - alert: NodeOutOfDisk
         expr: pai_node_count{out_of_disk="true"} > 0
@@ -60,7 +60,7 @@ groups:
         labels:
           severity: error
         annotations:
-          summary: "{{$labels.node_name}} ({{$labels.host_ip}})  is out of disk"
+          summary: "node_name: {{$labels.node_name}} ({{$labels.host_ip}})  is out of disk"
 
       - alert: NodeNotReady
         expr: pai_node_count{ready!="true"} > 0
@@ -68,7 +68,7 @@ groups:
         labels:
           severity: error
         annotations:
-          summary: "{{$labels.node_name}} ({{$labels.host_ip}})  is not ready"
+          summary: "node_name: {{$labels.node_name}} ({{$labels.host_ip}})  is not ready"
 
       - alert: NodeUnschedulable
         expr: pai_node_count{unschedulable="true"} > 0
@@ -76,7 +76,7 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "{{$labels.node_name}} ({{$labels.host_ip}}) is unschedulable"
+          summary: "node_name: {{$labels.node_name}} ({{$labels.host_ip}}) is unschedulable"
 
       - alert: AzureAgentConsumeTooMuchMem
         expr: process_mem_usage_byte{cmd=~".*om[is]agent.*"} > 1073741824 # 1G
@@ -84,4 +84,4 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "{{$labels.cmd}} with pid {{$labels.pid}} in {{$labels.instance}} consume more than 1G of memory"
+          summary: "{{$labels.cmd}} with pid {{$labels.pid}} in instance: {{$labels.instance}} consume more than 1G of memory"

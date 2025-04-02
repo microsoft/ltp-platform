@@ -28,7 +28,7 @@ groups:
         labels:
           severity: error
         annotations:
-          summary: "95th nvidia-smi call latency is larger than 30s in {{$labels.instance}}, should check the gpu status manually"
+          summary: "95th nvidia-smi call latency is larger than 30s in instance: {{$labels.instance}}, should check the gpu status manually"
 
       - alert: NvidiaSmiFailed
         expr: nvidiasmi_status{error!="ok"} > 0 or rocmsmi_status{error!="ok"} > 0 
@@ -36,7 +36,7 @@ groups:
         labels:
           severity: fatal
         annotations:
-          summary: "nvidia-smi failed in {{$labels.instance}}, error is: {{$labels.error}}"
+          summary: "smi failed in node_name: {{$labels.node_name}} instance: {{$labels.instance}}, error is: {{$labels.error}}"
       
       - alert: DmesgGPUFault
         expr: system_dmesg_status{error!="ok",node_name!~"aks.*"} > 0 
@@ -44,7 +44,7 @@ groups:
         labels:
           severity: fatal
         annotations:
-          summary: "Found temperary GPU error in {{$labels.instance}}, error is: {{$labels.error}}"
+          summary: "Found temperary GPU error in node_name: {{$labels.node_name}} instance: {{$labels.instance}}, error is: {{$labels.error}}"
 
       - alert: NvidiaSmiDoubleEccError
         expr: nvidiasmi_ecc_error_count{type="double"} > 0 or rocmsmi_ecc_error_count{type="double"} > 0
@@ -52,7 +52,7 @@ groups:
         labels:
           severity: fatal
         annotations:
-          summary: "nvidia card from {{$labels.instance}} minor number {{$labels.minor_number}} has {{$labels.type}} ecc error, count {{$value}}"
+          summary: "GPU from node_name: {{$labels.node_name}} instance: {{$labels.instance}} minor number {{$labels.minor_number}} has {{$labels.type}} ecc error, count {{$value}}"
 
       - alert: NvidiaMemoryLeak
         expr: nvidiasmi_memory_leak_count > 0
@@ -60,7 +60,7 @@ groups:
         labels:
           severity: error
         annotations:
-          summary: "found nvidia memory leak from {{$labels.instance}} minor number {{$labels.minor_number}}"
+          summary: "found nvidia memory leak from instance: {{$labels.instance}} minor number {{$labels.minor_number}}"
 
       - alert: NvidiaZombieProcess
         expr: zombie_process_count{command="nvidia-smi"} > 0
@@ -68,7 +68,7 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "found nvidia zombie process in {{$labels.instance}}"
+          summary: "found nvidia zombie process in instance: {{$labels.instance}}"
 
       - alert: GpuUsedByExternalProcess
         expr: gpu_used_by_external_process_count > 0
@@ -76,7 +76,7 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "found nvidia used by external process in {{$labels.instance}}"
+          summary: "found nvidia used by external process in instance: {{$labels.instance}}"
 
       - alert: GpuUsedByZombieContainer
         expr: gpu_used_by_zombie_container_count > 0
@@ -84,7 +84,7 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "found nvidia used by zombie container in {{$labels.instance}}"
+          summary: "found nvidia used by zombie container in instance: {{$labels.instance}}"
 
       - alert: NodeGpuCountChanged
         expr: node:gpu_utilization:count != on (instance) configured_gpu_count
@@ -92,7 +92,7 @@ groups:
         labels:
           severity: fatal
         annotations:
-          summary: "found gpu count changes in {{$labels.instance}}"
+          summary: "found gpu count changes in instance: {{$labels.instance}}"
 
       - alert: NodeGpuLowPerfState
         expr: nvidiasmi_performance_state{clocks_throttle_reasons=""} >= 8
@@ -100,4 +100,4 @@ groups:
         labels:
           severity: warn
         annotations:
-          summary: "found gpu in {{$labels.instance}} minor number {{$labels.minor_number}} in low perf state"
+          summary: "found gpu in instance: {{$labels.instance}} minor number {{$labels.minor_number}} in low perf state"
