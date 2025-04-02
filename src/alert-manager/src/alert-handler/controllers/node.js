@@ -256,6 +256,17 @@ const getRebootPod = (nodeName) => ({
   },
 });
 
+const checkNodeCordoned = async (nodeName) => {
+  const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+  // Check if the node is already cordoned
+  const { body: node } = await k8sApi.readNode(nodeName);
+  const isCordoned = node.spec.unschedulable === true;
+  if (isCordoned) {
+    return true;
+  }
+  return false;
+};
+
 const drainNodes = async (req, res) => {
   logger.info('alert-handler received `drainNode` post request from alert-manager.');
   const nodeNames = req.body.alerts
@@ -269,6 +280,11 @@ const drainNodes = async (req, res) => {
 
   const results = await Promise.allSettled(nodeNames.map(async (nodeName) => {
     try {
+      if (await checkNodeCordoned(nodeName)) {
+        logger.info(`Node ${nodeName} is already cordoned. Skipping drain.`);
+        await cordonNode(nodeName);
+        return { nodeName, status: 'fulfilled' };
+      }
       await cordonNode(nodeName);
       await drainNode(nodeName);
       logger.info(`Successfully triggered drain for node: ${nodeName}`);
