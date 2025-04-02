@@ -28,10 +28,11 @@ const logger = require('@pai/config/logger');
 const task = require('@pai/models/v2/task');
 const createError = require('@pai/utils/error');
 const { encodeName } = require('@pai/models/v2/utils/name');
+const paiConfig = require('@pai/config/paiConfig');
 
 const logServer = launcherConfig.logServer;
 
-const constrcutLogManagerPrefix = (nodeIp) => {
+const constructLogManagerPrefix = (nodeIp) => {
   return `http://${nodeIp}:${launcherConfig.logManagerPort}/api/v1`;
 };
 
@@ -42,7 +43,7 @@ const NoTaskLogErr = createError(
 );
 
 const loginLogManager = async (nodeIp, username, password) => {
-  const prefix = constrcutLogManagerPrefix(nodeIp);
+  const prefix = constructLogManagerPrefix(nodeIp);
   return axios.post(`${prefix}/tokens`, {
     username: username,
     password: password,
@@ -69,18 +70,25 @@ const getLogListFromLogManager = async (
   const taskStatus = taskDetail.data.attempts.find(
     (attempt) => attempt.attemptId === Number(taskAttemptId),
   );
-  if (!taskStatus || !taskStatus.containerIp) {
-    logger.error(`Failed to find task to retrive log or task not started`);
+
+  if (!taskStatus) {
+    logger.error(`Failed to find task to retrieve log or task not started`);
     throw NoTaskLogErr;
   }
 
-  const nodeIp = taskStatus.containerIp;
+  const nodeIp = taskStatus.containerIp || paiConfig.machineList.find(machine => machine.nodename === taskStatus.containerNodeName).hostip;
+
+  if (!nodeIp) {
+    logger.error(`Failed to retrieve the node ip of task`);
+    throw NoTaskLogErr;
+  }
+
   const podUid = taskStatus.containerId;
 
   let res = await loginLogManager(nodeIp, adminName, adminPassword);
   const token = res.data.token;
 
-  const prefix = constrcutLogManagerPrefix(nodeIp);
+  const prefix = constructLogManagerPrefix(nodeIp);
   try {
     const params = {
       token: token,
