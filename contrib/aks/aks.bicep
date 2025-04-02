@@ -54,6 +54,46 @@ resource aksAcrUai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31'
 resource aksNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
   name: aksVnetNsgName
   location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowCorpSSHInbound'
+        properties: {
+          priority: 1000
+          protocol: '*'
+          sourcePortRange: '*'
+          sourceAddressPrefixes: [
+            '131.107.0.0/16'
+            '167.220.0.0/16'
+          ]
+          destinationPortRange: '22'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowCorpWebInbound'
+        properties: {
+          priority: 1001
+          protocol: '*'
+          sourcePortRange: '*'
+          sourceAddressPrefixes: [
+            '131.107.0.0/16'
+            '167.220.0.0/16'
+          ]
+          destinationPortRanges: [
+            '80'
+            '443'
+          ]
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          direction: 'Inbound'
+          
+        }
+      }
+    ]
+  }
 }
 
 // network for AKS

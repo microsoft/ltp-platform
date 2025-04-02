@@ -91,3 +91,6 @@ You need to create all required resources in your cloud provider.
     kubectl get svc 
     ```
     7.2 Create a domain name and point it to the public ip of pylon service.
+    7.3 Add the new domain name into `openpai-cluster` Application Registration in Azure AD.
+        * Make sure you are the owner of the `openpai-cluster` Application Registration.
+        * Go to Azure portal -> Microsoft Entra iD -> App registrations -> openpai-cluster -> Authentication -> Add a platform -> Web -> Redirect URIs
