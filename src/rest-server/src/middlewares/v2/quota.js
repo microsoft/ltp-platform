@@ -15,6 +15,10 @@ const getReqeustedGpuCount = (protocol) => {
   return gpuCount;
 };
 
+const getJobPriority = (protocol) => {
+  return protocol.extras?.hivedScheduler?.jobPriorityClass || null;
+};
+
 const check = async (req, res, next) => {
   try {
     const userProperty = req[token.userProperty];
@@ -22,6 +26,52 @@ const check = async (req, res, next) => {
     const jobProtocol = res.locals.protocol;
     const requestedGpuCount = getReqeustedGpuCount(jobProtocol);
     const userInfo = await user.getUser(username);
+    const jobPriority = getJobPriority(jobProtocol);
+
+    const userPrioritySet = userInfo.extension?.jobPriority ?? null;
+    const userPriorityExpiration = userInfo.extension?.jobExpiration ?? null;
+
+    if (jobPriority === 'prod') {
+      if (userPrioritySet !== 1) {
+        logger.debug(
+          `User ${username} does not have the required job priority set to 1. Current priority set: ${userPrioritySet}`
+        );
+        return next(
+          createError(
+        'Forbidden',
+        'NoJobPriorityError',
+        'You do not have the required job priority set to 1 to submit a job with "prod" priority.',
+          ),
+        );
+      }
+
+      if (isNaN(new Date(userPriorityExpiration).getTime())) {
+        logger.debug(
+          `User ${username} has an invalid job priority expiration date: ${userPriorityExpiration}`
+        );
+        return next(
+          createError(
+        'Forbidden',
+        'InvalidJobPriorityExpirationError',
+        'Your job priority expiration date is invalid.',
+          ),
+        );
+      }
+
+      if (new Date(userPriorityExpiration) < new Date(Date.now())) {
+        logger.debug(
+          `User ${username}'s job priority has been expired`
+        );
+        return next(
+          createError(
+        'Forbidden',
+        'ExpiredJobPriorityExpirationError',
+        'Your job priority expiration date has expired.',
+          ),
+        );
+      }
+    }
+
     const maxGpusPerJob = userInfo.extension?.quota?.maxGpusPerJob ?? -1;
     const expiration = userInfo.extension?.quota?.expiration ?? null;
     const expirationDate = new Date(expiration);
