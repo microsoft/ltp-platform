@@ -32,7 +32,7 @@ const Logo = ({ className, style }) => (
           className={c(t.ml3, FontClassNames.xLarge, ColorClassNames.white)}
           style={{ fontWeight: FontWeights.semibold }}
         >
-          Platform for AI
+          LTP
         </div>
       </div>
     </a>

@@ -135,7 +135,7 @@ const Index = () => {
           t.justifyBetween,
         )}
       >
-        <div className={c(FontClassNames.large, t.white)}>Platform for AI</div>
+        <div className={c(FontClassNames.large, t.white)}>Lucia Training Platform</div>
         <div
           className={c(FontClassNames.large, t.white, t.dim, t.pointer)}
           onClick={showLoginModal}

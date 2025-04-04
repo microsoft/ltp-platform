@@ -27,7 +27,7 @@ const validateInput = async (clusterAlias, clusterUri, username, token) => {
         .regex(/^https?:\/\/[^/]*\/?$/)
         .required()
         .error(() => {
-          return 'Please use a valid OpenPAI URI, e.g. https://10.0.0.1, https://a.b.c';
+          return 'Please use a valid LTP URI, e.g. https://10.0.0.1, https://a.b.c';
         }),
       username: Joi.string().required(),
       token: Joi.string()

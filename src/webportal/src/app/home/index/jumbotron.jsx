@@ -35,16 +35,24 @@ const Jumbotron = ({ showLoginModal }) => (
         <SignInBackground style={{ maxWidth: '20rem' }} />
         <div className={c(t.flex, t.flexColumn, t.itemsCenter)}>
           <div className={c(FontClassNames.superLarge, t.pt3)}>
-            Platform for AI
+            Lucia Training Platform
           </div>
           <div
             className={c(FontClassNames.mediumPlus, t.tc, t.lhCopy, t.mv4)}
             style={{ maxWidth: '20rem' }}
           >
-            Platform for AI is an open source platform that provides complete AI
-            model training and resource management capabilities, it is easy to
-            extend and supports on-premise, cloud and hybrid environments in
-            various scale.
+            Lucia Training Platform (LTP) is a pioneering open-source platform,
+            constructed on the robust foundation of the OpenPAI project,
+            dedicated to facilitating large-scale distributed training.
+            This innovative platform offers advanced AI administration for
+            efficient cluster management. LTP is not only committed to
+            enhancing the availability and reliability of the cluster
+            but also focuses on elevating its efficiency. A unique feature
+            of LTP is its ability to significantly improve the user experience
+            via chatbot, making it a comprehensive solution for managing and
+            optimizing large-scale distributed training. With its advanced
+            features and user-friendly approach, LTP is revolutionizing the
+            way we manage AI training.
           </div>
           <PrimaryButton
             styles={{ root: { maxWidth: '6rem' } }}
@@ -64,12 +72,20 @@ const Jumbotron = ({ showLoginModal }) => (
           className={c(t.flex, t.flexColumn, t.pr4)}
           style={{ minWidth: '20rem' }}
         >
-          <div className={c(FontClassNames.superLarge)}>Platform for AI</div>
+          <div className={c(FontClassNames.superLarge)}>Lucia Training Platform</div>
           <div className={c(FontClassNames.mediumPlus, t.lhCopy, t.mv4)}>
-            Platform for AI is an open source platform that provides complete AI
-            model training and resource management capabilities, it is easy to
-            extend and supports on-premise, cloud and hybrid environments in
-            various scale.
+            Lucia Training Platform (LTP) is a pioneering open-source platform,
+            constructed on the robust foundation of the OpenPAI project,
+            dedicated to facilitating large-scale distributed training.
+            This innovative platform offers advanced AI administration for
+            efficient cluster management. LTP is not only committed to
+            enhancing the availability and reliability of the cluster
+            but also focuses on elevating its efficiency. A unique feature
+            of LTP is its ability to significantly improve the user experience
+            via chatbot, making it a comprehensive solution for managing and
+            optimizing large-scale distributed training. With its advanced
+            features and user-friendly approach, LTP is revolutionizing the
+            way we manage AI training.
           </div>
           <PrimaryButton
             styles={{ root: { maxWidth: '6rem' } }}

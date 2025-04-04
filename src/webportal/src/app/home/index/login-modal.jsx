@@ -58,7 +58,7 @@ const LoginModal = ({ isOpen, lock, error, onDismiss, onLogin }) => {
           className={c(FontClassNames.medium, t.center, t.mt4, t.mb3, t.tc)}
           style={{ fontWeight: FontWeights.semibold }}
         >
-          Sign in with your OpenPAI account
+          Sign in with your LTP account
         </div>
         {error && (
           <MessageBar messageBarType={MessageBarType.error}>{error}</MessageBar>

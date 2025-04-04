@@ -84,7 +84,7 @@ const Bottom = () => (
           className={c(FontClassNames.mediumPlus, t.lhCopy, t.mv4)}
           style={{ maxWidth: '20rem' }}
         >
-          The job of OpenPAI defines how to execute command(s) in specified
+          The job of LTP defines how to execute command(s) in specified
           environment(s). A job can be model training, other kinds of commands,
           or distributed on multiple servers.
         </div>
@@ -121,7 +121,7 @@ const Bottom = () => (
           className={c(FontClassNames.mediumPlus, t.lhCopy, t.mv4)}
           style={{ maxWidth: '20rem' }}
         >
-          OpenPAI Client is a VS Code extension to connect PAI clusters, submit
+          LTP Client is a VS Code extension to connect LTP clusters, submit
           AI jobs, and manage files on HDFS, etc. You need to install the
           extension in VS code before using it.
         </div>

@@ -45,7 +45,7 @@ export const AddDataSource = props => {
     },
     {
       key: 'hdfs',
-      text: 'From PAI HDFS',
+      text: 'From LTP HDFS',
       iconProps: { iconName: 'Cloudy' },
       className: config.launcherType === 'k8s' ? c(t.dn) : null,
       onClick: () => {

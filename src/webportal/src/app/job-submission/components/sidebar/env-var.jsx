@@ -55,13 +55,13 @@ const columns = [
 
 export const EnvVar = React.memo(({ selected, onSelect }) => (
   <SidebarCard
-    title='PAI environment variables'
+    title='LTP environment variables'
     selected={selected}
     onSelect={onSelect}
   >
     <Stack gap='m'>
       <Hint>
-        You could reference these PAI Environment Variables in command by{' '}
+        You could reference these LTP Environment Variables in command by{' '}
         <code>{'$envKey'}</code>
       </Hint>
       <div>

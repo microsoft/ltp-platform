@@ -136,7 +136,7 @@ const Navbar = ({ onToggleSidebar, mobile, userInfo }) => {
         >
           <div>
             <div className={c(t.flex)}>
-              <div className={c(t.pa3, t.flexAuto)}>Platform for AI</div>
+              <div className={c(t.pa3, t.flexAuto)}>Lucia Training Platform</div>
               <CommandBarButton
                 styles={{
                   root: [

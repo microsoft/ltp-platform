@@ -35,11 +35,11 @@ export const AddLocal = ({
 
   useEffect(() => {
     if (!hdfsClient) {
-      setHDFSErrorMessage('Cannot upload to pai right now');
+      setHDFSErrorMessage('Cannot upload to LTP right now');
     } else {
       hdfsClient.checkAccess().then(isAccessiable => {
         if (!isAccessiable) {
-          setHDFSErrorMessage('Cannot upload to pai right now');
+          setHDFSErrorMessage('Cannot upload to LTP right now');
         }
       });
     }
@@ -102,7 +102,7 @@ export const AddLocal = ({
         />
       </Stack.Item>
       <Stack.Item align='baseline'>
-        <Label className={FontClassNames.medium}>Upload to pai</Label>
+        <Label className={FontClassNames.medium}>Upload to LTP</Label>
         <DefaultButton
           disabled={hdfsErrorMessage}
           iconProps={{ iconName: 'Upload' }}

@@ -35,12 +35,12 @@ export const AddHDFS = ({
   useEffect(() => {
     if (!hdfsClient) {
       setIsHdfsEnabled(false);
-      setHdfsPathErrorMessage('Pai HDFS is not available');
+      setHdfsPathErrorMessage('LTP HDFS is not available');
     } else {
       hdfsClient.checkAccess().then(isAccessiable => {
         setIsHdfsEnabled(isAccessiable);
         if (!isAccessiable) {
-          setHdfsPathErrorMessage('Pai HDFS is not available');
+          setHdfsPathErrorMessage('LTP HDFS is not available');
         }
       });
     }
@@ -85,7 +85,7 @@ export const AddHDFS = ({
       </Stack.Item>
       <Stack.Item align='baseline'>
         <Label required className={FontClassNames.medium}>
-          Path in pai HDFS
+          Path in LTP HDFS
         </Label>
         <TextField
           required

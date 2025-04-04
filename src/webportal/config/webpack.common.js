@@ -26,7 +26,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const markedConfig = require('./marked.config');
 const helpers = require('./helpers');
 
-const title = 'Platform for AI';
+const title = 'LTP';
 const version = require('../package.json').version;
 const commitVersion = require('../package.json').commitVersion;
 const FABRIC_DIR = [

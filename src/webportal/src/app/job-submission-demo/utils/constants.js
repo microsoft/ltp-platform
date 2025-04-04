@@ -24,7 +24,7 @@ export const PAI_ENV_VAR = [
   },
   {
     key: 'PAI_DEFAULT_FS_URI',
-    desc: 'Default file system uri in PAI',
+    desc: 'Default file system uri in LTP',
   },
   {
     key: 'PAI_TASK_ROLE_COUNT',
@@ -188,6 +188,6 @@ export const SIDEBAR_CONFIG = [
   { key: SIDEBAR_TOOL, text: 'SSH' },
   { key: SIDEBAR_PARAM, text: 'Parameters' },
   { key: SIDEBAR_SECRET, text: 'Secrets' },
-  { key: SIDEBAR_ENVVAR, text: 'PAI environment variables' },
+  { key: SIDEBAR_ENVVAR, text: 'LTP environment variables' },
   { key: SIDEBAR_DATA, text: 'Data volume' },
 ];
