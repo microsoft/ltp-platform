@@ -354,6 +354,7 @@ const generateTaskRole = (
   jobInfo,
   frameworkEnvList,
   config,
+  enableLocalStorage,
 ) => {
   const ports = config.taskRoles[taskRole].resourcePerInstance.ports || {};
   for (const port of ['ssh', 'http']) {
@@ -473,6 +474,10 @@ const generateTaskRole = (
                   name: 'job-exit-spec',
                   mountPath: '/usr/local/pai-config',
                 },
+                ...(enableLocalStorage && enableLocalStorage.enabled ? [{
+                  name: 'local-storage',
+                  mountPath: `${enableLocalStorage.mntpath}`,
+                }] : []),
               ],
             },
           ],
@@ -531,6 +536,10 @@ const generateTaskRole = (
                   }/${convertName(taskRole)}`,
                   mountPath: '/usr/local/pai/logs',
                 },
+                ...(enableLocalStorage && enableLocalStorage.enabled ? [{
+                  name: 'local-storage',
+                  mountPath: `${enableLocalStorage.mntpath}`,
+                }] : []),
               ],
             },
           ],
@@ -552,6 +561,12 @@ const generateTaskRole = (
                 path: `/var/log/pai`,
               },
             },
+            ...((enableLocalStorage && enableLocalStorage.enabled) ? [{
+              name: 'local-storage',
+              hostPath: {
+                path: `${enableLocalStorage.hostpath}`,
+              },
+            }] : []),
             {
               name: 'job-exit-spec',
               configMap: {
@@ -682,6 +697,7 @@ const generateFrameworkDescription = (
   userExtension,
   config,
   rawConfig,
+  enableLocalStorage,
 ) => {
   const [userName, jobName] = frameworkName.split(/~(.+)/);
   const jobInfo = {
@@ -738,6 +754,7 @@ const generateFrameworkDescription = (
       jobInfo,
       frameworkEnvList,
       config,
+      enableLocalStorage,
     );
     if (launcherConfig.enabledPriorityClass) {
       taskRoleDescription.task.pod.spec.priorityClassName = `${encodeName(
@@ -1101,6 +1118,36 @@ const put = async (frameworkName, config, rawConfig) => {
     }
   }
 
+  let enableLocalStorage = {
+    enabled: false,
+    hostpath: '',
+    mntpath: ''
+  };
+
+  const isValidLinuxPath = (path) => {
+    const linuxPathRegex = /^(\/[a-zA-Z0-9._-]+)+\/?$/;
+    return linuxPathRegex.test(path);
+  };
+
+  if ('extras' in config && config.extras.enableLocalStorage && config.extras.enableLocalStorage.enabled === true) {
+    enableLocalStorage.enabled = true;
+    const hostpath = config.extras.enableLocalStorage.hostpath || 'no host path';
+    const mntpath = config.extras.enableLocalStorage.mntpath || 'no mount path';
+
+    if (!isValidLinuxPath(hostpath) || !isValidLinuxPath(mntpath)) {
+      throw createError(
+        'Bad Request',
+        'InvalidPathError',
+        `Invalid Linux path provided for hostpath (${hostpath}) or mntpath (${mntpath}).`
+      );
+    }
+
+    enableLocalStorage.hostpath = hostpath;
+    enableLocalStorage.mntpath = mntpath;
+
+    logger.info(`Local storage enabled for job ${frameworkName}, host path is ${enableLocalStorage.hostpath}, mount path is ${enableLocalStorage.mntpath}`);
+  }
+
   // generate the user-extension-secret definition
   const user = await userModel.getUser(userName);
   const userExtension = user.extension;
@@ -1114,6 +1161,7 @@ const put = async (frameworkName, config, rawConfig) => {
     userExtension,
     config,
     rawConfig,
+    enableLocalStorage,
   );
   // generate the image pull secret definition
   const auths = Object.values(config.prerequisites.dockerimage)
