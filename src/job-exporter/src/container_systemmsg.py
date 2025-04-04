@@ -20,7 +20,9 @@ def parse_system_msg_stats(stats: str):
             system_msgs.add("amdgpu: trn=2 ACK should not assert! wait again !")
         if "Fence fallback timer expired on ring sdma" in data:
             system_msgs.add("Fence fallback timer expired on ring sdma")
-        if "segfault" in data:
+        if "GPU reset" in data:
+            system_msgs.add("GPU reset")
+        if "segfault" in data and "python" not in data:
             system_msgs.add("segfault")
     
     return system_msgs

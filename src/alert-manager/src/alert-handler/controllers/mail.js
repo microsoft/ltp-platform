@@ -9,6 +9,20 @@ const sendEmailToAdmin = async (req, res) => {
   logger.info(
     'alert-handler received `send-email-to-admin` post request from alert-manager.',
   );
+
+  const timestamp = new Date().toISOString();
+  // Add logging for each alert to be sent to admin
+  req.body.alerts.forEach(alert => {
+    const summary = alert.annotations?.summary || 'No summary available';
+    const labels = JSON.stringify(alert.labels);
+    const annotations = alert.annotations && Object.keys(alert.annotations).length > 0
+      ? JSON.stringify(alert.annotations)
+      : 'No annotations available';
+    logger.info(
+      `[${timestamp}] alert-handler send alert to admin with alerts: Alertname: ${alert.labels?.alertname}, Severity: ${alert.labels?.severity}, Summary: ${summary}, Labels: ${labels}, Annotations: ${annotations}`
+    );
+  });
+
   const template = req.query.template
     ? req.query.template
     : 'general-templates';
