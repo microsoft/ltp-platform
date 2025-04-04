@@ -87,6 +87,7 @@ TimeoutSec=1200
 ExecStartPre=/bin/mount --make-shared /var/lib/kubelet
 ExecStartPre=-/sbin/ebtables -t nat --list
 ExecStartPre=-/sbin/iptables -t nat --numeric --list
+ExecStartPre=-/usr/bin/timeout 300 /bin/sh -c 'until grep -Eq "^(nvidia|amdgpu)" /proc/modules; do echo "Waiting for nvidia/amdgpu module"; sleep 5; done'
 ExecStart=/usr/local/bin/kubelet \
         --enable-server \
         --node-labels="${KUBELET_NODE_LABELS}" \
