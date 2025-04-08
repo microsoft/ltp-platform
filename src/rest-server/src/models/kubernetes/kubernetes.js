@@ -32,6 +32,7 @@ const getClient = (baseURL = '') => {
   const config = {
     baseURL: new URL(baseURL, apiserver.uri).toString(),
     maxRedirects: 0,
+    timeout: 5000, // Default timeout value set to 5000ms
     headers: {
       Accept: 'application/json',
     },

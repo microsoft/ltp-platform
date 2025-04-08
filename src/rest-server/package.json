@@ -30,6 +30,7 @@
     "ajv": "^6.12.3",
     "ajv-merge-patch": "~4.1.0",
     "async": "~2.6.4",
+    "async-mutex": "^0.2.6",
     "axios": "^0.21.2",
     "chai": "~4.1.2",
     "chai-as-promised": "~7.1.1",

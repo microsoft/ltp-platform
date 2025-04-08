@@ -18,6 +18,7 @@
 const User = require('./user');
 const logger = require('@pai/config/logger');
 const k8sModel = require('@pai/models/kubernetes/kubernetes');
+const { Mutex } = require('async-mutex');
 
 const USER_NAMESPACE = process.env.PAI_USER_NAMESPACE || 'pai-user-v2';
 
@@ -36,44 +37,71 @@ const USER_NAMESPACE = process.env.PAI_USER_NAMESPACE || 'pai-user-v2';
  * @param {string} key - User name
  * @return {Promise<User>} A promise to the User instance
  */
-async function read(key) {
-  try {
-    const request = k8sModel.getClient('/api/v1/namespaces/');
-    const hexKey = Buffer.from(key).toString('hex');
+const cache = new Map();
 
-    const logId = Math.floor(Math.random() * 100000);
-    const startTime = Date.now();
-    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read user info`);      
-    const response = await request.get(
-      `${USER_NAMESPACE}/secrets/${hexKey}`.toString(),
-      {
-        headers: {
-          Accept: 'application/json',
-        },
-      },
-    );
-    const endTime = Date.now();
-    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading user info, response time: ${endTime - startTime}ms`);
-    const userData = response.data;
-    const userInstance = User.createUser({
-      username: Buffer.from(userData.data.username, 'base64').toString(),
-      password: Buffer.from(userData.data.password, 'base64').toString(),
-      grouplist: JSON.parse(
-        Buffer.from(userData.data.grouplist, 'base64').toString(),
-      ),
-      email: Buffer.from(userData.data.email, 'base64').toString(),
-      extension: JSON.parse(
-        Buffer.from(userData.data.extension, 'base64').toString(),
-      ),
-    });
-    return userInstance;
-  } catch (error) {
-    if (error.response) {
-      throw error.response;
-    } else {
-      throw error;
-    }
+const readMutex = new Mutex();
+
+async function read(key) {
+  if (cache.has(key)) {
+    logger.info(`Read user info from cache: ${key}`);
+    return cache.get(key);
   }
+
+  return readMutex.runExclusive(async () => {
+    if (cache.has(key)) {
+      logger.info(`Read user info from cache: ${key}`);
+      return cache.get(key);
+    }
+
+    try {
+      const request = k8sModel.getClient('/api/v1/namespaces/');
+      const hexKey = Buffer.from(key).toString('hex');
+
+      const logId = Math.floor(Math.random() * 100000);
+      const startTime = Date.now();
+      logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read user info`);
+      const response = await request.get(
+        `${USER_NAMESPACE}/secrets/${hexKey}`,
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+        },
+      );
+      const endTime = Date.now();
+      logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading user info, response time: ${endTime - startTime}ms`);
+
+      if (!response || !response.data) {
+        throw new Error(`Invalid response from Kubernetes API while fetching user: ${key}`);
+      }
+
+      const userData = response.data;
+      const userInstance = User.createUser({
+        username: Buffer.from(userData.data.username, 'base64').toString(),
+        password: Buffer.from(userData.data.password, 'base64').toString(),
+        grouplist: JSON.parse(
+          Buffer.from(userData.data.grouplist, 'base64').toString(),
+        ),
+        email: Buffer.from(userData.data.email, 'base64').toString(),
+        extension: JSON.parse(
+          Buffer.from(userData.data.extension, 'base64').toString(),
+        ),
+      });
+
+      cache.set(key, userInstance);
+      return userInstance;
+    } catch (error) {
+      if (error.code === 'ECONNABORTED') {
+        logger.error(`Timeout error while fetching user: ${key}`);
+        throw new Error(`Timeout error while fetching user: ${key}`);
+      }
+      if (error.response) {
+        throw error.response;
+      } else {
+        throw error;
+      }
+    }
+  });
 }
 
 /**
@@ -82,49 +110,71 @@ async function read(key) {
  * @return {Promise<User[]>} A promise to all User instance list.
  */
 async function readAll() {
-  try {
-    const request = k8sModel.getClient('/api/v1/namespaces/');
+  if (cache.has('allUsers')) {
+    logger.info('Read all user info from cache');
+    return cache.get('allUsers');
+  }
 
-    const logId = Math.floor(Math.random() * 100000);
-    const startTime = Date.now();
-    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read all user info`);
-    const response = await request.get(`${USER_NAMESPACE}/secrets`.toString(), {
-      headers: {
-        Accept: 'application/json',
-      },
-    });
-    const endTime = Date.now();
-    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading all user info, response time: ${endTime - startTime}ms`);
-    const allUserInstance = [];
-    const userData = response.data;
-    for (const item of userData.items) {
-      try {
-        const userInstance = User.createUser({
-          username: Buffer.from(item.data.username, 'base64').toString(),
-          password: Buffer.from(item.data.password, 'base64').toString(),
-          grouplist: JSON.parse(
-            Buffer.from(item.data.grouplist, 'base64').toString(),
-          ),
-          email: Buffer.from(item.data.email, 'base64').toString(),
-          extension: JSON.parse(
-            Buffer.from(item.data.extension, 'base64').toString(),
-          ),
-        });
-        allUserInstance.push(userInstance);
-      } catch (error) {
-        logger.debug(
-          `secret ${item.metadata.name} is filtered in ${USER_NAMESPACE} due to user schema`,
-        );
+  return readMutex.runExclusive(async () => {
+    if (cache.has('allUsers')) {
+      logger.info('Read all user info from cache');
+      return cache.get('allUsers');
+    }
+
+    try {
+      const request = k8sModel.getClient('/api/v1/namespaces/');
+
+      const logId = Math.floor(Math.random() * 100000);
+      const startTime = Date.now();
+      logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read all user info`);
+      const response = await request.get(`${USER_NAMESPACE}/secrets`, {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+      const endTime = Date.now();
+      logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading all user info, response time: ${endTime - startTime}ms`);
+      const allUserInstance = [];
+
+      if (!response || !response.data) {
+        throw new Error(`Invalid response from Kubernetes API while fetching all users`);
+      }
+
+      const userData = response.data;
+      for (const item of userData.items) {
+        try {
+          const userInstance = User.createUser({
+            username: Buffer.from(item.data.username, 'base64').toString(),
+            password: Buffer.from(item.data.password, 'base64').toString(),
+            grouplist: JSON.parse(
+              Buffer.from(item.data.grouplist, 'base64').toString(),
+            ),
+            email: Buffer.from(item.data.email, 'base64').toString(),
+            extension: JSON.parse(
+              Buffer.from(item.data.extension, 'base64').toString(),
+            ),
+          });
+          allUserInstance.push(userInstance);
+        } catch (error) {
+          logger.debug(
+            `secret ${item.metadata.name} is filtered in ${USER_NAMESPACE} due to user schema`,
+          );
+        }
+      }
+      cache.set('allUsers', allUserInstance);
+      return allUserInstance;
+    } catch (error) {
+      if (error.code === 'ECONNABORTED') {
+        logger.error('Timeout error while fetching all users');
+        throw new Error('Timeout error while fetching all users');
+      }
+      if (error.response) {
+        throw error.response;
+      } else {
+        throw error;
       }
     }
-    return allUserInstance;
-  } catch (error) {
-    if (error.response) {
-      throw error.response;
-    } else {
-      throw error;
-    }
-  }
+  });
 }
 
 /**
@@ -166,6 +216,11 @@ async function create(key, value) {
     const response = await request.post(`${USER_NAMESPACE}/secrets`, userData);
     const endTime = Date.now();
     logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished creating user, response time: ${endTime - startTime}ms`);
+
+    await readMutex.runExclusive(async () => {
+      cache.delete('allUsers');
+    });
+
     return response;
   } catch (error) {
     if (error.response) {
@@ -221,6 +276,12 @@ async function update(key, value, updatePassword = false) {
     );
     const endTime = Date.now();
     logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished updating user info, response time: ${endTime - startTime}ms`);
+    
+    await readMutex.runExclusive(async () => {
+      cache.delete(key);
+      cache.delete('allUsers');
+    });
+
     return response;
   } catch (error) {
     if (error.response) {
@@ -246,14 +307,19 @@ async function remove(key) {
     logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to remove user`);
     const response = await request.delete(`${USER_NAMESPACE}/secrets/${hexKey}`, {
       headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
     });
-    
+
     const endTime = Date.now();
     logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished removing user, response time: ${endTime - startTime}ms`);
-    
+
+    await readMutex.runExclusive(async () => {
+      cache.delete(key);
+      cache.delete('allUsers');
+    });
+
     return response;
   } catch (error) {
     if (error.response) {

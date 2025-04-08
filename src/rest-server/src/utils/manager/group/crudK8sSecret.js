@@ -20,6 +20,9 @@ const logger = require('@pai/config/logger');
 const k8sModel = require('@pai/models/kubernetes/kubernetes');
 
 const GROUP_NAMESPACE = process.env.PAI_GROUP_NAMESPACE || 'pai-group';
+const { Mutex } = require('async-mutex');
+const cacheMutex = new Mutex();
+const cache = new Map();
 
 /**
  * @typedef Group
@@ -27,7 +30,6 @@ const GROUP_NAMESPACE = process.env.PAI_GROUP_NAMESPACE || 'pai-group';
  * @property {String} externalName - externalName
  * @property {string} description - description
  * @property {Object} extension - extension field
- */
 
 /**
  * @function read - return a Group's info based on the GroupName.
@@ -36,39 +38,62 @@ const GROUP_NAMESPACE = process.env.PAI_GROUP_NAMESPACE || 'pai-group';
  * @return {Promise<Group>} A promise to the Group instance
  */
 async function read(key) {
-  try {
-    const request = k8sModel.getClient('/api/v1/namespaces');
-    const hexKey = Buffer.from(key).toString('hex');
-    const logId = Math.floor(Math.random() * 100000);
-    const startTime = Date.now();
-    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read group`);      
-    const response = await request.get(`${GROUP_NAMESPACE}/secrets/${hexKey}`, {
-      headers: {
-        Accept: 'application/json',
-      },
-    });
-    const endTime = Date.now();
-    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading group, response time: ${endTime - startTime}ms`);    
-    const groupData = response.data;
-    const groupInstance = Group.createGroup({
-      groupname: Buffer.from(groupData.data.groupname, 'base64').toString(),
-      description: Buffer.from(groupData.data.description, 'base64').toString(),
-      externalName: Buffer.from(
-        groupData.data.externalName,
-        'base64',
-      ).toString(),
-      extension: JSON.parse(
-        Buffer.from(groupData.data.extension, 'base64').toString(),
-      ),
-    });
-    return groupInstance;
-  } catch (error) {
-    if (error.response) {
-      throw error.response;
-    } else {
-      throw error;
-    }
+  if (cache.has(key)) {
+    logger.info(`Read group from cache: ${key}`);
+    return cache.get(key);
   }
+
+  return cacheMutex.runExclusive(async () => {
+    if (cache.has(key)) {
+      logger.info(`Read group from cache: ${key}`);
+      return cache.get(key);
+    }
+
+    try {
+      const request = k8sModel.getClient('/api/v1/namespaces');
+      const hexKey = Buffer.from(key).toString('hex');
+      const logId = Math.floor(Math.random() * 100000);
+      const startTime = Date.now();
+      logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read group`);      
+      const response = await request.get(`${GROUP_NAMESPACE}/secrets/${hexKey}`, {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+      const endTime = Date.now();
+      logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading group, response time: ${endTime - startTime}ms`);    
+
+      if (!response || !response.data) {
+        throw new Error(`Invalid response from Kubernetes API while fetching group: ${key}`);
+      }
+
+      const groupData = response.data;
+      const groupInstance = Group.createGroup({
+        groupname: Buffer.from(groupData.data.groupname, 'base64').toString(),
+        description: Buffer.from(groupData.data.description, 'base64').toString(),
+        externalName: Buffer.from(
+          groupData.data.externalName,
+          'base64',
+        ).toString(),
+        extension: JSON.parse(
+          Buffer.from(groupData.data.extension, 'base64').toString(),
+        ),
+      });
+
+      cache.set(key, groupInstance);
+      return groupInstance;
+    } catch (error) {
+      if (error.code === 'ECONNABORTED') {
+        logger.error(`Request timed out while fetching group: ${key}`);
+        throw new Error(`Request timed out while fetching group: ${key}`);
+      }
+      if (error.response) {
+        throw error.response;
+      } else {
+        throw error;
+      }
+    }
+  });
 }
 
 /**
@@ -77,51 +102,63 @@ async function read(key) {
  * @return {Promise<Group[]>} A promise to all Group instance list.
  */
 async function readAll() {
-  try {
-    const request = k8sModel.getClient('/api/v1/namespaces');
+  if (cache.has('allGroups')) {
+    logger.info('Read all groups from cache');
+    return cache.get('allGroups');
+  }
 
-    const logId = Math.floor(Math.random() * 100000);
-    const startTime = Date.now();
-    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read all group namespaces`);  
+  return cacheMutex.runExclusive(async () => {
+    if (cache.has('allGroups')) {
+      logger.info('Read all groups from cache');
+      return cache.get('allGroups');
+    }
 
-    const response = await request.get(`${GROUP_NAMESPACE}/secrets`, {
-      headers: {
-        Accept: 'application/json',
-      },
-    });
+    try {
+      const request = k8sModel.getClient('/api/v1/namespaces');
 
-    const endTime = Date.now();
-    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading all group namespaces, response time: ${endTime - startTime}ms`);
-    const allGroupInstance = [];
-    const groupData = response.data;
-    for (const item of groupData.items) {
-      try {
-        const groupInstance = Group.createGroup({
-          groupname: Buffer.from(item.data.groupname, 'base64').toString(),
-          description: Buffer.from(item.data.description, 'base64').toString(),
-          externalName: Buffer.from(
-            item.data.externalName,
-            'base64',
-          ).toString(),
-          extension: JSON.parse(
-            Buffer.from(item.data.extension, 'base64').toString(),
-          ),
-        });
-        allGroupInstance.push(groupInstance);
-      } catch (error) {
-        logger.debug(
-          `secret ${item.metadata.name} is filtered in ${GROUP_NAMESPACE} due to group schema`,
-        );
+      const logId = Math.floor(Math.random() * 100000);
+      const startTime = Date.now();
+      logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to read all group namespaces`);
+
+      const response = await request.get(`${GROUP_NAMESPACE}/secrets`, {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      const endTime = Date.now();
+      logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished reading all group namespaces, response time: ${endTime - startTime}ms`);
+      const allGroupInstance = [];
+
+      if (!response || !response.data) {
+        throw new Error(`Invalid response from Kubernetes API while fetching all groups`);
+      }
+
+      const groupData = response.data;
+      for (const item of groupData.items) {
+        try {
+          const groupInstance = Group.createGroup({
+            groupname: Buffer.from(item.data.groupname, 'base64').toString(),
+            description: Buffer.from(item.data.description, 'base64').toString(),
+            externalName: Buffer.from(item.data.externalName, 'base64').toString(),
+            extension: JSON.parse(Buffer.from(item.data.extension, 'base64').toString()),
+          });
+          allGroupInstance.push(groupInstance);
+        } catch (error) {
+          logger.debug(`secret ${item.metadata.name} is filtered in ${GROUP_NAMESPACE} due to group schema`);
+        }
+      }
+
+      cache.set('allGroups', allGroupInstance);
+      return allGroupInstance;
+    } catch (error) {
+      if (error.response) {
+        throw error.response;
+      } else {
+        throw error;
       }
     }
-    return allGroupInstance;
-  } catch (error) {
-    if (error.response) {
-      throw error.response;
-    } else {
-      throw error;
-    }
-  }
+  });
 }
 
 /**
@@ -160,6 +197,12 @@ async function create(key, value) {
     const response = await request.post(`${GROUP_NAMESPACE}/secrets`, groupData);
     const endTime = Date.now();
     logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished creating group, response time: ${endTime - startTime}ms`);
+
+    // Remove the item from cache
+    await cacheMutex.runExclusive(() => {
+      cache.delete('allGroups');
+    });
+
     return response;
     
   } catch (error) {
@@ -208,6 +251,13 @@ async function update(key, value) {
     const response = await request.put(`${GROUP_NAMESPACE}/secrets/${hexKey}`, groupData);
     const endTime = Date.now();
     logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished updating group, response time: ${endTime - startTime}ms`);
+    
+    // Remove the item from cache
+    await cacheMutex.runExclusive(() => {
+      cache.delete(key);
+      cache.delete('allGroups');
+    });
+    
     return response;
   } catch (error) {
     if (error.response) {
@@ -241,6 +291,12 @@ async function remove(key) {
 
     const endTime = Date.now();
     logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished removing group, response time: ${endTime - startTime}ms`);
+
+    // Remove the item from cache
+    await cacheMutex.runExclusive(() => {
+      cache.delete(key);
+      cache.delete('allGroups');
+    });    
 
     return response;
   } catch (error) {

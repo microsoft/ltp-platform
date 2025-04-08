@@ -22,6 +22,13 @@ const user = require('@pai/models/v2/user');
 const secret = require('@pai/models/kubernetes/k8s-secret');
 const kubernetes = require('@pai/models/kubernetes/kubernetes');
 const logger = require('@pai/config/logger');
+const { Mutex } = require('async-mutex');
+
+const pvcCache = new Map();
+const pvcMutex = new Mutex();
+
+const pvCache = new Map();
+const pvMutex = new Mutex();
 
 const convertVolumeSummary = (pvc) => {
   return {
@@ -38,25 +45,48 @@ const convertVolumeDetail = async (pvc) => {
   }
 
   let response;
-  try {
-    const logId = Math.floor(Math.random() * 100000);
-    const startTime = Date.now();
-    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to convert volume detail`);      
 
-    response = await kubernetes
-      .getClient()
-      .get(`/api/v1/persistentvolumes/${storage.volumeName}`);
-
-    const endTime = Date.now();
-    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished converting volume detail, response time: ${endTime - startTime}ms`);
-
-  } catch (error) {
-    if (error.response != null) {
-      response = error.response;
-    } else {
-      throw error;
-    }
+  if (pvCache.has(storage.volumeName)) {
+    logger.info(`Read persistant volume from cache: ${storage.volumeName}`);
+    response = { data: pvCache.get(storage.volumeName), status: status('OK') };
   }
+  else {
+    await pvMutex.runExclusive(async () => {
+      try {
+        if (pvCache.has(storage.volumeName)) {
+          logger.info(`Read persistant volume from cache: ${storage.volumeName}`);
+          response = { data: pvCache.get(storage.volumeName), status: status('OK') };
+        } 
+        else {
+          const logId = Math.floor(Math.random() * 100000);
+          const startTime = Date.now();
+          logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to convert volume detail`);
+
+          response = await kubernetes
+          .getClient()
+          .get(`/api/v1/persistentvolumes/${storage.volumeName}`);
+
+          const endTime = Date.now();
+          logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished converting volume detail, response time: ${endTime - startTime}ms`);
+
+          if (response.status === status('OK')) {
+            pvCache.set(storage.volumeName, response.data);
+          }
+        }
+      }catch (error) {
+        if (error.code === 'ECONNABORTED') {
+          logger.error(`Request timed out while getting persistant volume: ${storage.volumeName}`);
+          throw createError('Request Timeout', 'TimeoutError', 'The request to fetch persistant volume timed out.');
+        }
+        if (error.response != null) {
+          response = error.response;
+        } else {
+          throw error;
+        }
+      }
+    });
+  }
+
   if (response.status !== status('OK')) {
     throw createError(response.status, 'UnknownError', response.data.message);
   }
@@ -149,26 +179,48 @@ const convertVolumeDetail = async (pvc) => {
 
 const list = async (userName, filterDefault = false) => {
   let response;
-  try {
-
-    const logId = Math.floor(Math.random() * 100000);
-    const startTime = Date.now();
-    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to list storage`);
-
-    response = await kubernetes
-      .getClient()
-      .get('/api/v1/namespaces/default/persistentvolumeclaims');
-
-    const endTime = Date.now();
-    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished listing storage, response time: ${endTime - startTime}ms`);
-
-  } catch (error) {
-    if (error.response != null) {
-      response = error.response;
-    } else {
-      throw error;
-    }
+  if (pvcCache.has('storageList')) {
+    logger.info('Read persistant volume claim list from cache');
+    // NOTENOTE: If we add a new storage into the system, we need to restart the service to refresh the cache.
+    // TODO: add a web request to refresh the cache
+    response = { data: pvcCache.get('storageList'), status: status('OK') };
   }
+  else {
+    await pvcMutex.runExclusive(async () => {
+      try {
+        if (pvcCache.has('storageList')) {
+          logger.info('Read persistant volume claim list from cache');
+          response = { data: pvcCache.get('storageList'), status: status('OK') };
+        } else {
+          const logId = Math.floor(Math.random() * 100000);
+          const startTime = Date.now();
+          logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to list storage`);
+
+          response = await kubernetes
+            .getClient()
+            .get('/api/v1/namespaces/default/persistentvolumeclaims');
+
+          const endTime = Date.now();
+          logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished listing storage, response time: ${endTime - startTime}ms`);
+
+          if (response.status === status('OK')) {
+            pvcCache.set('storageList', response.data);
+          }
+        }
+      } catch (error) {
+        if (error.code === 'ECONNABORTED') {
+          logger.error('Request timed out while listing storage');
+          throw createError('Request Timeout', 'TimeoutError', 'The request to list storage timed out.');
+        }
+        if (error.response != null) {
+          response = error.response;
+        } else {
+          throw error;
+        }
+      }
+    });
+  }
+
   if (response.status !== status('OK')) {
     throw createError(response.status, 'UnknownError', response.data.message);
   }
@@ -198,23 +250,43 @@ const list = async (userName, filterDefault = false) => {
 
 const get = async (storageName, userName) => {
   let response;
-  try {
-    
-    const logId = Math.floor(Math.random() * 100000);
-    const startTime = Date.now();
-    logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to get storage`);
-    response = await kubernetes
-      .getClient()
-      .get(`/api/v1/namespaces/default/persistentvolumeclaims/${storageName}`);
-    
-    const endTime = Date.now();
-    logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished getting storage, response time: ${endTime - startTime}ms`);
-  } catch (error) {
-    if (error.response != null) {
-      response = error.response;
-    } else {
-      throw error;
-    }
+  if (pvcCache.has(storageName)) {
+    logger.info(`Read persistant volume claim from cache: ${storageName}`);
+    response = { data: pvcCache.get(storageName), status: status('OK') };
+  }
+  else {
+    await pvcMutex.runExclusive(async () => {
+      try {
+        if (pvcCache.has(storageName)) {
+          logger.info(`Read persistant volume claim from cache: ${storageName}`);
+          response = { data: pvcCache.get(storageName), status: status('OK') };
+        } else {
+          const logId = Math.floor(Math.random() * 100000);
+          const startTime = Date.now();
+          logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to get storage`);
+          response = await kubernetes
+          .getClient()
+          .get(`/api/v1/namespaces/default/persistentvolumeclaims/${storageName}`);
+          
+          const endTime = Date.now();
+          logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished getting storage, response time: ${endTime - startTime}ms`);
+          
+          if (response.status === status('OK')) {
+            pvcCache.set(storageName, response.data);
+          }
+        }
+      } catch (error) {
+        if (error.code === 'ECONNABORTED') {
+          logger.error(`Request timed out while getting persistant volume claim: ${storageName}`);
+          throw createError('Request Timeout', 'TimeoutError', 'The request to fetch persistant volume claim timed out.');
+        }
+        if (error.response != null) {
+          response = error.response;
+        } else {
+          throw error;
+        }
+      }
+    });
   }
 
   if (response.status === status('OK')) {
