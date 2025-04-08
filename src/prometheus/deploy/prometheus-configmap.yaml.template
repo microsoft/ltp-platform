@@ -23,10 +23,10 @@ metadata:
   name: prometheus-configmap
 data:
   prometheus.yml: |-
+    {% if prom_info["remote_write"] %}
     global:
       external_labels:
-        cluster: aks-openpai
-    {% if prom_info["remote_write"] %}
+        cluster: prom_info["remote_write"]["cluster_label"]
     remote_write:
     {% if prom_info["remote_write"]["local_url"] %}
       - url: {{ prom_info["remote_write"]["local_url"] }}
