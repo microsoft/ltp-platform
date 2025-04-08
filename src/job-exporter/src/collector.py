@@ -24,7 +24,7 @@ import ps
 import utils
 from utils import GpuVendor
 
-import amdsmi
+import amd_smi_cmds
 
 logger = logging.getLogger(__name__)
 
@@ -401,13 +401,24 @@ class GpuCollector(Collector):
         self.mem_leak_thrashold = mem_leak_thrashold
         self.gpu_vendor = utils.get_gpu_vendor()
 
+        #special variable for AMD to indicate if the amd_smi is initialized
+        self.amd_smi_initialized = False
+        self.device_handlers = None  # Ensure device_handlers is always initialized
+
         if self.gpu_vendor == GpuVendor.AMD:
-            amdsmi.amdsmi_init()
-            self.device_handlers = amdsmi.amdsmi_get_processor_handles()
+            try:
+                self.device_handlers = utils.run_func_in_thread(amd_smi_cmds.init_amd_smi, GpuCollector.cmd_timeout)
+                self.amd_smi_initialized = True
+            except TimeoutError:
+                logger.warning("Timeout occurred while initializing AMD SMI")
+                self.amd_smi_initialized = False
     
     def __del__(self):
         if self.gpu_vendor == GpuVendor.AMD:
-            amdsmi.amdsmi_shut_down()
+            try:
+                utils.run_func_in_thread(amd_smi_cmds.destroy_amd_smi, GpuCollector.cmd_timeout)
+            except TimeoutError:
+                logger.warning("Timeout occurred while destroying AMD SMI")
 
     @staticmethod
     def get_container_id(pid):
@@ -603,7 +614,7 @@ class GpuCollector(Collector):
             error = "ok"
             try:
                 gpu_info = amd.rocm_smi(GpuCollector.amd_cmd_hostogram,
-                         GpuCollector.cmd_timeout, self.device_handlers)
+                         GpuCollector.cmd_timeout, self.device_handlers, self.amd_smi_initialized)
             except TimeoutError:
                 error = "timeout"
             except Exception as e:

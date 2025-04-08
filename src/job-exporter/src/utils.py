@@ -22,7 +22,32 @@ import subprocess
 
 import logging
 
+import threading
+import queue
+
 logger = logging.getLogger(__name__)
+
+
+def run_func_in_thread(func, timeout, *args, **kwargs):
+    if not callable(func):
+        raise ValueError("The 'func' parameter must be a callable function.")
+
+    result_queue = queue.Queue()
+
+    def target():
+        try:
+            result = func(*args, **kwargs)
+            result_queue.put(result)
+        except Exception as e:
+            logger.warning("run function %s encountered an error: %s", func.__name__, str(e))
+            result_queue.put(None)
+
+    thread = threading.Thread(target=target)
+    thread.start()
+    thread.join(timeout)
+    if thread.is_alive():
+        raise TimeoutError(f"Function {func.__name__} did not complete within {timeout} seconds.")
+    return result_queue.get()
 
 
 def exec_cmd(*args, **kwargs):

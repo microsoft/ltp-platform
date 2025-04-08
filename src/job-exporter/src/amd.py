@@ -7,7 +7,8 @@ import logging
 import subprocess
 
 import utils
-import amdsmi
+import amd_smi_cmds
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,42 +40,7 @@ class AMDGpuStatus(object):
                 self.pci_addr == o.pci_addr
 
 
-def get_device_ecc_error(device_handler):
-    corrected_ecc = 0
-    uncorrected_ecc = 0
-    for block in amdsmi.AmdSmiGpuBlock:
-        try:
-            ecc_count = amdsmi.amdsmi_get_gpu_ecc_count(device_handler, block)
-            corrected_ecc += ecc_count['correctable_count']
-            uncorrected_ecc += ecc_count['uncorrectable_count']
-        except (amdsmi.AmdSmiLibraryException, amdsmi.AmdSmiParameterException):
-            pass
-        except Exception as err:
-            LOGGER.warning('Get device ECC information failed: {}'.format(str(err)))
-            raise err
-
-    return corrected_ecc, uncorrected_ecc
-
-
-def get_processors_for_gpu():
-    pids = {}
-    try:
-        procs = amdsmi.amdsmi_get_gpu_compute_process_info()
-        for proc in procs:
-            indices = amdsmi.amdsmi_get_gpu_compute_process_gpus(proc.process_id)
-            for index in indices:
-                if index not in pids:
-                    pids[index] = []
-                pids[index].append(proc.process_id)
-        return pids
-    except (amdsmi.AmdSmiLibraryException, amdsmi.AmdSmiParameterException):
-        pass
-    except Exception as e:
-        LOGGER.error("Failed to get GPU compute process info: %s", e)
-        raise e
-
-
-def rocm_smi(histogram, timeout, device_handlers):
+def rocm_smi(histogram, timeout, device_handlers, amd_smi_initialized):
     try:
         smi_output = utils.exec_cmd(
             ["rocm-smi", "--showmeminfo", "all", "-a", "--json"],
@@ -82,12 +48,19 @@ def rocm_smi(histogram, timeout, device_handlers):
             timeout=timeout)
         
         ecc_errors = {}
-        for index, handler in enumerate(device_handlers):
-            corrected_ecc, uncorrected_ecc = get_device_ecc_error(handler)
-            ecc_errors[index] = utils.EccError(corrected_ecc, uncorrected_ecc)
-            LOGGER.debug(f"corrected_ecc: {corrected_ecc}, uncorrected_ecc: {uncorrected_ecc}")
+        pids = {}
+
+        if amd_smi_initialized:
+            for index, handler in enumerate(device_handlers):
+                corrected_ecc, uncorrected_ecc = utils.run_func_in_thread(
+                    amd_smi_cmds.get_device_ecc_error, timeout, handler)
+                ecc_errors[index] = utils.EccError(corrected_ecc, uncorrected_ecc)
+                LOGGER.debug(f"corrected_ecc: {corrected_ecc}, uncorrected_ecc: {uncorrected_ecc}")
         
-        pids = get_processors_for_gpu()
+            pids = utils.run_func_in_thread(amd_smi_cmds.get_processors_for_gpu, timeout)
+        else:
+            LOGGER.exception("amd smi not initialized")
+            raise RuntimeError("amd smi not initialized")
 
         return parse_smi_json_result(smi_output, ecc_errors, pids)
     except subprocess.CalledProcessError as e:
@@ -98,8 +71,8 @@ def rocm_smi(histogram, timeout, device_handlers):
     except subprocess.TimeoutExpired:
         LOGGER.warning("rocm-smi timeout")
         raise TimeoutError
-    except Exception:
-        LOGGER.exception("exec rocm-smi error")
+    except Exception as e:
+        LOGGER.exception("exec rocm-smi error: %s", str(e))
         raise
 
 
@@ -119,7 +92,7 @@ def parse_smi_json_result(smi_output, ecc_errors, pids):
         gpu_temperature = float(value["Temperature (Sensor junction) (C)"])
         gpu_uuid = str(value["Unique ID"]).strip()
         pci_addr = value["PCI Bus"]
-        pid = pids.get(index, [])
+        pid = pids.get(index, []) if pids else []
 
         res[str(index)] = AMDGpuStatus(gpu_util, gpu_mem_vram_util, pid, ecc_errors[index], str(index),
                            gpu_uuid, gpu_temperature, pci_addr)

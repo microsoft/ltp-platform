@@ -18,8 +18,8 @@
 
 FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04
 # Register the ROCM package repository, and install rocm-dev package
-ARG ROCM_VERSION=6.1.1
-ARG AMDGPU_VERSION=6.1.1
+ARG ROCM_VERSION=6.2.2
+ARG AMDGPU_VERSION=6.2.2
 ARG APT_PREF="Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600"
 RUN echo "$APT_PREF" > /etc/apt/preferences.d/rocm-pin-600
 
@@ -55,11 +55,13 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-ARG BRANCH_OR_TAG='yangwang1/add_dummy_field'
+RUN apt update && apt upgrade -y
+
+ARG BRANCH_OR_TAG='ruigao/add_dummy_field_6.2.2update'
 
 # Clone Moneo
 RUN git config --global advice.detachedHead false
-RUN git clone --branch ${BRANCH_OR_TAG} https://github.com/RyoYang/Moneo.git
+RUN git clone --branch ${BRANCH_OR_TAG} https://github.com/Azure/Moneo.git
 
 # Install RDC
 RUN sudo bash Moneo/src/worker/install/amd.sh
@@ -85,7 +87,5 @@ RUN wget https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERS
 
 COPY requirements.txt /job_exporter/
 RUN pip3 install -r /job_exporter/requirements.txt
-
-RUN apt update && apt upgrade -y
 
 COPY src/*.py /job_exporter/

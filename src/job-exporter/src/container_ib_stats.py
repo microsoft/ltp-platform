@@ -48,6 +48,9 @@ def stats(container_id, histogram, timeout):
                             state = PORT_STATE.get(state_content.split()[1].strip(), None)
                             if state is not None:
                                 result['{}:{}'.format(hca, port)][field_name] = state
+                            else:
+                                result['{}:{}'.format(hca, port)][field_name] = -1
+                                logger.warning("Invalid port state value for %s: %s", state_path, state_content)
                         continue
 
                     count_file_path = str(os.path.join(counter_path, field_name))
