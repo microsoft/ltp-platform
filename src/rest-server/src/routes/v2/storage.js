@@ -24,6 +24,11 @@ const router = new express.Router();
 
 router.route('/').get(token.check, controller.list);
 
+router.route('/refresh').post(
+    token.check,
+    token.checkAdmin,
+    controller.refresh);
+
 router.route('/:storageName').get(token.check, controller.get);
 
 module.exports = router;

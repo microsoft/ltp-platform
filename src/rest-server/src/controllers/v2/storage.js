@@ -19,8 +19,15 @@ const get = asyncHandler(async (req, res) => {
   res.json(data);
 });
 
+const refresh = asyncHandler(async (req, res) => {
+  const userName = req.user.username;
+  const data = await storage.refresh(userName);
+  res.json(data);
+});
+
 // module exports
 module.exports = {
   list,
   get,
+  refresh,
 };

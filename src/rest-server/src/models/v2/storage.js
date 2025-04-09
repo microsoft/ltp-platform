@@ -181,8 +181,6 @@ const list = async (userName, filterDefault = false) => {
   let response;
   if (pvcCache.has('storageList')) {
     logger.info('Read persistant volume claim list from cache');
-    // NOTENOTE: If we add a new storage into the system, we need to restart the service to refresh the cache.
-    // TODO: add a web request to refresh the cache
     response = { data: pvcCache.get('storageList'), status: status('OK') };
   }
   else {
@@ -315,8 +313,26 @@ const get = async (storageName, userName) => {
   }
 };
 
+const refresh = async (userName) => {
+  logger.info(`Refreshing storage cache by user ${userName}`);
+  try {
+    await pvcMutex.runExclusive(async () => {
+      pvcCache.clear();
+    });
+    await pvMutex.runExclusive(async () => {
+      pvCache.clear();
+    });
+    logger.info('Storage cache has been refreshed.');
+    return { status: status('OK') };
+  } catch (error) {
+    logger.error('Failed to refresh storage cache:', error);
+    return { status: status('Internal Server Error'), message: error.message };
+  }
+};
+
 // module exports
 module.exports = {
   list,
   get,
+  refresh,
 };
