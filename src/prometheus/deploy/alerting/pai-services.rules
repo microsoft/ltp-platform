@@ -33,7 +33,7 @@ groups:
 
       - alert: PaiServicePodNotReady
         expr: pai_pod_count{phase="running",ready="false",node_name!~"aks.*"} > 0
-        for: 10m
+        for: 5m
         labels:
           type: pai_service
           severity: error

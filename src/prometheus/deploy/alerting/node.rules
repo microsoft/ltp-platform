@@ -64,7 +64,7 @@ groups:
 
       - alert: NodeNotReady
         expr: pai_node_count{ready!="true"} > 0
-        for: 10m
+        for: 1m
         labels:
           severity: error
         annotations:

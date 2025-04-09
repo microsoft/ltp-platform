@@ -64,7 +64,12 @@ data:
         match:
           alertname: PaiServicePodNotReady
         continue: true
-      
+
+      - receiver: pai-cordon-nodes
+        match:
+          alertname: NodeNotReady
+        continue: true
+
       - receiver: pai-drain-nodes
         match:
           alertname: DmesgGPUFault
