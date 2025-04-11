@@ -24,7 +24,7 @@ if kubectl get daemonset | grep -q "pylon-ds"; then
 fi
 
 if kubectl get service | grep -q "pylon"; then
-    kubectl delete service pylon || exit $?
+    kubectl delete service pylon-service || exit $?
 fi
 
 if kubectl get configmap | grep -q "https-config"; then

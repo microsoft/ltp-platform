@@ -1,0 +1,131 @@
+trigger:
+- main
+
+pr:
+- main 
+
+resources:
+- repo: self
+
+variables:
+- name: 'tag'
+  value: '$(Build.BuildId)'
+- group: 'pai-cicd-cluster'
+
+jobs:
+  - job: Build
+    displayName: 'Build and Deploy'
+    pool:
+      vmImage: 'ubuntu-24.04'
+    steps:
+    - script: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython   
+      displayName: Install python libs
+    - script: |
+        az aks install-cli
+      displayName: Install kubectl
+    - task: DownloadSecureFile@1
+      name: configs
+      displayName: Download Config Files and Certs
+      inputs:
+        secureFile: $(configFile)
+    - task: ExtractFiles@1
+      displayName: Extract Config Files and Certs
+      inputs:
+        archiveFilePatterns: $(configs.secureFilePath)
+        destinationFolder: '$(Pipeline.Workspace)/config'
+        cleanDestinationFolder: true
+    - script: |
+        mv $(Pipeline.Workspace)/config/pylon-configuration /tmp/
+        mv $(Pipeline.Workspace)/config/auth-configuration /tmp/
+      displayName: Arrange Config Files
+    - script: |
+        if [ "$(Build.Reason)" == "PullRequest" ]; then
+          # Fetch the target branch
+          git fetch origin $(System.PullRequest.TargetBranchName)
+          # Get list of changed files between the source branch and the target branch
+          changed_files=$(git diff --name-only origin/$(System.PullRequest.TargetBranchName)..$(System.PullRequest.SourceBranchName))
+          echo "Changed files in PR: $changed_files"
+        else
+          # Get list of changed files from the last commit
+          changed_files=$(git diff --name-only HEAD~1 HEAD)
+          echo "Changed files in last commit: $changed_files"
+        fi
+        
+        folders=$(echo "$changed_files" | grep '^src/' | awk -F'/' '{print $2}' | sort -u)
+        
+        # Check if "hivedscheduler" is in the folder list
+        if echo "$folders" | grep -q "hivedscheduler"; then
+          folders=$(echo "$folders" | grep -v "cluster-configuration" | grep -v "rest-server")
+          # Add "cluster-configuration" to the head and "rest-server" to the end
+          folders="cluster-configuration\n$folders\nrest-server"
+        fi
+        
+        # Store the folder list in a pipeline variable
+        folders=$(echo "$folders" | tr '\n' ' ')
+        echo "Changed folders: $folders"
+        echo "##vso[task.setvariable variable=changed_folders]$folders"
+      displayName: 'Get Changed Folders(Services)'
+    - script: |
+        if [ -z "$(echo "${changed_folders}" | tr -d ' ')" ]; then
+          echo "No folders changed, bypassing build and deployment steps."
+          echo "##vso[task.setvariable variable=has_changed]false"
+        else
+          echo "##vso[task.setvariable variable=has_changed]true"
+        fi
+      displayName: 'Check if folders are empty'
+    - script: |
+        # Build the changed services
+        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s $(changed_folders)
+      displayName: 'Build Changed Services'
+      condition: eq(variables['has_changed'], 'true')
+    - script: |
+        # Push the changed services
+        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -i $(changed_folders)
+      displayName: 'Push Changed Services'
+      condition: eq(variables['has_changed'], 'true')
+    - task: AzureCLI@2
+      displayName: 'Azure CLI get credentials of aks and deploy the pai services'
+      condition: eq(variables['has_changed'], 'true')
+      inputs:
+        azureSubscription: $(azureSubscriptionEndpoint)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az aks get-credentials --resource-group $(azureResourceGroup) --name $(kubernetesCluster) --overwrite-existing
+          kubectl config use-context $(kubernetesCluster)
+          kubelogin convert-kubeconfig -l azurecli
+          echo "Stopping changed pai services \"$(changed_folders)\" on $(paiClusterName) ..."
+          echo -e $(paiClusterName) | $(Build.Repository.LocalPath)/paictl.py service stop -n $(changed_folders)
+          echo "Pushing config to cluter \"$(paiClusterName)\" |..."
+          echo -e $(paiClusterName) | $(Build.Repository.LocalPath)/paictl.py config push -m service -p $(Pipeline.Workspace)/config/cluster-configuration
+          echo "Starting to update  \"$(changed_folders)\" on $(paiClusterName) ..."
+          echo -e $(paiClusterName) | $(Build.Repository.LocalPath)/paictl.py service start -n $(changed_folders)
+          echo "Checking pai cluster status..."
+          echo "Getting all pai pods..."
+          kubectl get pod
+          echo "Getting all pai services..."
+          kubectl get service     
+
+  - deployment: Test
+    displayName: 'Test rest-server'
+    dependsOn: Build
+    environment: 
+      name: test
+      resourceType: virtualMachine
+      resourceName: paicicd
+    strategy:
+      runOnce:
+        deploy:   
+            steps:
+            - script: |
+                  echo "Testing rest-server $(paiWebUrl)/rest-server/api/v2/info"
+                  curl $(paiWebUrl)/rest-server/api/v2/info
+                  echo "Checking virtual cluster status..."
+                  vc_info=$(curl -H "Authorization: Bearer $(paiWebToken)" -s $(paiWebUrl)/rest-server/api/v2/virtualclusters)
+                  if [ $? -ne 0 ]; then
+                    echo "Failed to access virtual cluster API"
+                    exit 1
+                  fi
+                  echo "Virtual cluster info: $vc_info"
+              displayName: 'Test rest-server'
+

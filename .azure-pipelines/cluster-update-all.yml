@@ -1,0 +1,82 @@
+resources:
+- repo: self
+
+variables:
+- name: 'tag'
+  value: '$(Build.BuildId)'
+- group: 'pai-cicd-cluster'
+
+jobs:
+  - job: Build
+    displayName: 'Build and Deploy'
+    pool:
+      vmImage: 'ubuntu-24.04'
+    steps:
+    - script: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython   
+      displayName: Install python libs
+    - script: |
+        az aks install-cli
+      displayName: Install kubectl
+    - task: DownloadSecureFile@1
+      displayName: Download Config Files and Certs
+      inputs:
+        secureFile: $(configFile)
+    - task: ExtractFiles@1
+      displayName: Extract Config Files and Certs
+      inputs:
+        archiveFilePatterns: '$(Pipeline.Workspace)/$(configFile)'
+        destinationFolder: '$(Pipeline.Workspace)/config'
+        cleanDestinationFolder: true
+    - script: |
+        mv $(Pipeline.Workspace)/config/pylon-configuration /
+        mv $(Pipeline.Workspace)/config/auth-configuration /
+      displayName: Arrange Config Files
+    - script: |
+        # Build the changed services
+        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana alert-manager watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
+      displayName: 'Build Changed Services'
+    - script: |
+        # Push the changed services
+        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -i cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana alert-manager watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
+      displayName: 'Push Changed Services'
+    - task: AzureCLI@2
+      displayName: 'Azure CLI get credentials of aks and deploy the pai services'
+      inputs:
+        azureSubscription: $(azureSubscriptionEndpoint)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az aks get-credentials --resource-group $(azureResourceGroup) --name $(kubernetesCluster) --overwrite-existing
+          kubectl config use-context $(kubernetesCluster)
+          kubelogin convert-kubeconfig -l azurecli
+          echo "Stopping all pai services..."
+          echo -e $(paiClusterName) | $(Build.Repository.LocalPath)/paictl.py service stop -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana alert-manager watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
+          echo "Starting to update pai..."
+          bash $(Build.Repository.LocalPath)/contrib/kubespray/script/start-service-in-dev-box.all.sh -c $(Pipeline.Workspace)/config/cluster-configuration -n $(paiClusterName)
+          echo "Checking pai cluster status..."
+          echo "Getting all pai pods..."
+          kubectl get pod
+          echo "Getting all pai services..."
+          kubectl get service     
+  - deployment: Test
+    displayName: 'Test rest-server'
+    environment: 
+      name: test
+      resourceType: virtualMachine
+      resourceName: paicicd
+    strategy:
+      runOnce:
+        deploy:   
+            steps:
+            - script: |
+                  echo "Testing rest-server $(paiWebUrl)/rest-server/api/v2/info"
+                  curl $(paiWebUrl)/rest-server/api/v2/info
+                  echo "Checking virtual cluster status..."
+                  vc_info=$(curl -H "Authorization: Bearer $(paiWebToken)" -s $(paiWebUrl)/rest-server/api/v2/virtualclusters)
+                  if [ $? -ne 0 ]; then
+                    echo "Failed to access virtual cluster API"
+                    exit 1
+                  fi
+                  echo "Virtual cluster info: $vc_info"
+              displayName: 'Test rest-server'
+
