@@ -248,7 +248,6 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-03-02-preview' = {
         vmSize: aksPaiMasterNodePoolVmSize
         nodeLabels: {
           'pai-master': 'true'
-          'pai-worker': 'false'
         }
         tags: {
           LinuxAzSecPackEnableGIG: 'true'
