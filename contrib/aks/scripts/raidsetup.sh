@@ -20,7 +20,15 @@ then
     echo "RAID already mounted. Skipping RAID recreation."
 else
     # Check if RAID exists and has a UUID
-    uuid=\$(lsblk /dev/md0 --output UUID --noheadings | xargs)
+    uuid=""
+    for i in {1..5}; do
+        uuid=\$(blkid -s UUID -o value /dev/md0)
+        if [[ -n "\$uuid" ]]; then
+            break
+        fi
+        echo "Waiting for md0 to settle..."
+        sleep 2
+    done
     if [[ -n \$uuid ]]; then
         if grep \$uuid /etc/fstab
         then
@@ -65,9 +73,15 @@ else
     fi
     done
 
+    # Backup the original mdadm.conf
+    cp /etc/mdadm/mdadm.conf /etc/mdadm/mdadm.conf.bak
+    # Remove existing md0 ARRAY lines if any
+    grep -v '^ARRAY /dev/md0' /etc/mdadm/mdadm.conf > /tmp/mdadm.conf.clean
     # Save RAID info to assemble on boot
     mdadm --detail --scan >> /etc/mdadm/mdadm.conf
-
+    mdadm --detail --scan >> /tmp/mdadm.conf.clean
+    mv /tmp/mdadm.conf.clean /etc/mdadm/mdadm.conf
+    
     # Update fstab
     output="UUID=\$uuid /mntext ext4 errors=remount-ro 0 1"
     if [[ -f /etc/fstab.bak ]]
