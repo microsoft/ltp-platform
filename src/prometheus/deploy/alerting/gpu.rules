@@ -101,3 +101,11 @@ groups:
           severity: warn
         annotations:
           summary: "found gpu in instance: {{$labels.instance}} minor number {{$labels.minor_number}} in low perf state"
+      
+      - alert: IBPortDown
+        expr: task_ib_port_physical_state < 1
+        keep_firing_for: 5m
+        labels:
+          severity: fatal
+        annotations:
+          summary: "found abnomal IB in node_name: {{$labels.node_name}} instance: {{$labels.instance}}, state is: {{$value}}"

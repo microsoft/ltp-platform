@@ -161,6 +161,7 @@ class ResourceGauges(object):
 
         self.task_labels_ib = copy.deepcopy(self.task_labels)
         self.task_labels_ib.append("ib_port")
+        self.task_labels_ib.append("node_name")
 
         self.gauges = {}
 
@@ -836,6 +837,7 @@ class ContainerCollector(Collector):
                 for ib_port, port_status in ib_stats.items():
                     ib_labels = copy.deepcopy(container_labels)
                     ib_labels["ib_port"] = ib_port
+                    ib_labels["node_name"] = os.environ.get("NODE_NAME")
                     if "port_xmit_data" in port_status:
                         gauges.add_value("task_ib_port_xmit_data", ib_labels, port_status["port_xmit_data"])
                     else:
