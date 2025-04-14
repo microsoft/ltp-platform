@@ -18,26 +18,6 @@ jobs:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
-    - script: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython   
-      displayName: Install python libs
-    - script: |
-        az aks install-cli
-      displayName: Install kubectl
-    - task: DownloadSecureFile@1
-      name: configs
-      displayName: Download Config Files and Certs
-      inputs:
-        secureFile: $(configFile)
-    - task: ExtractFiles@1
-      displayName: Extract Config Files and Certs
-      inputs:
-        archiveFilePatterns: $(configs.secureFilePath)
-        destinationFolder: '$(Pipeline.Workspace)/config'
-        cleanDestinationFolder: true
-    - script: |
-        mv $(Pipeline.Workspace)/config/pylon-configuration /tmp/
-        mv $(Pipeline.Workspace)/config/auth-configuration /tmp/
-      displayName: Arrange Config Files
     - script: |
         if [ "$(Build.Reason)" == "PullRequest" ]; then
           # Fetch the target branch
@@ -66,13 +46,38 @@ jobs:
         echo "##vso[task.setvariable variable=changed_folders]$folders"
       displayName: 'Get Changed Folders(Services)'
     - script: |
-        if [ -z "$(echo "${changed_folders}" | tr -d ' ')" ]; then
+        if [ -z "$(echo $(changed_folders) | tr -d ' ')" ]; then
           echo "No folders changed, bypassing build and deployment steps."
           echo "##vso[task.setvariable variable=has_changed]false"
         else
           echo "##vso[task.setvariable variable=has_changed]true"
         fi
       displayName: 'Check if folders are empty'
+    - script: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython   
+      displayName: Install python libs
+      condition: eq(variables['has_changed'], 'true')
+    - script: |
+        az aks install-cli
+      displayName: Install kubectl
+      condition: eq(variables['has_changed'], 'true')
+    - task: DownloadSecureFile@1
+      name: configs
+      displayName: Download Config Files and Certs
+      condition: eq(variables['has_changed'], 'true')
+      inputs:
+        secureFile: $(configFile)
+    - task: ExtractFiles@1
+      displayName: Extract Config Files and Certs
+      condition: eq(variables['has_changed'], 'true')
+      inputs:
+        archiveFilePatterns: $(configs.secureFilePath)
+        destinationFolder: '$(Pipeline.Workspace)/config'
+        cleanDestinationFolder: true
+    - script: |
+        mv $(Pipeline.Workspace)/config/pylon-configuration /tmp/
+        mv $(Pipeline.Workspace)/config/auth-configuration /tmp/
+      displayName: Arrange Config Files
+      condition: eq(variables['has_changed'], 'true')
     - script: |
         # Build the changed services
         $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s $(changed_folders)
