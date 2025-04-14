@@ -22,20 +22,20 @@ from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
 
-
 # To check a service ready or not.
 # Note that service name should be same as the app-name in
 #     labels:
 #        app: app-name
 def is_service_ready(servicename):
 
-    label_selector_str="app={0}".format(servicename)
+    label_selector_str = "app={0}".format(servicename)
 
     config.load_kube_config()
     v1 = client.CoreV1Api()
 
     try:
-        pod_list = v1.list_pod_for_all_namespaces(label_selector=label_selector_str, watch=False)
+        pod_list = v1.list_pod_for_all_namespaces(
+            label_selector=label_selector_str, watch=False)
     except ApiException as e:
         print("Exception when calling CoreV1Api->list_pod_for_all_namespaces: %s\n" % e)
         sys.exit(1)
@@ -53,21 +53,20 @@ def is_service_ready(servicename):
     return True
 
 
-
-
 # To check a service ready or not.
 # Note that service name should be same as the app-name in
 #     labels:
 #        key : value
 def pod_is_ready_or_not(label_key, label_value):
 
-    label_selector_str="{0}={1}".format(label_key, label_value)
+    label_selector_str = "{0}={1}".format(label_key, label_value)
 
     config.load_kube_config()
     v1 = client.CoreV1Api()
 
     try:
-        pod_list = v1.list_pod_for_all_namespaces(label_selector=label_selector_str, watch=False)
+        pod_list = v1.list_pod_for_all_namespaces(
+            label_selector=label_selector_str, watch=False)
     except ApiException as e:
         print("Exception when calling CoreV1Api->list_pod_for_all_namespaces: %s\n" % e)
         return False
@@ -79,9 +78,19 @@ def pod_is_ready_or_not(label_key, label_value):
         if pod.status.container_statuses is None:
             return False
         for container in pod.status.container_statuses:
-            if container.ready != True:
+            if not container.ready:
+                # Check if the container get failed
+                container_state = container.state
+                if container_state and container_state.waiting and container_state.waiting.message:
+                    # there would be an error
+                    print("{pod.metadata.name}: Container {container.name} might fail"
+                          f"due to {container_state.waiting.reason}.\n"
+                          f"Error message: {container_state.waiting.message}")
+                if container_state and container_state.terminated and container_state.terminated.message:
+                    # there would be an error
+                    print(f"{pod.metadata.name}: Container {container.name} might fail"
+                          f"due to {container_state.terminated.reason}.\n"
+                        f"Error message: {container_state.terminated.message}")
                 return False
 
     return True
-
-

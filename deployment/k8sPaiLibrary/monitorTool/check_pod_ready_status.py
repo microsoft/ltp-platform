@@ -23,39 +23,40 @@ import time
 
 from ..monitorlib import servicestatus
 
+DefaultTimeout = 600
 
 # Designed for shell, so use the exit function to pass error code.
 def service_status_check(label_key, label_value):
 
-    if servicestatus.pod_is_ready_or_not(label_key, label_value) != True:
+    if not servicestatus.pod_is_ready_or_not(label_key, label_value):
         print("{0} is not ready yet!".format(label_value))
         sys.exit(1)
 
 
-
-def waiting_until_service_ready(label_key, label_value, total_time=3600):
-
-    while servicestatus.pod_is_ready_or_not(label_key, label_value) != True:
-
+def waiting_until_service_ready(label_key, label_value, total_time=DefaultTimeout):
+    start_time = time.time()
+    while not servicestatus.pod_is_ready_or_not(label_key, label_value):
 
         print("{0} is not ready yet. Please wait for a moment!".format(label_value))
         time.sleep(10)
-        total_time = total_time - 10
-
-        if total_time < 0:
+        current_time = time.time()
+        if current_time - start_time > total_time:
             print("An issue occure when starting up {0}".format(label_value))
             sys.exit(1)
 
     print("{0} is ready!".format(label_value))
 
 
-
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-w', '--wait_service', action="store_true", help="wait until the service is ready")
-    parser.add_argument('-k', '--label-key', dest="label_key", required=True, help="the data of app label-key in your service")
-    parser.add_argument('-v', '--label-value', dest="label_value", required=True, help="the data of app label-value in your service")
-    parser.add_argument('-t', '--timeout', type=int, default=3600, help="the data of app label in your service")
+    parser.add_argument('-w', '--wait_service', action="store_true",
+                        help="wait until the service is ready")
+    parser.add_argument('-k', '--label-key', dest="label_key",
+                        required=True, help="the data of app label-key in your service")
+    parser.add_argument('-v', '--label-value', dest="label_value",
+                        required=True, help="the data of app label-value in your service")
+    parser.add_argument('-t', '--timeout', type=int, default=3600,
+                        help="the data of app label in your service")
 
     args = parser.parse_args()
     service_label_key = args.label_key
@@ -64,7 +65,8 @@ def main():
     timeout = args.timeout
 
     if args.wait_service:
-        waiting_until_service_ready(service_label_key, service_label_value, timeout)
+        waiting_until_service_ready(
+            service_label_key, service_label_value, timeout)
     else:
         service_status_check(service_label_key, service_label_value)
 
