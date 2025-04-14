@@ -34,8 +34,22 @@ try {
   logger.warn('The machine list will be initialized as an empty list.');
 }
 
+let paiMachineSku = {};
+try {
+  const layoutConfig = yaml.safeLoad(
+    fs.readFileSync('/pai-cluster-config/layout.yaml', 'utf8'),
+  );
+  paiMachineSku = layoutConfig['machine-sku'] || {};
+}
+catch (err) {
+  paiMachineSku = {};
+  logger.warn('Unable to load machine skus from cluster-configuration.');
+  logger.warn('The machine skus will be initialized as an empty list.');
+}
+
 let paiConfigData = {
   machineList: paiMachineList,
+  machineSku: paiMachineSku,
   version: null,
   debuggingReservationSeconds: Number(
     process.env.DEBUGGING_RESERVATION_SECONDS || '604800',
@@ -46,6 +60,7 @@ let paiConfigData = {
 const paiConfigSchema = Joi.object()
   .keys({
     machineList: Joi.array(),
+    machineSku: Joi.object(),
     version: Joi.string().allow(null),
     debuggingReservationSeconds: Joi.number().integer().positive(),
   })

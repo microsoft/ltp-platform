@@ -30,6 +30,7 @@ const logger = require('@pai/config/logger');
 const { apiserver } = require('@pai/config/kubernetes');
 const schedulePort = require('@pai/config/schedule-port');
 const databaseModel = require('@pai/utils/dbUtils');
+const paiConfig = require('@pai/config/paiConfig');
 const {
   convertState,
   convertAttemptState,
@@ -44,9 +45,13 @@ const {
   decodeName,
 } = require('@pai/models/v2/utils/name');
 
+const kubernetes = require('@pai/models/kubernetes/kubernetes');
+
 const Sequelize = require('sequelize');
 
 const CREATE_JOB_SPECIFIC_TOKEN = false; // this feature is currently disabled
+
+const NO_GPU = "N/A";
 
 const convertFrameworkSummary = (framework) => {
   return {
@@ -355,6 +360,7 @@ const generateTaskRole = (
   frameworkEnvList,
   config,
   enableLocalStorage,
+  enableForceRunNodes,
 ) => {
   const ports = config.taskRoles[taskRole].resourcePerInstance.ports || {};
   for (const port of ['ssh', 'http']) {
@@ -585,12 +591,21 @@ const generateTaskRole = (
                         operator: 'In',
                         values: ['true'],
                       },
+                        ...(enableForceRunNodes.enabled ? [{
+                        key: 'kubernetes.io/hostname',
+                        operator: 'In',
+                        values: enableForceRunNodes.nodes,
+                        }] : []),
                     ],
                   },
                 ],
               },
             },
           },
+          tolerations: enableForceRunNodes.enabled ? [{
+            key: "node.kubernetes.io/unschedulable",
+            operator: "Exists"
+          }] : [],
           imagePullSecrets: [
             {
               name: launcherConfig.runtimeImagePullSecrets,
@@ -663,7 +678,7 @@ const generateTaskRole = (
     }
   }
   // hived spec
-  if (launcherConfig.enabledHived) {
+  if (launcherConfig.enabledHived && !enableForceRunNodes.enabled) {
     frameworkTaskRole.task.pod.spec.schedulerName = `${launcherConfig.scheduler}-ds-${config.taskRoles[taskRole].hivedPodSpec.virtualCluster}`;
     delete frameworkTaskRole.task.pod.spec.containers[0].resources.limits[
       launcherConfig.defaultComputingDeviceType
@@ -688,6 +703,15 @@ const generateTaskRole = (
     }
   }
 
+  if (enableForceRunNodes.enabled && enableForceRunNodes.count > 0 && enableForceRunNodes.gpu !== NO_GPU) {
+    delete frameworkTaskRole.task.pod.spec.containers[0].resources.limits[
+      launcherConfig.defaultComputingDeviceType
+    ];
+    frameworkTaskRole.task.pod.spec.containers[0].resources.limits[
+      enableForceRunNodes.gpu
+    ] = enableForceRunNodes.count;
+  }
+  
   return frameworkTaskRole;
 };
 
@@ -698,6 +722,7 @@ const generateFrameworkDescription = (
   config,
   rawConfig,
   enableLocalStorage,
+  enableForceRunNodes,
 ) => {
   const [userName, jobName] = frameworkName.split(/~(.+)/);
   const jobInfo = {
@@ -755,6 +780,7 @@ const generateFrameworkDescription = (
       frameworkEnvList,
       config,
       enableLocalStorage,
+      enableForceRunNodes,
     );
     if (launcherConfig.enabledPriorityClass) {
       taskRoleDescription.task.pod.spec.priorityClassName = `${encodeName(
@@ -1148,6 +1174,57 @@ const put = async (frameworkName, config, rawConfig) => {
     logger.info(`Local storage enabled for job ${frameworkName}, host path is ${enableLocalStorage.hostpath}, mount path is ${enableLocalStorage.mntpath}`);
   }
 
+  let enableForceRunNodes = {
+    enabled: false,
+    nodes: [],
+    gpu: NO_GPU,
+    count: 0
+  };
+  if ('extras' in config && config.extras.forceNodes) {
+    const nodes = config.extras.forceNodes.split(',').map(node => node.trim());
+
+    const schedulableNodes = [];
+    try {
+      const nodesInfo = await kubernetes.getNodes();
+
+      if (nodesInfo && nodesInfo.items) {
+        nodesInfo.items.forEach((node) => {
+          if ((!node.spec || !node.spec.unschedulable) && nodes.includes(node.metadata.name)) {
+              schedulableNodes.push(node.metadata.name);
+          }
+        });
+      }
+    } catch (err) {
+      logger.warn('Failed to fetch node information from Kubernetes API', err);
+      throw createError(
+        'Internal Server Error',
+        'KubernetesApiError',
+        'Failed to fetch node information from Kubernetes API',
+      );
+    }
+
+    if (schedulableNodes.length > 0) {
+      logger.warn(`Failed to create job because of the schedulable nodes for job ${frameworkName}: ${schedulableNodes.join(', ')}`);
+      throw createError(
+      'Bad Request',
+      'SchedulableNodeError',
+      `The following nodes are schedulable: ${schedulableNodes.join(', ')}`
+      );
+    }
+
+    if (nodes.length > 0) {
+      enableForceRunNodes.enabled = true;
+      enableForceRunNodes.nodes = nodes;
+
+      const machine_type = paiConfig.machineList.find(machine => machine.nodename === nodes[0])['machine-type'];
+      if (paiConfig.machineSku[machine_type] && paiConfig.machineSku[machine_type]['computing-device']) {
+        enableForceRunNodes.gpu = paiConfig.machineSku[machine_type]['computing-device'].type;
+        enableForceRunNodes.count = paiConfig.machineSku[machine_type]['computing-device'].count;
+        logger.info(`Force run nodes enabled for job ${frameworkName}, gpu type is ${enableForceRunNodes.gpu}, gpu count is ${enableForceRunNodes.count}`);
+      }
+    }
+  }
+
   // generate the user-extension-secret definition
   const user = await userModel.getUser(userName);
   const userExtension = user.extension;
@@ -1162,6 +1239,7 @@ const put = async (frameworkName, config, rawConfig) => {
     config,
     rawConfig,
     enableLocalStorage,
+    enableForceRunNodes,
   );
   // generate the image pull secret definition
   const auths = Object.values(config.prerequisites.dockerimage)
