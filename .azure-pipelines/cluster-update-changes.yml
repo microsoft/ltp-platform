@@ -63,7 +63,6 @@ jobs:
     - task: DownloadSecureFile@1
       name: configs
       displayName: Download Config Files and Certs
-      condition: eq(variables['has_changed'], 'true')
       inputs:
         secureFile: $(configFile)
     - task: ExtractFiles@1
