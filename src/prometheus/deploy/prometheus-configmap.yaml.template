@@ -26,7 +26,7 @@ data:
     {% if prom_info["remote_write"] %}
     global:
       external_labels:
-        cluster: prom_info["remote_write"]["cluster_label"]
+        cluster: {{ prom_info["remote_write"]["cluster_label"] }}
     remote_write:
     {% if prom_info["remote_write"]["local_url"] %}
       - url: {{ prom_info["remote_write"]["local_url"] }}
