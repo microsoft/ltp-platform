@@ -74,6 +74,12 @@ const k8sLauncherConfigSchema = Joi.object()
       is: 'azure_storage',
       then: Joi.string().required(),
     }),
+    jobRestrictionEnabledVirtualCluster: Joi.string().required(),
+    jobRestrictionGPUResourceNumber: Joi.number().integer().required(),
+    jobRestrictionGitRepoUrl: Joi.string().required(),
+    jobRestrictionGitRepoBranch: Joi.string().required(),
+    jobRestrictionGitScriptPrefix: Joi.string().required(),
+    jobRestrictionGitScriptName: Joi.string().required(),
   })
   .required();
 
@@ -136,6 +142,12 @@ if (launcherType === 'k8s') {
     logAzureStorageAccount: process.env.LOG_AZURE_STORAGE_ACCOUNT,
     logAzureStorageAccountKey: process.env.LOG_AZURE_STORAGE_ACCOUNT_KEY,
     logAzureStorageContainerName: process.env.LOG_AZURE_STORAGE_CONTAINER_NAME,
+    jobRestrictionEnabledVirtualCluster: process.env.JOB_RESTRICTION_ENABLED_VIRTUAL_CLUSTER || 'non-existing-vc',
+    jobRestrictionGPUResourceNumber: parseInt(process.env.JOB_RESTRICTION_GPU_RESOURCE_NUMBER) || Number.MAX_SAFE_INTEGER,
+    jobRestrictionGitRepoUrl: process.env.JOB_RESTRICTION_GIT_REPO_URL || 'unset',
+    jobRestrictionGitRepoBranch: process.env.JOB_RESTRICTION_GIT_REPO_BRANCH || 'unset',
+    jobRestrictionGitScriptPrefix: process.env.JOB_RESTRICTION_GIT_SCRIPT_PREFIX || 'unset',
+    jobRestrictionGitScriptName: process.env.JOB_RESTRICTION_GIT_SCRIPT_NAME || 'unset',
   };
 
   const { error, value } = Joi.validate(

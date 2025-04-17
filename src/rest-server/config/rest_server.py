@@ -74,7 +74,8 @@ class RestServer:
             'debugging-reservation-seconds', 'enable-priority-class',
             'schedule-port-start', 'schedule-port-end', 'sql-max-connection',
             'hived-computing-device-envs', 'log-server', 'log_azure_storage_account',
-            'log_azure_storage_account_key', 'log_azure_storage_container_name'
+            'log_azure_storage_account_key', 'log_azure_storage_container_name',
+            'code-restriction'
         ]:
             service_object_model[k] = self.service_configuration[k]
 
