@@ -103,9 +103,25 @@ groups:
           summary: "found gpu in instance: {{$labels.instance}} minor number {{$labels.minor_number}} in low perf state"
       
       - alert: IBPortDown
-        expr: task_ib_port_physical_state < 1
-        keep_firing_for: 5m
+        expr: task_ib_port_physical_state < 0
+        for: 1m
         labels:
           severity: fatal
         annotations:
-          summary: "found abnomal IB in node_name: {{$labels.node_name}} instance: {{$labels.instance}}, state is: {{$value}}"
+          summary: "Abnormal IB port detected on node: {{$labels.node_name}}, instance: {{$labels.instance}}, state: {{$value}}"
+
+      - alert: IBLinkFlapRepeat
+        expr: count_over_time((task_ib_port_physical_state == 0)[10m:1m]) > 8 or count_over_time(count_over_time((task_ib_port_physical_state == 0)[10m:1m])[30m:10m]) > 1
+        for: 1m
+        labels:
+          severity: fatal
+        annotations:
+          summary: "Frequent IB link flapping on node: {{$labels.node_name}}, instance: {{$labels.instance}} — flap count: {{$value}} in last 10 minutes"
+
+      - alert: IBLinkFlap
+        expr: task_ib_port_physical_state == 0
+        keep_firing_for: 1m
+        labels:
+          severity: warn
+        annotations:
+          summary: "IB port temporarily down on node: {{$labels.node_name}}, instance: {{$labels.instance}}, state: {{$value}}"

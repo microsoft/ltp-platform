@@ -59,7 +59,17 @@ data:
         match:
           alertname: NvidiaSmiFailed
         continue: true
+      
+      - receiver: pai-drain-nodes
+        match:
+          alertname: IBPortDown
+        continue: true
 
+      - receiver: pai-drain-nodes
+        match:
+          alertname: IBLinkFlapRepeat
+        continue: true
+      
       - receiver: pai-cordon-nodes
         match:
           alertname: PaiServicePodNotReady

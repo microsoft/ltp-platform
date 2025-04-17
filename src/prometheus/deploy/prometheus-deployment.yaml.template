@@ -84,9 +84,9 @@ spec:
         {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}
         resources:
           limits:
-            memory: "20Gi"
+            memory: "32Gi"
           requests:
-            memory: "1Gi"
+            memory: "4Gi"
         {%- endif %}
         args:
           - '--config.file=/etc/prometheus/prometheus.yml'

@@ -15,16 +15,15 @@ def parse_system_msg_stats(stats: str):
     system_msgs = set()
     for data in lines:
         if "no-retry page fault" in data:
-            system_msgs.add("no-retry page fault")
+            system_msgs.add(data)
         if "amdgpu: trn=2 ACK should not assert! wait again !" in data:
             system_msgs.add("amdgpu: trn=2 ACK should not assert! wait again !")
         if "Fence fallback timer expired on ring sdma" in data:
             system_msgs.add("Fence fallback timer expired on ring sdma")
         if "GPU reset" in data:
             system_msgs.add("GPU reset")
-        if "segfault" in data and "python" not in data:
-            system_msgs.add("segfault")
-    
+        if "segfault" in data and ("rdcd" in data or "failed to read reg" in stats):
+            system_msgs.add(data)
     return system_msgs
 
 def stats(histogram, timeout, duration):
