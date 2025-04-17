@@ -41,7 +41,7 @@ const checkReqeustedCommand = (protocol) => {
 
     const jobRestrictionGitRepoName = launcherConfig.jobRestrictionGitRepoUrl.split('/').pop().replace(/\.git$/, '');
 
-    const setAzureBlobKeyCommandRegex = new RegExp(`^export\\s+AZURE_BLOB_KEY=(["']?)[0-9a-zA-Z?=\\-%&]+\\1$`);
+    const setAzureBlobKeyCommandRegex = new RegExp(`^export\\s+AZURE_BLOB_KEY=(["']?)[0-9a-zA-Z=\\-%&]+\\1$`);
     const setWanDbApiKeyCommandRegex = new RegExp(`^export\\s+WANDB_API_KEY=(["']?)[0-9a-zA-Z]+\\1$`);
     const gitCloneRegex = new RegExp(`^git\\s+clone\\s+([a-zA-Z0-9_]+)@(${launcherConfig.jobRestrictionGitRepoUrl})\\s+-b\\s+(${launcherConfig.jobRestrictionGitRepoBranch})$`);
     const cdRegex = new RegExp(`^cd\\s+(${jobRestrictionGitRepoName})$`);
