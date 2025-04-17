@@ -7,7 +7,6 @@ import os
 
 import utils
 
-logger = logging.getLogger(__name__)
 
 IB_FILE_PATH = "/sys/class/infiniband"
 
@@ -50,7 +49,7 @@ def stats(container_id, histogram, timeout):
                                 result['{}:{}'.format(hca, port)][field_name] = state
                             else:
                                 result['{}:{}'.format(hca, port)][field_name] = -1
-                                logger.warning("Invalid port state value for %s: %s", state_path, state_content)
+                                logging.warning("Invalid port state value for %s: %s", state_path, state_content)
                         continue
 
                     count_file_path = str(os.path.join(counter_path, field_name))
@@ -60,9 +59,9 @@ def stats(container_id, histogram, timeout):
                             counter = int(counter_content.strip())
                             result['{}:{}'.format(hca, port)][field_name] = counter
                         except ValueError:
-                            logger.warning("Invalid counter value for %s: %s", count_file_path, counter_content)
+                            logging.warning("Invalid counter value for %s: %s", count_file_path, counter_content)
     except Exception:
-        logger.exception("Error while collecting IB stats")
+        logging.exception("Error while collecting IB stats")
     return result
 
 def list_files(container_id, path, histogram, timeout):
@@ -71,16 +70,16 @@ def list_files(container_id, path, histogram, timeout):
             ["nerdctl", "exec", "--namespace", "k8s.io", container_id,  "ls", path],
             histogram=histogram,
             timeout=timeout)
-        logger.debug("List of files at %s: %s", path, result)        
+        logging.debug("List of files at %s: %s", path, result)
         file_list = result.split('\n')
         return [file for file in file_list if file]
     except subprocess.CalledProcessError as e:
-        logger.exception("command '%s' return with error (code %d): %s",
+        logging.exception("command '%s' return with error (code %d): %s",
                 e.cmd, e.returncode, e.output)
     except subprocess.TimeoutExpired:
-        logger.warning("nerdctl exec timeout for command: nerdctl exec %s ls %s", container_id, path)
+        logging.warning("nerdctl exec timeout for command: nerdctl exec %s ls %s", container_id, path)
     except Exception:
-        logger.exception("exec nerdctl exec error for command: nerdctl exec %s ls %s", container_id, path)
+        logging.exception("exec nerdctl exec error for command: nerdctl exec %s ls %s", container_id, path)
 
 def get_file_content(container_id, path, histogram, timeout):
     try:
@@ -88,12 +87,12 @@ def get_file_content(container_id, path, histogram, timeout):
             ["nerdctl", "exec", "--namespace", "k8s.io", container_id,  "cat", path],
             histogram=histogram,
             timeout=timeout)
-        logger.debug("File content at %s: %s", path, result)
+        logging.debug("File content at %s: %s", path, result)
         return result
     except subprocess.CalledProcessError as e:
-        logger.exception("command '%s' return with error (code %d): %s",
+        logging.exception("command '%s' return with error (code %d): %s",
                 e.cmd, e.returncode, e.output)
     except subprocess.TimeoutExpired:
-        logger.warning("nerdctl exec timeout for command: nerdctl exec %s cat %s", container_id, path)
+        logging.warning("nerdctl exec timeout for command: nerdctl exec %s cat %s", container_id, path)
     except Exception:
-        logger.exception("exec nerdctl exec error for command: nerdctl exec %s cat %s", container_id, path)
+        logging.exception("exec nerdctl exec error for command: nerdctl exec %s cat %s", container_id, path)
