@@ -23,6 +23,8 @@ const createError = require('@pai/utils/error');
 const { job, log } = require('@pai/models/v2/job');
 const logger = require('@pai/config/logger');
 const { Op } = require('sequelize');
+const { userProperty } = require('@pai/config/token');
+const userController = require('@pai/controllers/v2/user');
 
 const list = asyncHandler(async (req, res) => {
   // ?keyword=<keyword filter>&username=<username1>,<username2>&vc=<vc1>,<vc2>
@@ -46,6 +48,17 @@ const list = asyncHandler(async (req, res) => {
     if ('vc' in req.query) {
       filters.virtualCluster = req.query.vc.split(',');
     }
+
+    const username = req[userProperty].username;
+    myvcs = await userController.getUserVCs(username);
+    if (!filters.virtualCluster || filters.virtualCluster.length === 0) {
+      filters.virtualCluster = myvcs;
+    } else {
+      filters.virtualCluster = filters.virtualCluster.filter((vc) =>
+        myvcs.includes(vc),
+      );
+    }
+
     if ('state' in req.query) {
       filters.state = req.query.state.split(',');
     }

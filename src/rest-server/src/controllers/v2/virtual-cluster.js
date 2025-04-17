@@ -22,6 +22,8 @@ const virtualCluster = require('@pai/models/v2/virtual-cluster');
 const createError = require('@pai/utils/error');
 const groupModel = require('@pai/models/v2/group');
 const authConfig = require('@pai/config/authn');
+const { userProperty } = require('@pai/config/token');
+const userController = require('@pai/controllers/v2/user');
 
 const validate = (req, res, next, virtualClusterName) => {
   if (!/^[A-Za-z0-9_]+$/.test(virtualClusterName)) {
@@ -47,6 +49,11 @@ const list = asyncHandler(async (req, res) => {
     data = await virtualCluster.getNodeResource();
   } else {
     data = await virtualCluster.list();
+    const username = req[userProperty].username;
+    vcs = await userController.getUserVCs(username);
+    data = Object.fromEntries(
+      Object.entries(data).filter(([key]) => vcs.includes(key))
+    );
   }
   res.status(status('OK')).json(data);
 });
