@@ -480,10 +480,12 @@ const generateTaskRole = (
                   name: 'job-exit-spec',
                   mountPath: '/usr/local/pai-config',
                 },
-                ...(enableLocalStorage && enableLocalStorage.enabled ? [{
-                  name: 'local-storage',
-                  mountPath: `${enableLocalStorage.mntpath}`,
-                }] : []),
+                ...(enableLocalStorage && enableLocalStorage.enabled
+                  ? enableLocalStorage.mntpath.map((mntPath, index) => ({
+                      name: `local-storage-${index}`,
+                      mountPath: mntPath,
+                    }))
+                  : []),
               ],
             },
           ],
@@ -542,10 +544,12 @@ const generateTaskRole = (
                   }/${convertName(taskRole)}`,
                   mountPath: '/usr/local/pai/logs',
                 },
-                ...(enableLocalStorage && enableLocalStorage.enabled ? [{
-                  name: 'local-storage',
-                  mountPath: `${enableLocalStorage.mntpath}`,
-                }] : []),
+                ...(enableLocalStorage && enableLocalStorage.enabled
+                  ? enableLocalStorage.mntpath.map((mntPath, index) => ({
+                      name: `local-storage-${index}`,
+                      mountPath: mntPath,
+                    }))
+                  : []),
               ],
             },
           ],
@@ -567,12 +571,14 @@ const generateTaskRole = (
                 path: `/var/log/pai`,
               },
             },
-            ...((enableLocalStorage && enableLocalStorage.enabled) ? [{
-              name: 'local-storage',
-              hostPath: {
-                path: `${enableLocalStorage.hostpath}`,
-              },
-            }] : []),
+            ...(enableLocalStorage && enableLocalStorage.enabled
+              ? enableLocalStorage.hostpath.map((hostPath, index) => ({
+                  name: `local-storage-${index}`,
+                  hostPath: {
+                    path: hostPath,
+                  },
+                }))
+              : []),
             {
               name: 'job-exit-spec',
               configMap: {
@@ -1146,8 +1152,8 @@ const put = async (frameworkName, config, rawConfig) => {
 
   let enableLocalStorage = {
     enabled: false,
-    hostpath: '',
-    mntpath: ''
+    hostpath: [],
+    mntpath: []
   };
 
   const isValidLinuxPath = (path) => {
@@ -1157,10 +1163,30 @@ const put = async (frameworkName, config, rawConfig) => {
 
   if ('extras' in config && config.extras.enableLocalStorage && config.extras.enableLocalStorage.enabled === true) {
     enableLocalStorage.enabled = true;
-    const hostpath = config.extras.enableLocalStorage.hostpath || 'no host path';
-    const mntpath = config.extras.enableLocalStorage.mntpath || 'no mount path';
+    const hostpath = config.extras.enableLocalStorage.hostpath
+      ? config.extras.enableLocalStorage.hostpath.split(':')
+      : [];
+    const mntpath = config.extras.enableLocalStorage.mntpath
+      ? config.extras.enableLocalStorage.mntpath.split(':')
+      : [];
 
-    if (!isValidLinuxPath(hostpath) || !isValidLinuxPath(mntpath)) {
+    if (hostpath.length === 0 || mntpath.length === 0) {
+      throw createError(
+        'Bad Request',
+        'MissingMountPathError',
+        'Either hostpath or mntpath array is empty.'
+      );
+    }
+
+    if (hostpath.length !== mntpath.length) {
+      throw createError(
+        'Bad Request',
+        'MountPathMismatchError',
+        'The lengths of hostpath and mntpath arrays must be equal.'
+      );
+    }
+
+    if (!hostpath.every(isValidLinuxPath) || !mntpath.every(isValidLinuxPath)) {
       throw createError(
         'Bad Request',
         'InvalidPathError',
@@ -1171,7 +1197,10 @@ const put = async (frameworkName, config, rawConfig) => {
     enableLocalStorage.hostpath = hostpath;
     enableLocalStorage.mntpath = mntpath;
 
-    logger.info(`Local storage enabled for job ${frameworkName}, host path is ${enableLocalStorage.hostpath}, mount path is ${enableLocalStorage.mntpath}`);
+    enableLocalStorage.hostpath.forEach((hostPath, index) => {
+      const mountPath = enableLocalStorage.mntpath[index];
+      logger.info(`Local storage enabled for job ${frameworkName}, host path: ${hostPath}, mount path: ${mountPath}`);
+    });
   }
 
   let enableForceRunNodes = {
