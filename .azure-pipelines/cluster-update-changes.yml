@@ -79,12 +79,16 @@ jobs:
       condition: eq(variables['has_changed'], 'true')
     - script: |
         # Build the changed services
-        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s $(changed_folders)
+        # Skip "openpai-runtime" due to the image built by other repo
+        changed_services=$(echo $(changed_folders) | tr ' ' '\n' | grep -v "openpai-runtime" | tr '\n' ' ')
+        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s $changed_services
       displayName: 'Build Changed Services'
       condition: eq(variables['has_changed'], 'true')
     - script: |
         # Push the changed services
-        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -i $(changed_folders)
+        # Skip "openpai-runtime" due to the image built by other repo
+        changed_services=$(echo $(changed_folders) | tr ' ' '\n' | grep -v "openpai-runtime" | tr '\n' ' ')
+        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -s $changed_services
       displayName: 'Push Changed Services'
       condition: eq(variables['has_changed'], 'true')
     - task: AzureCLI@2

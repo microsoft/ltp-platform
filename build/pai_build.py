@@ -17,8 +17,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-
-
 from core import build_center
 from core import build_utility
 from model import config_model
@@ -33,23 +31,45 @@ import logging.config
 
 logger = logging.getLogger(__name__)
 
+
 def load_build_config(config_dir):
     buildConfig = config_model.ConfigModel(config_dir)
     configModel = buildConfig.build_config_parse()
     return configModel
 
-def build_service(args,config_model):
+
+def build_service(args, config_model):
     pai_build = build_center.BuildCenter(config_model, args.service, 'k8s')
     pai_build.build_center()
 
-def push_image(args,config_model):
+
+def push_image(args, config_model):
+    if args.service is not None:
+        if args.imagelist is None:
+            args.imagelist = []
+        temp = build_center.BuildCenter(config_model, None, 'k8s')
+        temp.construct_graph()
+        all_services = temp.graph.services
+        for service in args.service:
+            if service in all_services:
+                if all_services[service].docker_files:
+                    for docker_file in all_services[service].docker_files:
+                        image = os.path.splitext(docker_file)[0]
+                        args.imagelist.append(image)
+                else:
+                    logger.warning(
+                        "Service {0} has no images found".format(service))
+            else:
+                logger.warning(
+                    "Service {0} has no images found".format(service))
     pai_push = build_center.BuildCenter(config_model, args.imagelist, 'k8s')
     pai_push.push_center()
+
 
 def main():
 
     # Define execution path to root folder
-    scriptFolder=os.path.dirname(os.path.realpath(__file__))
+    scriptFolder = os.path.dirname(os.path.realpath(__file__))
     os.chdir(os.path.dirname(scriptFolder))
 
     starttime = datetime.datetime.now()
@@ -59,7 +79,7 @@ def main():
     subparsers = parser.add_subparsers(help='build service cli')
 
     # Build commands
-    build_parser = subparsers.add_parser('build',help='build service cli')
+    build_parser = subparsers.add_parser('build', help='build service cli')
     build_parser.add_argument(
         '-c', '--config',
         type=str,
@@ -72,10 +92,10 @@ def main():
         nargs='+',
         help="The service list you want to build"
     )
-    build_parser.set_defaults(func = build_service)
+    build_parser.set_defaults(func=build_service)
 
     # Push commands
-    push_parser = subparsers.add_parser('push',help='push image cli')
+    push_parser = subparsers.add_parser('push', help='push image cli')
     push_parser.add_argument(
         '-c', '--config',
         type=str,
@@ -88,7 +108,13 @@ def main():
         nargs='+',
         help="The image list you want to push"
     )
-    push_parser.set_defaults(func = push_image)
+    push_parser.add_argument(
+        '-s', '--service',
+        type=str,
+        nargs='+',
+        help="The service list that contains corresponding images you want to push"
+    )
+    push_parser.set_defaults(func=push_image)
 
     args = parser.parse_args()
     config_model = load_build_config(args.config)
@@ -97,6 +123,7 @@ def main():
     endtime = datetime.datetime.now()
     logger.info("Pai build ends at {0}".format(endtime))
     logger.info("Pai build costs {0}".format(endtime - starttime))
+
 
 if __name__ == "__main__":
     build_utility.setup_logger_config(logger)

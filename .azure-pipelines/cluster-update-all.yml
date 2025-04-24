@@ -5,6 +5,20 @@ pr: none
 resources:
 - repo: self
 
+parameters:
+  - name: "rebuildImage"
+    type: boolean
+    default: false
+    displayName: "Rebuild all images"
+  - name: "repushImage"
+    type: boolean
+    default: false
+    displayName: "Repush all images"
+  - name: "redeployService"
+    type: boolean
+    default: false
+    displayName: "Redeploy all services"  
+
 variables:
 - name: 'tag'
   value: '$(Build.BuildId)'
@@ -13,6 +27,7 @@ variables:
 jobs:
   - job: Build
     displayName: 'Build and Deploy'
+    timeoutInMinutes: 120
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
@@ -22,29 +37,33 @@ jobs:
         az aks install-cli
       displayName: Install kubectl
     - task: DownloadSecureFile@1
+      name: configs
       displayName: Download Config Files and Certs
       inputs:
         secureFile: $(configFile)
     - task: ExtractFiles@1
       displayName: Extract Config Files and Certs
       inputs:
-        archiveFilePatterns: '$(Pipeline.Workspace)/$(configFile)'
+        archiveFilePatterns: $(configs.secureFilePath)
         destinationFolder: '$(Pipeline.Workspace)/config'
         cleanDestinationFolder: true
     - script: |
-        mv $(Pipeline.Workspace)/config/pylon-configuration /
-        mv $(Pipeline.Workspace)/config/auth-configuration /
+        mv $(Pipeline.Workspace)/config/pylon-configuration /tmp/
+        mv $(Pipeline.Workspace)/config/auth-configuration /tmp/
       displayName: Arrange Config Files
     - script: |
-        # Build the changed services
-        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana alert-manager watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
-      displayName: 'Build Changed Services'
+        # Build all services # Skip "frameworkcontroller" "hivedscheduler" "openpai-runtime" "k8s-dashboard" "marketplace-db" "node-exporter" "prometheus"
+        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin  job-exporter log-manager grafana alert-manager watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
+      displayName: 'Build all Services images'
+      condition: or(eq(${{ parameters.rebuildImage }}, 'true'), eq(${{ parameters.repushImage }}, 'true'))
     - script: |
-        # Push the changed services
-        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -i cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana alert-manager watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
-      displayName: 'Push Changed Services'
+        # Build all services # Skip "frameworkcontroller" "hivedscheduler" "openpai-runtime" "k8s-dashboard" "marketplace-db" "node-exporter" "prometheus"
+        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana alert-manager watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
+      displayName: 'Push all Services'
+      condition: eq(${{ parameters.repushImage }}, 'true')
     - task: AzureCLI@2
       displayName: 'Azure CLI get credentials of aks and deploy the pai services'
+      condition: eq(${{ parameters.redeployService }}, 'true')
       inputs:
         azureSubscription: $(azureSubscriptionEndpoint)
         scriptType: bash
@@ -53,7 +72,8 @@ jobs:
           az aks get-credentials --resource-group $(azureResourceGroup) --name $(kubernetesCluster) --overwrite-existing
           kubectl config use-context $(kubernetesCluster)
           kubelogin convert-kubeconfig -l azurecli
-          echo "Stopping all pai services..."
+          echo "Stopping all pai services..." 
+          # Skip the pylon service to avoid changing extenral IP
           echo -e $(paiClusterName) | $(Build.Repository.LocalPath)/paictl.py service stop -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana alert-manager watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
           echo "Starting to update pai..."
           bash $(Build.Repository.LocalPath)/contrib/kubespray/script/start-service-in-dev-box.all.sh -c $(Pipeline.Workspace)/config/cluster-configuration -n $(paiClusterName)
@@ -64,6 +84,7 @@ jobs:
           kubectl get service     
   - deployment: Test
     displayName: 'Test rest-server'
+    dependsOn: Build
     environment: 
       name: test
       resourceType: virtualMachine
@@ -83,4 +104,3 @@ jobs:
                   fi
                   echo "Virtual cluster info: $vc_info"
               displayName: 'Test rest-server'
-
