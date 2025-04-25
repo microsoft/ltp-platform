@@ -3,6 +3,9 @@
 
 FROM python:3.10
 
+RUN apt update && apt upgrade -y
+RUN pip install --upgrade pip
+
 COPY ./src/abnormal_detector .
 
 RUN pip3 install -r requirements.txt
