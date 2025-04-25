@@ -45,7 +45,7 @@ const checkReqeustedCommand = (protocol) => {
     const setWanDbApiKeyCommandRegex = new RegExp(`^export\\s+WANDB_API_KEY=(["']?)[0-9a-zA-Z]+\\1$`);
     const gitCloneRegex = new RegExp(`^git\\s+clone\\s+https://([a-zA-Z0-9-_]+):([a-zA-Z0-9_]+)@(${launcherConfig.jobRestrictionGitRepoUrl})\\s+-b\\s+(${launcherConfig.jobRestrictionGitRepoBranch})$`);
     const cdRegex = new RegExp(`^cd\\s+(${jobRestrictionGitRepoName})$`);
-    const bashRegex = new RegExp(`^bash\\s+(${launcherConfig.jobRestrictionGitScriptPrefix})\\s*/\\s*(${launcherConfig.jobRestrictionGitScriptName})$`);
+    const bashRegex = new RegExp(`^bash\\s+(${launcherConfig.jobRestrictionGitScriptPrefix})\\s*/\\s*(${launcherConfig.jobRestrictionGitScriptName}[a-zA-Z0-9-_\.]*\\.sh)$`);
 
     const setAzureBlobKeyMatch = setAzureBlobKeyCommandRegex.test(setAzureBlobKeyCommand);
     const setWanDbApiKeyMatch = setWanDbApiKeyCommandRegex.test(setWanDbApiKeyCommand);
