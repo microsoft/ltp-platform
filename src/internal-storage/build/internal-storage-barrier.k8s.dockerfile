@@ -17,6 +17,8 @@
 
 FROM ubuntu:22.04
 
+RUN apt update && apt upgrade -y
+
 RUN mkdir -p /barrier_scripts
 
 COPY src/barrier.sh /barrier_scripts
