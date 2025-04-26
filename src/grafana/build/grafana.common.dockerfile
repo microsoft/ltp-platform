@@ -37,6 +37,8 @@ RUN \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get upgrade -y
+
 RUN grafana-cli plugins install yesoreyeram-infinity-datasource && ls /var/lib/grafana/plugins
 RUN mkdir ${GF_PLUGIN_DIR}
 RUN mv /var/lib/grafana/plugins/yesoreyeram-infinity-datasource /grafana-plugins
