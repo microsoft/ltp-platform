@@ -8,18 +8,19 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "pg": "^8.2.1",
-    "sequelize": "5.21.3"
+    "pg": "^8.15.6",
+    "sequelize": "6.37.7"
   },
   "devDependencies": {
-    "eslint": "6.2.2",
-    "eslint-config-prettier": "6.1.0",
-    "eslint-config-standard": "14.0.1",
-    "eslint-plugin-import": "2.18.2",
-    "eslint-plugin-node": "9.1.0",
-    "eslint-plugin-prettier": "3.1.0",
-    "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-standard": "4.0.1",
-    "prettier": "1.18.2"
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "10.1.2",
+    "eslint-config-standard": "17.1.0",
+    "eslint-plugin-import": "2.31.0",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-prettier": "5.2.6",
+    "eslint-plugin-promise": "7.2.1",
+    "eslint-plugin-standard": "5.0.0",
+    "prettier": "3.5.3"
+
   }
 }
