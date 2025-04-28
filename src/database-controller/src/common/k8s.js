@@ -162,6 +162,13 @@ function getEventInformer(timeoutSeconds = 365 * 86400, namespace = 'default') {
   */
   const listFn = () => {
     logger.info('Cluster events are listed.');
+    if (namespace === null) {
+      logger.info('Namespace: null');
+    } else if (namespace === undefined) {
+      logger.info('Namespace: undefined');
+    } else {
+      logger.info(`Namespace: ${namespace}`);
+    }
     return coreV1Client.listNamespacedEvent(namespace);
   };
   const informer = k8s.makeInformer(
