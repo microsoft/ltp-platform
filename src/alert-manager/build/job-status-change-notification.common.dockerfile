@@ -5,6 +5,8 @@ FROM node:20
 
 WORKDIR /usr/src/app
 
+RUN apt update && apt upgrade -y
+
 ENV NODE_ENV=production
 
 COPY ./src/job-status-change-notification .
