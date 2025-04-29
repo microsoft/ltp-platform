@@ -6,7 +6,7 @@ FROM golang:1.24.2-alpine3.21 as builder
 ENV PROJECT_DIR=/src
 ENV INSTALL_DIR=/opt/watchdog
 
-RUN apk update && apk upgeade -y && apk add --no-cache bash && \
+RUN apk update && apk add --no-cache bash && \
   mkdir -p ${PROJECT_DIR} ${INSTALL_DIR}
 COPY src ${PROJECT_DIR}
 RUN ${PROJECT_DIR}/build/watchdog/go-build.sh && \
@@ -16,6 +16,6 @@ FROM alpine:3.21
 
 ENV INSTALL_DIR=/opt/watchdog
 
-RUN apk update && apt upgrade -y && apk add --no-cache bash
+RUN apk update && apk add --no-cache bash
 COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
 WORKDIR ${INSTALL_DIR}
