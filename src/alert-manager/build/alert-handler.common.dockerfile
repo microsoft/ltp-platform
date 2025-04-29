@@ -3,6 +3,8 @@
 
 FROM node:20
 
+RUN apt update && apt upgrade -y
+
 WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
