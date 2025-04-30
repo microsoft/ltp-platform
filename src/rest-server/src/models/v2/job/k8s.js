@@ -1405,7 +1405,7 @@ const getConfig = async (frameworkName) => {
 
   if (framework) {
     if (framework.jobConfig) {
-      return yaml.safeLoad(framework.jobConfig);
+      return yaml.load(framework.jobConfig);
     } else {
       throw createError(
         'Not Found',

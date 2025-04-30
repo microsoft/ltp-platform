@@ -57,7 +57,7 @@ const extractRuntimeOutput = (podCompletionStatus) => {
         const output = message.substring(start, end).trim();
         try {
           res = {
-            ...yaml.safeLoad(output),
+            ...yaml.load(output),
             name: container.name,
           };
         } catch (error) {
@@ -121,7 +121,7 @@ const generateExitSpecMap = () => {
   } else {
     exitSpecPath = '/k8s-job-exit-spec-configuration/k8s-job-exit-spec.yaml';
   }
-  const exitSpecList = yaml.safeLoad(fs.readFileSync(exitSpecPath));
+  const exitSpecList = yaml.load(fs.readFileSync(exitSpecPath));
   const exitSpecMap = {};
   exitSpecList.forEach((val) => {
     exitSpecMap[val.code] = val;

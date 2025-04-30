@@ -489,13 +489,13 @@ describe('API v2 Unit Tests: protocol', () => {
   // protocol schema test
   it('test protocol schema for valid protocol', () => {
     for (let validProtocolYAML of Object.values(validProtocolYAMLs)) {
-      const validprotocolObj = yaml.safeLoad(validProtocolYAML);
+      const validprotocolObj = yaml.load(validProtocolYAML);
       expect(protocolSchema.validate(validprotocolObj)).to.be.true;
     }
   });
   it('test protocol schema for invalid protocol', () => {
     for (let invalidMessage of Object.keys(invalidProtocolYAMLs)) {
-      const invalidprotocolObj = yaml.safeLoad(invalidProtocolYAMLs[invalidMessage]);
+      const invalidprotocolObj = yaml.load(invalidProtocolYAMLs[invalidMessage]);
       if (invalidMessage[0] === '*') {
         invalidMessage = invalidMessage.slice(1);
       }

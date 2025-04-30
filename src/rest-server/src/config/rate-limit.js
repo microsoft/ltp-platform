@@ -33,7 +33,7 @@ const limiterConfigSchema = Joi.object()
   })
   .required();
 
-const { error, value } = Joi.validate(limiterConfig, limiterConfigSchema);
+const { error, value } = limiterConfigSchema.validate(limiterConfig);
 if (error) {
   throw new Error(`rate limit config error\n${error}`);
 }

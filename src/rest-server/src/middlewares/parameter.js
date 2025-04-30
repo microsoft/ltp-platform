@@ -24,15 +24,14 @@ const createError = require('@pai/utils/error');
  */
 const validate = (schema) => {
   return (req, res, next) => {
-    Joi.validate(req.body, schema, (err, value) => {
-      if (err) {
-        next(createError('Bad Request', 'InvalidParametersError', err.message));
-      } else {
-        req.originalBody = req.body;
-        req.body = value;
-        next();
-      }
-    });
+    const { err, value } = schema.validate(req.body);
+    if (err) {
+      next(createError('Bad Request', 'InvalidParametersError', err.message));
+    } else {
+      req.originalBody = req.body;
+      req.body = value;
+      next();
+    }
   };
 };
 
