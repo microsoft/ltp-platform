@@ -45,7 +45,7 @@ const configSchema = Joi.object()
   })
   .required();
 
-const { error, value } = Joi.validate(config, configSchema);
+const { error, value } = configSchema.validate(config);
 if (error) {
   throw new Error(`config error\n${error}`);
 }
