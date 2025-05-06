@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import urlJoin from "url-join";
+
 const axios = require("axios");
-const urljoin = require("url-join");
 const logger = require("@job-status-change-notification/common/logger");
 const config = require("@job-status-change-notification/common/config");
 
-const URI_ALERT_MANAGER = urljoin(
+const URI_ALERT_MANAGER = urlJoin(
   config.paiUri,
   "/alert-manager/api/v2/alerts"
 );
