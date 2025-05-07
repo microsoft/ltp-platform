@@ -44,6 +44,9 @@ module.exports = {
   api: rateLimit({
     max: limiterConfig.apiPerMin,
     windowMs: 1 * 60 * 1000,
+    validate: {
+      trustProxy: false
+    },
   }),
   listJob: rateLimit({
     max: limiterConfig.listJobPerMin,
