@@ -91,8 +91,7 @@ async function patchFramework(name, data, namespace = 'default') {
     namespace: namespace,
     plural: 'frameworks',
     name: name,
-    body: data},
-    { headers: { 'Content-Type': 'application/merge-patch+json' } },
+    body: data}
   );
   return res.response;
 }
@@ -104,8 +103,7 @@ async function deleteFramework(name, namespace = 'default') {
     version: 'v1',
     namespace: namespace,
     plural: 'frameworks',
-    name: name},
-    { headers: { propagationPolicy: 'Foreground' } },
+    name: name}
   );
   return res.response;
 }
