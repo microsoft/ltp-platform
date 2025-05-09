@@ -98,7 +98,7 @@ const generateExitDiagnostics = (diag) => {
 
   const summmaryInfo = diag.substring(0, matches.index + 'matched:'.length);
   exitDiagnostics.diagnosticsSummary =
-    summmaryInfo + '\n' + yaml.safeDump(podCompletionStatus);
+    summmaryInfo + '\n' + yaml.dump(podCompletionStatus);
   exitDiagnostics.launcher = exitDiagnostics.diagnosticsSummary;
 
   // Get runtime output, set launcher output to null. Otherwise, treat all message as launcher output
