@@ -181,7 +181,7 @@ class Snapshot {
 
   getRequestUpdate(withSnapshot = true) {
     // Get database updates from the snapshot for the request part.
-    const loadedConfig = yaml.safeLoad(
+    const loadedConfig = yaml.load(
       this._snapshot.metadata.annotations.config,
     );
     const jobPriority = _.get(
