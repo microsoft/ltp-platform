@@ -65,7 +65,7 @@ router
 
 /** Internal API */
 router
-  .route('/:groupname/extension/*')
+  .route('/:groupname/extension/*splat')
   .put(
     token.checkNotApplication,
     param.validate(groupInputSchema.groupExtensionAttrUpdateInputSchema),
