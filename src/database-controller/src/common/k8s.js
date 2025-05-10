@@ -43,7 +43,9 @@ if (config.rbacEnabled) {
 // and error.response.statusCode is the actual status code.
 // If network is disconnected, the error will be a different one,
 // and you cannot get error.name and error.statusCode.
-const customObjectsClient = kc.makeApiClient(k8s.CustomObjectsApi);
+const configuration = k8s.createConfiguration(kc);
+const customObjectsClient = new k8s.CustomObjectsApi(configuration);
+//const customObjectsClient = kc.makeApiClient(k8s.CustomObjectsApi);
 
 async function getFramework(name, namespace = 'default') {
   const res = await customObjectsClient.getNamespacedCustomObject({
