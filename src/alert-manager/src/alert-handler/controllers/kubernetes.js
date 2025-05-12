@@ -33,7 +33,7 @@ const cleanTTL24HJobs = () => {
     )
     .then((response) => {
       logger.info(`Successfully get job list.`);
-      const jobs = response.body.items;
+      const jobs = response.items;
       jobs.forEach((job) => {
         const jobName = job.metadata.name;
         if (

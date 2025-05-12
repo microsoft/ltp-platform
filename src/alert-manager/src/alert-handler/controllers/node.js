@@ -27,7 +27,7 @@ async function SyncUserLogs(nodeName) {
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
     const allPods = await k8sApi.listPodForAllNamespaces();
     // Find the log-manager pod running on the specified node
-    const logManagerPod = allPods.body.items.find(pod =>
+    const logManagerPod = allPods.items.find(pod =>
       pod.metadata.namespace === 'default' &&
       pod.spec.nodeName === nodeName &&
       pod.metadata.name.includes('log-manager')
@@ -86,20 +86,11 @@ const retrySyncUserLogs = async (nodeName, retries) => {
 };
 
 const cordonNode = async (nodeName) => {
-  const headers = {
-    'content-type': 'application/strategic-merge-patch+json',
-  };
   // Set the node unschedulable
   const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-  const patchNodePromise = k8sApi.patchNode(
-    nodeName,
-    { spec: { unschedulable: true } },
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    { headers },
+  const patchNodePromise = k8sApi.patchNode({
+    name: nodeName,
+    body: { spec: { unschedulable: true } }},
   );
 
   const syncLogsPromise = retrySyncUserLogs(nodeName, 2);
@@ -116,20 +107,11 @@ const cordonNode = async (nodeName) => {
 };
 
 const uncordonNode = async (nodeName) => {
-  const headers = {
-    'content-type': 'application/strategic-merge-patch+json',
-  };
   // set the node unschedulable
   const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-  return k8sApi.patchNode(
-    nodeName,
-    { spec: { unschedulable: false } },
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    { headers },
+  return k8sApi.patchNode({
+    name: nodeName,
+    body: { spec: { unschedulable: false } }},
   );
 }
 
@@ -210,7 +192,7 @@ const drainNode = async (nodeName) => {
   try {
     // Get all pods on the node (excluding DaemonSets)
     const allPods = await k8sApi.listPodForAllNamespaces();
-    const podNames = allPods.body.items.filter(
+    const podNames = allPods.items.filter(
       pod => pod.metadata.namespace === 'default' && pod.spec.nodeName === nodeName && !pod.metadata.ownerReferences?.some(ref => ref.kind === 'DaemonSet'))
       .map(pod => pod.metadata.name);
 
@@ -222,7 +204,9 @@ const drainNode = async (nodeName) => {
     // Evict each pod
     await Promise.all(
       podNames.map(podName =>
-        k8sApi.deleteNamespacedPod(podName, 'default')
+        k8sApi.deleteNamespacedPod({
+          name: podName,
+          namespace: 'default'})
       )
     );
 
@@ -259,7 +243,7 @@ const getRebootPod = (nodeName) => ({
 const checkNodeCordoned = async (nodeName) => {
   const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
   // Check if the node is already cordoned
-  const { body: node } = await k8sApi.readNode(nodeName);
+  const node = await k8sApi.readNode({name: nodeName});
   const isCordoned = node.spec.unschedulable === true;
   if (isCordoned) {
     return true;
@@ -319,7 +303,7 @@ const rebootNodes = async (req, res) => {
       await cordonNode(nodeName);
       await drainNode(nodeName);
       const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-      await k8sApi.createNamespacedPod("default", getRebootPod(nodeName));
+      await k8sApi.createNamespacedPod({namespace: "default", body: getRebootPod(nodeName)});
       logger.info(`Successfully triggered reboot for node: ${nodeName}`);
       return { nodeName, status: 'fulfilled' };
     } catch (error) {
@@ -416,7 +400,7 @@ const fixNvidiaGPULowPerf = (req, res) => {
       jobInfo.minorNumber,
     );
     k8sApi
-      .createNamespacedJob('default', job)
+      .createNamespacedJob({namespace: 'default', body: job})
       .then((response) => {
         logger.info(
           `Successfully start job ${jobInfo.jobName} for GPU Low Performance issue in node: ${jobInfo.nodeName}, minor number: ${jobInfo.minorNumber}`,

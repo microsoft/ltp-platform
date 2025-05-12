@@ -568,9 +568,8 @@ class AddOns {
 async function synchronizeCreate(snapshot, addOns) {
   await addOns.create();
   try {
-    const response = await k8s.createFramework(snapshot.getRequest(false));
+    const frameworkResponse = await k8s.createFramework(snapshot.getRequest(false));
     // framework is created successfully.
-    const frameworkResponse = response.body;
     // don't wait for patching
     addOns.silentPatch(frameworkResponse);
     return frameworkResponse;
@@ -590,8 +589,7 @@ async function synchronizeModify(snapshot) {
     snapshot.getName(),
     snapshot.getRequest(false),
   );
-  const frameworkResponse = response.body;
-  return frameworkResponse;
+  return response;
 }
 
 async function synchronizeRequest(snapshot, addOns) {

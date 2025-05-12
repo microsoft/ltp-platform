@@ -43,9 +43,7 @@ if (config.rbacEnabled) {
 // and error.response.statusCode is the actual status code.
 // If network is disconnected, the error will be a different one,
 // and you cannot get error.name and error.statusCode.
-const configuration = k8s.createConfiguration(kc);
-const customObjectsClient = new k8s.CustomObjectsApi(configuration);
-//const customObjectsClient = kc.makeApiClient(k8s.CustomObjectsApi);
+const customObjectsClient = kc.makeApiClient(k8s.CustomObjectsApi);
 
 async function getFramework(name, namespace = 'default') {
   const res = await customObjectsClient.getNamespacedCustomObject({
@@ -55,7 +53,7 @@ async function getFramework(name, namespace = 'default') {
     plural: 'frameworks',
     name: name}
   );
-  return res.response;
+  return res;
 }
 
 async function listFramework(name, namespace = 'default') {
@@ -65,7 +63,7 @@ async function listFramework(name, namespace = 'default') {
     namespace: namespace,
     plural: 'frameworks'}
   );
-  return res.response;
+  return res;
 }
 
 async function createFramework(frameworkDescription, namespace = 'default') {
@@ -76,7 +74,7 @@ async function createFramework(frameworkDescription, namespace = 'default') {
     plural: 'frameworks',
     body: frameworkDescription}
   );
-  return res.response;
+  return res;
 }
 
 async function patchFramework(name, data, namespace = 'default') {
@@ -95,7 +93,7 @@ async function patchFramework(name, data, namespace = 'default') {
     name: name,
     body: data}
   );
-  return res.response;
+  return res;
 }
 
 async function deleteFramework(name, namespace = 'default') {
@@ -107,7 +105,7 @@ async function deleteFramework(name, namespace = 'default') {
     plural: 'frameworks',
     name: name}
   );
-  return res.response;
+  return res;
 }
 
 function getFrameworkInformer(
@@ -174,12 +172,12 @@ const priorityClassClient = kc.makeApiClient(k8s.SchedulingV1Api);
 
 async function createPriorityClass(priorityClassDef) {
   const res = await priorityClassClient.createPriorityClass({body: priorityClassDef});
-  return res.response;
+  return res;
 }
 
 async function deletePriorityClass(name) {
   const res = await priorityClassClient.deletePriorityClass({name: name});
-  return res.response;
+  return res;
 }
 
 async function createSecret(secretDef) {
@@ -195,7 +193,7 @@ async function deleteSecret(name, namespace = 'default') {
     name: name,
     namespace: namespace}
   );
-  return res.response;
+  return res;
 }
 
 async function patchSecretOwnerToFramework(secret, frameworkResponse) {
@@ -215,10 +213,9 @@ async function patchSecretOwnerToFramework(secret, frameworkResponse) {
   const res = await coreV1Client.patchNamespacedSecret({
     name: secret.metadata.name,
     namespace: secret.metadata.namespace,
-    body: { metadata: metadata }},
-    { headers: { 'Content-Type': 'application/merge-patch+json' } },
+    body: { metadata: metadata }}
   );
-  return res.response;
+  return res;
 }
 
 const timeoutMs = config.k8sConnectionTimeoutSecond * 1000;
