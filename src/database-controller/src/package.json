@@ -10,7 +10,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@kubernetes/client-node": "1.0.0",
+    "@kubernetes/client-node": "1.2.0",
     "async-lock": "^1.4.1",
     "body-parser": "^2.2.0",
     "compression": "^1.8.0",
