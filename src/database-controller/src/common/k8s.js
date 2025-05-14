@@ -91,8 +91,10 @@ async function patchFramework(name, data, namespace = 'default') {
     namespace: namespace,
     plural: 'frameworks',
     name: name,
-    body: data}
+    body: data},
+    k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch),
   );
+  logger.info(JSON.stringify(res, null, 2));
   return res;
 }
 
@@ -103,7 +105,8 @@ async function deleteFramework(name, namespace = 'default') {
     version: 'v1',
     namespace: namespace,
     plural: 'frameworks',
-    name: name}
+    name: name},
+    k8s.setHeaderOptions('propagationPolicy', 'Foreground'),
   );
   return res;
 }
@@ -213,7 +216,8 @@ async function patchSecretOwnerToFramework(secret, frameworkResponse) {
   const res = await coreV1Client.patchNamespacedSecret({
     name: secret.metadata.name,
     namespace: secret.metadata.namespace,
-    body: { metadata: metadata }}
+    body: { metadata: metadata }},
+    k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch),
   );
   return res;
 }
