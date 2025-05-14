@@ -26,7 +26,7 @@
     "lodash": "^4.17.21",
     "module-alias": "^2.2.3",
     "morgan": "^1.10.0",
-    "node-fetch": "^3.3.2",
+    "node-fetch": "^2.7.0",
     "openpaidbsdk": "file:../sdk",
     "p-queue": "^8.1.0",
     "statuses": "^2.0.1",
