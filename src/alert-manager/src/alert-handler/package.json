@@ -25,7 +25,7 @@
   "devDependencies": {
     "dotenv": "^16.5.0",
     "eslint": "^9.26.0",
-    "eslint-config-prettier": "~10.1.2",
+    "eslint-config-prettier": "~10.1.5",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "~5.4.0",
@@ -34,7 +34,7 @@
     "prettier": "~3.5.3"
   },
   "dependencies": {
-    "@kubernetes/client-node": "1.1.2",
+    "@kubernetes/client-node": "1.2.0",
     "axios": "^1.9.0",
     "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.7",
@@ -44,7 +44,7 @@
     "express-bearer-token": "^3.0.0",
     "joi": "^17.13.3",
     "module-alias": "^2.2.3",
-    "nodemailer": "^7.0.2",
+    "nodemailer": "^7.0.3",
     "winston": "2"
   },
   "scripts": {

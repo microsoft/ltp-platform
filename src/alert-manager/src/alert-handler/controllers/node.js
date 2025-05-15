@@ -91,6 +91,7 @@ const cordonNode = async (nodeName) => {
   const patchNodePromise = k8sApi.patchNode({
     name: nodeName,
     body: { spec: { unschedulable: true } }},
+    k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.StrategicMergePatch),
   );
 
   const syncLogsPromise = retrySyncUserLogs(nodeName, 2);
@@ -112,6 +113,7 @@ const uncordonNode = async (nodeName) => {
   return k8sApi.patchNode({
     name: nodeName,
     body: { spec: { unschedulable: false } }},
+    k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.StrategicMergePatch),
   );
 }
 
