@@ -32,7 +32,7 @@ spec:
       hostNetwork: false
       containers:
       - name: internal-storage-delete
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}internal-storage-delete:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}internal-storage-delete:security-fix
         securityContext:
           privileged: true
         imagePullPolicy: Always

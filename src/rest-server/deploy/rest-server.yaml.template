@@ -33,7 +33,7 @@ spec:
       hostPID: false
       containers:
       - name: rest-server
-        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}rest-server:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}rest-server:security-fix
         imagePullPolicy: Always
         volumeMounts:
         - mountPath: /pai-cluster-config
