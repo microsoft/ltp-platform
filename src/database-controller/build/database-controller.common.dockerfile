@@ -3,6 +3,8 @@
 
 FROM node:20
 
+RUN npm install -g npm@latest
+
 RUN apt update && apt install -y
 
 WORKDIR /database-controller
