@@ -95,8 +95,7 @@ def main():
     )
     build_parser.add_argument(
         '-n', '--nocache',
-        type=bool,
-        default=False,
+        action='store_true',
         help="Build the service using cache or not"
     )
     build_parser.set_defaults(func=build_service)
