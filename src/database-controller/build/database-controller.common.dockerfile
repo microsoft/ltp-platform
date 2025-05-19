@@ -5,7 +5,7 @@ FROM node:20
 
 RUN npm install -g npm@latest
 
-RUN apt update && apt install -y
+RUN apt update && apt upgrade -y
 
 WORKDIR /database-controller
 
@@ -20,6 +20,5 @@ RUN yarn install
 RUN npm install json -g
 RUN json -I -f package.json -e "this.paiVersion=\"`cat ../version/PAI.VERSION`\""
 RUN json -I -f package.json -e "this.paiCommitVersion=\"`cat ../version/COMMIT.VERSION`\""
-
 
 CMD ["sleep", "infinity"]

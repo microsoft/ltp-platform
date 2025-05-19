@@ -17,7 +17,7 @@
 
 FROM openresty/openresty:1.27.1.2-0-alpine-fat
 
-RUN apk update && apk upgrade curl libcurl
+RUN apk update && apk upgrade
 
 RUN luarocks install lua-cjson && luarocks install lua-resty-jwt && \
   luarocks install luafilesystem && luarocks install lua-path

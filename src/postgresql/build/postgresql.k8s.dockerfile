@@ -17,6 +17,8 @@
 
 FROM postgres:16.8
 
+RUN apt update && apt upgrade -y
+
 RUN mkdir -p /docker-entrypoint-initdb.d
 
 COPY src/once_init_table.sql /docker-entrypoint-initdb.d
