@@ -94,7 +94,7 @@ def main():
         help="The service list you want to build"
     )
     build_parser.add_argument(
-        '-n', '--nochache',
+        '-n', '--nocache',
         type=bool,
         default=False,
         help="Build the service using cache or not"
