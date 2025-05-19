@@ -39,8 +39,8 @@ class DockerClient:
         self.docker_login()
 
 
-    def set_build_from_cache(self, build_using_cache=True):
-        self.build_using_cache = build_using_cache
+    def set_build_cache_type(self, build_nocache=False):
+        self.build_nocache = build_nocache
 
     def resolve_image_name(self, image_name):
         prefix = "" if self.docker_registry == "" else self.docker_registry + "/"
@@ -54,10 +54,10 @@ class DockerClient:
 
 
     def docker_image_build(self, image_name, dockerfile_path, build_path):
-        if self.build_using_cache:
-            cmd = "docker build -t {0} -f {1} {2}".format(image_name, dockerfile_path, build_path)
-        else:
+        if self.build_nocache:
             cmd = "docker build --no-cache -t {0} -f {1} {2}".format(image_name, dockerfile_path, build_path)
+        else:
+            cmd = "docker build -t {0} -f {1} {2}".format(image_name, dockerfile_path, build_path)
         execute_shell(cmd)
 
 
