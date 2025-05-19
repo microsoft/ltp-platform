@@ -54,6 +54,9 @@ class BuildCenter:
         self.dependencyDir = "dependency/"
 
 
+    def set_build_from_cache(self, build_cache=True):
+        self.docker_cli.set_build_from_cache(build_cache)
+
     def construct_graph(self):
         self.logger.info("Starts to construct service graph")
 

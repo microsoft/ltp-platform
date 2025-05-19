@@ -40,6 +40,7 @@ def load_build_config(config_dir):
 
 def build_service(args, config_model):
     pai_build = build_center.BuildCenter(config_model, args.service, 'k8s')
+    pai_build.set_build_from_cache(args.usingcache)
     pai_build.build_center()
 
 
@@ -91,6 +92,12 @@ def main():
         type=str,
         nargs='+',
         help="The service list you want to build"
+    )
+    build_parser.add_argument(
+        '-u', '--usingcache',
+        type=bool,
+        default=True,
+        help="Build the service without using cache"
     )
     build_parser.set_defaults(func=build_service)
 
