@@ -18,7 +18,7 @@
 // module dependencies
 import Ajv from 'ajv';
 
-const ajv = new Ajv({ allErrors: true });
+const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 
 // base schema
 const baseSchema = {
@@ -186,6 +186,7 @@ const protocolSchema = {
       minimum: 0,
     },
     taskRoles: {
+      type: 'object',
       patternProperties: {
         '^[a-zA-Z_][a-zA-Z0-9_]*$': {
           type: 'object',
@@ -252,6 +253,7 @@ const protocolSchema = {
                   type: 'integer',
                 },
                 ports: {
+                  type: 'object',
                   patternProperties: {
                     '^[a-zA-Z_][a-zA-Z0-9_]*$': {
                       type: 'integer',
@@ -291,6 +293,7 @@ const protocolSchema = {
             $ref: 'base.json#/properties/name',
           },
           taskRoles: {
+            type: 'object',
             patternProperties: {
               '^[a-zA-Z_][a-zA-Z0-9_]*$': {
                 type: 'object',
