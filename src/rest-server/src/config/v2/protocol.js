@@ -16,7 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // module dependencies
-import Ajv from 'ajv';
+const Ajv = require('ajv');
 
 const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 
