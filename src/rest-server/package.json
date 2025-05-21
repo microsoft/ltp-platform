@@ -22,7 +22,7 @@
     "url": "https://github.com/Microsoft/pai/issues"
   },
   "engines": {
-    "node": "^18"
+    "node": "^20"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.27.0",
@@ -47,7 +47,7 @@
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "~9.0.2",
     "lodash": "^4.17.21",
-    "mocha": "~11.2.2",
+    "mocha": "~11.4.0",
     "module-alias": "^2.2.3",
     "morgan": "~1.10.0",
     "mustache": "~4.2.0",
@@ -56,9 +56,10 @@
     "node-rsa": "~1.1.1",
     "nyc": "^17.1.0",
     "openpaidbsdk": "file:./openpaidbsdk",
-    "pg": "^8.15.6",
+    "pg": "^8.16.0",
     "querystring": "~0.2.1",
     "sequelize": "^6.37.7",
+    "sshpk": "^1.18.0",
     "statuses": "~2.0.1",
     "swagger-ui-express": "^5.0.1",
     "tough-cookie": "^5.1.2",
@@ -81,8 +82,8 @@
     "test": "npm run lint && nyc npm run mocha"
   },
   "devDependencies": {
-    "eslint": "^9.26.0",
-    "eslint-config-prettier": "~10.1.2",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "~10.1.5",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "~5.4.0",
