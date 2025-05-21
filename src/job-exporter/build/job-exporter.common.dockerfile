@@ -57,11 +57,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
 
 RUN apt update && apt upgrade -y
 
-ARG BRANCH_OR_TAG='ruigao/add_dummy_field_6.2.2update'
-
-# Clone Moneo
-RUN git config --global advice.detachedHead false
-RUN git clone --branch ${BRANCH_OR_TAG} https://github.com/Azure/Moneo.git
+COPY src/Moneo /Moneo
 
 # Install RDC
 RUN sudo bash Moneo/src/worker/install/amd.sh
