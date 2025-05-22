@@ -58,10 +58,14 @@ spec:
           value: "{{ cluster_cfg['rest-server']['code-restriction']['virtual-cluster'] }}"
         - name: JOB_RESTRICTION_GPU_RESOURCE_NUMBER
           value: "{{ cluster_cfg['rest-server']['code-restriction']['gpu-number'] }}"
-        - name: JOB_RESTRICTION_GIT_REPO_URL
-          value: "{{ cluster_cfg['rest-server']['code-restriction']['git-repo'] }}"
-        - name: JOB_RESTRICTION_GIT_REPO_BRANCH
-          value: "{{ cluster_cfg['rest-server']['code-restriction']['git-branch'] }}"
+        - name: JOB_RESTRICTION_GIT_REPO_URL_INFRA
+          value: "{{ cluster_cfg['rest-server']['code-restriction']['git-repo-infra'] }}"
+        - name: JOB_RESTRICTION_GIT_REPO_URL_MODEL
+          value: "{{ cluster_cfg['rest-server']['code-restriction']['git-repo-model'] }}"
+        - name: JOB_RESTRICTION_GIT_REPO_BRANCH_INFRA
+          value: "{{ cluster_cfg['rest-server']['code-restriction']['git-branch-infra'] }}"
+        - name: JOB_RESTRICTION_GIT_REPO_BRANCH_MODEL
+          value: "{{ cluster_cfg['rest-server']['code-restriction']['git-branch-model'] }}"
         - name: JOB_RESTRICTION_GIT_SCRIPT_PREFIX
           value: "{{ cluster_cfg['rest-server']['code-restriction']['script-prefix'] }}"
         - name: JOB_RESTRICTION_GIT_SCRIPT_NAME

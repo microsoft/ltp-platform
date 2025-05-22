@@ -19,41 +19,45 @@ const isJobRunningOnSpecificVirtualCluster = (protocol) => {
 
 // check if the job is following the rules
 // we only support the following commands:
-// 1. export AZURE_BLOB_KEY=<your-azure-blob-key>
-// 2. export WANDB_API_KEY=<your-wandb-api-key>
-// 3. git clone <github-key>@<expected_repo_url> -b <expected_branch>
-// 4. cd <expected_repo_name>
-// 5. bash <expected_script_prefix>/<script-name>
+// 1. export WANDB_API_KEY=<your-wandb-api-key>
+// 2. git clone <github-key>@<expected_repo_url_infra> -b <expected_branch_infra>
+// 3. git clone <github-key>@<expected_repo_url_model> -b <expected_branch_model>
+// 4. cp -r <expected_repo_name_model>/* <expected_repo_name_infra>/
+// 5. cd <expected_repo_name_infra>
+// 6. bash <expected_script_prefix>/<script-name>
 const checkReqeustedCommand = (protocol) => {
   return Object.values(protocol.taskRoles).every((taskRole) => {
-    if (!taskRole.commands || taskRole.commands.length !== 5) {
+    if (!taskRole.commands || taskRole.commands.length !== 6) {
       logger.warn(`Invalid taskRole.commands: ${JSON.stringify(taskRole.commands)}`);
       return false;
     }
 
     // now we check the commands one by one
     // TODO: find a better way to check the commands in the future when the commands are more complex
-    const setAzureBlobKeyCommand = taskRole.commands[0]?.trim();
-    const setWanDbApiKeyCommand = taskRole.commands[1]?.trim();
-    const gitCloneCommand = taskRole.commands[2]?.trim();
-    const cdCommand = taskRole.commands[3]?.trim();
-    const bashCommand = taskRole.commands[4]?.trim();
+    const setWanDbApiKeyCommand = taskRole.commands[0]?.trim();
+    const gitCloneCommandInfra = taskRole.commands[1]?.trim();
+    const gitCloneCommandModel = taskRole.commands[2]?.trim();
+    const cpCommand = taskRole.commands[3]?.trim();
+    const cdCommand = taskRole.commands[4]?.trim();
+    const bashCommand = taskRole.commands[5]?.trim();
 
-    const jobRestrictionGitRepoName = launcherConfig.jobRestrictionGitRepoUrl.split('/').pop().replace(/\.git$/, '');
+    const jobRestrictionGitRepoNameInfra = launcherConfig.jobRestrictionGitRepoUrlInfra.split('/').pop().replace(/\.git$/, '');
+    const jobRestrictionGitRepoNameModel = launcherConfig.jobRestrictionGitRepoUrlModel.split('/').pop().replace(/\.git$/, '');
 
-    const setAzureBlobKeyCommandRegex = new RegExp(`^export\\s+AZURE_BLOB_KEY=(["']?)[0-9a-zA-Z=\\-%&]+\\1$`);
     const setWanDbApiKeyCommandRegex = new RegExp(`^export\\s+WANDB_API_KEY=(["']?)[0-9a-zA-Z]+\\1$`);
-    const gitCloneRegex = new RegExp(`^git\\s+clone\\s+https://([a-zA-Z0-9-_]+):([a-zA-Z0-9_]+)@(${launcherConfig.jobRestrictionGitRepoUrl})\\s+-b\\s+(${launcherConfig.jobRestrictionGitRepoBranch})$`);
-    const cdRegex = new RegExp(`^cd\\s+(${jobRestrictionGitRepoName})$`);
+    const gitCloneRegexInfra = new RegExp(`^git\\s+clone\\s+https://([a-zA-Z0-9-_]+):([a-zA-Z0-9_]+)@(${launcherConfig.jobRestrictionGitRepoUrlInfra})\\s+-b\\s+(${launcherConfig.jobRestrictionGitRepoBranchInfra})$`);
+    const gitCloneRegexModel = new RegExp(`^git\\s+clone\\s+https://([a-zA-Z0-9-_]+):([a-zA-Z0-9_]+)@(${launcherConfig.jobRestrictionGitRepoUrlModel})\\s+-b\\s+(${launcherConfig.jobRestrictionGitRepoBranchModel})$`);
+    const cpRegex = new RegExp(`^cp\\s+-r\\s+(${jobRestrictionGitRepoNameModel})/\\*\\s+(${jobRestrictionGitRepoNameInfra})/$`);
+    const cdRegex = new RegExp(`^cd\\s+(${jobRestrictionGitRepoNameInfra})$`);
     const bashRegex = new RegExp(`^bash\\s+(${launcherConfig.jobRestrictionGitScriptPrefix})\\s*/\\s*(${launcherConfig.jobRestrictionGitScriptName}[a-zA-Z0-9-_\.]*\\.sh)$`);
 
-    const setAzureBlobKeyMatch = setAzureBlobKeyCommandRegex.test(setAzureBlobKeyCommand);
     const setWanDbApiKeyMatch = setWanDbApiKeyCommandRegex.test(setWanDbApiKeyCommand);
-    const gitCloneMatch = gitCloneRegex.test(gitCloneCommand);
+    const gitCloneMatch = gitCloneRegexInfra.test(gitCloneCommandInfra) && gitCloneRegexModel.test(gitCloneCommandModel);
+    const cpMatch = cpRegex.test(cpCommand);
     const cdMatch = cdRegex.test(cdCommand);
     const bashMatch = bashRegex.test(bashCommand);
 
-    if (!gitCloneMatch || !cdMatch || !bashMatch || !setAzureBlobKeyMatch || !setWanDbApiKeyMatch) {
+    if (!setWanDbApiKeyMatch || !gitCloneMatch || !cpMatch || !cdMatch || !bashMatch) {
       logger.warn(`Commands do not match the expected patterns: ${JSON.stringify(taskRole.commands)}`);
       return false;
     }
@@ -144,11 +148,14 @@ const check = async (req, res, next) => {
         );
       }
       if (!checkReqeustedCommand(jobProtocol)) {
+        const jobRestrictionGitRepoNameInfra = launcherConfig.jobRestrictionGitRepoUrlInfra.split('/').pop().replace(/\.git$/, '');
+        const jobRestrictionGitRepoNameModel = launcherConfig.jobRestrictionGitRepoUrlModel.split('/').pop().replace(/\.git$/, '');
         correctCommands = [
-          `expert AZURE_BLOB_KEY=<your-azure-blob-key>`,
           `export WANDB_API_KEY=<your-wandb-api-key>`,
-          `git clone ${launcherConfig.jobRestrictionGitRepoUrl} -b ${launcherConfig.jobRestrictionGitRepoBranch}`,
-          `cd ${launcherConfig.jobRestrictionGitRepoUrl.split('/').pop().replace(/\.git$/, '')}`,
+          `git clone https://<user>:<token>@${launcherConfig.jobRestrictionGitRepoUrlInfra} -b ${launcherConfig.jobRestrictionGitRepoBranchInfra}`,
+          `git clone https://<user>:<token>@${launcherConfig.jobRestrictionGitRepoUrlModel} -b ${launcherConfig.jobRestrictionGitRepoBranchModel}`,
+          `cp -r ${jobRestrictionGitRepoNameModel}/* ${jobRestrictionGitRepoNameInfra}/`,
+          `cd ${jobRestrictionGitRepoNameInfra}`,
           `bash ${launcherConfig.jobRestrictionGitScriptPrefix}/${launcherConfig.jobRestrictionGitScriptName}`
         ];
         return next(

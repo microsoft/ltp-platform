@@ -46,7 +46,9 @@ log_azure_storage_container_name: 'YOUR_AZURE_STORAGE_CONTAINER_NAME'
 code-restriction:
   virtual-cluster: default
   gpu-number: 10000
-  git-repo: https://noexisting.git.repo
-  git-branch: no-existing-branch
+  git-repo-infra: https://noexisting.infra.git.repo
+  git-repo-model: https://noexisting.model.git.repo
+  git-branch-infra: no-existing-branch-infra
+  git-branch-model: no-existing-branch-model
   script-prefix: no-existing-prefix
   script-name: no-existing-name
