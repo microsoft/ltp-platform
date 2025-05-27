@@ -19,7 +19,7 @@
 FROM ubuntu:22.04
 
 ENV \
-  GRAFANA_VERSION=10.4.19 \
+  GRAFANA_VERSION=10.4.18+security~01 \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
