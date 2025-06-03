@@ -541,8 +541,12 @@ class GpuCollector(Collector):
             amd_core_utils.add_metric([minor], info.gpu_util)
             amd_mem_utils.add_metric([minor], info.gpu_mem_util)
             amd_gpu_temp.add_metric([minor], info.temperature)
-            amd_ecc_errors.add_metric([node_name, minor, "single"], info.ecc_errors.single)
-            amd_ecc_errors.add_metric([node_name, minor, "double"], info.ecc_errors.double)
+            # Add ECC errors only if info.ecc_errors exists and has values
+            if hasattr(info, "ecc_errors") and info.ecc_errors:
+                if hasattr(info.ecc_errors, "single") and info.ecc_errors.single is not None:
+                    amd_ecc_errors.add_metric([node_name, minor, "single"], info.ecc_errors.single)
+                if hasattr(info.ecc_errors, "double") and info.ecc_errors.double is not None:
+                    amd_ecc_errors.add_metric([node_name, minor, "double"], info.ecc_errors.double)
 
             # TODO: this piece of code seems not corret, gpu_mem_util is
             # a percentage number but mem_leak_thrashold is memory size. Need to fix it.
