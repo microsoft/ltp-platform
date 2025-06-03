@@ -372,23 +372,29 @@ def init_ib_config():
     global IB_Mapping
     global FIELD_LIST
     # IB mapping
-    cmd = 'ibv_devinfo -l'
+    cmd = 'ls /sys/class/infiniband'
     result = shell_cmd(cmd, 5)
-    if 'HCAs found' in result or 'HCA found' in result:
-        try:
-            config['counter']['link_flap'] = {}
-            result = result.split('\n')[1:]
-            for ib in result:
-                if "ib" not in ib:
-                    continue
-                if len(ib):
-                    mapping = re.search(r"ib\d", ib.strip()).group()
+    # The output of 'ls /sys/class/infiniband' could be like 'mlx5_ib7', 'mlx5_7', etc.
+    try:
+        config['counter']['link_flap'] = {}
+        result = result.strip().split('\n')
+        for ib in result:
+            if not ib:
+                continue
+            # Match both 'mlx5_ib7' and 'mlx5_7' patterns
+            match = re.match(r'(mlx5_(?:ib)?[0-9]+)', ib.strip())
+
+            if match:
+                # Extract the number part and always use 'ib' prefix for mapping
+                num = re.search(r'(\d+)$', match.group(1))
+                if num:
+                    mapping = f'ib{num.group(1)}'
                     config['counter']['link_flap'][mapping] = []
                     IB_Mapping[mapping] = ib.strip() + ':1'
-            FIELD_LIST.append('link_flap')
-        except Exception as e:
-            logging.exception('Exception occured during configuration. Message: %s', e)
-            pass
+        FIELD_LIST.append('link_flap')
+    except Exception as e:
+        logging.exception('Exception occured during configuration. Message: %s', e)
+        pass
 
 
 def init_nvidia_config():
