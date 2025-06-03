@@ -37,11 +37,10 @@ jobs:
         if echo "$folders" | grep -q "hivedscheduler"; then
           folders=$(echo "$folders" | grep -v "cluster-configuration" | grep -v "rest-server")
           # Add "cluster-configuration" to the head and "rest-server" to the end
-          folders="cluster-configuration\n$folders\nrest-server"
+          folders="cluster-configuration $folders rest-server"
         fi
         
         # Store the folder list in a pipeline variable
-        folders=$(echo "$folders" | tr '\n' ' ')
         echo "Changed folders: $folders"
         echo "##vso[task.setvariable variable=changed_folders]$folders"
       displayName: 'Get Changed Folders(Services)'
