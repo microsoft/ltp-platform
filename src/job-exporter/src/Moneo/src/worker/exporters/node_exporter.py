@@ -74,24 +74,24 @@ class NodeExporter(BaseExporter):
                 self.gauges[field_name] = prometheus_client.Gauge(
                     'node_{}'.format(field_name),
                     'node_{}'.format(field_name),
-                    ['job_id', 'cpu_id', 'numa_domain']
+                    ['job_id', 'cpu_id', 'numa_domain', 'node_name']
                 )
             elif 'xid' in field_name:
                 self.gauges[field_name] = prometheus_client.Gauge(
                     'node_{}'.format(field_name),
                     'node_{}'.format(field_name),
-                    ['job_id', 'pci_id', 'gpu_id', 'time_stamp']
+                    ['job_id', 'pci_id', 'gpu_id', 'time_stamp', 'node_name']
                 )
             elif 'link_flap' in field_name:
                 self.gauges[field_name] = prometheus_client.Gauge(
                     'node_{}'.format(field_name),
                     'node_{}'.format(field_name),
-                    ['job_id', 'ib_port', 'time_stamp'])
+                    ['job_id', 'ib_port', 'time_stamp', 'node_name'])
             else:
                 self.gauges[field_name] = prometheus_client.Gauge(
                     'node_{}'.format(field_name),
                     'node_{}'.format(field_name),
-                    ['job_id']
+                    ['job_id', 'node_name']
                 )
 
     # example function of how to collect metrics from a command using the
@@ -182,7 +182,7 @@ class NodeExporter(BaseExporter):
             for id, k in enumerate(value.keys()):
                 numa_domain = self.config['cpu_numa_map'][id]
                 logging.debug(f'Handeling key: {k}. Setting value: {value[k]}')
-                self.update_field(field_name, value[k], self.config['job_id'], k, numa_domain)
+                self.update_field(field_name, value[k], self.config['job_id'], k, numa_domain, self.config['node_name'])
         elif 'xid' in field_name or 'link_flap' in field_name:
             Mapping = GPU_Mapping if 'xid' in field_name else IB_Mapping
             try:
@@ -190,8 +190,8 @@ class NodeExporter(BaseExporter):
                 for dev_id in value.keys():
                     iter_object = value[dev_id].keys() if field_name == 'xid' else value[dev_id]
                     for time_stamp in iter_object:
-                        label_values = [self.config['job_id'], dev_id, Mapping[dev_id], time_stamp] \
-                            if 'xid' in field_name else [self.config['job_id'], Mapping[dev_id], time_stamp]
+                        label_values = [self.config['job_id'], dev_id, Mapping[dev_id], time_stamp, self.config['node_name']] \
+                            if 'xid' in field_name else [self.config['job_id'], Mapping[dev_id], time_stamp, self.config['node_name']]
                         collect_time = self.config['sample_timestamp'][field_name]
                         event_time = datetime.strptime(time_stamp, "%b %d %H:%M:%S").replace(year=collect_time.year)
                         if event_time <= collect_time:
@@ -207,7 +207,7 @@ class NodeExporter(BaseExporter):
                 logging.exception('Raised exception during xid/linkflap handling. Message: %s', e)
                 pass
         else:
-            self.update_field(field_name, value, self.config['job_id'])
+            self.update_field(field_name, value, self.config['job_id'], self.config['node_name'])
         logging.debug('Node exporter field %s: %s', field_name, str(value))
 
     def remove_metric(self, field_name, Mapping):
@@ -278,21 +278,22 @@ def get_core_numa_mapping(core_count):
 # you will need to initialize your custom metric's file if we are exporting
 # from a file you may also want to initialize the config's counter member
 # for the specific field
-def init_config(job_id, port=None, ethernet_device='eth0'):
+def init_config(job_id, port=None, ethernet_device='eth0', interval=30):
     '''Example of config initialization'''
     global config
     if not port:
         port = 8002
     config = {
         'exit': False,
-        'update_freq': 1,
+        'update_freq': interval,
         'listen_port': port,
-        'publish_interval': 1,
+        'publish_interval': interval,
         'job_id': job_id,
         'fieldFiles': {},
         'counter': {},
         'sample_timestamp': {},
-        'ethernet_device': ethernet_device
+        'ethernet_device': ethernet_device,
+        'node_name': os.environ.get("NODE_NAME"),
     }
     # for xid and link flaps
     config['command'] = {}
@@ -449,6 +450,13 @@ def main():
         type=str,
         default='eth0',
         help='Ethernet device to monitor')
+    parser.add_argument(
+        "-i",
+        "--interval",
+        type=int,
+        default=30,
+        help='Set the interval (in seconds) for the exporter'
+    )
     args = parser.parse_args()
     # set up logging
     os.makedirs('/tmp/moneo-worker', exist_ok=True)
@@ -456,7 +464,7 @@ def main():
                         format='[%(asctime)s] node_exporter-%(levelname)s-%(message)s')
     jobId = None  # set a default job id of None
     try:
-        init_config(jobId, args.port, args.ethernet_device)
+        init_config(jobId, args.port, args.ethernet_device, args.interval)
         init_signal_handler()
         exporter = NodeExporter(FIELD_LIST, config)
         exporter.loop()
