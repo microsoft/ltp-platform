@@ -1,0 +1,254 @@
+"""Node status models."""
+
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from typing import List, Optional
+from ...utils.time_util import convert_timestamp
+
+
+class StatusGroup(str, Enum):
+    """Groups of related node statuses"""
+
+    TRIAGED = "Cordon"
+    UA = "UA"
+    PLATFORM = "Platform",
+    NEW = "New"
+    VALIDATING = "Validation"
+    AVAILABLE = "Healthy"
+    CORDONED = "Cordon"
+    DEALLOCATED = "Deallocated"
+
+
+@dataclass
+class StatusMetadata:
+    """Metadata for a node status"""
+    group: StatusGroup
+    description: str
+    allowed_transitions: List[str]
+
+
+class NodeStatus(str, Enum):
+    """Enum representing various node statuses with metadata."""
+    # Basic states
+    NEW = "new"
+    VALIDATING = "validating"
+    AVAILABLE = "available"
+    CORDONED = "cordoned"
+    DEALLOCATED_CAPACITY = "deallocated_capacity"
+
+    # Triaged states
+    TRIAGED_HW = "triaged_hardware"
+    TRIAGED_USER = "triaged_user"
+    TRIAGED_PLATFORM = "triaged_platform"
+    TRIAGED_UNKNOWN = "triaged_unknown"
+
+    # UA states
+    UA = "ua"
+    DEALLOCATED_UA = "deallocated_ua"
+    ALLOCATED_UA = "allocated_ua"
+
+    # Platform states
+    DEALLOCATED_PLATFORM = "deallocated_platform"
+    ALLOCATED_PLATFORM = "allocated_platform"
+
+    @classmethod
+    def get_metadata(cls, status: str) -> StatusMetadata:
+        """Get metadata for a given status"""
+        return STATUS_METADATA.get(status, None)
+
+    @classmethod
+    def get_group(cls, status: str) -> StatusGroup:
+        """Get the group a status belongs to"""
+        return cls.get_metadata(status).group
+
+    @classmethod
+    def get_allowed_transitions(cls, status: str) -> List[str]:
+        """Get allowed status transitions for a given status"""
+        return cls.get_metadata(status).allowed_transitions
+
+    @classmethod
+    def can_transition(cls, from_status: str, to_status: str) -> bool:
+        """Check if transition between statuses is allowed"""
+        return to_status in cls.get_allowed_transitions(from_status)
+
+
+@dataclass
+class NodeStatusRecord:
+    """
+    Represents a record of node status in a Kusto database.
+    Attributes:
+        timestamp (datetime): The timestamp of the status record.
+        hostname (str): The hostname of the node.
+        status (str): The current status of the node.
+        nodeid (str): The unique identifier for the node.
+    """
+    Timestamp: datetime
+    HostName: str
+    Status: str
+    NodeId: str
+    Endpoint: str
+
+    @classmethod
+    def from_record(cls, record: dict):
+        """Converts a record dictionary to a NodeStatusRecord instance."""
+        timestamp = record['Timestamp']
+        timestamp_str = convert_timestamp(timestamp, format="str")
+        return cls(Timestamp=timestamp_str,
+                   HostName=record['HostName'],
+                   Status=record['Status'],
+                   NodeId=record.get('NodeId', ''),
+                   Endpoint=record.get('Endpoint', ''))
+
+    def to_dict(self) -> dict:
+        """Converts the NodeStatusRecord instance to a dictionary."""
+        return {
+            "Timestamp": convert_timestamp(self.Timestamp, format="str"),
+            "HostName": self.HostName,
+            "Status": self.Status,
+            "NodeId": self.NodeId,
+            "Endpoint": self.Endpoint
+        }
+
+    def update(self, to_status: str):
+        """Updates the node status to the new status."""
+        if NodeStatus.can_transition(self.Status, to_status):
+            self.Status = to_status
+        else:
+            raise ValueError(
+                f"Invalid transition from {self.Status} to {to_status}")
+
+    @classmethod
+    def get_transition_action(cls, from_status: str, to_status: str) -> str:
+        """Returns the action label for a transition from one status to another."""
+        return from_status + '-' + to_status
+
+
+# Define metadata for each status
+STATUS_METADATA = {
+    NodeStatus.NEW.value:
+    StatusMetadata(group=StatusGroup.NEW,
+                   description="Initial state for new nodes",
+                   allowed_transitions=[
+                       NodeStatus.VALIDATING.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value
+                   ]),
+    NodeStatus.VALIDATING.value:
+    StatusMetadata(group=StatusGroup.VALIDATING,
+                   description="Node is being validated",
+                   allowed_transitions=[
+                       NodeStatus.AVAILABLE.value, NodeStatus.CORDONED.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                       NodeStatus.TRIAGED_HW.value,
+                       NodeStatus.TRIAGED_USER.value,
+                       NodeStatus.TRIAGED_PLATFORM.value,
+                       NodeStatus.TRIAGED_UNKNOWN.value
+                   ]),
+    NodeStatus.AVAILABLE.value:
+    StatusMetadata(group=StatusGroup.AVAILABLE,
+                   description="Node is available for use",
+                   allowed_transitions=[
+                       NodeStatus.CORDONED.value,
+                       NodeStatus.TRIAGED_HW.value,
+                       NodeStatus.TRIAGED_USER.value,
+                       NodeStatus.TRIAGED_PLATFORM.value,
+                       NodeStatus.TRIAGED_UNKNOWN.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                   ]),
+    NodeStatus.CORDONED.value:
+    StatusMetadata(group=StatusGroup.CORDONED,
+                   description="Node is cordoned off",
+                   allowed_transitions=[
+                       NodeStatus.AVAILABLE.value,
+                       NodeStatus.TRIAGED_HW.value,
+                       NodeStatus.TRIAGED_USER.value,
+                       NodeStatus.TRIAGED_PLATFORM.value,
+                       NodeStatus.TRIAGED_UNKNOWN.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                   ]),
+    NodeStatus.DEALLOCATED_CAPACITY.value:
+    StatusMetadata(group=StatusGroup.DEALLOCATED,
+                   description="Node is deallocated due to capacity",
+                   allowed_transitions=[
+                       NodeStatus.NEW.value, NodeStatus.VALIDATING.value
+                   ]),
+
+    # Triaged states metadata
+    NodeStatus.TRIAGED_HW.value:
+    StatusMetadata(group=StatusGroup.TRIAGED,
+                   description="Node is triaged for hardware issues",
+                   allowed_transitions=[
+                       NodeStatus.UA.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                   ]),
+    NodeStatus.TRIAGED_USER.value:
+    StatusMetadata(group=StatusGroup.TRIAGED,
+                   description="Node is triaged for user issues",
+                   allowed_transitions=[
+                       NodeStatus.VALIDATING.value,
+                       NodeStatus.AVAILABLE.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                   ]),
+    NodeStatus.TRIAGED_PLATFORM.value:
+    StatusMetadata(group=StatusGroup.TRIAGED,
+                   description="Node is triaged for platform issues",
+                   allowed_transitions=[
+                       NodeStatus.DEALLOCATED_PLATFORM.value,
+                       NodeStatus.ALLOCATED_PLATFORM.value,
+                       NodeStatus.VALIDATING.value,
+                       NodeStatus.AVAILABLE.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                   ]),
+    NodeStatus.TRIAGED_UNKNOWN.value:
+    StatusMetadata(group=StatusGroup.TRIAGED,
+                   description="Node is triaged for unknown issues",
+                   allowed_transitions=[
+                       NodeStatus.VALIDATING.value, NodeStatus.CORDONED.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                       NodeStatus.TRIAGED_PLATFORM.value,
+                       NodeStatus.TRIAGED_USER.value,
+                       NodeStatus.TRIAGED_HW.value
+                   ]),
+
+    # UA states metadata
+    NodeStatus.UA.value:
+    StatusMetadata(group=StatusGroup.UA,
+                   description="Node is in UA state",
+                   allowed_transitions=[
+                       NodeStatus.DEALLOCATED_UA.value,
+                       NodeStatus.ALLOCATED_UA.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                   ]),
+    NodeStatus.DEALLOCATED_UA.value:
+    StatusMetadata(group=StatusGroup.UA,
+                   description="Node is deallocated in UA",
+                   allowed_transitions=[
+                       NodeStatus.ALLOCATED_UA.value, NodeStatus.UA.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value
+                   ]),
+    NodeStatus.ALLOCATED_UA.value:
+    StatusMetadata(group=StatusGroup.UA,
+                   description="Node is allocated in UA",
+                   allowed_transitions=[
+                       NodeStatus.VALIDATING.value,
+                       NodeStatus.DEALLOCATED_UA.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value
+                   ]),
+
+    # Platform states metadata
+    NodeStatus.DEALLOCATED_PLATFORM.value:
+    StatusMetadata(group=StatusGroup.PLATFORM,
+                   description="Node is deallocated for platform",
+                   allowed_transitions=[
+                       NodeStatus.ALLOCATED_PLATFORM.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value
+                   ]),
+    NodeStatus.ALLOCATED_PLATFORM.value:
+    StatusMetadata(group=StatusGroup.PLATFORM,
+                   description="Node is allocated for platform",
+                   allowed_transitions=[
+                       NodeStatus.VALIDATING.value,
+                       NodeStatus.DEALLOCATED_PLATFORM.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value
+                   ])
+}
