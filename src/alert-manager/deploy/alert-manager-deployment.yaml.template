@@ -126,6 +126,48 @@ spec:
           value: "{{ cluster_cfg['alert-manager']['job-status-change-notification']['prod_vc_group_emails'][group] }}"
         {%- endfor %}
 {% endif %}
+{% if cluster_cfg["alert-manager"]["alert-parser"]["configured"] %}
+      - name: alert-parser
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}alert-parser:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        env:
+        - name: CLUSTER_ID
+          value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
+        - name: LTP_KUSTO_CLUSTER_URI
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-cluster"] }}
+        - name: LTP_KUSTO_DATABASE_NAME
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-database"] }}
+        - name: KUSTO_NODE_STATUS_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-status-table"] | default("NodeStatusRecord") }}
+        - name: KUSTO_NODE_STATUS_ATTRIBUTE_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-status-attribute-table"] | default("NodeStatusAttributes") }}
+        - name: KUSTO_NODE_ACTION_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-action-table"] | default("NodeActionRecord") }}
+        - name: KUSTO_NODE_ACTION_ATTRIBUTE_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-action-attribute-table"] | default("NodeActionAttributes") }}
+        - name: ENVIRONMENT
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["environment"] | default("prod") }}
+        - name: LOG_LEVEL
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["log-level"] | default("INFO") }}
+        - name: UPDATE_INTERVAL
+          value: "{{ cluster_cfg['alert-manager']['alert-parser']['update-interval'] | default('10') }}"
+        - name: KUSTO_ALERT_CLUSTER
+          value: "{{ cluster_cfg['alert-manager']['alert-parser']['alert-kusto-cluster'] | default('https://ltp-kusto-alerts.westus2.kusto.windows.net') }}"
+        - name: KUSTO_ALERT_DATABASE
+          value: "{{ cluster_cfg['alert-manager']['alert-parser']['alert-kusto-database'] | default('DefaultWorkspace-id-westus2') }}"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+{% endif %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       volumes:
