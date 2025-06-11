@@ -1,0 +1,144 @@
+{
+  "node_crash_detail": [
+    {
+      "alertname": "NodeNotReady",
+      "summary": "Node not ready for scheduling",
+      "severity": "critical",
+      "timestamp": "2024-01-01T12:00:00.000Z",
+      "node_name": "test-node-001"
+    }
+  ],
+  "ib_port_down_detail": [
+    {
+      "alertname": "IBPortDown",
+      "summary": "InfiniBand port down detected",
+      "severity": "warning",
+      "timestamp": "2024-01-01T12:01:00.000Z",
+      "node_name": "test-node-002"
+    }
+  ],
+  "ib_link_flapping_detail": [
+    {
+      "alertname": "IBLinkFlap",
+      "summary": "IB link flapping detected",
+      "severity": "warning",
+      "timestamp": "2024-01-01T12:02:00.000Z",
+      "node_name": "test-node-003"
+    }
+  ],
+  "gpu_segfault_detail": [
+    {
+      "alertname": "DmesgGPUFault",
+      "summary": "GPU segfault detected",
+      "severity": "critical",
+      "timestamp": "2024-01-01T12:03:00.000Z",
+      "node_name": "test-node-004"
+    }
+  ],
+  "gpu_page_fault_detail": [
+    {
+      "alertname": "DmesgGPUFault",
+      "summary": "GPU page fault detected",
+      "severity": "critical",
+      "timestamp": "2024-01-01T12:04:00.000Z",
+      "node_name": "test-node-005"
+    }
+  ],
+  "gpu_fence_fallback_detail": [
+    {
+      "alertname": "DmesgGPUFault",
+      "summary": "fence fallback timer expired",
+      "severity": "critical",
+      "timestamp": "2024-01-01T12:05:00.000Z",
+      "node_name": "test-node-006"
+    }
+  ],
+  "nvidia_smi_failed_detail": [
+    {
+      "alertname": "NvidiaSmiFailed",
+      "summary": "nvidia-smi command failed",
+      "severity": "warning",
+      "timestamp": "2024-01-01T12:06:00.000Z",
+      "node_name": "test-node-007"
+    }
+  ],
+  "validation_ib_bandwidth_detail": [
+    {
+      "alertname": "CordonValidationFailedNodes",
+      "summary": "rccl-bw:ib validation failed",
+      "severity": "warning",
+      "timestamp": "2024-01-01T12:07:00.000Z",
+      "node_name": "test-node-008"
+    }
+  ],
+  "validation_model_benchmark_detail": [
+    {
+      "alertname": "CordonValidationFailedNodes",
+      "summary": "model-benchmark validation failed",
+      "severity": "warning",
+      "timestamp": "2024-01-01T12:08:00.000Z",
+      "node_name": "test-node-009"
+    }
+  ],
+  "validation_mem_bw_detail": [
+    {
+      "alertname": "CordonValidationFailedNodes",
+      "summary": "mem-bw validation failed",
+      "severity": "warning",
+      "timestamp": "2024-01-01T12:09:00.000Z",
+      "node_name": "test-node-010"
+    }
+  ],
+  "validation_kernel_launch_detail": [
+    {
+      "alertname": "CordonValidationFailedNodes",
+      "summary": "kernel-launch validation failed",
+      "severity": "warning",
+      "timestamp": "2024-01-01T12:10:00.000Z",
+      "node_name": "test-node-011"
+    }
+  ],
+  "admin_loss_nan_detail": [
+    {
+      "alertname": "admin-abnormal-node",
+      "summary": "Loss detected",
+      "severity": "critical",
+      "timestamp": "2024-01-01T12:11:00.000Z",
+      "node_name": "test-node-012"
+    }
+  ],
+  "admin_data_issue_detail": [
+    {
+      "alertname": "admin-abnormal-node",
+      "summary": "Data validation failed",
+      "severity": "warning",
+      "timestamp": "2024-01-01T12:12:00.000Z",
+      "node_name": "test-node-013"
+    }
+  ],
+  "multiple_alerts_detail": [
+    {
+      "alertname": "NodeNotReady",
+      "summary": "Node not ready for scheduling",
+      "severity": "critical",
+      "timestamp": "2024-01-01T12:00:00.000Z",
+      "node_name": "test-node-014"
+    },
+    {
+      "alertname": "DmesgGPUFault",
+      "summary": "GPU segfault detected",
+      "severity": "critical",
+      "timestamp": "2024-01-01T12:01:00.000Z",
+      "node_name": "test-node-014"
+    }
+  ],
+  "unknown_alert_detail": [
+    {
+      "alertname": "UnknownAlert",
+      "summary": "Unknown issue detected",
+      "severity": "warning",
+      "timestamp": "2024-01-01T12:13:00.000Z",
+      "node_name": "test-node-015"
+    }
+  ]
+} 
