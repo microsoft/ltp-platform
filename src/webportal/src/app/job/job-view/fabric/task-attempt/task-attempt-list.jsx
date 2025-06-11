@@ -356,6 +356,9 @@ export default class TaskAttemptList extends React.Component {
           }
         }
       }
+      res.push(
+        'The ssh feature in LTP is disabled by default due to security reasons.',
+      );
       if (hasUserSsh) {
         res.push(
           'You can connect to this container by one of the following commands if SSH is set up properly: \n',
