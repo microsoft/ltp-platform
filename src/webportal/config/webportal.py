@@ -47,11 +47,12 @@ class Webportal:
                 # Python 2 only uses urlquote_plus in urlencode
                 config_query = urllib.parse.urlencode(plugin['config'], True).replace('+', '%20')
                 uri = urllib.parse.urljoin(uri, '?' + config_query)
-            return {
-                'id': plugin.get('id'),
-                'title': plugin['title'],
-                'uri': uri,
-            }
+            # Besides 'id', 'title', 'uri', make the plugin can be able to add customized config 
+            result = dict(plugin)  # Copy all key-value pairs from plugin
+            result['uri'] = uri    # Overwrite uri with the possibly modified value
+            result['title'] = plugin['title']
+            result['id'] = plugin.get('id')
+            return result
 
         machine_list = self.cluster_configuration['machine-list']
         master_ip = [host['hostip'] for host in machine_list if host.get('pai-master') == 'true'][0]
