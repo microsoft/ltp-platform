@@ -23,6 +23,23 @@ job-status-change-notification:
   log-level: 'info'
   db-poller-max-db-connection: 10
   db-poller-interval-second: 600
+node-recycler:
+  configured: False
+  kusto:
+    cluster: luciatrainingplatform
+    datebase: ""
+  icm:
+    host: prod.microsofticm.com
+    crt_name: cert.pem
+    crt_path: /icm/cert.pem
+    key_name: key.pem
+    key_path: /icm/key.pem
+    connector_id: ""
+    routing_id: hpclucia://AzureHPC/Lucia/TrainingPlatform
+  vmss:
+    client_id: ""
+    vmss_ids: ""
+    validation_image: bench.azurecr.io/superbench:0.11-rocm6.3
 use-pylon: False
 repeat-interval: '24h'
 cert-expiration-checker:

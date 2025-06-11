@@ -1,0 +1,5 @@
+./kusto-sdk
+./python-icm
+azure-identity
+azure-mgmt-compute
+requests

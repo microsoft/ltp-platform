@@ -1,0 +1,51 @@
+protocolVersion: 2
+name: superbench_uaback_auto_{uid}
+type: job
+jobRetryCount: 3
+prerequisites:
+  - type: dockerimage
+    uri: {image}
+    name: superbench_image
+taskRoles:
+  taskrole:
+    instances: {instances}
+    completion:
+      minFailedInstances: -1
+      minSucceededInstances: -1
+    taskRetryCount: 0
+    dockerImage: superbench_image
+    extraContainerOptions:
+      infiniband: true
+    resourcePerInstance:
+      gpu: 8
+      cpu: 88
+      memoryMB: 1638400
+    commands:
+      - export AZURE_SKU=$(curl -sH "Metadata: true" "http://169.254.169.254/metadata/instance/compute/vmSize?api-version=2020-06-01&format=text")
+      - export NCCL_SOCKET_IFNAME=eth0
+      - export CUDA_DEVICE_ORDER=PCI_BUS_ID
+      - export NCCL_DEBUG=WARN
+      - export NODE_COUNT=1
+      - export NODE_LIST=localhost
+      - >-
+        sed -i 's|source /tmp/sb.env|source /tmp/sb.env \&\& source
+        /etc/profile|' /opt/superbench/superbench/runner/runner.py
+      - pip install /opt/superbench/
+      - pip uninstall ansible_core -y
+      - git clone https://LuciaTrainingPlatform@dev.azure.com/LuciaTrainingPlatform/LTP/_git/ltp-validation /LTPvalidation
+      - cd /LTPvalidation
+      - >-
+        python3 script/run.py --category NCCL TensorCore IB PCIe Model
+        --output-dir /output/validation-$(date '+%Y-%m-%d_%H-%M-%S')
+defaults:
+  virtualCluster: default
+extras:
+  gangAllocation: false
+  forceNodes: {hostnames}
+  enableLocalStorage:
+    enabled: true
+    hostpath: /mntext/validation
+    mntpath: /output
+  hivedScheduler:
+    jobPriorityClass: oppo
+  submitFrom: submit-job-v2

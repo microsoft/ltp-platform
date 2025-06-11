@@ -193,6 +193,68 @@ spec:
         - name: config-volume
           mountPath: /app/config
 {% endif %}
+
+{% if cluster_cfg["alert-manager"]["node-recycler"]["configured"] %}
+      - name: node-recycler
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}node-recycler:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        env:
+        - name: CLUSTER_ID
+          value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
+        - name: ENVIRONMENT
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["environment"] | default("prod") }}
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
+{% if "kusto" in cluster_cfg["alert-manager"]["node-recycler"] %}
+        - name: LTP_KUSTO_CLUSTER
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto"]["cluster"] }}
+        - name: LTP_KUSTO_DATABASE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto"]["database"] }}
+        - name: KUSTO_NODE_STATUS_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto"]["node-status-table"] | default("NodeStatusRecord") }}
+        - name: KUSTO_NODE_ACTION_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto"]["node-action-table"] | default("NodeActionRecord") }}
+{% endif %}
+{% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
+        - name: ICM_HOST
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["icm"]["host"] }}
+        - name: ICM_CERT_PATH
+          value: /etc/icm/certs/{{ cluster_cfg["alert-manager"]["node-recycler"]["icm"]["crt_name"] | default("cert.pem") }}
+        - name: ICM_KEY_PATH
+          value: /etc/icm/certs/{{ cluster_cfg["alert-manager"]["node-recycler"]["icm"]["key_name"] | default("key.pem") }}
+        - name: ICM_CONNECTOR_ID
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["icm"]["connector_id"] }}
+        - name: ICM_ROUTING_ID
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["icm"]["routing_id"] }}
+{% endif %}
+{% if "vmss" in cluster_cfg["alert-manager"]["node-recycler"] %}
+        - name: AZURE_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["vmss"]["client_id"] }}
+        - name: LTP_VMSS_IDS
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["vmss"]["vmss_ids"] }}
+        - name: LTP_VALIDATION_IMAGE
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["vmss"]["validation_image"] }}
+{% endif %}
+        - name: REST_SERVER_URI
+          value: {{ cluster_cfg["rest-server"]["uri"] }}
+        - name: REST_SERVER_TOKEN
+          value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+{% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
+        - name: icm-certs
+          mountPath: /etc/icm/certs
+{% endif %}
+{% endif %}
+
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       volumes:
@@ -211,6 +273,13 @@ spec:
           - key: {{ template }}-subject.ejs
             path: {{ template }}/subject.ejs
           {% endfor -%}
+{% endif %}
+{% endif %}
+{% if cluster_cfg["alert-manager"]["node-recycler"]["configured"] %}
+{% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
+      - name: icm-certs
+        configMap:
+          name: icm-certs
 {% endif %}
 {% endif %}
       - name: alertmanager

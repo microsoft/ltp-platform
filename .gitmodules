@@ -1,0 +1,3 @@
+[submodule "src/alert-manager/src/node-recycler/python-icm"]
+	path = src/alert-manager/src/node-recycler/python-icm
+	url = https://dev.azure.com/msblox/python-icm/_git/python-icm
