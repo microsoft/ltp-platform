@@ -466,6 +466,10 @@ const generateTaskRole = (
               ],
               volumeMounts: [
                 {
+                  name: 'host-mount',
+                  mountPath: '/host-mnt',
+                },
+                {
                   name: 'pai-vol',
                   mountPath: '/usr/local/pai',
                 },
@@ -569,6 +573,12 @@ const generateTaskRole = (
               name: 'host-log',
               hostPath: {
                 path: `/var/log/pai`,
+              },
+            },
+            {
+              name: 'host-mount',
+              hostPath: {
+                path: `/mnt`,
               },
             },
             ...(enableLocalStorage && enableLocalStorage.enabled
