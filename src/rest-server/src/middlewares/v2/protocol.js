@@ -54,7 +54,7 @@ const render = (template, dict, tags = ['<%', '%>']) => {
 };
 
 const protocolValidate = (protocolYAML) => {
-  const protocolObj = yaml.safeLoad(protocolYAML);
+  const protocolObj = yaml.load(protocolYAML);
   if (!protocolSchema.validate(protocolObj)) {
     throw createError(
       'Bad Request',

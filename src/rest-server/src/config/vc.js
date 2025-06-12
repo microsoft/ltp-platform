@@ -35,14 +35,14 @@ const vcCreateInputSchema = Joi.object()
 // define the input schema for the 'put vc status' api
 const vcStatusPutInputSchema = Joi.object()
   .keys({
-    vcStatus: Joi.string().valid(['stopped', 'running']).required(),
+    vcStatus: Joi.string().valid('stopped', 'running').required(),
   })
   .required();
 
 const resourceUnits = {};
 
 if (enabledHived) {
-  const hivedConfig = yaml.safeLoad(fs.readFileSync(hivedSpecPath));
+  const hivedConfig = yaml.load(fs.readFileSync(hivedSpecPath));
   if (
     !(
       'physicalCluster' in hivedConfig &&

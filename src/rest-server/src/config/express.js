@@ -64,7 +64,7 @@ app.use('/api/v2', routers.v2);
 app.use('/api/internal', routers.internal);
 
 // create OpenAPI docs
-const swaggerSpec = yaml.safeLoad(fs.readFileSync('./docs/swagger.yaml'));
+const swaggerSpec = yaml.load(fs.readFileSync('./docs/swagger.yaml'));
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // catch 404 and forward to error handler

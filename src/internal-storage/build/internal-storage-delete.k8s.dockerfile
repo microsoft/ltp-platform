@@ -17,6 +17,8 @@
 
 FROM ubuntu:22.04
 
+RUN apt update && apt upgrade -y
+
 RUN mkdir -p /init_scripts
 
 COPY src/delete.sh /init_scripts

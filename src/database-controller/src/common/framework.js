@@ -181,7 +181,7 @@ class Snapshot {
 
   getRequestUpdate(withSnapshot = true) {
     // Get database updates from the snapshot for the request part.
-    const loadedConfig = yaml.safeLoad(
+    const loadedConfig = yaml.load(
       this._snapshot.metadata.annotations.config,
     );
     const jobPriority = _.get(
@@ -438,7 +438,7 @@ class AddOns {
       try {
         await k8s.createSecret(this._configSecretDef);
       } catch (err) {
-        if (err.response && err.response.statusCode === 409) {
+        if (err.code === 409) {
           logger.warn(
             `Secret ${this._configSecretDef.metadata.name} already exists.`,
           );
@@ -451,7 +451,7 @@ class AddOns {
       try {
         await k8s.createSecret(this._userExtensionSecretDef);
       } catch (err) {
-        if (err.response && err.response.statusCode === 409) {
+        if (err.code === 409) {
           logger.warn(
             `Secret ${this._userExtensionSecretDef.metadata.name} already exists.`,
           );
@@ -464,7 +464,7 @@ class AddOns {
       try {
         await k8s.createPriorityClass(this._priorityClassDef);
       } catch (err) {
-        if (err.response && err.response.statusCode === 409) {
+        if (err.code === 409) {
           logger.warn(
             `PriorityClass ${this._priorityClassDef.metadata.name} already exists.`,
           );
@@ -477,7 +477,7 @@ class AddOns {
       try {
         await k8s.createSecret(this._dockerSecretDef);
       } catch (err) {
-        if (err.response && err.response.statusCode === 409) {
+        if (err.code === 409) {
           logger.warn(
             `Secret ${this._dockerSecretDef.metadata.name} already exists.`,
           );
@@ -490,7 +490,7 @@ class AddOns {
       try {
         await k8s.createSecret(this._tokenSecretDef);
       } catch (err) {
-        if (err.response && err.response.statusCode === 409) {
+        if (err.code === 409) {
           logger.warn(
             `Secret ${this._tokenSecretDef.metadata.name} already exists.`,
           );
@@ -568,14 +568,13 @@ class AddOns {
 async function synchronizeCreate(snapshot, addOns) {
   await addOns.create();
   try {
-    const response = await k8s.createFramework(snapshot.getRequest(false));
+    const frameworkResponse = await k8s.createFramework(snapshot.getRequest(false));
     // framework is created successfully.
-    const frameworkResponse = response.body;
     // don't wait for patching
     addOns.silentPatch(frameworkResponse);
     return frameworkResponse;
   } catch (err) {
-    if (err.response && err.response.statusCode === 409) {
+    if (err.code === 409) {
       // doesn't delete add-ons if 409 error
       logger.warn(`Framework ${snapshot.getName()} already exists.`);
       throw err;
@@ -590,8 +589,7 @@ async function synchronizeModify(snapshot) {
     snapshot.getName(),
     snapshot.getRequest(false),
   );
-  const frameworkResponse = response.body;
-  return frameworkResponse;
+  return response;
 }
 
 async function synchronizeRequest(snapshot, addOns) {
@@ -608,7 +606,7 @@ async function synchronizeRequest(snapshot, addOns) {
     return frameworkResponse;
   } catch (err) {
     // If framework doesn't exist, create it.
-    if (err.response && err.response.statusCode === 404) {
+    if (err.code === 404) {
       const frameworkResponse = await synchronizeCreate(snapshot, addOns);
       logger.info(
         `Request of framework ${snapshot.getName()} is successfully created.`,

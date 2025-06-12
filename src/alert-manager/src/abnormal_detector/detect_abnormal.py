@@ -171,9 +171,17 @@ def main():
     if not PAI_URI:
         logging.error("PAI_URI is not set")
         return
-    diagnose_info = get_diagnose_info()
-    send_quota_adjust_alerts(PAI_URI, diagnose_info.quota_adjustments)
-    send_abnormal_job_alerts(PAI_URI, diagnose_info.abnormal_jobs)
+    try:
+        diagnose_info = get_diagnose_info()
+    except Exception as e:
+        logging.error(f"Failed to get diagnose info: {e}")
+        return
+
+    try:
+        send_quota_adjust_alerts(PAI_URI, diagnose_info.quota_adjustments)
+        send_abnormal_job_alerts(PAI_URI, diagnose_info.abnormal_jobs)
+    except Exception as e:
+        logging.error(f"Failed to send adjust alerts: {e}")
 
 if __name__ == "__main__":
     logging.basicConfig(

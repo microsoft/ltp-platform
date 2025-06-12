@@ -1,0 +1,421 @@
+import os
+import sys
+import time
+import signal
+import logging
+import json
+import prometheus_client
+import subprocess
+import shlex
+
+sys.path.append('/usr/local/dcgm/bindings/python3')
+import dcgm_fields
+from DcgmReader import DcgmReader
+from common import dcgm_client_cli_parser
+
+# sys.path.append('/usr/local/dcgm/bindings')
+
+
+DCGM_PROF_FIELDS = [
+    dcgm_fields.DCGM_FI_PROF_PIPE_TENSOR_ACTIVE,
+    dcgm_fields.DCGM_FI_PROF_PIPE_FP64_ACTIVE,
+    dcgm_fields.DCGM_FI_PROF_PIPE_FP32_ACTIVE,
+    dcgm_fields.DCGM_FI_PROF_PIPE_FP16_ACTIVE,
+]
+
+DCGM_FIELDS = [
+    # PID
+    # dcgm_fields.DCGM_FI_DEV_COMPUTE_PIDS,
+    # Clock
+    dcgm_fields.DCGM_FI_DEV_SM_CLOCK,
+    dcgm_fields.DCGM_FI_DEV_MEM_CLOCK,
+    # Temperature
+    dcgm_fields.DCGM_FI_DEV_GPU_TEMP,
+    dcgm_fields.DCGM_FI_DEV_MEMORY_TEMP,
+    # Power
+    dcgm_fields.DCGM_FI_DEV_POWER_USAGE,
+    dcgm_fields.DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION,
+    # Utilization
+    dcgm_fields.DCGM_FI_DEV_GPU_UTIL,
+    dcgm_fields.DCGM_FI_DEV_MEM_COPY_UTIL,
+    # ECC
+    dcgm_fields.DCGM_FI_DEV_ECC_SBE_VOL_TOTAL,
+    dcgm_fields.DCGM_FI_DEV_ECC_DBE_VOL_TOTAL,
+    dcgm_fields.DCGM_FI_DEV_ECC_SBE_AGG_TOTAL,
+    dcgm_fields.DCGM_FI_DEV_ECC_DBE_AGG_TOTAL,
+    # SM
+    dcgm_fields.DCGM_FI_PROF_SM_ACTIVE,
+    dcgm_fields.DCGM_FI_PROF_SM_OCCUPANCY,
+    # Memory
+    dcgm_fields.DCGM_FI_PROF_DRAM_ACTIVE,
+    # NVLink
+    dcgm_fields.DCGM_FI_PROF_NVLINK_TX_BYTES,
+    dcgm_fields.DCGM_FI_PROF_NVLINK_RX_BYTES,
+    # PCIe
+    dcgm_fields.DCGM_FI_PROF_PCIE_TX_BYTES,
+    dcgm_fields.DCGM_FI_PROF_PCIE_RX_BYTES,
+    # throttling and violations
+    dcgm_fields.DCGM_FI_DEV_CLOCK_THROTTLE_REASONS,
+    dcgm_fields.DCGM_FI_DEV_POWER_VIOLATION,
+    dcgm_fields.DCGM_FI_DEV_THERMAL_VIOLATION
+]
+
+DCGM_FIELDS_DESCRIPTION = {
+    # PID
+    # dcgm_fields.DCGM_FI_DEV_COMPUTE_PIDS,
+    # Clock
+    dcgm_fields.DCGM_FI_DEV_SM_CLOCK:
+    'SM clock frequency (in MHz)',
+    dcgm_fields.DCGM_FI_DEV_MEM_CLOCK:
+    'Memory clock frequency (in MHz)',
+    # Temperature
+    dcgm_fields.DCGM_FI_DEV_GPU_TEMP:
+    'GPU temperature (in C)',
+    dcgm_fields.DCGM_FI_DEV_MEMORY_TEMP:
+    'Memory temperature (in C)',
+    # Power
+    dcgm_fields.DCGM_FI_DEV_POWER_USAGE:
+    'Power usage (in W)',
+    dcgm_fields.DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION:
+    'Total energy consumption since boot (in mJ)',
+    # Utilization
+    dcgm_fields.DCGM_FI_DEV_GPU_UTIL:
+    'GPU utilization (in %)',
+    dcgm_fields.DCGM_FI_DEV_MEM_COPY_UTIL:
+    'Memory utilization (in %)',
+    # ECC
+    dcgm_fields.DCGM_FI_DEV_ECC_SBE_VOL_TOTAL:
+    'Total number of single-bit volatile ECC errors',
+    dcgm_fields.DCGM_FI_DEV_ECC_DBE_VOL_TOTAL:
+    'Total number of double-bit volatile ECC errors',
+    dcgm_fields.DCGM_FI_DEV_ECC_SBE_AGG_TOTAL:
+    'Total number of single-bit persistent ECC errors',
+    dcgm_fields.DCGM_FI_DEV_ECC_DBE_AGG_TOTAL:
+    'Total number of double-bit persistent ECC errors',
+    # SM
+    dcgm_fields.DCGM_FI_PROF_SM_ACTIVE:
+    'The fraction of time at least one warp was active on a multiprocessor, averaged over all multiprocessors',
+    dcgm_fields.DCGM_FI_PROF_SM_OCCUPANCY:
+    'The fraction of resident warps on a multiprocessor,'
+    ' relative to the maximum number of concurrent warps supported on a multiprocessor',
+    dcgm_fields.DCGM_FI_PROF_PIPE_TENSOR_ACTIVE:
+    'The fraction of cycles the tensor (HMMA / IMMA) pipe was active',
+    dcgm_fields.DCGM_FI_PROF_PIPE_FP64_ACTIVE:
+    'The fraction of cycles the FP64 (double precision) pipe was active',
+    dcgm_fields.DCGM_FI_PROF_PIPE_FP32_ACTIVE:
+    'The fraction of cycles the FMA (FP32 (single precision), and integer) pipe was active',
+    dcgm_fields.DCGM_FI_PROF_PIPE_FP16_ACTIVE:
+    'The fraction of cycles the FP16 (half precision) pipe was active',
+    # Memory
+    dcgm_fields.DCGM_FI_PROF_DRAM_ACTIVE:
+    'The fraction of cycles where data was sent to or received from device memory',
+    # NVLink
+    dcgm_fields.DCGM_FI_PROF_NVLINK_TX_BYTES:
+    'The rate of data transmitted over NVLink, not including protocol headers, in bytes per second',
+    dcgm_fields.DCGM_FI_PROF_NVLINK_RX_BYTES:
+    'The rate of data received over NVLink, not including protocol headers, in bytes per second',
+    # PCIe
+    dcgm_fields.DCGM_FI_PROF_PCIE_TX_BYTES:
+    'The rate of data transmitted over the PCIe bus,'
+    ' including both protocol headers and data payloads, in bytes per second',
+    dcgm_fields.DCGM_FI_PROF_PCIE_RX_BYTES:
+    'The rate of data received over the PCIe bus,'
+    ' including both protocol headers and data payloads, in bytes per second',
+    dcgm_fields.DCGM_FI_DEV_CLOCK_THROTTLE_REASONS:
+    'Current clock throttle reasons (bitmask of DCGM_CLOCKS_THROTTLE_REASON_*)',
+    dcgm_fields.DCGM_FI_DEV_POWER_VIOLATION:
+    'Power Violation time in usec',
+    dcgm_fields.DCGM_FI_DEV_THERMAL_VIOLATION:
+    'Thermal Violation time in usec',
+}
+
+
+def shell_cmd(cmd, timeout):
+    """Helper Function for running subprocess"""
+    args = shlex.split(cmd)
+    child = subprocess.Popen(args, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
+    try:
+        result, errs = child.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        child.kill()
+        print("Command " + " ".join(args) + ", Failed on timeout")
+        logging.error("Command " + " ".join(args) + ", Failed on timeout")
+        result = 'TimeOut'
+        return result
+    return result.decode()
+
+
+class DcgmExporter(DcgmReader):
+    def __init__(self):
+        DcgmReader.__init__(
+            self,
+            fieldIds=dcgm_config['publishFieldIds'],
+            ignoreList=dcgm_config['ignoreList'],
+            updateFrequency=int(60000000 / dcgm_config['prometheusPublishInterval']),
+            maxKeepAge=1800.0,
+            fieldGroupName='dcgm_exporter_{}'.format(os.getpid()),
+            hostname=dcgm_config['dcgmHostName'],
+        )
+        logging.info(
+            'DCGM sample interval: {} per minute'
+            .format(dcgm_config['prometheusPublishInterval']))
+        self.InitConnection()
+        self.InitGauges()
+        signal.signal(signal.SIGUSR1, self.jobID_update_flag)
+        self.InitCounterConfig()
+
+    def InitConnection(self):
+        self.Reconnect()
+
+        prometheus_client.start_http_server(dcgm_config['prometheusPort'])
+        logging.info('Started prometheus client')
+
+        fieldTagList = []
+
+        for fieldId in self.m_publishFields[self.m_updateFreq]:
+            if fieldId in self.m_dcgmIgnoreFields:
+                continue
+            fieldTagList.append(self.m_fieldIdToInfo[fieldId].tag)
+        logging.info('Publishing fields: {}'.format(','.join(fieldTagList)))
+
+    def InitGauges(self):
+        self.m_gauges = {}
+        for fieldId in self.m_publishFields[self.m_updateFreq]:
+            if fieldId in self.m_dcgmIgnoreFields:
+                continue
+
+            self.m_gauges[fieldId] = prometheus_client.Gauge(
+                'dcgm_{}'.format(self.m_fieldIdToInfo[fieldId].tag),
+                DCGM_FIELDS_DESCRIPTION[fieldId],
+                [
+                    'gpu_id',
+                    'gpu_uuid' if dcgm_config['sendUuid'] else 'gpu_bus_id',
+                    'job_id'
+                ],
+            )
+        self.m_gauges['dummy_field'] = prometheus_client.Gauge('dummy_field', 'dummy_field', ['gpu_id', 'gpu_uuid' if dcgm_config['sendUuid'] else 'gpu_bus_id', 'job_id'],)
+        self.m_gauges['nvlink_down_status'] = prometheus_client.Gauge('nvlink_down_status', 'nvlink_down_status', ['gpu_id', 'gpu_uuid' if dcgm_config['sendUuid'] else 'gpu_bus_id', 'job_id'],)
+
+    def InitCounterConfig(self):
+        global dcgm_config
+        fvs = self.m_dcgmGroup.samples.GetAllSinceLastCall(None, self.m_fieldGroup).values
+        for gpuId in fvs.keys():
+            dcgm_config['last_value'][gpuId] = {}
+            for fieldId in self.m_publishFields[self.m_updateFreq]:
+                if fieldId in self.m_dcgmIgnoreFields:
+                    continue
+                dcgm_config['last_value'][gpuId][fieldId] = None
+
+    def CustomDataHandler(self, fvs):
+        global dcgm_config
+        def parse_nvlink_status(output):
+            down_statuses = {}
+            lines = output.splitlines()
+            current_gpu = None
+
+            for line in lines:
+                line = line.strip()
+                if line.startswith('gpuId'):
+                    current_gpu = line.split()[1][:-1]  # Extract the GPU ID
+                    down_statuses[current_gpu] = 0  # Initialize with 0 "D" statuses
+                elif current_gpu is not None:
+                    statuses = line.split()
+                    down_statuses[current_gpu] = sum(1 for status in statuses if status == 'D')
+            return down_statuses
+        cmd = 'sudo dcgmi nvlink -s'
+        nvlink_output = shell_cmd(cmd, 60)
+        nvlink_down_status = parse_nvlink_status(nvlink_output)
+
+        for gpuId in fvs.keys():
+            gpuUuid = self.m_gpuIdToUUId[gpuId]
+            gpuBusId = self.m_gpuIdToBusId[gpuId]
+            gpuUniqueId = gpuUuid if dcgm_config['sendUuid'] else gpuBusId
+
+            gpu_line = [str(gpuId), gpuUniqueId]
+            for fieldId in self.m_publishFields[self.m_updateFreq]:
+                if fieldId in self.m_dcgmIgnoreFields:
+                    continue
+
+                val = fvs[gpuId][fieldId][-1]
+                if val.isBlank:
+                    continue
+
+                dcgm_config['last_value'][gpuId][fieldId] = val
+                self.m_gauges[fieldId].labels(
+                    gpuId,
+                    gpuUniqueId,
+                    dcgm_config['jobId']
+                ).set(val.value)
+                gpu_line.append(str(val.value))
+
+                logging.debug('Sent GPU %d %s : %s=%s', gpuId,
+                              gpuUniqueId, self.m_fieldIdToInfo[fieldId].tag,
+                              str(val.value))
+            logging.debug(','.join(gpu_line))
+            self.m_gauges['dummy_field'].labels(
+                gpuId,
+                gpuUniqueId,
+                dcgm_config['jobId']
+            ).set(1)
+            self.m_gauges['nvlink_down_status'].labels(
+            gpuId,
+            gpuUniqueId,
+            dcgm_config['jobId']
+            ).set(nvlink_down_status[str(gpuId)])
+
+    def jobID_update_flag(self, signum, stack):
+        '''Sets job update flag when user defined signal comes in'''
+        global job_update
+        job_update = True
+
+    def jobID_update(self):
+        '''Updates job id when job update flag has been set'''
+        global job_update
+        job_update = False
+        newJobID = None
+        # get new job id
+        try:
+            with open('/tmp/moneo-worker/curr_jobID') as f:
+                newJobID = f.readline().strip()
+            fvs = self.m_dcgmGroup.samples.GetAllSinceLastCall(None, self.m_fieldGroup).values
+
+            # remove last set of label values
+            for gpuId in fvs.keys():
+                gpuUuid = self.m_gpuIdToUUId[gpuId]
+                gpuBusId = self.m_gpuIdToBusId[gpuId]
+                gpuUniqueId = gpuUuid if dcgm_config['sendUuid'] else gpuBusId
+                for fieldId in self.m_publishFields[self.m_updateFreq]:
+                    if fieldId in self.m_dcgmIgnoreFields:
+                        continue
+                    # remove last set of label values
+                    self.m_gauges[fieldId].remove(gpuId, gpuUniqueId, dcgm_config['jobId'])
+
+                    val = fvs[gpuId][fieldId][-1]
+                    if val.isBlank:
+                        val = dcgm_config['last_value'][gpuId][fieldId]
+                    # update new gauge with new job id label
+                    self.m_gauges[fieldId].labels(
+                        gpuId,
+                        gpuUniqueId,
+                        newJobID
+                    ).set(val.value)
+        except Exception as e:
+            newJobID = dcgm_config['jobId']
+            logging.error(' Job change Raised exception. Message: %s', e)
+
+        # update job id
+        dcgm_config['jobId'] = newJobID
+        logging.debug('Job ID updated to %s', dcgm_config['jobId'])
+
+    def Loop(self):
+        global job_update
+        job_update = False
+        try:
+            while True:
+                if (job_update):
+                    self.jobID_update()
+                self.Process()
+                time.sleep(60 / int(dcgm_config['prometheusPublishInterval']))
+                if dcgm_config['exit']:
+                    logging.info('Received exit signal, shutting down ...')
+                    break
+        except KeyboardInterrupt:
+            pass
+
+
+def get_custom_config():
+    try:
+        with open('/tmp/moneo-worker/moneo_config.json') as f:
+            mon_config = json.load(f)
+
+        sample_per_min = int(mon_config['exporter_config']['gpu_sample_interval'])
+        sample_intervals = [1, 2, 30, 60, 120, 600]
+
+        if sample_per_min not in sample_intervals:
+            mon_config['exporter_config']['gpu_sample_interval'] = 60
+        else:
+            mon_config['exporter_config']['gpu_sample_interval'] = sample_per_min
+
+        if (mon_config['exporter_config']['gpu_profiling']).lower() == "true":
+            mon_config['exporter_config']['gpu_profiling'] = True
+        else:
+            mon_config['exporter_config']['gpu_profiling'] = False
+        return mon_config
+    except Exception:
+        mon_config = {'exporter_config': {'gpu_sample_interval': 60, 'gpu_profiling': False}}
+        return mon_config
+
+
+def init_config():
+    global dcgm_config
+    mon_config = get_custom_config()
+    dcgm_config = {
+        'exit': False,
+        'ignoreList': [],
+        'dcgmHostName': None,
+        'prometheusPort': None,
+        'prometheusPublishInterval': mon_config['exporter_config']['gpu_sample_interval'],
+        'publishFieldIds': None,
+        'profilerMetrics': True,
+        'last_value': {}
+    }
+
+
+def init_signal_handler():
+    def exit_handler(signalnum, frame):
+        dcgm_config['exit'] = True
+    signal.signal(signal.SIGINT, exit_handler)
+    signal.signal(signal.SIGTERM, exit_handler)
+
+
+def parse_dcgm_cli():
+    parser = dcgm_client_cli_parser.create_parser(
+        name='prometheus',
+        field_ids=DCGM_FIELDS,
+        interval=1,
+        publish_port=8000,
+        log_level='INFO',
+    )
+    args = dcgm_client_cli_parser.run_parser(parser)
+    # add profiling metrics if flag enabled
+    if (dcgm_config['profilerMetrics']):
+        args.field_ids.extend(DCGM_PROF_FIELDS)
+    field_ids = dcgm_client_cli_parser.get_field_ids(args)
+    numeric_log_level = dcgm_client_cli_parser.get_log_level(args)
+    filemode = 'w+'
+    if not args.logfile:
+        os.makedirs('/tmp/moneo-worker', exist_ok=True)
+        args.logfile = '/tmp/moneo-worker/moneoExporter.log'
+        filemode = 'a'
+    # Defaults to localhost, so we need to set it to None.
+    if args.embedded:
+        dcgm_config['dcgmHostName'] = None
+    else:
+        dcgm_config['dcgmHostName'] = args.hostname
+    dcgm_config['prometheusPort'] = args.publish_port
+    dcgm_config['publishFieldIds'] = field_ids
+    dcgm_config['sendUuid'] = True
+    dcgm_config['jobId'] = None
+    logging.basicConfig(
+        level=numeric_log_level,
+        filemode=filemode,
+        filename=args.logfile,
+        format='[%(asctime)s] nvidia_exporter-%(levelname)s-%(message)s',
+    )
+
+
+def main():
+    init_config()
+    init_signal_handler()
+    parse_dcgm_cli()
+    try:
+        exporter = DcgmExporter()
+        exporter.Loop()
+        exporter.Shutdown()
+    except Exception as e:
+        logging.error('Raised exception. Message: %s', e)
+
+
+if __name__ == '__main__':
+    main()

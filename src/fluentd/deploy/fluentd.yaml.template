@@ -35,7 +35,7 @@ spec:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       containers:
       - name: fluentd
-        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}fluentd:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}fluentd:security-fix
         imagePullPolicy: Always
         env:
         - name: FLUENTD_ARGS

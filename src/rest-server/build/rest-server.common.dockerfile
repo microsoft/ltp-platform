@@ -15,7 +15,11 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM mcr.microsoft.com/cbl-mariner/base/nodejs:18.20-cm2.0
+FROM node:20
+
+RUN npm install -g npm@latest
+
+RUN apt update && apt upgrade -y
 
 WORKDIR /usr/src/app
 

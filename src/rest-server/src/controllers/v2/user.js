@@ -91,6 +91,7 @@ const getAllUser = async (req, res, next) => {
     );
     return res.status(200).json(retUserList);
   } catch (error) {
+    logger.error(JSON.stringify(error));
     return next(createError.unknown(error));
   }
 };

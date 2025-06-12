@@ -19,7 +19,7 @@
 FROM ubuntu:22.04
 
 ENV \
-  GRAFANA_VERSION=10.4.4 \
+  GRAFANA_VERSION=10.4.18+security~01 \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
@@ -36,6 +36,8 @@ RUN \
   apt-get autoremove -y --force-yes && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get upgrade -y
 
 RUN grafana-cli plugins install yesoreyeram-infinity-datasource && ls /var/lib/grafana/plugins
 RUN mkdir ${GF_PLUGIN_DIR}

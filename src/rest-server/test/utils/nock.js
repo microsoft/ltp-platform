@@ -39,7 +39,7 @@ const encrypt = (username, password) => {
  * @param {string[]} data.grouplist
  */
 const getUserPayload = (data = {}) => {
-  const payload = yaml.safeLoad(fs.readFileSync(userTemplate));
+  const payload = yaml.load(fs.readFileSync(userTemplate));
   const username = data.username || 'admin';
   const password = data.password || 'default_password';
   const grouplist = data.grouplist || [];
@@ -57,7 +57,7 @@ const getUserPayload = (data = {}) => {
  * @param {string[]} data.virtualClusters
  */
 const getGroupPayload = (data = {}) => {
-  const payload = yaml.safeLoad(fs.readFileSync(groupTemplate));
+  const payload = yaml.load(fs.readFileSync(groupTemplate));
   const groupname = data.groupname || 'admin';
   const admin = data.admin || false;
   const virtualClusters = data.virtualClusters || [];
