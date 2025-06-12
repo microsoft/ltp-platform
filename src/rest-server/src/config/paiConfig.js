@@ -25,7 +25,7 @@ const k8sModel = require('@pai/models/kubernetes/kubernetes');
 
 let paiMachineList = [];
 try {
-  paiMachineList = yaml.safeLoad(
+  paiMachineList = yaml.load(
     fs.readFileSync('/pai-cluster-config/layout.yaml', 'utf8'),
   )['machine-list'];
 } catch (err) {
@@ -36,7 +36,7 @@ try {
 
 let paiMachineSku = {};
 try {
-  const layoutConfig = yaml.safeLoad(
+  const layoutConfig = yaml.load(
     fs.readFileSync('/pai-cluster-config/layout.yaml', 'utf8'),
   );
   paiMachineSku = layoutConfig['machine-sku'] || {};
@@ -66,7 +66,7 @@ const paiConfigSchema = Joi.object()
   })
   .required();
 
-const { error, value } = Joi.validate(paiConfigData, paiConfigSchema);
+const { error, value } = paiConfigSchema.validate(paiConfigData);
 if (error) {
   throw new Error(`config error\n${error}`);
 }

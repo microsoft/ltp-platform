@@ -64,22 +64,20 @@ let config = {
 };
 
 // define config schema
-const configSchema = Joi.object()
-  .keys({
-    env: Joi.string()
-      .allow(['test', 'development', 'production'])
-      .default('development'),
-    logLevel: Joi.string()
-      .allow(['error', 'warn', 'info', 'verbose', 'debug', 'silly'])
-      .default('debug'),
-    serverPort: Joi.number().integer().min(8000).max(65535).default(9186),
-    jwtSecret: Joi.string()
-      .required()
-      .description('JWT Secret required to sign'),
-  })
-  .required();
+const configSchema = Joi.object({
+  env: Joi.string()
+    .valid('test', 'development', 'production')
+    .default('development'),
+  logLevel: Joi.string()
+    .valid('error', 'warn', 'info', 'verbose', 'debug', 'silly')
+    .default('debug'),
+  serverPort: Joi.number().integer().min(8000).max(65535).default(9186),
+  jwtSecret: Joi.string()
+    .required()
+    .description('JWT Secret required to sign'),
+}).required();
 
-const { error, value } = Joi.validate(config, configSchema);
+const { error, value } = configSchema.validate(config);
 if (error) {
   throw new Error(`config error\n${error}`);
 }

@@ -47,6 +47,8 @@ RUN wget https://www.openssl.org/source/openssl-3.3.0.tar.gz && \
 # subs_filter
 RUN git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module.git
 
+RUN apt update && apt upgrade -y
+
 #
 # Configure nginx build
 #

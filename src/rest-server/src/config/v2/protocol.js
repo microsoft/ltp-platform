@@ -17,10 +17,8 @@
 
 // module dependencies
 const Ajv = require('ajv');
-const ajvMerge = require('ajv-merge-patch/keywords/merge');
 
-const ajv = new Ajv({ allErrors: true });
-ajvMerge(ajv);
+const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 
 // base schema
 const baseSchema = {
@@ -78,101 +76,98 @@ const protocolSchema = {
         oneOf: [
           {
             // script or output prerequisite
-            $merge: {
-              source: {
-                $ref: 'base.json#',
+            type: 'object',
+            properties: {
+              protocolVersion: { $ref: 'base.json#/properties/protocolVersion' },
+              name: { $ref: 'base.json#/properties/name' },
+              version: { $ref: 'base.json#/properties/version' },
+              contributor: { $ref: 'base.json#/properties/contributor' },
+              description: { $ref: 'base.json#/properties/description' },
+              type: {
+                type: 'string',
+                enum: ['script', 'output'],
               },
-              with: {
-                properties: {
-                  type: {
-                    type: 'string',
-                    enum: ['script', 'output'],
-                  },
-                  plugin: {
-                    type: 'string',
-                  },
-                  require: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                  },
-                  uri: {
-                    type: 'string',
-                  },
+              plugin: {
+                type: 'string',
+              },
+              require: {
+                type: 'array',
+                items: {
+                  type: 'string',
                 },
-                required: ['name', 'type'],
-                additionalProperties: true,
+              },
+              uri: {
+                type: 'string',
               },
             },
+            required: ['name', 'type'],
+            additionalProperties: true,
           },
           {
             // data prerequisite
-            $merge: {
-              source: {
-                $ref: 'base.json#',
+            type: 'object',
+            properties: {
+              protocolVersion: { $ref: 'base.json#/properties/protocolVersion' },
+              name: { $ref: 'base.json#/properties/name' },
+              version: { $ref: 'base.json#/properties/version' },
+              contributor: { $ref: 'base.json#/properties/contributor' },
+              description: { $ref: 'base.json#/properties/description' },
+              type: {
+                type: 'string',
+                enum: ['data'],
               },
-              with: {
-                properties: {
-                  type: {
-                    type: 'string',
-                    enum: ['data'],
-                  },
-                  plugin: {
-                    type: 'string',
-                  },
-                  require: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                  },
-                  uri: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                    },
-                  },
+              plugin: {
+                type: 'string',
+              },
+              require: {
+                type: 'array',
+                items: {
+                  type: 'string',
                 },
-                required: ['name', 'type'],
-                additionalProperties: true,
+              },
+              uri: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                },
               },
             },
+            required: ['name', 'type'],
+            additionalProperties: true,
           },
           {
             // docker image prerequisite
-            $merge: {
-              source: {
-                $ref: 'base.json#',
+            type: 'object',
+            properties: {
+              protocolVersion: { $ref: 'base.json#/properties/protocolVersion' },
+              name: { $ref: 'base.json#/properties/name' },
+              version: { $ref: 'base.json#/properties/version' },
+              contributor: { $ref: 'base.json#/properties/contributor' },
+              description: { $ref: 'base.json#/properties/description' },
+              type: {
+                type: 'string',
+                enum: ['dockerimage'],
               },
-              with: {
+              auth: {
+                type: 'object',
                 properties: {
-                  type: {
+                  username: {
                     type: 'string',
-                    enum: ['dockerimage'],
                   },
-                  auth: {
-                    type: 'object',
-                    properties: {
-                      username: {
-                        type: 'string',
-                      },
-                      password: {
-                        type: 'string',
-                      },
-                      registryuri: {
-                        type: 'string',
-                      },
-                    },
+                  password: {
+                    type: 'string',
                   },
-                  uri: {
+                  registryuri: {
                     type: 'string',
                   },
                 },
-                required: ['name', 'type', 'uri'],
-                additionalProperties: false,
+              },
+              uri: {
+                type: 'string',
               },
             },
+            required: ['name', 'type', 'uri'],
+            additionalProperties: false,
           },
         ],
       },
@@ -191,6 +186,7 @@ const protocolSchema = {
       minimum: 0,
     },
     taskRoles: {
+      type: 'object',
       patternProperties: {
         '^[a-zA-Z_][a-zA-Z0-9_]*$': {
           type: 'object',
@@ -257,6 +253,7 @@ const protocolSchema = {
                   type: 'integer',
                 },
                 ports: {
+                  type: 'object',
                   patternProperties: {
                     '^[a-zA-Z_][a-zA-Z0-9_]*$': {
                       type: 'integer',
@@ -296,6 +293,7 @@ const protocolSchema = {
             $ref: 'base.json#/properties/name',
           },
           taskRoles: {
+            type: 'object',
             patternProperties: {
               '^[a-zA-Z_][a-zA-Z0-9_]*$': {
                 type: 'object',

@@ -39,7 +39,7 @@ const config = {
   rbacEnabled: process.env.RBAC_IN_CLUSTER === 'true',
 };
 
-const { error, value } = Joi.validate(config, configSchema);
+const { error, value } = configSchema.validate(config);
 if (error) {
   throw new Error(`Config error\n${error}`);
 }

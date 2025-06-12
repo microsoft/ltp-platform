@@ -27,17 +27,13 @@ const cleanTTL24HJobs = () => {
 
   const k8sApi = kc.makeApiClient(k8s.BatchV1Api);
   k8sApi
-    .listNamespacedJob(
-      'default',
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      'created-by=alert-handler,time-to-live=24h', // labelSelector
+    .listNamespacedJob({
+      namespace: 'default',
+      labelSelector: 'created-by=alert-handler,time-to-live=24h'}
     )
     .then((response) => {
       logger.info(`Successfully get job list.`);
-      const jobs = response.body.items;
+      const jobs = response.items;
       jobs.forEach((job) => {
         const jobName = job.metadata.name;
         if (
@@ -45,7 +41,9 @@ const cleanTTL24HJobs = () => {
           new Date() - new Date(job.status.completionTime) > 24 * 60 * 60 * 1000 // completed for more than 24h
         )
           k8sApi
-            .deleteNamespacedJob(jobName, 'default')
+            .deleteNamespacedJob({
+              name: jobName,
+              namespace: 'default'})
             .then((response) => {
               logger.info(`Successfully deleted job ${jobName}`);
             })

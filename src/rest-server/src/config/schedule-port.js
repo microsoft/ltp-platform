@@ -30,10 +30,7 @@ const schedulePortConfigSchema = Joi.object()
   })
   .required();
 
-const { error, value } = Joi.validate(
-  schedulePortConfig,
-  schedulePortConfigSchema,
-);
+const { error, value } = schedulePortConfigSchema.validate(schedulePortConfig);
 if (error) {
   throw new Error(`schedule port config error\n${error}`);
 }

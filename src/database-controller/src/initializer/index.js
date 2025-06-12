@@ -13,7 +13,7 @@ async function updateFromNoDatabaseVersion(databaseModel) {
   // update from 1.0.0 < version < v1.2.0
   await databaseModel.synchronizeSchema();
   // transfer old frameworks from api server to db
-  const frameworks = (await k8s.listFramework()).body.items;
+  const frameworks = (await k8s.listFramework()).items;
   const upsertPromises = [];
   for (const framework of frameworks) {
     const snapshot = new Snapshot(framework);
