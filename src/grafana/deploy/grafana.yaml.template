@@ -36,7 +36,7 @@ spec:
           name: grafana-configuration
       containers:
       - name: grafana
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}grafana:security-fix
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}grafana:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         ports:
         - containerPort: {{ cluster_cfg["grafana"]["port"] }}

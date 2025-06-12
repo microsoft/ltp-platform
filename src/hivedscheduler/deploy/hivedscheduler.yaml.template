@@ -36,7 +36,7 @@ spec:
       serviceAccountName: hivedscheduler-account
       containers:
       - name: hivedscheduler
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}hivedscheduler:security-fix
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}hivedscheduler:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         command: [
           "bash", "-c",
           "cp /hivedscheduler-config/hivedscheduler.yaml . &&
@@ -79,7 +79,7 @@ spec:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       containers:
       - name: defaultscheduler
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}kube-scheduler:security-fix
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}kube-scheduler:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         command:
         - /usr/local/bin/kube-scheduler

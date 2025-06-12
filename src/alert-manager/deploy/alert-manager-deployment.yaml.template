@@ -41,7 +41,7 @@ spec:
       hostNetwork: false
       containers:
       - name: alertmanager
-        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}alertmanager:security-fix
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}alertmanager:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         args:
           - '--config.file=/etc/alertmanager/config.yml'
           - '--storage.path=/alertmanager'
@@ -59,7 +59,7 @@ spec:
           mountPath: /alertmanager
 {% if cluster_cfg["alert-manager"]["alert-handler"]["configured"] %}
       - name: alerthandler
-        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}alert-handler:security-fix
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}alert-handler:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         env:
         - name: SERVER_PORT
@@ -100,7 +100,7 @@ spec:
 {% endif %}
 {% if cluster_cfg["alert-manager"]["job-status-change-notification"]["configured"] %}
       - name: job-status-change-notification
-        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}job-status-change-notification:security-fix
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}job-status-change-notification:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         env:
         - name: PAI_URI

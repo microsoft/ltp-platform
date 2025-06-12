@@ -38,7 +38,7 @@ spec:
       - key: CriticalAddonsOnly
         operator: Exists
       containers:
-      - image: luciaopenai.azurecr.io/luciaopenai/k8s-host-device-plugin:security-fix
+      - image: luciaopenai.azurecr.io/luciaopenai/k8s-host-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         name: k8s-host-device-plugin-ctr
         securityContext:
           privileged: true

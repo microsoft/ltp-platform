@@ -59,7 +59,7 @@ spec:
             memory: "128Mi"
         {%- endif %}
       - name: log-manager-nginx
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}log-manager-nginx:security-fix
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}log-manager-nginx:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         livenessProbe:
           httpGet:

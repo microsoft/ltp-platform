@@ -32,7 +32,7 @@ spec:
       hostPID: false
       containers:
         - name: pylon
-          image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}pylon:security-fix
+          image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}pylon:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /pylon-config

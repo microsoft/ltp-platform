@@ -33,7 +33,7 @@ spec:
       hostPID: false
       containers:
       - name: rest-server
-        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}rest-server:security-fix
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}rest-server:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         volumeMounts:
         - mountPath: /pai-cluster-config
@@ -77,7 +77,7 @@ spec:
         - name: LAUNCHER_PRIORITY_CLASS
           value: "{{ cluster_cfg['rest-server']['enable-priority-class'] }}"
         - name: LAUNCHER_RUNTIME_IMAGE
-          value: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}openpai-runtime:security-fix
+          value: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}openpai-runtime:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         - name: LAUNCHER_RUNTIME_IMAGE_PULL_SECRETS
           value: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
         - name: LAUNCHER_SCHEDULER

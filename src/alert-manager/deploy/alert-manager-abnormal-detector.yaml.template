@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
           - name: abnormal-detector
-            image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}abnormal-detector:security-fix
+            image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}abnormal-detector:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
             imagePullPolicy: Always
             env:
             - name: PAI_URI

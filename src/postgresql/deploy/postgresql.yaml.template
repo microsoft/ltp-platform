@@ -32,7 +32,7 @@ spec:
       hostNetwork: true
       initContainers:
       - name: internal-storage-barrier
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}internal-storage-barrier:security-fix
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}internal-storage-barrier:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         volumeMounts:
         - name: internal-data-dir
@@ -40,7 +40,7 @@ spec:
           mountPropagation: "None"
       containers:
       - name: postgresql
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}postgresql:security-fix
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}postgresql:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         env:
         - name: POSTGRES_USER
@@ -57,7 +57,7 @@ spec:
           mountPath: /var/lib/postgresql/data/
           mountPropagation: "None"
       - name: postgresql-init-client
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}postgresql-init-client:security-fix
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}postgresql-init-client:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         env:
         - name: POSTGRES_USER

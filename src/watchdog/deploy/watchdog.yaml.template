@@ -37,7 +37,7 @@ spec:
       serviceAccountName: watchdog-account
       containers:
       - name: watchdog
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}watchdog:security-fix
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}watchdog:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
