@@ -79,7 +79,7 @@ spec:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       containers:
       - name: defaultscheduler
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}kube-scheduler:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}kube-scheduler:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         imagePullPolicy: Always
         command:
         - /usr/local/bin/kube-scheduler

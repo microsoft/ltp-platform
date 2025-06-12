@@ -32,7 +32,7 @@ spec:
       hostNetwork: false
       containers:
       - name: internal-storage-create
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}internal-storage-create:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}internal-storage-create:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         securityContext:
           privileged: true
         imagePullPolicy: Always

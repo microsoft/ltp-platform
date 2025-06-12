@@ -34,7 +34,7 @@ spec:
     spec:
       priorityClassName: pai-daemon-priority
       containers:
-      - image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+      - image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         imagePullPolicy: Always
         livenessProbe: # in case job-exporter hangs
           httpGet:
@@ -87,7 +87,7 @@ spec:
           hostPort: {{ cluster_cfg["job-exporter"]["job-port"] }}
           name: main
       - name: moneo-gpu-exporter
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         securityContext:
           privileged: true
           capabilities:
@@ -104,7 +104,7 @@ spec:
           hostPort: {{ cluster_cfg["job-exporter"]["gpu-port"] }}
           name: gpu
       - name: moneo-net-exporter
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         securityContext:
           privileged: true
           capabilities:
@@ -122,7 +122,7 @@ spec:
           hostPort: {{ cluster_cfg["job-exporter"]["net-port"] }}
           name: net
       - name: moneo-node-exporter
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         securityContext:
           privileged: true
           capabilities:
