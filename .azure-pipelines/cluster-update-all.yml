@@ -31,6 +31,14 @@ jobs:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
+    - checkout: self
+      submodules: false
+      persistCredentials : true
+    - powershell: |
+        $header = "AUTHORIZATION: bearer $(System.AccessToken)"
+        git -c http.extraheader="$header" submodule sync
+        git -c http.extraheader="$header" submodule update --init --force --depth=1
+      displayName: Checkout Submodule
     - script: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython   
       displayName: Install python libs
     - script: |
