@@ -73,6 +73,7 @@ RUN sed -i 's/systemctl --now enable nvidia-dcgm/#&/' Moneo/src/worker/install/n
 
 ENV PATH "${PATH}:/opt/rocm/bin"
 COPY build/moneo-*-exporter_entrypoint.sh .
+COPY build/update-dcgm.py .
 
 # For the job exporter
 ENV NERDCTL_VERSION=2.0.0-rc.2

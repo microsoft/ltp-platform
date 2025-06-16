@@ -9,6 +9,7 @@ if lspci | grep -qi 'Advanced Micro Devices'; then
     echo "AMD Exporter Started!"
 elif lspci | grep -qi 'NVIDIA'; then
     echo "NVIDIA Graphics card detected."
+    python3 /update-dcgm.py
     # Launches NVIDIA DCGM Daemon
     nohup nv-hostengine &
     echo "DCGM Daemon Started!"
