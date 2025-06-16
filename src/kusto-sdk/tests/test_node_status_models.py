@@ -44,7 +44,7 @@ class TestNodeStatusRecord:
     def test_update_invalid_transition(self, sample_node_record):
         with patch.object(NodeStatus, 'can_transition', return_value=False):
             with pytest.raises(ValueError) as exc_info:
-                sample_node_record.update(NodeStatus.TRIAGED_HW.value)
+                sample_node_record.update(NodeStatus.TRIAGED_HARDWARE.value)
             assert "Invalid transition" in str(exc_info.value)
 
 
@@ -61,5 +61,5 @@ class TestNodeStatus:
                                          NodeStatus.CORDONED.value)
 
     def test_get_group(self):
-        group = NodeStatus.get_group(NodeStatus.TRIAGED_HW.value)
+        group = NodeStatus.get_group(NodeStatus.TRIAGED_HARDWARE.value)
         assert group == StatusGroup.TRIAGED

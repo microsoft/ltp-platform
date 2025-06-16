@@ -4,7 +4,7 @@ from ltp_kusto_sdk.features.node_status.models import NodeStatus
 import time
 import logging
 
-# - `LTP_KUSTO_CLUSTER`: Kusto cluster URI.
+# - `LTP_KUSTO_CLUSTER_URI`: Kusto cluster URI.
 # - `LTP_KUSTO_DATABASE_NAME`: Kusto database name.
 # - `CLUSTER_ID`: Current cluster/endpoint identifier.
 # - `KUSTO_NODE_STATUS_TABLE_NAME`: (Optional) Node status table (default: `NodeStatusRecord`).

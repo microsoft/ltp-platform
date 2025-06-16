@@ -142,7 +142,7 @@ spec:
 {% if cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto"] %}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
           value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
-        - name: LTP_KUSTO_CLUSTER
+        - name: LTP_KUSTO_CLUSTER_URI
           value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
         - name: LTP_KUSTO_DATABASE_NAME
           value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
@@ -179,9 +179,13 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["log-level"] | default(cluster_cfg["alert-manager"]["log-level"]) | default("INFO") }}
         - name: UPDATE_INTERVAL
           value: "{{ cluster_cfg["alert-manager"]["alert-parser"]["update-interval"] | default("10") }}"
+        - name: REST_SERVER_URI
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["uri"] }} 
+        - name: PAI_TOKEN
+          value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
           value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
-        - name: LTP_KUSTO_CLUSTER
+        - name: LTP_KUSTO_CLUSTER_URI
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
         - name: LTP_KUSTO_DATABASE_NAME
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
@@ -221,7 +225,7 @@ spec:
 {% if cluster_cfg["alert-manager"]["node-recycler"]["kusto"] %}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
           value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
-        - name: LTP_KUSTO_CLUSTER
+        - name: LTP_KUSTO_CLUSTER_URI
           value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
         - name: LTP_KUSTO_DATABASE_NAME
           value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}

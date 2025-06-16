@@ -27,6 +27,7 @@ class NodeRecordUpdater:
         
     def get_node_latest_status(self, node):
         node_status = self.node_status_client.get_node_status(node)
+        logger.info(f"Latest status for node {node}: {node_status.Status} at {node_status.Timestamp}")
         return node_status
     
     def get_nodes_by_status(self, status, as_of_time=None):

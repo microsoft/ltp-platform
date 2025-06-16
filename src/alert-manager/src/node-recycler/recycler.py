@@ -47,7 +47,7 @@ class NodeRecycler:
         Returns:
             List[int]: A list of hostnames of the succeeded OFR nodes.
         """
-        from_state, to_state = NodeStatus.TRIAGED_HW.value, NodeStatus.UA.value
+        from_state, to_state = NodeStatus.TRIAGED_HARDWARE.value, NodeStatus.UA.value
 
         created = []
         if not node_faults and status_client and action_client:

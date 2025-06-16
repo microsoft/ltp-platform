@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Tuple
 
 from ltp_kusto_sdk.features.node_status.models import NodeStatus
+from ltp_kusto_sdk import NodeAction
 
 
 # Set up logging
@@ -17,7 +18,7 @@ class NodeFailure:
     IBPortDown = 'IBPortDown'
     IBLinkFlapping = 'IBLinkFlapping'
     GPUHangingwithSegfault = 'GPUHangingwithSegfault'
-    GPUSMIHanging = 'GPUSMIHanging'
+    AMDGPUSMIHanging = 'AMDGPUSMIHanging'
     MemoryAccessFault = 'MemoryAccessFault'
     GPUHangingwithFenceFallbackTimerExpired = 'GPUHangingwithFenceFallbackTimerExpired'
     IBBandwidthProblem = 'IBBandwidthProblem'
@@ -56,7 +57,7 @@ class NodeIssueClassifier:
             NodeFailure.IBLinkFlapping: 'IBPortFlapping',
             NodeFailure.GPUHangingwithSegfault: 'AmdGPUHangSegFault',
             NodeFailure.GPUDriverHanging: 'AmdGPUDriverHang',
-            NodeFailure.GPUSMIHanging: 'AmdGPUSMIHang',
+            NodeFailure.AMDGPUSMIHanging: 'AmdGPUSMIHang',
             NodeFailure.MemoryAccessFault: 'AmdGPUHangMemoryAccess',
             NodeFailure.GPUHangingwithFenceFallbackTimerExpired: 'AmdGPUHangFenceFallbackTimer',
             NodeFailure.IBBandwidthProblem: 'SuperBenchRDMAfailure',
@@ -76,7 +77,7 @@ class NodeIssueClassifier:
             NodeFailure.ModelPerformanceDegradation: NodeFailureCategory.hardware,
             NodeFailure.GPUHangingwithFenceFallbackTimerExpired: NodeFailureCategory.hardware,
             NodeFailure.GPUDriverHanging: NodeFailureCategory.hardware,
-            NodeFailure.GPUSMIHanging: NodeFailureCategory.hardware,
+            NodeFailure.AMDGPUSMIHanging: NodeFailureCategory.hardware,
             NodeFailure.FrontendNetworkIssue: NodeFailureCategory.hardware,
             NodeFailure.DiskError: NodeFailureCategory.hardware,
             NodeFailure.NodeCrash: NodeFailureCategory.hardware,
@@ -118,8 +119,10 @@ class NodeIssueClassifier:
                         issue = NodeFailure.UnknownIssue
                     break
                 elif 'ROCmSmiFailed' in alertname:
-                    issue = NodeFailure.GPUSMIHanging
+                    issue = NodeFailure.AMDGPUSMIHanging
                     break
+                elif 'NvidiaSmiFailed' in alertname:
+                    issue = NodeFailure.NvidiaSmiLatencyTooLarge
                 elif 'NodeNotReady' in alertname:
                     issue = NodeFailure.NodeCrash
                     break
@@ -167,7 +170,7 @@ class NodeIssueClassifier:
     def get_target_status_from_category(self, category: str) -> str:
         """Get target node status based on issue category"""
         category_to_status = {
-            NodeFailureCategory.hardware: NodeStatus.TRIAGED_HW.value,
+            NodeFailureCategory.hardware: NodeStatus.TRIAGED_HARDWARE.value,
             NodeFailureCategory.user: NodeStatus.TRIAGED_USER.value,
             NodeFailureCategory.platform: NodeStatus.TRIAGED_PLATFORM.value,
             NodeFailureCategory.unknown: NodeStatus.TRIAGED_UNKNOWN.value,
@@ -198,7 +201,10 @@ class NodeIssueClassifier:
             Tuple containing (issue, category, to_status, detail)
         """
         try:
-            cordoned_node_id = node_status['NodeID']
+            cordoned_node_id = node_status['NodeId']
+            
+            if not isinstance(node_action, dict):
+                node_action = node_action.to_dict()
             
             if not node_action or not node_action.get('Detail'):
                 logger.warning(f"No action detail found for node {node_name}")
