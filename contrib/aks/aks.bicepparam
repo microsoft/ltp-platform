@@ -6,7 +6,7 @@ param aksSystemNodePoolCount = 1
 param aksPaiMasterNodePoolVmSize = 'Standard_E48as_v4'
 param aksPaiMasterNodePoolCount = 1
 param tier = 'Standard'
-param kubernetesVersion = '1.29.5'
+param kubernetesVersion = '1.31.8'
 param supportPlan = 'KubernetesOfficial'
 
 // vnet

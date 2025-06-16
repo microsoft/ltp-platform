@@ -17,6 +17,9 @@ mkdir -p /etc/kubernetes/certs
 mkdir -p /etc/systemd/system/kubelet.service.d
 mkdir -p /var/lib/kubelet
 
+if [ "$PROCESSOR_TYPE" = "gpu" ]; then
+  touch /etc/gpu-exists
+fi
 
 KUBELET_CA="/etc/kubernetes/certs/ca.crt"
 touch "${KUBELET_CA}"
@@ -29,7 +32,7 @@ KUBELET_SERVER_CERT_PATH="/etc/kubernetes/certs/kubeletserver.crt"
 openssl genrsa -out $KUBELET_SERVER_PRIVATE_KEY_PATH 4096
 openssl req -new -x509 -days 7300 -key $KUBELET_SERVER_PRIVATE_KEY_PATH -out $KUBELET_SERVER_CERT_PATH -subj "/CN=system:node:${NODE_NAME}"
 
-curl -LO https://nexusstaticsa.blob.core.windows.net/public/k8s/v${KUBE_VERSION}/kubernetes-node-linux-amd64.tar.gz
+curl -LO https://dl.k8s.io/v${KUBE_VERSION}/kubernetes-node-linux-amd64.tar.gz
 tar -xvzf kubernetes-node-linux-amd64.tar.gz kubernetes/node/bin/kubelet
 mv kubernetes/node/bin/kubelet /usr/local/bin
 rm kubernetes-node-linux-amd64.tar.gz
@@ -39,6 +42,7 @@ mkdir -p /opt/image-cred-provider/config/
 mkdir -p /opt/image-cred-provider/bin/
 
 touch /opt/image-cred-provider/bin/workload-identity-token
+chmod +x /opt/image-cred-provider/bin/workload-identity-token
 
 tee /opt/image-cred-provider/config/workload-identity-token.yaml > /dev/null <<EOF
 kind: CredentialProviderConfig
@@ -57,7 +61,7 @@ EOF
 # adust flags as desired
 tee /etc/default/kubelet > /dev/null <<EOF
 KUBELET_NODE_LABELS="kubernetes.azure.com/mode=system,kubernetes.azure.com/role=agent,node.kubernetes.io/exclude-from-external-load-balancers=true,kubernetes.azure.com/managed=false,kubernetes.io/os=linux,node.kubernetes.io/instance-type=$INSTANCE_TYPE,RepairStatus=Validate"
-KUBELET_FLAGS="--address=0.0.0.0 --anonymous-auth=false --authentication-token-webhook=true --authorization-mode=Webhook --cgroup-driver=systemd --cgroups-per-qos=true --client-ca-file=/etc/kubernetes/certs/ca.crt --cluster-dns=10.0.0.10 --cluster-domain=cluster.local --enforce-node-allocatable=pods --event-qps=0 --eviction-hard=memory.available<500Mi,nodefs.available<50Gi,imagefs.available<200Gi,nodefs.inodesFree<5% --image-gc-high-threshold=99 --image-gc-low-threshold=90 --keep-terminated-pod-volumes=false --kube-reserved=cpu=180m,memory=3399Mi,pid=1000 --kubeconfig=/var/lib/kubelet/kubeconfig --max-pods=110 --node-status-update-frequency=10s --pod-infra-container-image=mcr.microsoft.com/oss/kubernetes/pause:3.6 --protect-kernel-defaults=true --read-only-port=0 --rotate-certificates=true --streaming-connection-idle-timeout=4h --tls-cert-file=/etc/kubernetes/certs/kubeletserver.crt --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256 --tls-private-key-file=/etc/kubernetes/certs/kubeletserver.key --image-credential-provider-config=/opt/image-cred-provider/config/workload-identity-token.yaml --image-credential-provider-bin-dir=/opt/image-cred-provider/bin --container-log-max-size=5Gi --container-log-max-files=2"
+KUBELET_FLAGS="--address=0.0.0.0 --anonymous-auth=false --authentication-token-webhook=true --authorization-mode=Webhook --cgroup-driver=systemd --cgroups-per-qos=true --client-ca-file=/etc/kubernetes/certs/ca.crt --cluster-dns=10.0.0.10 --cluster-domain=cluster.local --enforce-node-allocatable=pods --event-qps=0 --eviction-hard=memory.available<500Mi,nodefs.available<50Gi,imagefs.available<200Gi,nodefs.inodesFree<5% --image-gc-high-threshold=99 --image-gc-low-threshold=90 --kube-reserved=cpu=180m,memory=3399Mi,pid=1000 --kubeconfig=/var/lib/kubelet/kubeconfig --max-pods=110 --node-status-update-frequency=10s --pod-infra-container-image=mcr.microsoft.com/oss/kubernetes/pause:3.6 --protect-kernel-defaults=true --read-only-port=0 --rotate-certificates=true --streaming-connection-idle-timeout=4h --tls-cert-file=/etc/kubernetes/certs/kubeletserver.crt --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256 --tls-private-key-file=/etc/kubernetes/certs/kubeletserver.key --image-credential-provider-config=/opt/image-cred-provider/config/workload-identity-token.yaml --image-credential-provider-bin-dir=/opt/image-cred-provider/bin --container-log-max-size=5Gi --container-log-max-files=2"
 EOF
 
 # can simplify this + 2 following files by merging together
@@ -87,7 +91,7 @@ TimeoutSec=1200
 ExecStartPre=/bin/mount --make-shared /var/lib/kubelet
 ExecStartPre=-/sbin/ebtables -t nat --list
 ExecStartPre=-/sbin/iptables -t nat --numeric --list
-ExecStartPre=-/usr/bin/timeout 300 /bin/sh -c 'until grep -Eq "^(nvidia|amdgpu)" /proc/modules; do echo "Waiting for nvidia/amdgpu module"; sleep 5; done'
+ExecStartPre=-/bin/bash -c "[ ! -f /etc/gpu-exists ] || /usr/bin/timeout 300 /bin/sh -c 'until grep -Eq \"^(nvidia|amdgpu)\" /proc/modules; do echo \"Waiting for nvidia/amdgpu module\"; sleep 5; done'"
 ExecStart=/usr/local/bin/kubelet \
         --enable-server \
         --node-labels="${KUBELET_NODE_LABELS}" \
