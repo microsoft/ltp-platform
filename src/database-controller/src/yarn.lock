@@ -2900,9 +2900,9 @@ synckit@^0.11.0:
     tslib "^2.8.1"
 
 tar-fs@^3.0.8:
-  version "3.0.8"
-  resolved "https://registry.npmjs.org/tar-fs/-/tar-fs-3.0.8.tgz"
-  integrity sha512-ZoROL70jptorGAlgAYiLoBLItEKw/fUxg9BSYK/dF/GAGYFJOJJJMvjPAKDJraCXFwadD456FCuvLWgfhMsPwg==
+  version "3.0.10"
+  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-3.0.10.tgz#60f8ccd60fe30164bdd3d6606619650236ed38f7"
+  integrity sha512-C1SwlQGNLe/jPNqapK8epDsXME7CAJR5RL3GcE6KWx1d9OUByzoHVcbu1VPI8tevg9H8Alae0AApHHFGzrD5zA==
   dependencies:
     pump "^3.0.0"
     tar-stream "^3.1.5"
