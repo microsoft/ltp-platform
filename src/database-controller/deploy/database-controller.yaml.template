@@ -22,7 +22,7 @@ spec:
       hostNetwork: true
       initContainers:
       - name: database-initializer
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:security-fix
         imagePullPolicy: Always
         env:
         # Log level of all logs. You can choose from error, warn, info, http, verbose, debug, and silly. Default value is info.
@@ -62,7 +62,7 @@ spec:
         command: ["node", "--max-old-space-size=8192", "initializer/index.js"]
       containers:
       - name: write-merger
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:security-fix
         imagePullPolicy: Always
         env:
         # Log level of all logs. You can choose from error, warn, info, http, verbose, debug, and silly. Default value is info.
@@ -117,7 +117,7 @@ spec:
           periodSeconds: 60
         command: ["node", "--max-old-space-size={{ cluster_cfg['database-controller']['write-merger-max-heap-mb'] }}", "write-merger/index.js"]
       - name: framework-watcher
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:security-fix
         imagePullPolicy: Always
         env:
         # Log level of all logs. You can choose from error, warn, info, http, verbose, debug, and silly. Default value is info.
@@ -161,7 +161,7 @@ spec:
           value: "{{ cluster_cfg['database-controller']['framework-watcher-watch-timeout-seconds'] }}"
         command: ["node", "--max-old-space-size={{ cluster_cfg['database-controller']['framework-watcher-max-heap-mb'] }}", "watcher/framework/index.js"]
       - name: cluster-event-watcher
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:security-fix
         imagePullPolicy: Always
         volumeMounts:
         - name: internal-data-dir
@@ -217,7 +217,7 @@ spec:
           value: "{{ cluster_cfg['database-controller']['cluster-event-watcher-watch-timeout-seconds'] }}"
         command: ["node", "--max-old-space-size={{ cluster_cfg['database-controller']['cluster-event-watcher-max-heap-mb'] }}", "watcher/cluster-event/index.js"]
       - name: poller
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}database-controller:security-fix
         imagePullPolicy: Always
         env:
         # Log level of all logs. You can choose from error, warn, info, http, verbose, debug', and silly. Default value is info.
