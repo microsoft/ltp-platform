@@ -455,12 +455,12 @@ __metadata:
   linkType: hard
 
 "brace-expansion@npm:^1.1.7":
-  version: 1.1.11
-  resolution: "brace-expansion@npm:1.1.11"
+  version: 1.1.12
+  resolution: "brace-expansion@npm:1.1.12"
   dependencies:
     balanced-match: "npm:^1.0.0"
     concat-map: "npm:0.0.1"
-  checksum: 10c0/695a56cd058096a7cb71fb09d9d6a7070113c7be516699ed361317aca2ec169f618e28b8af352e02ab4233fb54eb0168460a40dc320bab0034b36ab59aaad668
+  checksum: 10c0/975fecac2bb7758c062c20d0b3b6288c7cc895219ee25f0a64a9de662dbac981ff0b6e89909c3897c1f84fa353113a721923afdec5f8b2350255b097f12b1f73
   languageName: node
   linkType: hard
 
@@ -1849,7 +1849,6 @@ __metadata:
     interval-promise: "npm:^1.4.0"
     joi: "npm:^17.13.3"
     module-alias: "npm:^2.2.3"
-    npm-check-updates: "npm:^18.0.1"
     openpaidbsdk: "file:./openpaidbsdk"
     prettier: "npm:~3.5.3"
     sequelize: "npm:^6.37.7"
@@ -2069,16 +2068,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npm-check-updates@npm:^18.0.1":
-  version: 18.0.1
-  resolution: "npm-check-updates@npm:18.0.1"
-  bin:
-    ncu: build/cli.js
-    npm-check-updates: build/cli.js
-  checksum: 10c0/0f4f8c26e8a51a413ee724fe76f0860bd360e0c096a52e928916ef6fe3ff0c2ea0f346ca8d291a43f46a269d05450e2a879fed8aa11871f73970d5f9dfdd162a
-  languageName: node
-  linkType: hard
-
 "object-assign@npm:^4":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
@@ -2169,11 +2158,11 @@ __metadata:
 
 "openpaidbsdk@file:./openpaidbsdk::locator=job-status-change-notification%40workspace%3A.":
   version: 1.0.2
-  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=8f34d7&locator=job-status-change-notification%40workspace%3A."
+  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=13d9d1&locator=job-status-change-notification%40workspace%3A."
   dependencies:
     pg: "npm:^8.15.6"
     sequelize: "npm:6.37.7"
-  checksum: 10c0/6d4cf9f022c3e32c6ab3ad6fe8fcfa2672f8a5b01570623d3862b355ba70af628130a5bba35fdbe5c53b8e4670cad2f3222555dfb4d6039f662f649727078201
+  checksum: 10c0/b0b833eef79b0601effa76cefed88d67e4ad5a4abadcda8e6525a08cbd5809b9a1045d18367dacbdd84b1eed3435396964fe81493d53fb23b973e488c3b7d142
   languageName: node
   linkType: hard
 
