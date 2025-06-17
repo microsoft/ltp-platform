@@ -1,7 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-from dataclasses import dataclass
 import json
 import logging
 import subprocess
@@ -94,7 +93,6 @@ def parse_smi_json_result(smi_output, ecc_errors, pids):
         pci_addr = value["PCI Bus"]
         pid = pids.get(index, []) if pids else []
 
-        res[str(index)] = AMDGpuStatus(gpu_util, gpu_mem_vram_util, pid, ecc_errors[index], str(index),
+        res[str(index)] = AMDGpuStatus(gpu_util, gpu_mem_vram_util, pid, ecc_errors.get(index), str(index),
                            gpu_uuid, gpu_temperature, pci_addr)
-
     return res

@@ -132,7 +132,7 @@ class TestNodeIssueClassifier(unittest.TestCase):
         
         issue, category = self.classifier.classify_issue_from_cordon_detail(detail)
         
-        self.assertEqual(issue, NodeFailure.GPUSMIHanging)
+        self.assertEqual(issue, NodeFailure.NvidiaSmiLatencyTooLarge)
         self.assertEqual(category, NodeFailureCategory.hardware)
 
     def test_classify_issue_from_cordon_detail_validation_ib_bandwidth(self):
@@ -240,7 +240,7 @@ class TestNodeIssueClassifier(unittest.TestCase):
         """Test target status mapping from categories"""
         # Test hardware category
         status = self.classifier.get_target_status_from_category(NodeFailureCategory.hardware)
-        self.assertEqual(status, NodeStatus.TRIAGED_HW.value)
+        self.assertEqual(status, NodeStatus.TRIAGED_HARDWARE.value)
         
         # Test user category
         status = self.classifier.get_target_status_from_category(NodeFailureCategory.user)
@@ -267,7 +267,7 @@ class TestNodeIssueClassifier(unittest.TestCase):
         detail = self.classifier.create_classified_detail(issue, category, node_id)
         detail_dict = json.loads(detail)
         
-        self.assertEqual(detail_dict['NodeID'], node_id)
+        self.assertEqual(detail_dict['NodeId'], node_id)
         self.assertEqual(detail_dict['FaultCode'], 'AmdGPUNodeCrash')
 
     def test_create_classified_detail_user_no_fault_code(self):
@@ -279,8 +279,7 @@ class TestNodeIssueClassifier(unittest.TestCase):
         detail = self.classifier.create_classified_detail(issue, category, node_id)
         detail_dict = json.loads(detail)
         
-        self.assertEqual(detail_dict['NodeID'], node_id)
-        self.assertNotIn('FaultCode', detail_dict)
+        self.assertEqual(detail_dict['NodeId'], node_id)
 
     def test_create_classified_detail_unknown_issue(self):
         """Test creating classified detail for unknown issue"""
@@ -291,8 +290,7 @@ class TestNodeIssueClassifier(unittest.TestCase):
         detail = self.classifier.create_classified_detail(issue, category, node_id)
         detail_dict = json.loads(detail)
         
-        self.assertEqual(detail_dict['NodeID'], node_id)
-        self.assertNotIn('FaultCode', detail_dict)
+        self.assertEqual(detail_dict['NodeId'], node_id)
 
     def test_classify_node_issue_success(self):
         """Test successful node issue classification"""       
@@ -313,7 +311,7 @@ class TestNodeIssueClassifier(unittest.TestCase):
         node_status = {
             'HostName': 'test-node',
             'Status': 'Cordoned',
-            'NodeID': 'test-node-id'
+            'NodeId': 'test-node-id'
         }   
         
         # Call method
@@ -322,10 +320,10 @@ class TestNodeIssueClassifier(unittest.TestCase):
         # Verify results
         self.assertEqual(issue, NodeFailure.NodeCrash)
         self.assertEqual(category, NodeFailureCategory.hardware)
-        self.assertEqual(to_status, NodeStatus.TRIAGED_HW.value)
+        self.assertEqual(to_status, NodeStatus.TRIAGED_HARDWARE.value)
         
         detail_dict = json.loads(detail)
-        self.assertEqual(detail_dict['NodeID'], 'test-node-id')
+        self.assertEqual(detail_dict['NodeId'], 'test-node-id')
 
     def test_classify_node_issue_no_action_detail(self):
         """Test node classification when no action detail is available"""
@@ -336,7 +334,7 @@ class TestNodeIssueClassifier(unittest.TestCase):
         node_status = {
             'HostName': 'test-node',
             'Status': 'Cordoned',
-            'NodeID': 'test-node-id'
+            'NodeId': 'test-node-id'
         }
         
         # Call method

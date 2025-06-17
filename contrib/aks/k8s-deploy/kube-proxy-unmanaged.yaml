@@ -42,7 +42,7 @@ spec:
         - --detect-local-mode=ClusterCIDR
         - --pod-interface-name-prefix=
         - --v=3
-        image: mcr.microsoft.com/oss/kubernetes/kube-proxy:v1.26.3
+        image: mcr.microsoft.com/oss/kubernetes/kube-proxy:v1.31.8
         imagePullPolicy: IfNotPresent
         name: kube-proxy
         resources:

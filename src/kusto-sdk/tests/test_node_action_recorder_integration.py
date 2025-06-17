@@ -11,16 +11,6 @@ from ltp_kusto_sdk.features.node_action.client import NodeActionClient
 from ltp_kusto_sdk.features.node_action.models import NodeAction
 from ltp_kusto_sdk.utils.time_util import convert_timestamp
 
-# Test environment configuration
-os.environ["CLUSTER_ID"] = "test-wcu"
-os.environ[
-    "LTP_KUSTO_CLUSTER_URI"] = "https://luciatrainingplatform.westcentralus.kusto.windows.net"
-os.environ["LTP_KUSTO_DATABASE_NAME"] = "Test"
-os.environ["KUSTO_NODE_ACTION_TABLE_NAME"] = "TestNodeActionRecord"
-os.environ[
-    "KUSTO_NODE_ACTION_ATTRIBUTE_TABLE_NAME"] = "TestNodeActionAttributes"
-os.environ["ENVIRONMENT"] = "dev"
-
 
 @pytest.fixture(scope="session")
 def recorder() -> NodeActionClient:

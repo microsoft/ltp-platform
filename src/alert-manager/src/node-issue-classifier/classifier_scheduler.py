@@ -43,7 +43,7 @@ class NodeIssueClassifierScheduler:
             self.is_running = True
             logger.info(f"Starting scheduled node issue classification at {datetime.now()}")
             
-            results = self.classifier.monitor_and_classify_cordoned_nodes()
+            results = self.monitor_and_classify_cordoned_nodes()
             
             # Log summary
             if results:

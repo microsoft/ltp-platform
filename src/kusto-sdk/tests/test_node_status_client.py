@@ -229,5 +229,5 @@ class TestNodeStatusClient:
 
         # Attempt invalid transition
         with pytest.raises(ValueError) as exc_info:
-            client.update_node_status(test_node, NodeStatus.TRIAGED_HW.value,
+            client.update_node_status(test_node, NodeStatus.TRIAGED_HARDWARE.value,
                                       timestamp.timestamp())

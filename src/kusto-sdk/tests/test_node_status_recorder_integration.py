@@ -13,16 +13,6 @@ from ltp_kusto_sdk.features.node_status.models import NodeStatusRecord, NodeStat
 from ltp_kusto_sdk.utils.kusto_client import KustoManageClient
 from ltp_kusto_sdk.utils.time_util import convert_timestamp
 
-# Test environment configuration
-os.environ["CLUSTER_ID"] = "test-wcu"
-os.environ[
-    "LTP_KUSTO_CLUSTER_URI"] = "https://luciatrainingplatform.westcentralus.kusto.windows.net"
-os.environ["LTP_KUSTO_DATABASE_NAME"] = "Test"
-os.environ["KUSTO_NODE_STATUS_TABLE_NAME"] = "TestNodeStatusRecord"
-os.environ[
-    "KUSTO_NODE_STATUS_ATTRIBUTES_TABLE_NAME"] = "TestNodeStatusAttributes"
-os.environ["ENVIRONMENT"] = "dev"
-
 
 @pytest.fixture(scope="session")
 def recorder() -> NodeStatusClient:
@@ -125,7 +115,7 @@ class TestNodeStatusRecorderIntegration:
         # Create a sequence of valid status transitions
         transitions = [
             NodeStatus.CORDONED.value,
-            NodeStatus.TRIAGED_HW.value,
+            NodeStatus.TRIAGED_HARDWARE.value,
         ]
 
         timestamps = [

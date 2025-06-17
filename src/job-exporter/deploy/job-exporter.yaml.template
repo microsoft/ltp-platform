@@ -128,6 +128,14 @@ spec:
           capabilities:
             add:
               - SYS_ADMIN
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        volumeMounts:
+          - mountPath: /var/log/syslog
+            name: syslog-mount
         command:
         - "bash"
         - "moneo-node-exporter_entrypoint.sh"
@@ -151,6 +159,9 @@ spec:
         - name: infiniband-sys
           hostPath:
             path: /sys
+        - name: syslog-mount
+          hostPath:
+            path: /var/log/syslog
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       hostNetwork: true

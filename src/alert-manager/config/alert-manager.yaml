@@ -15,6 +15,8 @@ alert-handler:
   log-level: 'info'
   port: 9095
   configured: False
+alert-parser:
+  configured: False
 cluster-utilization:
   configured: False
 job-status-change-notification:
@@ -23,11 +25,12 @@ job-status-change-notification:
   log-level: 'info'
   db-poller-max-db-connection: 10
   db-poller-interval-second: 600
+node-issue-classifier:
+  configured: False
+  kusto: False
 node-recycler:
   configured: False
-  kusto:
-    cluster: luciatrainingplatform
-    datebase: ""
+  kusto: False
   icm:
     host: prod.microsofticm.com
     crt_name: cert.pem

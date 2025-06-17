@@ -48,6 +48,9 @@
     "winston": "2",
     "ws": "^8.18.2"
   },
+  "resolutions": {
+    "tar-fs": "^3.0.9"
+  },
   "scripts": {
     "lint": "eslint .",
     "start": "node index.js",

@@ -33,7 +33,7 @@ spec:
       serviceAccountName: frameworkcontroller-account
       containers:
       - name: frameworkcontroller
-        image: luciaopenai.azurecr.io/luciaopenai/frameworkcontroller:security-fix
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}frameworkcontroller:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
       {%- if cluster_cfg['cluster']['common']['k8s-rbac'] != 'true' %}
         env:
         - name: KUBE_APISERVER_ADDRESS

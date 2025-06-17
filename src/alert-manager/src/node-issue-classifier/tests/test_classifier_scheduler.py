@@ -42,7 +42,7 @@ def mock_node_issue_classifier():
             NodeFailure.UnknownIssue,
             NodeFailureCategory.unknown,
             'TRIAGED_UNKNOWN',
-            '{"NodeID": "test-node-id"}'
+            '{"NodeId": "test-node-id"}'
         )
         
         yield mock_classifier
@@ -96,12 +96,12 @@ class TestNodeIssueClassifierScheduler(unittest.TestCase):
         node_status = {
             'HostName': 'test-node',
             'Status': 'Cordoned',
-            'NodeID': 'test-node-id'
+            'NodeId': 'test-node-id'
         }
         issue = NodeFailure.NodeCrash
         category = NodeFailureCategory.hardware
-        to_status = NodeStatus.TRIAGED_HW.value
-        detail = '{"NodeID": "test-node-id", "FaultCode": "AmdGPUNodeCrash"}'
+        to_status = NodeStatus.TRIAGED_HARDWARE.value
+        detail = '{"NodeId": "test-node-id", "FaultCode": "AmdGPUNodeCrash"}'
         
         # Call method
         result = scheduler.update_node_after_classification(
@@ -136,8 +136,8 @@ class TestNodeIssueClassifierScheduler(unittest.TestCase):
         
         # Mock cordoned nodes
         cordoned_nodes = [
-            {'HostName': 'test-node-1', 'Status': 'Cordoned', 'NodeID': 'node-id-1'},
-            {'HostName': 'test-node-2', 'Status': 'Cordoned', 'NodeID': 'node-id-2'}
+            {'HostName': 'test-node-1', 'Status': 'Cordoned', 'NodeId': 'node-id-1'},
+            {'HostName': 'test-node-2', 'Status': 'Cordoned', 'NodeId': 'node-id-2'}
         ]
         mock_updater.get_nodes_by_status.return_value = cordoned_nodes
         mock_updater.update_status_action.return_value = True
@@ -145,7 +145,7 @@ class TestNodeIssueClassifierScheduler(unittest.TestCase):
             HostName='test-node-1',
             Action='avilable-cordoned',
             Timestamp=time.time(),
-            Detail=json.dumps([{"NodeID": "node-id-1"}]),
+            Detail=json.dumps([{"NodeId": "node-id-1"}]),
             NodeId='node-id-1',
             Reason='Node cordoned for classification',
             Category=NodeFailureCategory.hardware,
@@ -163,8 +163,8 @@ class TestNodeIssueClassifierScheduler(unittest.TestCase):
             return (
                 NodeFailure.NodeCrash,
                 NodeFailureCategory.hardware,
-                NodeStatus.TRIAGED_HW.value,
-                f'{{"NodeID": "{node_status["NodeID"]}"}}'
+                NodeStatus.TRIAGED_HARDWARE.value,
+                f'{{"NodeId": "{node_status["NodeId"]}"}}'
             )
         mock_classifier.classify_node_issue.side_effect = mock_classify_node_issue
         
@@ -183,7 +183,7 @@ class TestNodeIssueClassifierScheduler(unittest.TestCase):
             HostName='test-node-1',
             Action='avilable-validating',
             Timestamp=time.time(),
-            Detail=json.dumps([{"NodeID": "node-id-1"}]),
+            Detail=json.dumps([{"NodeId": "node-id-1"}]),
             NodeId='node-id-1',
             Reason='Node cordoned for classification',
             Category=NodeFailureCategory.hardware,
@@ -263,7 +263,7 @@ class TestNodeIssueClassifierSchedulerIntegration(unittest.TestCase):
         node_status = {
             'HostName': 'test-node',
             'Status': 'Cordoned',
-            'NodeID': 'test-node-id'
+            'NodeId': 'test-node-id'
         }
         
         # Call method through scheduler (which should call classifier)
@@ -272,10 +272,10 @@ class TestNodeIssueClassifierSchedulerIntegration(unittest.TestCase):
         # Verify results
         self.assertEqual(issue, NodeFailure.NodeCrash)
         self.assertEqual(category, NodeFailureCategory.hardware)
-        self.assertEqual(to_status, NodeStatus.TRIAGED_HW.value)
+        self.assertEqual(to_status, NodeStatus.TRIAGED_HARDWARE.value)
         
         detail_dict = json.loads(detail)
-        self.assertEqual(detail_dict['NodeID'], 'test-node-id')
+        self.assertEqual(detail_dict['NodeId'], 'test-node-id')
         self.assertEqual(detail_dict['FaultCode'], 'AmdGPUNodeCrash')
 
 

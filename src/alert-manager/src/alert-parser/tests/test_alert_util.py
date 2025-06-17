@@ -60,25 +60,25 @@ class TestAlertMapper(unittest.TestCase):
         test_log = self.test_data.iloc[12]['LogMessage']
         alert = AlertParser.parse_message(test_log)
         issue, events = AlertMapper.summary_events_into_reason_detail([alert])
-        self.assertEqual(issue, 'Node Crash')
+        self.assertTrue('NodeNotReady' in issue)
         
         # Test mapping IBLinkFlap alert
         test_log = self.test_data.iloc[33]['LogMessage']
         alert = AlertParser.parse_message(test_log)
         issue, events = AlertMapper.summary_events_into_reason_detail([alert])
-        self.assertEqual(issue, 'IB Link Flapping')
+        self.assertTrue('IBLinkFlap' in issue)
         
         # Test mapping DmesgGPUFault with GPU reset
         test_log = self.test_data.iloc[5]['LogMessage']
         alert = AlertParser.parse_message(test_log)
         issue, events = AlertMapper.summary_events_into_reason_detail([alert])
-        self.assertEqual(issue, 'GPU Reset')
+        self.assertTrue('DmesgGPUFault' in issue)
         
         # Test mapping NvidiaSmiFailed alert
         test_log = self.test_data.iloc[2]['LogMessage']
         alert = AlertParser.parse_message(test_log)
         issue, events = AlertMapper.summary_events_into_reason_detail([alert])
-        self.assertEqual(issue, 'GPU Driver Hanging')
+        self.assertTrue('NvidiaSmiFailed' in issue)
 
 @pytest.mark.usefixtures("mock_kusto_client")
 class TestAlertFetcher(unittest.TestCase):

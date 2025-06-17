@@ -12,8 +12,7 @@ def mock_env_vars():
         'KUSTO_NODE_STATUS_TABLE_NAME': 'NodeStatusRecord',
         'KUSTO_NODE_STATUS_ATTRIBUTE_TABLE_NAME': 'NodeStatusAttributes',
         'KUSTO_NODE_ACTION_TABLE_NAME': 'NodeActionRecord',
-        'KUSTO_NODE_ACTION_ATTRIBUTE_TABLE_NAME': 'NodeActionAttributes',
-        'ENVIRONMENT': 'test'
+        'KUSTO_NODE_ACTION_ATTRIBUTE_TABLE_NAME': 'NodeActionAttributes'
     }
     with pytest.MonkeyPatch.context() as m:
         for key, value in env_vars.items():
