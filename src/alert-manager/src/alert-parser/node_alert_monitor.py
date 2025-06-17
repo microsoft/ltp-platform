@@ -86,8 +86,34 @@ class NodeAvailabilityMonitor:
                 pd.Series(times)[change_indices],
                 values[change_indices]
             ))
+            raw_values = dict(zip(pd.Series(times), values))
             
-        return status_changes
+        return status_changes, raw_values
+    
+    def get_node_last_availability_status(self, node: str, end_time, status_change, max_offset='60d') -> Optional[float]:
+        """Get the last availability status for a node from prometheus"""
+        logger.info(f"Getting last availability status for node {node} at time {end_time} with status change {status_change}")
+        status_changes, raw_values = self.get_node_status_changes(node, end_time, max_offset)
+        status_changes = sorted(status_changes.items(), key=lambda x: x[0], reverse=True)
+        if status_changes:
+            # get the latest status change
+            last_change_time, last_status = status_changes[0]
+            logger.info(f"Last status change for node {node} at {last_change_time}: {last_status}")
+            if status_change == 1: 
+                return NodeStatus.AVAILABLE.value, last_change_time
+            elif status_change == 0:
+                return NodeStatus.VALIDATING.value, last_change_time
+            elif status_change == -1:
+                if len(status_changes) > 1:
+                    second_last_change_time, second_last_status = status_changes[1]
+                    return NodeStatus.AVAILABLE.value, second_last_change_time
+        first_time = min(raw_values.keys())
+        first_value = raw_values[first_time]
+        logger.info(f"Node {node} has no status changes. First value at {first_time}: {first_value}")
+        if first_value == 0: # remain available
+            return NodeStatus.AVAILABLE.value, first_time
+        elif first_value == 1: # remain unschedulable
+            return NodeStatus.VALIDATING.value, first_time
 
     def get_all_status_changes(self, end_time: int, time_offset: str) -> Dict[str, Dict[float, float]]:
         """Get status changes for all nodes"""
@@ -96,7 +122,7 @@ class NodeAvailabilityMonitor:
         node_status_changes = {}
         # Handle changed nodes
         for node in nodes_changed:
-            changes = self.get_node_status_changes(node, end_time, time_offset)
+            changes, raw_values = self.get_node_status_changes(node, end_time, time_offset)
             if changes:
                 node_status_changes[node] = changes
                 
@@ -113,11 +139,13 @@ class NodeAvailabilityMonitor:
             node_status = NodeStatusRecord.from_record(node_status)
         start_time = node_status.Timestamp
         from_status = node_status.Status
-        period_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, start_time)
-        logger.info(f'{len(period_alerts)} alerts found for node {node} at time {timestamp}')
-        shrinked_alerts = self.alert_fetcher.shrink_alerts((period_alerts))
-        logger.info(f'{len(shrinked_alerts)} alerts after shrinking for node {node} at time {timestamp}')
-        
+        shrinked_alerts = None
+        if alerts is not None and not alerts.empty:
+            period_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, start_time)
+            logger.info(f'{len(period_alerts)} alerts found for node {node} at time {timestamp}')
+            shrinked_alerts = self.alert_fetcher.shrink_alerts((period_alerts))
+            logger.info(f'{len(shrinked_alerts)} alerts after shrinking for node {node} at time {timestamp}')
+            
         if status == 1:  # Changed to unschedulable
             to_status = NodeStatus.CORDONED.value
             reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
@@ -151,8 +179,17 @@ class NodeAvailabilityMonitor:
                 logger.info(f"No status changes found for node {node}. Skipping processing.")
                 return
             # get the latest node status
-            node_status = self.node_updater.get_node_latest_status(node)
-            
+            first_change_time = min(changes.keys())
+            node_status = self.node_updater.get_node_latest_status(node, as_of_time=first_change_time)
+            if not node_status:
+                node_last_status, node_last_status_start_time = self.get_node_last_availability_status(
+                    node, first_change_time - 1, changes[first_change_time]
+                )
+                self.node_updater.update_node_status(node, node_last_status, node_last_status_start_time)
+                node_status = self.node_updater.get_node_latest_status(node, as_of_time=first_change_time)
+                if not node_status:
+                    logger.error(f"No node status found for {node} before {first_change_time}. Skipping processing.")
+                    return
             if isinstance(node_status, dict):
                 node_status = NodeStatusRecord.from_record(node_status)
             

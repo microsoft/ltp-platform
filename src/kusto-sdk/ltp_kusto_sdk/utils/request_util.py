@@ -39,7 +39,7 @@ class RequestUtil:
 
     @staticmethod
     def prometheus_query(query, data, uri, retry=3):
-        query = f"https://{uri}/prometheus/api/v1/{query}"
+        query = f"{uri}/api/v1/{query}"
         token = os.getenv("PAI_TOKEN")
         while retry > 0:
             response = RequestUtil.get_request(query, token)

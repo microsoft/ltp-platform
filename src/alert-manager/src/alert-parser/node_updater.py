@@ -25,8 +25,11 @@ class NodeRecordUpdater:
         self.retries = 3
         self.actions = ['AvailableFromValidating', 'CordonedFromValidating', 'CordonedFromAvailable', 'AvailableFromCordoned']
         
-    def get_node_latest_status(self, node):
-        node_status = self.node_status_client.get_node_status(node)
+    def get_node_latest_status(self, node, as_of_time=None):
+        node_status = self.node_status_client.get_node_status(node, as_of_time)
+        if not node_status:
+            logger.info(f"No status found for node {node} as of {as_of_time}")
+            return None
         logger.info(f"Latest status for node {node}: {node_status.Status} at {node_status.Timestamp}")
         return node_status
     
@@ -48,6 +51,17 @@ class NodeRecordUpdater:
             return result[0]['Timestamp']
         return None
     
+    def update_node_status(self, node, to_status, timestamp):
+        for i in range(self.retries):
+            try:
+                self.node_status_client.update_node_status(node, to_status, timestamp)
+                logger.info(f"Updated node status to {to_status} for node {node} on {timestamp}")
+                return True
+            except Exception as e:
+                logger.info(f"Error updating node status: {str(e)}")
+                time.sleep(1)
+        return False
+    
     def update_status_action(self, node, from_status, to_status, timestamp, reason, detail): 
         status_updated = False
         if from_status == to_status:
@@ -67,12 +81,9 @@ class NodeRecordUpdater:
                 time.sleep(1)
         
         if status_updated:
-            for i in range(self.retries):
-                try:
-                    self.node_status_client.update_node_status(node, to_status, timestamp)
-                    logger.info(f"Updated node status to {to_status} for node {node} on {timestamp}")
-                    return True
-                except Exception as e:
-                    logger.info(f"Error updating node status: {str(e)}")
-                    time.sleep(1)
+            if not self.update_node_status(node, to_status, timestamp):
+                logger.info(f"Failed to update node status to {to_status} for node {node} on {timestamp}")
+                return False
+            logger.info(f"Successfully updated node status and action for node {node} on {timestamp}")
+            return True
         return False        

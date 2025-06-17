@@ -201,6 +201,12 @@ spec:
           value: "{{ cluster_cfg['alert-manager']['alert-parser']['alert-kusto-cluster'] | default('https://ltp-kusto-alerts.westus2.kusto.windows.net') }}"
         - name: KUSTO_ALERT_DATABASE
           value: "{{ cluster_cfg['alert-manager']['alert-parser']['alert-kusto-database'] | default('DefaultWorkspace-id-westus2') }}"
+        - name: LTP_KUSTO_VM_INFO_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-vm-table"] | default(cluster_cfg["alert-manager"]["kusto-vm-table"]) }}
+        - name: LTP_VMSS_IDS
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["vmss_ids"] | default(cluster_cfg["alert-manager"]["vmss_ids"]) }}
+        - name: AZURE_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["vmss_client_id"] | default(cluster_cfg["alert-manager"]["vmss_client_id"]) }}
         resources:
           requests:
             memory: "256Mi"

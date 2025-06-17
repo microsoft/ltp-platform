@@ -8,6 +8,8 @@ setup(
     install_requires=[
         "azure-kusto-data>=0.0.45",
         "azure-kusto-ingest>=0.0.45",
+        "azure-identity>=1.5.0",
+        "azure-mgmt-compute",
         "pandas>=1.0.0",
         "requests>=2.25.0",
         "joblib>=1.0.0",

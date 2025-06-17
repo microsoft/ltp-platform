@@ -160,7 +160,6 @@ class AlertFetcher:
         """Get processed alert records for nodes"""
         print(f"Fetching alerts from Kusto for nodes: {nodes} with time offset: {time_offset} and end time: {end_time_stamp}")
         alerts_data = self.fetch_logs(end_time_stamp, time_offset)
-        logger.info(f"Fetched {len(alerts_data)} alert logs from Kusto.")
         if alerts_data is None:
             return None
 
