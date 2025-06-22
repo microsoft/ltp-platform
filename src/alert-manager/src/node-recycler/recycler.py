@@ -326,6 +326,7 @@ class NodeRecycler:
                 config = template.format(
                     uid="".join(random.choices(string.ascii_letters + string.digits, k=8)),
                     image=cls._ltp_validation_image,
+                    client_id=cls._azure_client_id,
                     instances=1,
                     hostnames=hostname.lower(),
                 )
