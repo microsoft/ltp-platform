@@ -260,7 +260,7 @@ class ComputeClient:
                 # Find the remaining VMs that are not in the existing DataFrame
                 remaining_df = df[~df['VMId'].isin(existing_df['VMId'])]
             if remaining_df.empty:
-                print("No new VMs to ingest in vmss_id: {vmss_id}")
+                print(f"VM not found in vmss_id: {vmss_id}")
                 continue
             print(f"Remaining VMs to ingest in {vmss_id}: {remaining_df['HostName'].to_list()}")
             ingestion_client.ingest_to_kusto(self.kusto_table, remaining_df)

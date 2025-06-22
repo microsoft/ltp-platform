@@ -73,6 +73,7 @@ class NodeAvailabilityMonitor:
                 
         result = RequestUtil.prometheus_query(query=query, data={}, uri=self.rest_server_uri)
         status_changes = {}
+        raw_values = {}
         
         if result is not None and result["result"]:
             node_result = result["result"][0]["values"]
@@ -114,22 +115,43 @@ class NodeAvailabilityMonitor:
             return NodeStatus.AVAILABLE.value, first_time
         elif first_value == 1: # remain unschedulable
             return NodeStatus.VALIDATING.value, first_time
+        return None, None
 
     def get_all_status_changes(self, end_time: int, time_offset: str) -> Dict[str, Dict[float, float]]:
         """Get status changes for all nodes"""
         nodes_changed, nodes_unschedulable = self.query_availability_changes(end_time, time_offset)
+        nodes_validating = self.node_updater.get_nodes_by_status(NodeStatus.VALIDATING.value, end_time)
         
         node_status_changes = {}
-        # Handle changed nodes
+        # Handle changed nodes in update interval
         for node in nodes_changed:
             changes, raw_values = self.get_node_status_changes(node, end_time, time_offset)
             if changes:
                 node_status_changes[node] = changes
-                
+        
         # Handle continuously unschedulable nodes
         for node in nodes_unschedulable:
-            node_status_changes[node] = {end_time: -1}  # Mark as continuously unschedulable
-            
+            last_status = self.node_updater.get_node_latest_status(node, end_time)
+            if last_status:
+                if isinstance(last_status, dict):
+                    last_status = NodeStatusRecord.from_record(last_status)
+                time_offset = int(end_time - convert_timestamp(last_status.Timestamp, format="timestamp"))
+                changes, raw_values = self.get_node_status_changes(node, end_time, f'{time_offset}s')
+                if changes:
+                    node_status_changes[node] = changes
+            if node not in node_status_changes:
+                node_status_changes[node] = {}
+            node_status_changes[node][end_time] = -1  # Mark as continuously unschedulable for potential validating failed nodes
+        
+        # Handle validating nodes changed from validating to available during service down
+        for node_stauts in nodes_validating:
+            node = node_stauts['HostName']
+            if node not in nodes_changed and node not in nodes_unschedulable:
+                time_offset = int(end_time - convert_timestamp(node_stauts['Timestamp'], format="timestamp"))
+                changes, raw_values = self.get_node_status_changes(node, end_time, f'{time_offset}s')
+                if changes:
+                    node_status_changes[node] = changes
+
         return node_status_changes
 
     def handle_node_status_change(self, node: str, timestamp: float, status: float, 
@@ -140,7 +162,7 @@ class NodeAvailabilityMonitor:
         start_time = node_status.Timestamp
         from_status = node_status.Status
         shrinked_alerts = None
-        if alerts is not None and not alerts.empty:
+        if alerts is not None:
             period_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, start_time)
             logger.info(f'{len(period_alerts)} alerts found for node {node} at time {timestamp}')
             shrinked_alerts = self.alert_fetcher.shrink_alerts((period_alerts))
@@ -185,10 +207,14 @@ class NodeAvailabilityMonitor:
                 node_last_status, node_last_status_start_time = self.get_node_last_availability_status(
                     node, first_change_time - 1, changes[first_change_time]
                 )
+                logger.info(f"Node {node} last status before first change: {node_last_status} at {node_last_status_start_time}")
+                if not node_last_status:
+                    logger.error(f"No last status found for node {node} before {first_change_time}. Skipping processing.")
+                    return
                 self.node_updater.update_node_status(node, node_last_status, node_last_status_start_time)
                 node_status = self.node_updater.get_node_latest_status(node, as_of_time=first_change_time)
                 if not node_status:
-                    logger.error(f"No node status found for {node} before {first_change_time}. Skipping processing.")
+                    logger.error(f"Fail to update init status for {node} before {first_change_time}. Skipping processing.")
                     return
             if isinstance(node_status, dict):
                 node_status = NodeStatusRecord.from_record(node_status)
@@ -230,7 +256,7 @@ class NodeAvailabilityMonitor:
         
         # Process each node's changes
         logger.info(f"Processing changes for {len(status_changes)} nodes in parallel")
-        with ThreadPoolExecutor(max_workers=min(32, len(status_changes) or 1)) as executor:
+        with ThreadPoolExecutor(max_workers=min(16, len(status_changes) or 1)) as executor:
             futures = {
                 executor.submit(self.process_node_changes, node, changes, end_time): node 
                 for node, changes in status_changes.items()

@@ -207,7 +207,8 @@ STATUS_METADATA = {
                        NodeStatus.DEALLOCATED_CAPACITY.value,
                        NodeStatus.TRIAGED_PLATFORM.value,
                        NodeStatus.TRIAGED_USER.value,
-                       NodeStatus.TRIAGED_HARDWARE.value
+                       NodeStatus.TRIAGED_HARDWARE.value,
+                       NodeStatus.AVAILABLE.value,
                    ]),
 
     # UA states metadata

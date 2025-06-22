@@ -81,7 +81,7 @@ class NodeIssueClassifier:
             NodeFailure.FrontendNetworkIssue: NodeFailureCategory.hardware,
             NodeFailure.DiskError: NodeFailureCategory.hardware,
             NodeFailure.NodeCrash: NodeFailureCategory.hardware,
-            NodeFailure.GPUHangingwithSegfault: NodeFailureCategory.user,
+            NodeFailure.GPUHangingwithSegfault: NodeFailureCategory.hardware,
             NodeFailure.MemoryAccessFault: NodeFailureCategory.user,
             NodeFailure.PlatformServiceIssue: NodeFailureCategory.platform,
             NodeFailure.DatasetPreCheckFailure: NodeFailureCategory.platform,
