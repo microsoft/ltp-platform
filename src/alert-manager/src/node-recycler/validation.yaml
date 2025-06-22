@@ -21,7 +21,6 @@ taskRoles:
       cpu: 88
       memoryMB: 1638400
     commands:
-      - export AZURE_SKU=$(curl -sH "Metadata: true" "http://169.254.169.254/metadata/instance/compute/vmSize?api-version=2020-06-01&format=text")
       - export NCCL_SOCKET_IFNAME=eth0
       - export CUDA_DEVICE_ORDER=PCI_BUS_ID
       - export NCCL_DEBUG=WARN
