@@ -25,7 +25,7 @@ const config = {
   watchTimeoutSeconds: parseInt(process.env.WATCH_TIMEOUT_SECONDS),
 };
 
-const { error, value } = Joi.validate(config, configSchema);
+const { error, value } = configSchema.validate(config);
 if (error) {
   throw new Error(`Config error\n${error}`);
 }

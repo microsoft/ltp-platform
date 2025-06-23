@@ -198,6 +198,7 @@ async function create(key, value) {
     await User.encryptUserPassword(userInstance);
     const userData = {
       metadata: { name: hexKey },
+      type: 'Opaque',
       data: {
         username: Buffer.from(userInstance.username).toString('base64'),
         password: Buffer.from(userInstance.password).toString('base64'),
@@ -224,8 +225,10 @@ async function create(key, value) {
     return response;
   } catch (error) {
     if (error.response) {
+      logger.error(`Error response while creating user: ${JSON.stringify(error.response.data)}`);
       throw error.response;
     } else {
+      logger.error(`Error while creating user: ${error.message}`);
       throw error;
     }
   }

@@ -28,8 +28,8 @@ const cleanFinishedRebootPods = () => {
 
   const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
-  k8sApi.listNamespacedPod('default').then((res) => {
-    const pods = res.body.items;
+  k8sApi.listNamespacedPod({namespace: 'default'}).then((res) => {
+    const pods = res.items;
     const rebootPods = pods.filter(pod => pod.metadata.name.includes('node-rebooter') && pod.status.containerStatuses.some(status => status.state.terminated && status.state.terminated.reason === 'ContainerStatusUnknown'));
     if (rebootPods.length > 0) {
       logger.info(`Rebooting pods to be cleaned: ${rebootPods.map(pod => pod.metadata.name).join(', ')}`);
@@ -37,7 +37,7 @@ const cleanFinishedRebootPods = () => {
       logger.info('No rebooting pods to be cleaned.');
     }
     rebootPods.forEach(pod => {
-      k8sApi.deleteNamespacedPod(pod.metadata.name, 'default').then(() => {
+      k8sApi.deleteNamespacedPod({name: pod.metadata.name, namesapce: 'default'}).then(() => {
         logger.info(`Successfully deleted rebooting pod ${pod.metadata.name}`);
       }).catch((err) => {
         logger.error(`Failed to delete rebooting pod ${pod.metadata.name}: ${err}`);

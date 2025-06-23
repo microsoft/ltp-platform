@@ -3,7 +3,11 @@
 
 FROM node:20
 
+RUN npm install -g npm@latest
+
 WORKDIR /usr/src/app
+
+RUN apt update && apt upgrade -y
 
 ENV NODE_ENV=production
 

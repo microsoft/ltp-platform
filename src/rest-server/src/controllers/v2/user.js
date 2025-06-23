@@ -73,24 +73,27 @@ const getAllUser = async (req, res, next) => {
 
     const retUserList = await Promise.all(
       userList.map(async (userItem) => {
+        // Create a shallow copy to avoid mutating the original object and possible circular references
+        const userCopy = { ...userItem };
         const groupItems = Array.from(
-          userItem.grouplist,
+          userCopy.grouplist,
           (groupname) => groupMap[groupname],
         );
         const admin = groupModel.getAdminWithGroupInfo(groupItems);
-        userItem.admin = admin;
-        userItem.virtualCluster = admin
+        userCopy.admin = admin;
+        userCopy.virtualCluster = admin
           ? allVClist
           : await groupModel.getVCsWithGroupInfo(groupItems);
-        userItem.storageConfig = await groupModel.getStorageConfigsWithGroupInfo(
+        userCopy.storageConfig = await groupModel.getStorageConfigsWithGroupInfo(
           groupItems,
         );
-        delete userItem.password;
-        return userItem;
+        delete userCopy.password;
+        return userCopy;
       }),
     );
     return res.status(200).json(retUserList);
   } catch (error) {
+    logger.error(error);
     return next(createError.unknown(error));
   }
 };
@@ -132,15 +135,21 @@ const createUserIfUserNotExist = async (req, res, next) => {
       grouplist: grouplist,
       extension: {},
     };
-    await userModel.createUser(username, userValue);
-    req.updateResult = true;
+
+    const existUser = await userModel.getUser(username).catch(() => null);
+    req.updateResult = false;
+    if (!existUser) {
+      await userModel.createUser(username, userValue);
+      req.updateResult = true;
+    }
     next();
+
   } catch (error) {
     if (error.status === 409) {
       req.updateResult = false;
       next();
     } else {
-      return next(createError.unknown(error));
+      return next(createError.unknown(error && error.message ? error.message : JSON.stringify(error)));
     }
   }
 };

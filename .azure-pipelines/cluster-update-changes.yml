@@ -12,9 +12,24 @@ variables:
   value: '$(Build.BuildId)'
 - group: 'pai-cicd-cluster'
 
+parameters:
+  - name: "rebuildImage"
+    type: boolean
+    default: true
+    displayName: "Rebuild images"
+  - name: "repushImage"
+    type: boolean
+    default: true
+    displayName: "Repush images"
+  - name: "redeployService"
+    type: boolean
+    default: true
+    displayName: "Redeploy services"  
+
 jobs:
   - job: Build
     displayName: 'Build and Deploy'
+    timeoutInMinutes: 120
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
@@ -40,14 +55,7 @@ jobs:
         fi
         
         folders=$(echo "$changed_files" | grep '^src/' | awk -F'/' '{print $2}' | sort -u)
-        
-        # Check if "hivedscheduler" is in the folder list
-        if echo "$folders" | grep -q "hivedscheduler"; then
-          folders=$(echo "$folders" | grep -v "cluster-configuration" | grep -v "rest-server")
-          # Add "cluster-configuration" to the head and "rest-server" to the end
-          folders="cluster-configuration $folders rest-server"
-        fi
-        
+        folders=$(echo "$folders" | tr '\n' ' ')
         # Store the folder list in a pipeline variable
         echo "Changed folders: $folders"
         echo "##vso[task.setvariable variable=changed_folders]$folders"
@@ -80,27 +88,29 @@ jobs:
         destinationFolder: '$(Pipeline.Workspace)/config'
         cleanDestinationFolder: true
     - script: |
-        mv $(Pipeline.Workspace)/config/pylon-configuration /tmp/
         mv $(Pipeline.Workspace)/config/auth-configuration /tmp/
+        ls -l /tmp/auth-configuration
       displayName: Arrange Config Files
       condition: eq(variables['has_changed'], 'true')
     - script: |
         # Build the changed services
-        # Skip "openpai-runtime" due to the image built by other repo
-        changed_services=$(echo $(changed_folders) | tr ' ' '\n' | grep -v "openpai-runtime" | tr '\n' ' ')
+        echo "Building folders" $(changed_folders)
+        changed_services=$(echo $(changed_folders) | tr ' ' '\n' )
+        echo "Building: " $changed_services
         $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s $changed_services
       displayName: 'Build Changed Services'
-      condition: eq(variables['has_changed'], 'true')
+      condition: and( eq( variables['has_changed'], 'true'), or(eq(${{ parameters.rebuildImage }}, 'true'), eq(${{ parameters.repushImage }}, 'true')) )
     - script: |
         # Push the changed services
-        # Skip "openpai-runtime" due to the image built by other repo
-        changed_services=$(echo $(changed_folders) | tr ' ' '\n' | grep -v "openpai-runtime" | tr '\n' ' ')
+        
+        changed_services=$(echo $(changed_folders) | tr ' ' '\n' )
+        echo "Pushing: " $changed_services
         $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -s $changed_services
       displayName: 'Push Changed Services'
-      condition: eq(variables['has_changed'], 'true')
+      condition: and(eq(${{ parameters.repushImage }}, 'true'),  eq(variables['has_changed'], 'true') )
     - task: AzureCLI@2
       displayName: 'Azure CLI get credentials of aks and deploy the pai services'
-      condition: eq(variables['has_changed'], 'true')
+      condition: and(eq(${{ parameters.redeployService }}, 'true'), eq(variables['has_changed'], 'true'))
       inputs:
         azureSubscription: $(azureSubscriptionEndpoint)
         scriptType: bash
@@ -136,7 +146,7 @@ jobs:
                   echo "Testing rest-server $(paiWebUrl)/rest-server/api/v2/info"
                   curl $(paiWebUrl)/rest-server/api/v2/info
                   echo "Checking virtual cluster status..."
-                  vc_info=$(curl -H "Authorization: Bearer $(paiWebToken)" -s $(paiWebUrl)/rest-server/api/v2/virtualclusters)
+                  vc_info=$(curl -H "Authorization: Bearer $(paiWebToken)" -s $(paiWebUrl)/rest-server/api/v2/virtual-clusters)
                   if [ $? -ne 0 ]; then
                     echo "Failed to access virtual cluster API"
                     exit 1

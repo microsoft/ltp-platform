@@ -4,7 +4,7 @@
 const axios = require('axios');
 const { Agent } = require('https');
 const { URL } = require('url');
-const { apiserver } = require('@pai/config/kubernetes');
+const { apiserver, UpdateToken } = require('@pai/config/kubernetes');
 const status = require('statuses');
 const logger = require('@pai/config/logger');
 
@@ -45,6 +45,7 @@ const getClient = (baseURL = '') => {
     });
   }
   if (apiserver.headers) {
+    UpdateToken();
     config.headers = {
       ...apiserver.headers,
       ...config.headers,

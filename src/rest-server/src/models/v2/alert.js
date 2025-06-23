@@ -5,7 +5,7 @@
 const status = require('statuses');
 const launcherConfig = require('@pai/config/launcher');
 const createError = require('@pai/utils/error');
-var urljoin = require('url-join');
+const url = require("url");
 const axios = require('axios');
 
 const checkUserRelatedAlert = (alert, userName) => {
@@ -22,12 +22,12 @@ const checkUserRelatedAlert = (alert, userName) => {
 
 const list = async (isAdmin, userName) => {
   let response;
+  const urljoin = url.resolve(
+    launcherConfig.alertManagerUrl,
+    'alert-manager/api/v2/alerts?silenced=false&inhibited=false');
   var config = {
     method: 'get',
-    url: urljoin(
-      launcherConfig.alertManagerUrl,
-      'alert-manager/api/v2/alerts?silenced=false&inhibited=false',
-    ),
+    url: urljoin,
     headers: {},
   };
 

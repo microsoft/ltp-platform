@@ -115,7 +115,7 @@ const create = async (
     return token;
   }
   const namespace = userTokenNamespace;
-  const key = uuid();
+  const key = uuid.v4();
   const item = await k8sSecret.get(namespace, username, { encode: 'hex' });
   if (item === null) {
     await k8sSecret.create(

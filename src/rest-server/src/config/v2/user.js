@@ -87,11 +87,11 @@ const basicAdminUserUpdateInputSchema = Joi.object().keys({
     .when('patch', {
       is: true,
       then: Joi.object({
-        email: Joi.empty(null),
-        virtualCluster: Joi.empty(null),
-        admin: Joi.empty(null),
-        password: Joi.empty(null),
-        extension: Joi.empty(null),
+        email: Joi.allow(null),
+        virtualCluster: Joi.allow(null),
+        admin: Joi.allow(null),
+        password: Joi.allow(null),
+        extension: Joi.allow(null),
       }),
       otherwise: Joi.object({
         email: Joi.required(),
@@ -122,8 +122,8 @@ const basicUserUpdateInputSchema = Joi.object().keys({
     .when('patch', {
       is: true,
       then: Joi.object({
-        email: Joi.empty(null),
-        newPassword: Joi.empty(null),
+        email: Joi.allow(null),
+        newPassword: Joi.allow(null),
       }),
       otherwise: Joi.object({
         email: Joi.required(),
