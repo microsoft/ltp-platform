@@ -7,7 +7,7 @@ import os
 import logging
 
 from ltp_kusto_sdk.base import KustoBaseClient
-from ltp_kusto_sdk.utils.time_util import parse_duration
+from ltp_kusto_sdk.utils.time_util import parse_duration, convert_timestamp
 
 # set logger with timestamp
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -158,8 +158,8 @@ class AlertFetcher:
 
     def get_node_alert_records(self, end_time_stamp, time_offset, tolerent_duration="15m", endpoint="wcu", nodes=None):
         """Get processed alert records for nodes"""
+        print(f"Fetching alerts from Kusto for nodes: {nodes} with time offset: {time_offset} and end time: {end_time_stamp}")
         alerts_data = self.fetch_logs(end_time_stamp, time_offset)
-        logger.info(f"Fetched {len(alerts_data)} alert logs from Kusto.")
         if alerts_data is None:
             return None
 
@@ -167,14 +167,20 @@ class AlertFetcher:
 
     def find_node_alerts(self, alerts, node, end_time_stamp, start_time_stamp):
         """Find alerts for a specific node in a time period"""
-        start_time = pd.to_datetime(start_time_stamp, unit='s', utc=True)
-        end_time = pd.to_datetime(end_time_stamp, unit='s', utc=True)
+        start_time = convert_timestamp(start_time_stamp, format="datetime")
+        end_time = convert_timestamp(end_time_stamp, format="datetime")
         if isinstance(alerts, list):
             alerts = pd.DataFrame(alerts)
-
-        return alerts[(alerts['timestamp'] >= start_time)
+        logger.info(f"Finding alerts for node {node} between {start_time} and {end_time}"
+                    )
+        logger.info(alerts.head())
+        alerts =  alerts[(alerts['timestamp'] >= start_time)
                      & (alerts['timestamp'] <= end_time) &
                      (alerts['node_name'] == node)]
+        if alerts.empty:
+            logger.info(f"No alerts found for node {node} in the specified time range.")
+            return pd.DataFrame()
+        return alerts
 
 class AlertMapper:
     """Maps alerts to issues"""

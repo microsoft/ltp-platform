@@ -57,11 +57,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
 
 RUN apt update && apt upgrade -y
 
-ARG BRANCH_OR_TAG='ruigao/add_dummy_field_6.2.2update'
-
-# Clone Moneo
-RUN git config --global advice.detachedHead false
-RUN git clone --branch ${BRANCH_OR_TAG} https://github.com/Azure/Moneo.git
+COPY src/Moneo /Moneo
 
 # Install RDC
 RUN sudo bash Moneo/src/worker/install/amd.sh
@@ -76,7 +72,7 @@ COPY build/moneo-*-exporter_entrypoint.sh .
 COPY build/update-dcgm.py .
 
 # For the job exporter
-ENV NERDCTL_VERSION=2.0.0-rc.2
+ENV NERDCTL_VERSION=2.1.2
 RUN apt-get update && apt-get install --no-install-recommends -y wget ca-certificates
 RUN wget https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz && \
     mkdir -p /tmp/nerdctl && \
@@ -88,5 +84,7 @@ RUN wget https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERS
 
 COPY requirements.txt /job_exporter/
 RUN pip3 install -r /job_exporter/requirements.txt
+
+RUN apt update && apt upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY src/*.py /job_exporter/

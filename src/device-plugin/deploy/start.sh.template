@@ -39,6 +39,7 @@ curl -s https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.15.0/deplo
 {% if 'amd.com/gpu' in cluster_cfg['device-plugin']['devices'] %}
 
 curl -s https://raw.githubusercontent.com/ROCm/k8s-device-plugin/master/k8s-ds-amdgpu-dp.yaml \
+| sed 's|rocm/k8s-device-plugin|luciaopenai.azurecr.io/luciaopenai/rocm/k8s-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|' \
     | kubectl apply --overwrite=true -f - || exit $?
 
 {% endif %}
@@ -68,7 +69,7 @@ kubectl apply --overwrite=true -f device-plugin.yaml || exit $?
 
 kubectl apply --overwrite=true -f rdma-devices.yaml || exit $?
 curl -s https://raw.githubusercontent.com/Mellanox/k8s-rdma-shared-dev-plugin/v1.4.0/deployment/k8s/base/daemonset.yaml \
-    | sed 's|ghcr.io/mellanox/k8s-rdma-shared-dev-plugin|ghcr.io/mellanox/k8s-rdma-shared-dev-plugin@sha256:2839e34107c96eb52944edcff66133c1a83ba302dd044489b39e86aca505be35|' \
+    | sed 's|ghcr.io/mellanox/k8s-rdma-shared-dev-plugin|luciaopenai.azurecr.io/luciaopenai/k8s-rdma-shared-dev-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|' \
     | kubectl apply --overwrite=true -f - || exit $?
 
 {% endif %}

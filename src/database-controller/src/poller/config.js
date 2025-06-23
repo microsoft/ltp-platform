@@ -31,7 +31,7 @@ const config = {
   maxRpcConcurrency: parseInt(process.env.MAX_RPC_CONCURRENCY),
 };
 
-const { error, value } = Joi.validate(config, configSchema);
+const { error, value } = configSchema.validate(config);
 if (error) {
   throw new Error(`Config error\n${error}`);
 }

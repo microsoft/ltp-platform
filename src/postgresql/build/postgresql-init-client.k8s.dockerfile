@@ -29,6 +29,8 @@ RUN apt update
 
 RUN apt install -y postgresql-client-16
 
+RUN apt upgrade -y
+
 RUN mkdir -p /postgresql_init
 
 COPY src/init_table.sql src/init_table.sh /postgresql_init/

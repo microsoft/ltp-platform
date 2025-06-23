@@ -138,15 +138,15 @@ export default function JobBar() {
         {/* Job select */}
         <div className="flex items-center gap-2">
           <label htmlFor="job-select" className="block text-sm font-medium text-gray-700 mr-2">Serving Job:</label>
-            <select
+          <select
             id="job-select"
             className="block w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2"
             value={currentJob?.id || ""}
             onChange={handleJobChange}
             disabled={isJobsLoading}
-            size={Math.min(6, allJobs.length || 1)}
+            size={1}
             style={{ minWidth: "16rem", maxWidth: "30rem" }}
-            >
+          >
             <option value="">Select a job ({allJobs.length})</option>
             {allJobs.map((job) => (
               <option key={job.id} value={job.id} title={`${job.name} (${job.username})`}>{job.name}</option>

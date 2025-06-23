@@ -6,6 +6,10 @@ prerequisites:
   - type: dockerimage
     uri: {image}
     name: superbench_image
+secrets:
+  client_id: {client_id}
+parameters:
+  resource_id: 499b84ac-1321-427f-aa17-267ca6975798
 taskRoles:
   taskrole:
     instances: {instances}
@@ -21,10 +25,6 @@ taskRoles:
       cpu: 88
       memoryMB: 1638400
     commands:
-      - export AZURE_SKU=$(curl -sH "Metadata: true" "http://169.254.169.254/metadata/instance/compute/vmSize?api-version=2020-06-01&format=text")
-      - export NCCL_SOCKET_IFNAME=eth0
-      - export CUDA_DEVICE_ORDER=PCI_BUS_ID
-      - export NCCL_DEBUG=WARN
       - export NODE_COUNT=1
       - export NODE_LIST=localhost
       - >-
@@ -32,8 +32,12 @@ taskRoles:
         /etc/profile|' /opt/superbench/superbench/runner/runner.py
       - pip install /opt/superbench/
       - pip uninstall ansible_core -y
-      - git clone https://LuciaTrainingPlatform@dev.azure.com/LuciaTrainingPlatform/LTP/_git/ltp-validation /LTPvalidation
-      - cd /LTPvalidation
+      - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+      - az login --identity --client-id <% $secrets.client_id %> --allow-no-subscriptions
+      - >-
+        git -c http.extraheader="AUTHORIZATION: Bearer $(az account get-access-token --resource <% $parameters.resource_id %> --query accessToken -o tsv)"
+        clone https://LuciaTrainingPlatform@dev.azure.com/LuciaTrainingPlatform/LTP/_git/ltp-validation /opt/ltp-validation
+      - cd /opt/ltp-validation
       - >-
         python3 script/run.py --category NCCL TensorCore IB PCIe Model
         --output-dir /output/validation-$(date '+%Y-%m-%d_%H-%M-%S')

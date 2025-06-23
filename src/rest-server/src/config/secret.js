@@ -52,7 +52,7 @@ if (authnConfig.authnMethod !== 'OIDC') {
     .required();
 }
 
-const { error, value } = Joi.validate(userSecretConfig, userSecretConfigSchema);
+const { error, value } = userSecretConfigSchema.validate(userSecretConfig);
 if (error) {
   throw new Error(`config error\n${error}`);
 }

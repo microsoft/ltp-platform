@@ -32,14 +32,8 @@ def mock_request_util():
 
 @pytest.fixture
 def monitor(mock_alert_fetcher, mock_alert_mapper, mock_node_updater):
-    return NodeAvailabilityMonitor(endpoint="test-endpoint", update_interval=1)
+    return NodeAvailabilityMonitor()
 
-def test_init(mock_alert_fetcher, mock_alert_mapper, mock_node_updater):
-    monitor = NodeAvailabilityMonitor(endpoint="test-endpoint", update_interval=5)
-    assert monitor.endpoint == "test-endpoint"
-    assert monitor.update_interval == 5
-    assert not monitor.is_running
-    assert monitor.last_update_time is None
 
 def test_query_availability_changes(monitor, mock_request_util):
     mock_response = {
@@ -93,7 +87,10 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
     })
     node_status = {
         'Timestamp': timestamp - 100,
-        'Status': 'available'
+        'Status': 'available',
+        'NodeId': node,
+        'Endpoint': 'test-endpoint',
+        'HostName': node
     }
     end_time = timestamp + 100
 
@@ -116,7 +113,10 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
     status = 0  # Changed to schedulable
     node_status = {
         'Timestamp': timestamp - 100,
-        'Status': 'validating'
+        'Status': 'validating',
+        'NodeId': node,
+        'Endpoint': 'test-endpoint',
+        'HostName': node
     }
     monitor.handle_node_status_change(node, timestamp, status, alerts, node_status)
     
@@ -131,7 +131,10 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
     status = -1 
     node_status = {
         'Timestamp': timestamp - 100,
-        'Status': 'validating'
+        'Status': 'validating',
+        'NodeId': node,
+        'Endpoint': 'test-endpoint',
+        'HostName': node
     }
     alerts = pd.DataFrame({
         'alertname': ['CordonValidationFailedNodes'],
@@ -158,7 +161,10 @@ def test_monitor_status_changes(monitor, mock_node_updater, mock_alert_fetcher, 
     mock_node_updater.get_last_actions_update_time.return_value = None
     mock_node_updater.get_node_latest_status.return_value = {
         'Timestamp': datetime.fromtimestamp(end_time-1000, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-        'Status': 'available'
+        'Status': 'available',
+        'NodeId': 'test-node',
+        'Endpoint': 'test-endpoint',
+        'HostName': 'test-node'
     }
     
     # Mock the get_all_status_changes method

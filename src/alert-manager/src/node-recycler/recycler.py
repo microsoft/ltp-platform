@@ -1,12 +1,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+from concurrent.futures import ThreadPoolExecutor
 import os
 import json
 import time
 import random
 import string
 from datetime import datetime
+import logging
 
 import icm
 import requests
@@ -15,6 +17,10 @@ from azure.mgmt.compute import ComputeManagementClient
 
 from ltp_kusto_sdk import NodeStatusClient, NodeActionClient
 from ltp_kusto_sdk.features.node_status.models import NodeStatus
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class NodeRecycler:
@@ -47,44 +53,49 @@ class NodeRecycler:
         Returns:
             List[int]: A list of hostnames of the succeeded OFR nodes.
         """
-        from_state, to_state = NodeStatus.TRIAGED_HW.value, NodeStatus.UA.value
+        from_state, to_state = NodeStatus.TRIAGED_HARDWARE.value, NodeStatus.UA.value
 
         created = []
         if not node_faults and status_client and action_client:
             query = """
             {table_name}
-            | where Action endswith {state}
+            | where Action endswith '{state}'
             | where HostName == '{hostname}' and NodeId == '{node_id}'
             | top 1 by Timestamp desc
             """
             node_faults = []
             for node in status_client.get_nodes_by_status(from_state):
-                hostname, node_id = node["HostName"], node["NodeId"]
-                result = action_client.execute_query(query.format(
-                    table_name=action_client.table_name,
-                    hostname=hostname,
-                    node_id=node_id,
-                ))
-                if result and "Action" in result[0] and "Detail" in result[0]:
-                    action, detail = result[0]["Action"], result[0]["Detail"]
-                    if action.endswith(from_state):
-                        try:
-                            detail_json = json.loads(detail)
-                            detail_node_id = detail_json.get("NodeId")
-                            defail_fault_reason = detail_json.get("FaultCode")
-                            if not detail_node_id or not defail_fault_reason:
-                                raise ValueError("NodeId or FaultCode is empty in Detail field")
-                            node_faults.append((hostname, detail_node_id, defail_fault_reason))
-                        except Exception as e:
-                            print(f"Failed to parse action detail {detail} due to: {e}")
-                            continue
-                    if action.startwith(from_state) and action.endswith(to_state):
-                        created.append({"hostname": hostname, "node_id": node_id, "ticket_id": detail})
-                else:
-                    print(f"WARNING: Cannot find action record for node {hostname} with node id {node_id}")
+                try:
+                    hostname, node_id = node["HostName"], node["NodeId"]
+                    result = action_client.execute_query(query.format(
+                        table_name=action_client.table_name,
+                        state=from_state,
+                        hostname=hostname,
+                        node_id=node_id,
+                    ))
+                    logger.info(f"INFO: Querying node {hostname} with node id {node_id} in state {from_state}")
+                    if result and "Action" in result[0] and "Detail" in result[0]:
+                        action, detail = result[0]["Action"], result[0]["Detail"]
+                        if action.endswith(from_state):
+                            try:
+                                detail_json = json.loads(detail)
+                                detail_node_id = detail_json.get("NodeId")
+                                defail_fault_reason = detail_json.get("FaultCode")
+                                if not detail_node_id or not defail_fault_reason:
+                                    raise ValueError("NodeId or FaultCode is empty in Detail field")
+                                node_faults.append((hostname, detail_node_id, defail_fault_reason))
+                            except Exception as e:
+                                logger.error(f"Failed to parse action detail {detail} due to: {e}")
+                                continue
+                        if action.startswith(from_state) and action.endswith(to_state):
+                            created.append({"hostname": hostname, "node_id": node_id, "ticket_id": detail})
+                    else:
+                        logger.warning(f"WARNING: Cannot find action record for node {hostname} with node id {node_id}")
+                except Exception as e:
+                    logger.error(f"Error occured when querying node {hostname} with node id {node_id}: {e}")
         if not node_faults and not created:
             return
-        print(f"Found {len(created)} existing IcM OFR tickets")
+        logger.info(f"Found {len(created)} existing IcM OFR tickets")
 
         icm_api = icm.ICMApi(
             icm_host=cls._icm_host,
@@ -114,7 +125,7 @@ class NodeRecycler:
             try:
                 result = icm_api.create_incident(incident=incident, connector_id=cls._icm_connector_id)
                 ticket_id = result[0]
-                print(f"Created IcM ticket {cls._icm_uri_format.format(ticket_id)} with id {ticket_id} for node {node_id} ({hostname})")
+                logger.info(f"Created IcM ticket {cls._icm_uri_format.format(ticket_id)} with id {ticket_id} for node {node_id} ({hostname})")
                 created.append({
                     "hostname": hostname,
                     "node_id": node_id,
@@ -126,8 +137,8 @@ class NodeRecycler:
                         time.time(), ofr_str, ticket_id, "",
                     )
             except Exception as e:
-                print(f"Error occured when creating OFR ticket for node {node_id} ({hostname}): {e}")
-        print(f"Found/Created {len(created)} IcM OFR tickets, checking OFR results ...")
+                logger.error(f"Error occured when creating OFR ticket for node {node_id} ({hostname}): {e}")
+        logger.info(f"Found/Created {len(created)} IcM OFR tickets, checking OFR results ...")
 
         def is_ticket_resolved(tid):
             try:
@@ -140,16 +151,22 @@ class NodeRecycler:
         curr_delay, max_delay = 60, 180
         while created and curr_delay <= max_delay:
             time.sleep(curr_delay)
+            logger.info(f"Checking IcM tickets for {len(created)} nodes, waiting {curr_delay} seconds ...")
             for each in created[:]:
-                name, tid = each["hostname"], each["ticket_id"]
-                if not is_ticket_resolved(tid):
-                    continue
-                created.remove(each)
-                completed.append(name)
-                if status_client:
-                    status_client.update_node_status(name, to_state, time.time())
+                try:
+                    name, tid = each["hostname"], each["ticket_id"]
+                    if not is_ticket_resolved(tid):
+                        continue
+                    created.remove(each)
+                    completed.append(name)
+                    if status_client:
+                        status_client.update_node_status(name, to_state, time.time())
+                except Exception as e:
+                    logger.error(f"Error occured when checking IcM ticket Resolved {tid} for node {name}: {e}")
             curr_delay += 60
-        print(f"AutoOFRed {len(completed)} nodes successfully")
+        logger.info(f"AutoOFRed {len(completed)} nodes successfully")
+        if created:
+            logger.error(f"Failed to AutoOFR {len(created)} nodes, please check IcM tickets: {created}")
 
         return completed
 
@@ -174,12 +191,13 @@ class NodeRecycler:
 
         for each in icm_api.get_incidents(query=query):
             if each["Title"].startswith(ofr_prefix):
-                print(f"Found active IcM ticket for node {node_id}: {each}")
+                logger.info(f"Found active IcM ticket for node {node_id}: {each}")
                 return True
         return False
 
     @classmethod
-    def operate(cls, vmss_id, operation="start", hostnames=None, status_client=None, action_client=None):
+    def operate(cls, vmss_id, operation="start", hostnames=None, status_client=None, action_client=None,
+                from_state=NodeStatus.DEALLOCATED_UA.value, to_state=NodeStatus.ALLOCATED_UA.value):
         """Start or deallocate given VMs in VMSS and update Kusto accordingly.
 
         Args:
@@ -197,25 +215,21 @@ class NodeRecycler:
             List[dict]: A list of VMs successfully transitioned.
         """
         op = operation.lower()
-        if op == "start":
-            from_state, to_state = NodeStatus.DEALLOCATED_UA.value, NodeStatus.ALLOCATED_UA.value
-        elif op == "deallocate":
-            from_state, to_state = NodeStatus.UA.value, NodeStatus.DEALLOCATED_UA.value
-        else:
+        if op != "start" and op != "deallocate":
             raise ValueError(f"Unsupported operation: {operation}")
 
         if not hostnames and status_client:
             hostnames = [n["HostName"] for n in status_client.get_nodes_by_status(from_state)]
         if not hostnames:
             return []
-
+        logger.info(f"Operating on {hostnames} hostnames in VMSS {vmss_id} with operation {op}")
         parts = vmss_id.strip().split("/")
         try:
             sub_id = parts[parts.index("subscriptions") + 1]
             rg_name = parts[parts.index("resourceGroups") + 1]
             vmss_name = parts[parts.index("virtualMachineScaleSets") + 1]
         except (ValueError, IndexError):
-            print(f"Invalid VMSS resource id: {vmss_id}")
+            logger.error(f"Invalid VMSS resource id: {vmss_id}")
             return []
 
         def is_vm_succeed_in_target(vm):
@@ -236,11 +250,11 @@ class NodeRecycler:
         pollers, completed = [], []
         try:
             for vm in vmss_client.list(rg_name, vmss_name, expand="instanceView"):
-                name = vm.os_profile.computer_name
+                name = vm.os_profile.computer_name.lower() if vm.os_profile and vm.os_profile.computer_name else None
                 if name not in hostnames:
                     continue
                 if op == "start" and is_vm_succeed_in_target(vm):
-                    print(f"WARNING: {name} is running but still in {from_state} state")
+                    logger.warning(f"WARNING: {name} is running but still in {from_state} state")
                     completed.append({"instance_id": vm.instance_id, "computer_name": name})
                     if status_client:
                         status_client.update_node_status(name, to_state, time.time())
@@ -257,11 +271,11 @@ class NodeRecycler:
                         time.time(), f"{op.title()}ing VM", "", "",
                     )
         except Exception as e:
-            print(f"List instances in VMSS failed due to: {e}")
+            logger.error(f"List instances in VMSS failed due to: {e}")
         finally:
             if op == "start":
-                print(f"Found {len(completed)} {to_state} instances to skip {op} in VMSS {vmss_name}")
-            print(f"Found {len(pollers)} {from_state} instances to {op} in VMSS {vmss_name}, {op}ing ...")
+                logger.info(f"Found {len(completed)} {to_state} instances to skip {op} in VMSS {vmss_name}")
+            logger.info(f"Found {len(pollers)} {from_state} instances to {op} in VMSS {vmss_name}, {op}ing ...")
 
         # Wait to finish start and check final state
         for each in pollers:
@@ -277,10 +291,10 @@ class NodeRecycler:
                     if status_client:
                         status_client.update_node_status(name, to_state, time.time())
                 else:
-                    print(f"Instance {inst} ({name}) failed to {op}")
+                    logger.warning(f"Instance {inst} ({name}) failed to {op}")
             except Exception as e:
-                print(f"Instance {inst} ({name}) failed during {op} due to: {e}")
-        print(f"{op.title()}ed {len(completed)} instances in VMSS {vmss_name}")
+                logger.warning(f"Instance {inst} ({name}) failed during {op} due to: {e}")
+        logger.info(f"{op.title()}ed {len(completed)} instances in VMSS {vmss_name}")
 
         return completed
 
@@ -303,41 +317,45 @@ class NodeRecycler:
 
         with open("validation.yaml", "r") as f:
             template = f.read()
-        config = template.format(
-            uid="".join(random.choices(string.ascii_letters + string.digits, k=8)),
-            image=cls._ltp_validation_image,
-            instances=len(hostnames),
-            hostnames=",".join(hostnames).lower(),
-        )
-
-        res = requests.post(
-            f"{cls._ltp_rest_server_uri}/api/v2/jobs",
-            data=config,
-            headers={
-                "Content-Type": "text/yaml",
-                "Authorization": f"Bearer {cls._ltp_rest_server_token}"
-            },
-        )
-        if action_client:
-            for hostname in hostnames:
-                action_client.update_node_action(
-                    hostname,
-                    f"{filter_state}-{NodeStatus.VALIDATING.value}",
-                    time.time(), "Submitting validation job for VM", "", "",
+        logger.info(f"Submitting validation job for {hostnames} in state {filter_state}")
+        for hostname in hostnames:
+            try:
+                if not hostname or not hostname.strip():
+                    logger.warning(f"Invalid hostname: {hostname}, skipping validation job submission")
+                    continue
+                config = template.format(
+                    uid="".join(random.choices(string.ascii_letters + string.digits, k=8)),
+                    image=cls._ltp_validation_image,
+                    client_id=cls._azure_client_id,
+                    instances=1,
+                    hostnames=hostname.lower(),
                 )
-        try:
-            res.raise_for_status()
-            print(f"Submitted validation job with response: {res.json()}")
-            if status_client:
-                for hostname in hostnames:
-                    status_client.update_node_status(
+                res = requests.post(
+                    f"{cls._ltp_rest_server_uri}/api/v2/jobs",
+                    data=config,
+                    headers={
+                        "Content-Type": "text/yaml",
+                        "Authorization": f"Bearer {cls._ltp_rest_server_token}"
+                    },
+                )
+                if action_client:
+                    action_client.update_node_action(
                         hostname,
-                        NodeStatus.VALIDATING.value,
-                        time.time(),
+                        f"{filter_state}-{NodeStatus.VALIDATING.value}",
+                        time.time(), "Submitting validation job for VM", "", "",
                     )
-        except Exception as e:
-            print(f"Failed to submit validation job due to:\n{e}")
-            print(f"Raw response: {res.text}")
+                res.raise_for_status()
+                logger.info(f"Submitted validation job for {hostname} with response: {res.json()}")
+                if status_client:
+                    for hostname in hostnames:
+                        status_client.update_node_status(
+                            hostname,
+                            NodeStatus.VALIDATING.value,
+                            time.time(),
+                        )
+            except Exception as e:
+                logger.error(f"Failed to submit validation job due to:\n{e}")
+                logger.info(f"Raw response: {res.text}")
 
     @classmethod
     def ua_and_deallocate_pipeline(cls, status_client, action_client):
@@ -348,20 +366,33 @@ class NodeRecycler:
             status_client (NodeStatusClient): Node status client in SDK.
             action_client (NodeActionClient): Node action client in SDK.
         """
-        print("Starting to UA Cordoned Nodes")
+        logger.info("Starting to UA Cordoned Nodes")
         ualist = cls.ofr(
             status_client=status_client,
             action_client=action_client,
         )
-        for vmss_id in cls._ltp_vmss_ids.split(","):
-            print(f"Starting to Deallocate Nodes in {vmss_id}")
-            cls.operate(
-                vmss_id,
-                operation="deallocate",
-                hostnames=ualist,
-                status_client=status_client,
-                action_client=action_client,
-            )
+          
+        logger.info(f"Starting to Deallocate Nodes in UA state")
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = []
+            for vmss_id in cls._ltp_vmss_ids.split(","):
+                futures.append(
+                    executor.submit(
+                        cls.operate,
+                        vmss_id,
+                        operation="deallocate",
+                        status_client=status_client,
+                        action_client=action_client,
+                        from_state=NodeStatus.UA.value,
+                        to_state=NodeStatus.DEALLOCATED_UA.value,
+                    )
+                )
+
+            for f in futures:
+                try:
+                    f.result()
+                except Exception as e:
+                    logger.error(f"Error operating on {vmss_id}: {e}")
 
     @classmethod
     def start_and_validate_pipeline(cls, status_client, action_client):
@@ -372,27 +403,40 @@ class NodeRecycler:
             status_client (NodeStatusClient): Node status client in SDK.
             action_client (NodeActionClient): Node action client in SDK.
         """
-        for vmss_id in cls._ltp_vmss_ids.split(","):
-            print(f"Starting to Start Nodes in {vmss_id}")
-            started_vms = cls.operate(
-                vmss_id,
-                operation="start",
-                status_client=status_client,
-                action_client=action_client,
-            )
-            if len(started_vms) > 0:
-                # TODO: check node status in k8s
-                time.sleep(300)
-                print(f"Starting to Validate Nodes in {vmss_id}")
-                cls.validate(
-                    hostnames=[vm["computer_name"] for vm in started_vms],
-                    status_client=status_client,
-                    action_client=action_client,
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = []
+            for vmss_id in cls._ltp_vmss_ids.split(","):
+                futures.append(
+                    executor.submit(
+                        cls.operate,
+                        vmss_id,
+                        operation="start",
+                        status_client=status_client,
+                        action_client=action_client,
+                        from_state=NodeStatus.DEALLOCATED_UA.value,
+                        to_state=NodeStatus.ALLOCATED_UA.value
+                    )
                 )
+
+            for f in futures:
+                try:
+                    started_vms = f.result()
+                    if len(started_vms) > 0:
+                        # TODO: check node status in k8s
+                        time.sleep(300)
+                        logger.info(f"Starting to Validate Nodes in {vmss_id}")
+                        cls.validate(
+                            hostnames=[vm["computer_name"] for vm in started_vms],
+                            status_client=status_client,
+                            action_client=action_client,
+                        )
+                except Exception as e:
+                    logger.error(f"Error operating on {vmss_id}: {e}") 
         # validate previous failed nodes as well
         time.sleep(30)
-        print("Starting to Validate Allocated Nodes")
-        cls.validate(status_client=status_client, action_client=action_client)
+        logger.info("Starting to Validate Allocated Nodes")
+        cls.validate(status_client=status_client, action_client=action_client,
+                     filter_state=NodeStatus.ALLOCATED_UA.value)
 
     @classmethod
     def node_recycle_pipeline_loop(cls, interval=1800):
@@ -403,11 +447,11 @@ class NodeRecycler:
             interval (int): Time interval to repeat the pipeline in the loop.
         """
         status_client, action_client = NodeStatusClient(), NodeActionClient()
-        print("Created Kusto clients for node status and action tables")
+        logger.info("Created Kusto clients for node status and action tables")
         while True:
-            print(f"{datetime.now()} Starting to UA and Deallocate Nodes")
+            logger.info(f"{datetime.now()} Starting to UA and Deallocate Nodes")
             cls.ua_and_deallocate_pipeline(status_client, action_client)
-            print(f"{datetime.now()} Starting to Start and Validate Nodes")
+            logger.info(f"{datetime.now()} Starting to Start and Validate Nodes")
             cls.start_and_validate_pipeline(status_client, action_client)
             time.sleep(interval)
 

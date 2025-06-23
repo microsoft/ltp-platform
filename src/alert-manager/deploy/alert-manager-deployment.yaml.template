@@ -41,7 +41,7 @@ spec:
       hostNetwork: false
       containers:
       - name: alertmanager
-        image: prom/alertmanager:v0.27.0
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}alertmanager:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         args:
           - '--config.file=/etc/alertmanager/config.yml'
           - '--storage.path=/alertmanager'
@@ -129,6 +129,43 @@ spec:
 {% if cluster_cfg["alert-manager"]["node-issue-classifier"]["configured"] %}
       - name: node-issue-classifier
         image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}node-issue-classifier:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        env:
+        - name: CLUSTER_ID
+          value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
+        - name: ENVIRONMENT
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["environment"] | default(cluster_cfg["alert-manager"]["environment"]) | default("prod") }}
+        - name: LOG_LEVEL
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["log-level"] | default(cluster_cfg["alert-manager"]["log-level"]) | default("INFO") }}
+        - name: CLASSIFICATION_INTERVAL_MINUTES
+          value: "{{ cluster_cfg["alert-manager"]["node-issue-classifier"]["classification-interval-minutes"] | default("10") }}"
+{% if cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto"] %}
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
+        - name: LTP_KUSTO_CLUSTER_URI
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
+        - name: LTP_KUSTO_DATABASE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
+        - name: KUSTO_NODE_STATUS_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["node-status-table"]
+                    | default(cluster_cfg["alert-manager"]["node-status-table"])
+                    | default("NodeStatusRecord") }}
+        - name: KUSTO_NODE_ACTION_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["node-action-table"]
+                    | default(cluster_cfg["alert-manager"]["node-action-table"])
+                    | default("NodeActionRecord") }}
+{% endif %}
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "100m"
+          limits:
+            memory: "4Gi"
+            cpu: "200m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+{% endif %}
 {% if cluster_cfg["alert-manager"]["alert-parser"]["configured"] %}
       - name: alert-parser
         image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}alert-parser:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
@@ -136,52 +173,40 @@ spec:
         env:
         - name: CLUSTER_ID
           value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
+        - name: ENVIRONMENT
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["environment"] | default(cluster_cfg["alert-manager"]["environment"]) | default("prod") }}
+        - name: LOG_LEVEL
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["log-level"] | default(cluster_cfg["alert-manager"]["log-level"]) | default("INFO") }}
+        - name: UPDATE_INTERVAL
+          value: "{{ cluster_cfg["alert-manager"]["alert-parser"]["update-interval"] | default("10") }}"
+        - name: REST_SERVER_URI
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["uri"] }} 
+        - name: PAI_TOKEN
+          value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
           value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
-        - name: LTP_KUSTO_CLUSTER
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto-cluster"] }}
-        - name: LTP_KUSTO_DATABASE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto-database"] }}
-        - name: KUSTO_NODE_STATUS_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["node-status-table"] | default("NodeStatusRecord") }}
-        - name: KUSTO_NODE_STATUS_ATTRIBUTE_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["node-status-attribute-table"] | default("NodeStatusAttributes") }}
-        - name: KUSTO_NODE_ACTION_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["node-action-table"] | default("NodeActionRecord") }}
-        - name: KUSTO_NODE_ACTION_ATTRIBUTE_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["node-action-attribute-table"] | default("NodeActionAttributes") }}
-        - name: ENVIRONMENT
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["environment"] | default("prod") }}
-        - name: LOG_LEVEL
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["log-level"] | default("INFO") }}
-        - name: CLASSIFICATION_INTERVAL_MINUTES
-          value: "{{ cluster_cfg['alert-manager']['node-issue-classifier']['classification-interval-minutes'] | default('10') }}"
-        - name: ICM_CERT_PATH
-          value: "/etc/icm-certs/cert"
-        - name: ICM_KEY_PATH
-          value: "/etc/icm-certs/key"
         - name: LTP_KUSTO_CLUSTER_URI
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-cluster"] }}
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
         - name: LTP_KUSTO_DATABASE_NAME
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-database"] }}
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
         - name: KUSTO_NODE_STATUS_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-status-table"] | default("NodeStatusRecord") }}
-        - name: KUSTO_NODE_STATUS_ATTRIBUTE_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-status-attribute-table"] | default("NodeStatusAttributes") }}
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-status-table"]
+                    | default(cluster_cfg["alert-manager"]["node-status-table"])
+                    | default("NodeStatusRecord") }}
         - name: KUSTO_NODE_ACTION_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-action-table"] | default("NodeActionRecord") }}
-        - name: KUSTO_NODE_ACTION_ATTRIBUTE_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-action-attribute-table"] | default("NodeActionAttributes") }}
-        - name: ENVIRONMENT
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["environment"] | default("prod") }}
-        - name: LOG_LEVEL
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["log-level"] | default("INFO") }}
-        - name: UPDATE_INTERVAL
-          value: "{{ cluster_cfg['alert-manager']['alert-parser']['update-interval'] | default('10') }}"
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-action-table"]
+                    | default(cluster_cfg["alert-manager"]["node-action-table"])
+                    | default("NodeActionRecord") }}
         - name: KUSTO_ALERT_CLUSTER
           value: "{{ cluster_cfg['alert-manager']['alert-parser']['alert-kusto-cluster'] | default('https://ltp-kusto-alerts.westus2.kusto.windows.net') }}"
         - name: KUSTO_ALERT_DATABASE
           value: "{{ cluster_cfg['alert-manager']['alert-parser']['alert-kusto-database'] | default('DefaultWorkspace-id-westus2') }}"
+        - name: LTP_KUSTO_VM_INFO_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-vm-table"] | default(cluster_cfg["alert-manager"]["kusto-vm-table"]) }}
+        - name: LTP_VMSS_IDS
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["vmss_ids"] | default(cluster_cfg["alert-manager"]["vmss_ids"]) }}
+        - name: AZURE_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["vmss_client_id"] | default(cluster_cfg["alert-manager"]["vmss_client_id"]) }}
         resources:
           requests:
             memory: "256Mi"
@@ -203,17 +228,21 @@ spec:
           value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
         - name: ENVIRONMENT
           value: {{ cluster_cfg["alert-manager"]["node-recycler"]["environment"] | default("prod") }}
+{% if cluster_cfg["alert-manager"]["node-recycler"]["kusto"] %}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
           value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
-{% if "kusto" in cluster_cfg["alert-manager"]["node-recycler"] %}
-        - name: LTP_KUSTO_CLUSTER
-          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto"]["cluster"] }}
+        - name: LTP_KUSTO_CLUSTER_URI
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
         - name: LTP_KUSTO_DATABASE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto"]["database"] }}
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
         - name: KUSTO_NODE_STATUS_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto"]["node-status-table"] | default("NodeStatusRecord") }}
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["node-status-table"]
+                    | default(cluster_cfg["alert-manager"]["node-status-table"])
+                    | default("NodeStatusRecord") }}
         - name: KUSTO_NODE_ACTION_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto"]["node-action-table"] | default("NodeActionRecord") }}
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["node-action-table"]
+                    | default(cluster_cfg["alert-manager"]["node-action-table"])
+                    | default("NodeActionRecord") }}
 {% endif %}
 {% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
         - name: ICM_HOST

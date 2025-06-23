@@ -31,6 +31,14 @@ jobs:
     pool:
       vmImage: 'ubuntu-24.04'
     steps:
+    - checkout: self
+      submodules: false
+      persistCredentials : true
+    - powershell: |
+        $header = "AUTHORIZATION: bearer $(System.AccessToken)"
+        git -c http.extraheader="$header" submodule sync
+        git -c http.extraheader="$header" submodule update --init --force --depth=1
+      displayName: Checkout Submodule
     - script: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython   
       displayName: Install python libs
     - script: |
@@ -48,17 +56,17 @@ jobs:
         destinationFolder: '$(Pipeline.Workspace)/config'
         cleanDestinationFolder: true
     - script: |
-        mv $(Pipeline.Workspace)/config/pylon-configuration /tmp/
         mv $(Pipeline.Workspace)/config/auth-configuration /tmp/
+        ls -l /tmp/auth-configuration
       displayName: Arrange Config Files
     - script: |
-        # Build all services # Skip "frameworkcontroller" "hivedscheduler" "openpai-runtime" "k8s-dashboard" "marketplace-db" "node-exporter" "prometheus"
-        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin  job-exporter log-manager grafana alert-manager watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
+        # Build all services # Skip"k8s-dashboard" "marketplace-db" "node-exporter" "prometheus"
+        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana alert-manager frameworkcontroller hivedscheduler openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal 
       displayName: 'Build all Services images'
       condition: or(eq(${{ parameters.rebuildImage }}, 'true'), eq(${{ parameters.repushImage }}, 'true'))
     - script: |
-        # Build all services # Skip "frameworkcontroller" "hivedscheduler" "openpai-runtime" "k8s-dashboard" "marketplace-db" "node-exporter" "prometheus"
-        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana alert-manager watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
+        # Push all services # Skip "k8s-dashboard" "marketplace-db" "node-exporter" "prometheus"
+        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana alert-manager frameworkcontroller hivedscheduler openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
       displayName: 'Push all Services'
       condition: eq(${{ parameters.repushImage }}, 'true')
     - task: AzureCLI@2
@@ -97,7 +105,7 @@ jobs:
                   echo "Testing rest-server $(paiWebUrl)/rest-server/api/v2/info"
                   curl $(paiWebUrl)/rest-server/api/v2/info
                   echo "Checking virtual cluster status..."
-                  vc_info=$(curl -H "Authorization: Bearer $(paiWebToken)" -s $(paiWebUrl)/rest-server/api/v2/virtualclusters)
+                  vc_info=$(curl -H "Authorization: Bearer $(paiWebToken)" -s $(paiWebUrl)/rest-server/api/v2/virtual-clusters)
                   if [ $? -ne 0 ]; then
                     echo "Failed to access virtual cluster API"
                     exit 1

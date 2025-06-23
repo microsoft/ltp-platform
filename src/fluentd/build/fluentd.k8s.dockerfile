@@ -27,6 +27,8 @@ RUN apk add --no-cache --update --virtual .build-deps \
  && sudo gem install rake pg \
  && sudo apk add ruby-bigdecimal
 
+ RUN sudo apk update && sudo apk upgrade
+
 # Build fluent-plugin-pgjson from scratch
 # Original fluent-plugin-pgjson is from https://github.com/fluent-plugins-nursery/fluent-plugin-pgjson
 # Original plugin cannot retry connecting when database connection is lost, 

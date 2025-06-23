@@ -65,9 +65,9 @@ const groupUpdateInputSchema = Joi.object().keys({
     .when('patch', {
       is: true,
       then: Joi.object({
-        description: Joi.empty(null),
-        externalName: Joi.empty(null),
-        extension: Joi.empty(null),
+        description: Joi.allow(null),
+        externalName: Joi.allow(null),
+        extension: Joi.allow(null),
       }),
       otherwise: Joi.object({
         description: Joi.required(),

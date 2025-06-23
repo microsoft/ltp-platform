@@ -38,7 +38,7 @@ class NodeStatus(str, Enum):
     DEALLOCATED_CAPACITY = "deallocated_capacity"
 
     # Triaged states
-    TRIAGED_HW = "triaged_hardware"
+    TRIAGED_HARDWARE = "triaged_hardware"
     TRIAGED_USER = "triaged_user"
     TRIAGED_PLATFORM = "triaged_platform"
     TRIAGED_UNKNOWN = "triaged_unknown"
@@ -139,7 +139,7 @@ STATUS_METADATA = {
                    allowed_transitions=[
                        NodeStatus.AVAILABLE.value, NodeStatus.CORDONED.value,
                        NodeStatus.DEALLOCATED_CAPACITY.value,
-                       NodeStatus.TRIAGED_HW.value,
+                       NodeStatus.TRIAGED_HARDWARE.value,
                        NodeStatus.TRIAGED_USER.value,
                        NodeStatus.TRIAGED_PLATFORM.value,
                        NodeStatus.TRIAGED_UNKNOWN.value
@@ -149,7 +149,7 @@ STATUS_METADATA = {
                    description="Node is available for use",
                    allowed_transitions=[
                        NodeStatus.CORDONED.value,
-                       NodeStatus.TRIAGED_HW.value,
+                       NodeStatus.TRIAGED_HARDWARE.value,
                        NodeStatus.TRIAGED_USER.value,
                        NodeStatus.TRIAGED_PLATFORM.value,
                        NodeStatus.TRIAGED_UNKNOWN.value,
@@ -160,7 +160,7 @@ STATUS_METADATA = {
                    description="Node is cordoned off",
                    allowed_transitions=[
                        NodeStatus.AVAILABLE.value,
-                       NodeStatus.TRIAGED_HW.value,
+                       NodeStatus.TRIAGED_HARDWARE.value,
                        NodeStatus.TRIAGED_USER.value,
                        NodeStatus.TRIAGED_PLATFORM.value,
                        NodeStatus.TRIAGED_UNKNOWN.value,
@@ -174,7 +174,7 @@ STATUS_METADATA = {
                    ]),
 
     # Triaged states metadata
-    NodeStatus.TRIAGED_HW.value:
+    NodeStatus.TRIAGED_HARDWARE.value:
     StatusMetadata(group=StatusGroup.TRIAGED,
                    description="Node is triaged for hardware issues",
                    allowed_transitions=[
@@ -207,7 +207,8 @@ STATUS_METADATA = {
                        NodeStatus.DEALLOCATED_CAPACITY.value,
                        NodeStatus.TRIAGED_PLATFORM.value,
                        NodeStatus.TRIAGED_USER.value,
-                       NodeStatus.TRIAGED_HW.value
+                       NodeStatus.TRIAGED_HARDWARE.value,
+                       NodeStatus.AVAILABLE.value,
                    ]),
 
     # UA states metadata

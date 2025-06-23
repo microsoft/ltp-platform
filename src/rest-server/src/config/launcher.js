@@ -154,10 +154,7 @@ if (launcherType === 'k8s') {
     jobRestrictionGitScriptName: process.env.JOB_RESTRICTION_GIT_SCRIPT_NAME || 'unset',
   };
 
-  const { error, value } = Joi.validate(
-    launcherConfig,
-    k8sLauncherConfigSchema,
-  );
+  const { error, value } = k8sLauncherConfigSchema.validate(launcherConfig);
   if (error) {
     throw new Error(`launcher config error\n${error}`);
   }

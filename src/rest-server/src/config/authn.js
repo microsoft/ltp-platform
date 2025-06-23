@@ -56,7 +56,7 @@ if (authnConfig.authnMethod === 'OIDC') {
   if (process.env.OIDC_CONFIG_PATH) {
     odicConfigPath = process.env.OIDC_CONFIG_PATH;
   }
-  authnConfig.OIDCConfig = yaml.safeLoad(
+  authnConfig.OIDCConfig = yaml.load(
     fs.readFileSync(odicConfigPath, 'utf8'),
   );
   (async function () {
@@ -69,7 +69,7 @@ try {
   if (process.env.GROUP_CONFIG_PATH) {
     groupConfigPath = process.env.GROUP_CONFIG_PATH;
   }
-  authnConfig.groupConfig = yaml.safeLoad(
+  authnConfig.groupConfig = yaml.load(
     fs.readFileSync(groupConfigPath, 'utf8'),
   );
 } catch (error) {
@@ -86,7 +86,7 @@ const authnSchema = Joi.object()
   })
   .required();
 
-const { error, value } = Joi.validate(authnConfig, authnSchema);
+const { error, value } = authnSchema.validate(authnConfig);
 if (error) {
   throw new Error(`config error\n${error}`);
 }

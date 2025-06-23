@@ -704,7 +704,7 @@ const generateTaskRole = (
     ] = 1;
     frameworkTaskRole.task.pod.metadata.annotations[
       'hivedscheduler.microsoft.com/pod-scheduling-spec'
-    ] = yaml.safeDump(config.taskRoles[taskRole].hivedPodSpec);
+    ] = yaml.dump(config.taskRoles[taskRole].hivedPodSpec);
     if (config.taskRoles[taskRole].resourcePerInstance.gpu > 0) {
       for (const envName of launcherConfig.hivedComputingDeviceEnvs) {
         frameworkTaskRole.task.pod.spec.containers[0].env.push({
@@ -920,7 +920,7 @@ const getDockerSecretDef = (frameworkName, auths) => {
 const getConfigSecretDef = (frameworkName, secrets) => {
   const name = `${encodeName(frameworkName)}-configcred`;
   const data = {
-    'secrets.yaml': Buffer.from(yaml.safeDump(secrets)).toString('base64'),
+    'secrets.yaml': Buffer.from(yaml.dump(secrets)).toString('base64'),
   };
   return getK8sSecretDef(name, data);
 };
@@ -929,7 +929,7 @@ const getUserExtensionSecretDef = (frameworkName, userExtension) => {
   const name = `${encodeName(frameworkName)}-usercred`;
   const data = {
     'userExtensionSecrets.yaml': Buffer.from(
-      yaml.safeDump(userExtension),
+      yaml.dump(userExtension),
     ).toString('base64'),
   };
   return getK8sSecretDef(name, data);
@@ -1405,7 +1405,7 @@ const getConfig = async (frameworkName) => {
 
   if (framework) {
     if (framework.jobConfig) {
-      return yaml.safeLoad(framework.jobConfig);
+      return yaml.load(framework.jobConfig);
     } else {
       throw createError(
         'Not Found',

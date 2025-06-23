@@ -38,8 +38,8 @@ class RequestUtil:
         return response
 
     @staticmethod
-    def prometheus_query(query, data, retry=3, entrypoint="we"):
-        query = f"https://{entrypoint}.openpai.org/prometheus/api/v1/{query}"
+    def prometheus_query(query, data, uri, retry=3):
+        query = f"{uri}/api/v1/{query}"
         token = os.getenv("PAI_TOKEN")
         while retry > 0:
             response = RequestUtil.get_request(query, token)

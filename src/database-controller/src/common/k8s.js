@@ -46,35 +46,35 @@ if (config.rbacEnabled) {
 const customObjectsClient = kc.makeApiClient(k8s.CustomObjectsApi);
 
 async function getFramework(name, namespace = 'default') {
-  const res = await customObjectsClient.getNamespacedCustomObject(
-    'frameworkcontroller.microsoft.com',
-    'v1',
-    namespace,
-    'frameworks',
-    name,
+  const res = await customObjectsClient.getNamespacedCustomObject({
+    group: 'frameworkcontroller.microsoft.com',
+    version: 'v1',
+    namespace: namespace,
+    plural: 'frameworks',
+    name: name}
   );
-  return res.response;
+  return res;
 }
 
 async function listFramework(name, namespace = 'default') {
-  const res = await customObjectsClient.listNamespacedCustomObject(
-    'frameworkcontroller.microsoft.com',
-    'v1',
-    namespace,
-    'frameworks',
+  const res = await customObjectsClient.listNamespacedCustomObject({
+    group: 'frameworkcontroller.microsoft.com',
+    version: 'v1',
+    namespace: namespace,
+    plural: 'frameworks'}
   );
-  return res.response;
+  return res;
 }
 
 async function createFramework(frameworkDescription, namespace = 'default') {
-  const res = await customObjectsClient.createNamespacedCustomObject(
-    'frameworkcontroller.microsoft.com',
-    'v1',
-    namespace,
-    'frameworks',
-    frameworkDescription,
+  const res = await customObjectsClient.createNamespacedCustomObject({
+    group: 'frameworkcontroller.microsoft.com',
+    version: 'v1',
+    namespace: namespace,
+    plural: 'frameworks',
+    body: frameworkDescription}
   );
-  return res.response;
+  return res;
 }
 
 async function patchFramework(name, data, namespace = 'default') {
@@ -85,31 +85,30 @@ async function patchFramework(name, data, namespace = 'default') {
     delete data.status;
   }
   // https://github.com/kubernetes-client/javascript/blob/8151bff/src/gen/api/customObjectsApi.ts#L1983
-  const res = await customObjectsClient.patchNamespacedCustomObject(
-    'frameworkcontroller.microsoft.com',
-    'v1',
-    namespace,
-    'frameworks',
-    name,
-    data,
-    ...Array(3), // skip some parameters
-    { headers: { 'Content-Type': 'application/merge-patch+json' } },
+  const res = await customObjectsClient.patchNamespacedCustomObject({
+    group: 'frameworkcontroller.microsoft.com',
+    version: 'v1',
+    namespace: namespace,
+    plural: 'frameworks',
+    name: name,
+    body: data},
+    k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch),
   );
-  return res.response;
+  logger.info(JSON.stringify(res, null, 2));
+  return res;
 }
 
 async function deleteFramework(name, namespace = 'default') {
   // https://github.com/kubernetes-client/javascript/blob/8151bff/src/gen/api/customObjectsApi.ts#L671C18-L671C47
-  const res = await customObjectsClient.deleteNamespacedCustomObject(
-    'frameworkcontroller.microsoft.com',
-    'v1',
-    namespace,
-    'frameworks',
-    name,
-    ...Array(5), // skip some parameters
-    { headers: { propagationPolicy: 'Foreground' } },
+  const res = await customObjectsClient.deleteNamespacedCustomObject({
+    group: 'frameworkcontroller.microsoft.com',
+    version: 'v1',
+    namespace: namespace,
+    plural: 'frameworks',
+    name: name},
+    k8s.setHeaderOptions('propagationPolicy', 'Foreground'),
   );
-  return res.response;
+  return res;
 }
 
 function getFrameworkInformer(
@@ -138,11 +137,11 @@ function getFrameworkInformer(
   */
   const listFn = () => {
     logger.info('Frameworks are listed.');
-    return customObjectsClient.listNamespacedCustomObject(
-      'frameworkcontroller.microsoft.com',
-      'v1',
-      namespace,
-      'frameworks',
+    return customObjectsClient.listNamespacedCustomObject({
+      group: 'frameworkcontroller.microsoft.com',
+      version: 'v1',
+      namespace: namespace,
+      plural: 'frameworks'}
     );
   };
   const informer = k8s.makeInformer(
@@ -162,7 +161,7 @@ function getEventInformer(timeoutSeconds = 365 * 86400, namespace = 'default') {
   */
   const listFn = () => {
     logger.info('Cluster events are listed.');
-    return coreV1Client.listNamespacedEvent(namespace);
+    return coreV1Client.listNamespacedEvent({namespace: namespace});
   };
   const informer = k8s.makeInformer(
     kc,
@@ -175,26 +174,29 @@ function getEventInformer(timeoutSeconds = 365 * 86400, namespace = 'default') {
 const priorityClassClient = kc.makeApiClient(k8s.SchedulingV1Api);
 
 async function createPriorityClass(priorityClassDef) {
-  const res = await priorityClassClient.createPriorityClass(priorityClassDef);
-  return res.response;
+  const res = await priorityClassClient.createPriorityClass({body: priorityClassDef});
+  return res;
 }
 
 async function deletePriorityClass(name) {
-  const res = await priorityClassClient.deletePriorityClass(name);
-  return res.response;
+  const res = await priorityClassClient.deletePriorityClass({name: name});
+  return res;
 }
 
 async function createSecret(secretDef) {
-  const res = await coreV1Client.createNamespacedSecret(
-    secretDef.metadata.namespace,
-    secretDef,
+  const res = await coreV1Client.createNamespacedSecret({
+    namespace: secretDef.metadata.namespace,
+    body: secretDef}
   );
   return res;
 }
 
 async function deleteSecret(name, namespace = 'default') {
-  const res = await coreV1Client.deleteNamespacedSecret(name, namespace);
-  return res.response;
+  const res = await coreV1Client.deleteNamespacedSecret({
+    name: name,
+    namespace: namespace}
+  );
+  return res;
 }
 
 async function patchSecretOwnerToFramework(secret, frameworkResponse) {
@@ -211,14 +213,13 @@ async function patchSecretOwnerToFramework(secret, frameworkResponse) {
     ],
   };
   // https://kubernetes-client.github.io/javascript/classes/CoreV1Api.html#patchNamespacedSecret
-  const res = await coreV1Client.patchNamespacedSecret(
-    secret.metadata.name,
-    secret.metadata.namespace,
-    { metadata: metadata },
-    ...Array(5), // skip some parameters
-    { headers: { 'Content-Type': 'application/merge-patch+json' } },
+  const res = await coreV1Client.patchNamespacedSecret({
+    name: secret.metadata.name,
+    namespace: secret.metadata.namespace,
+    body: { metadata: metadata }},
+    k8s.setHeaderOptions('Content-Type', k8s.PatchStrategy.MergePatch),
   );
-  return res.response;
+  return res;
 }
 
 const timeoutMs = config.k8sConnectionTimeoutSecond * 1000;

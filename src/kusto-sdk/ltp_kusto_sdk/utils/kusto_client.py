@@ -82,6 +82,27 @@ class KustoManageClient:
         query = f".show tables | where TableName == '{table_name}'"
         result = self.execute_command(query)
         return len(result) > 0 if result else False
+    
+    def create_table(self, table_name, data_class):
+        """Create a Kusto table if it does not exist.
+        Args:
+            table_name (str): The name of the Kusto table to create.
+            data_class: The class defining the schema of the table.
+        """
+        TYPE_MAP = {
+            'str': 'string',
+            'int': 'integer',
+            'float': 'real',
+            'bool': 'boolean',
+            'datetime': 'datetime',
+        }
+        from dataclasses import dataclass, fields
+        columns = ", ".join(
+            f"{field.name}: {TYPE_MAP.get(field.type.__name__)}" for field in fields(data_class) 
+        )
+        query = f".create-merge table {table_name} ({columns})"
+        self.execute_command(query)
+        print(f"Table {table_name} created successfully.")
 
 
 class KustoIngestionClient:
@@ -104,7 +125,7 @@ class KustoIngestionClient:
         """
         self.cluster = cluster
         self.database = database
-        self.user_managed_client_id = os.getenv("USER_ASSIGNED_CLIENT_ID",
+        self.user_managed_client_id = os.getenv("KUSTO_USER_ASSIGNED_CLIENT_ID",
                                                 None)
         self.env = os.getenv("ENVIRONMENT", "prod")
         self.kusto_client = self._initialize_kusto_ingest_client(cluster)
@@ -119,7 +140,7 @@ class KustoIngestionClient:
                 cluster, client_id=self.user_managed_client_id)
         return QueuedIngestClient(kcsb)
 
-    def ingest_to_kusto(self, database, table_name, df):
+    def ingest_to_kusto(self, table_name, df):
         """
         Ingests the DataFrame into Kusto.
         
@@ -128,7 +149,7 @@ class KustoIngestionClient:
             table_name: Name of the Kusto table
         """
         ingestion_props = IngestionProperties(
-            database=database,
+            database=self.database,
             table=table_name,
             data_format=DataFormat.CSV,
             report_level=ReportLevel.FailuresAndSuccesses)

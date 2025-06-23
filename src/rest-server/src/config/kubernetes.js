@@ -89,7 +89,25 @@ if (RBAC_IN_CLUSTER === 'false') {
 
 assert(apiserverConfig.uri, 'K8S_APISERVER_URI should be set in environments');
 
+function UpdateToken() {
+  if (apiserverConfig && apiserverConfig.headers) {
+    try {
+      let token;
+      if (K8S_APISERVER_TOKEN_FILE) {
+        token = readFileSync(K8S_APISERVER_TOKEN_FILE, 'utf8');
+      } else {
+        token = readFileSync('/var/run/secrets/kubernetes.io/serviceaccount/token', 'utf8');
+      }
+      apiserverConfig.headers.Authorization = `Bearer ${token}`;
+      logger.info('Kubernetes API token updated');
+    } catch (err) {
+      logger.error('Failed to update Kubernetes API token:', err.message);
+    }
+  }
+}
+
 module.exports = {
   apiserver: apiserverConfig,
   initPromise,
+  UpdateToken,
 };

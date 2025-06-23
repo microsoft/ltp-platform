@@ -1,7 +1,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM python:3.10
+FROM python:3.12
+
+RUN apt update && apt upgrade -y
+RUN pip install --upgrade pip
 
 COPY ./src/abnormal_detector .
 

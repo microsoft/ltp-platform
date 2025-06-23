@@ -23,29 +23,33 @@
     "@alert-handler": "."
   },
   "devDependencies": {
-    "dotenv": "^16.4.5",
-    "eslint": "^7.7.0",
-    "eslint-config-prettier": "~6.11.0",
-    "eslint-config-standard": "~14.1.1",
-    "eslint-plugin-import": "^2.22.0",
+    "dotenv": "^16.5.0",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "~10.1.5",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "~3.1.4",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "prettier": "~2.0.5"
+    "eslint-plugin-prettier": "~5.4.0",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-standard": "^5.0.0",
+    "prettier": "~3.5.3"
   },
   "dependencies": {
-    "@kubernetes/client-node": "0.20.0",
-    "axios": "^0.21.2",
-    "body-parser": "^1.20.3",
-    "ejs": "^3.1.5",
-    "email-templates": "^7.1.0",
-    "express": "^4.16.2",
-    "express-bearer-token": "^2.4.0",
-    "joi": "^14.3.1",
-    "module-alias": "^2.2.2",
-    "nodemailer": "^6.4.16",
-    "winston": "2"
+    "@kubernetes/client-node": "1.2.0",
+    "axios": "^1.9.0",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
+    "ejs": "^3.1.10",
+    "email-templates": "^12.0.2",
+    "express": "^5.1.0",
+    "express-bearer-token": "^3.0.0",
+    "joi": "^17.13.3",
+    "module-alias": "^2.2.3",
+    "nodemailer": "^7.0.3",
+    "winston": "2",
+    "ws": "^8.18.2"
+  },
+  "resolutions": {
+    "tar-fs": "^3.0.9"
   },
   "scripts": {
     "lint": "eslint .",
