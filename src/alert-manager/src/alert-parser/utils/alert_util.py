@@ -174,12 +174,12 @@ class AlertFetcher:
         logger.info(f"Finding alerts for node {node} between {start_time} and {end_time}"
                     )
         logger.info(alerts.head())
-        alerts =  alerts[(alerts['timestamp'] >= start_time)
-                     & (alerts['timestamp'] <= end_time) &
-                     (alerts['node_name'] == node)]
         if alerts.empty:
             logger.info(f"No alerts found for node {node} in the specified time range.")
             return pd.DataFrame()
+        alerts =  alerts[(alerts['timestamp'] >= start_time)
+                     & (alerts['timestamp'] <= end_time) &
+                     (alerts['node_name'] == node)]
         return alerts
 
 class AlertMapper:

@@ -209,10 +209,10 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["vmss_client_id"] | default(cluster_cfg["alert-manager"]["vmss_client_id"]) }}
         resources:
           requests:
-            memory: "256Mi"
+            memory: "2Gi"
             cpu: "100m"
           limits:
-            memory: "512Mi"
+            memory: "4Gi"
             cpu: "200m"
         volumeMounts:
         - name: config-volume
@@ -243,6 +243,8 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["node-recycler"]["node-action-table"]
                     | default(cluster_cfg["alert-manager"]["node-action-table"])
                     | default("NodeActionRecord") }}
+        - name: VALIDATION_DATA_SIZE
+          value: "{{ cluster_cfg['alert-manager']['node-recycler']['validation-data-size'] | default('-1') }}"
 {% endif %}
 {% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
         - name: ICM_HOST
@@ -270,10 +272,10 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
         resources:
           requests:
-            memory: "256Mi"
+            memory: "1Gi"
             cpu: "100m"
           limits:
-            memory: "512Mi"
+            memory: "4Gi"
             cpu: "200m"
         volumeMounts:
         - name: config-volume

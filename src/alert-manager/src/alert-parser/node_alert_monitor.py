@@ -185,12 +185,20 @@ class NodeAvailabilityMonitor:
                 self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
 
             elif from_status == NodeStatus.VALIDATING.value:
+                start_time_plus_1hour = convert_timestamp(start_time, format="timestamp") + 3600
+                period_new_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, start_time_plus_1hour)
+                shrinked_new_alerts = self.alert_fetcher.shrink_alerts((period_new_alerts))
                 if period_alerts['alertname'].str.contains('CordonValidationFailedNodes').any():
                     validation_alerts = period_alerts[period_alerts['alertname'].str.contains('CordonValidationFailedNodes')]
                     validation_time = validation_alerts['timestamp'].max()
                     to_status = NodeStatus.CORDONED.value
                     reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
                     self.node_updater.update_status_action(node, from_status, to_status, validation_time, reason, detail)
+                # TODO check validation job status
+                elif len(shrinked_new_alerts) > 0 and not period_alerts['alertname'].str.contains('NodeNotReady').any():
+                    to_status = NodeStatus.CORDONED.value
+                    reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_new_alerts)
+                    self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
             else:
                 logger.info(f"Node {node} is continuously unschedulable but in {from_status}. No action taken.")
  

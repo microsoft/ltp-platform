@@ -98,8 +98,11 @@ class NodeIssueClassifier:
             detail_records = json.loads(detail)
             if not isinstance(detail_records, list) or not detail_records:
                 return NodeFailure.UnknownIssue, NodeFailureCategory.unknown
-                
+            
+            issue = ''   
             # Process each alert record in the detail
+            # traverse through the issues and find the first matching issue
+            # if no any issue found, return UnknownIssue and unknown category
             for record in detail_records:
                 alertname = record.get('alertname', '')
                 summary = record.get('summary', '').lower()
@@ -126,18 +129,18 @@ class NodeIssueClassifier:
                 elif 'NodeNotReady' in alertname:
                     issue = NodeFailure.NodeCrash
                     break
+                elif 'PAISPaiServicePodNotReady' in alertname:
+                    issue = NodeFailure.PlatformServiceIssue
+                    break
                 elif 'CordonValidationFailedNodes' in alertname:
-                    if 'rccl-bw:ib' in summary:
+                    if 'rccl-bw:ib' in summary or 'nccl-bw:ib' in summary:
                         issue = NodeFailure.IBBandwidthProblem
-                    elif 'model-benchmark' in summary:
+                    elif 'model-benchmark' in summary or 'megatron' in summary:
                         issue = NodeFailure.ModelPerformanceDegradation
                     elif 'mem-bw' in summary:
                         issue = NodeFailure.PCIeBandwidthDegradation
                     elif 'kernel-launch' in summary:
                         issue = NodeFailure.GPUDriverHanging
-                    else:
-                        issue = NodeFailure.UnknownIssue
-                    break
                 elif 'admin-abnormal-node' in alertname:
                     if 'loss' in summary.lower() or 'nan' in summary.lower():
                         issue = NodeFailure.LossNaN
@@ -146,17 +149,12 @@ class NodeIssueClassifier:
                     # check if summary is in any of the NodeFailure enum str, such as NodeFailure.IBReregistration, etc.
                     elif summary in NodeFailure.__dict__.values():
                         issue = summary
-                    else:
-                        issue = NodeFailure.UnknownIssue
-                    break
                 else:
                     # check if alertname is in any of the NodeFailure enum str
                     # such as NodeFailure.IBPortDown, etc.
                     if alertname in NodeFailure.__dict__.values():
                         issue = alertname
                         break
-                    else:
-                        issue = NodeFailure.UnknownIssue
 
             
             # Get category for the issue

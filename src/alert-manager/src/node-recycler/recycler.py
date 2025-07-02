@@ -295,6 +295,7 @@ class NodeRecycler:
             except Exception as e:
                 logger.warning(f"Instance {inst} ({name}) failed during {op} due to: {e}")
         logger.info(f"{op.title()}ed {len(completed)} instances in VMSS {vmss_name}")
+        time.sleep(300)
 
         return completed
 
@@ -328,6 +329,7 @@ class NodeRecycler:
                     image=cls._ltp_validation_image,
                     client_id=cls._azure_client_id,
                     instances=1,
+                    data_size=os.getenv("VALIDATION_DATA_SIZE", -1),
                     hostnames=hostname.lower(),
                 )
                 res = requests.post(
@@ -355,7 +357,8 @@ class NodeRecycler:
                         )
             except Exception as e:
                 logger.error(f"Failed to submit validation job due to:\n{e}")
-                logger.info(f"Raw response: {res.text}")
+                logger.error(f"Original response: {res.text if 'res' in locals() else 'N/A'}")
+                logger.error(f"Config used: {config if 'config' in locals() else 'N/A'}")
 
     @classmethod
     def ua_and_deallocate_pipeline(cls, status_client, action_client):
@@ -423,7 +426,6 @@ class NodeRecycler:
                     started_vms = f.result()
                     if len(started_vms) > 0:
                         # TODO: check node status in k8s
-                        time.sleep(300)
                         logger.info(f"Starting to Validate Nodes in {vmss_id}")
                         cls.validate(
                             hostnames=[vm["computer_name"] for vm in started_vms],
@@ -433,7 +435,6 @@ class NodeRecycler:
                 except Exception as e:
                     logger.error(f"Error operating on {vmss_id}: {e}") 
         # validate previous failed nodes as well
-        time.sleep(30)
         logger.info("Starting to Validate Allocated Nodes")
         cls.validate(status_client=status_client, action_client=action_client,
                      filter_state=NodeStatus.ALLOCATED_UA.value)
