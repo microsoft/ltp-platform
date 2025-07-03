@@ -148,6 +148,7 @@ const oidcUserUpdateInputSchema = Joi.object().keys({
       sshKeys: Joi.array().optional(),
       jobPriority: Joi.number().integer().optional(),
       jobExpiration: Joi.string().isoDate().optional(),
+      vcadmins: Joi.array().items(Joi.string()).optional(),
     }).default(),
   }),
   patch: Joi.boolean().default(false),

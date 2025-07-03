@@ -55,6 +55,9 @@ const check = async (req, _, next) => {
     req[userProperty].admin = await userModel.checkAdmin(
       req[userProperty].username,
     );
+    req[userProperty].vcadmins = await userModel.checkVirtualClusterAdmin(
+      req[userProperty].username,
+    );
     next();
   } catch (error) {
     logger.debug(error);

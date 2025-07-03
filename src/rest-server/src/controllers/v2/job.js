@@ -226,7 +226,29 @@ const execute = asyncHandler(async (req, res) => {
   const userName = req.user.username;
   const admin = req.user.admin;
   const data = await job.get(req.params.frameworkName);
-  if (data.jobStatus.username === userName || admin) {
+
+  if (data == null) {
+    throw createError(
+      'Job Not Found',
+      'NoJobError',
+      `Job ${req.params.frameworkName} is not found.`,
+    );
+  }
+
+  if (!data.jobStatus) {
+    throw createError(
+      'Internal Server Error',
+      'InvalidJobStatusError',
+      `Job status for ${req.params.frameworkName} is missing.`,
+    );
+  }
+
+  const jobVirtualCluster = data.jobStatus.virtualCluster;
+  const vcadmins = req.user.vcadmins || [];
+
+  const isAdminOfVC = vcadmins.includes(jobVirtualCluster);
+
+  if (data.jobStatus.username === userName || admin || isAdminOfVC) {
     await job.execute(req.params.frameworkName, req.body.value);
     res.status(status('Accepted')).json({
       status: status('Accepted'),

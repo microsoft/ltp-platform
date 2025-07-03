@@ -114,6 +114,14 @@ const checkUserStorage = async (username, storageName) => {
   return userStorages.includes(storageName);
 };
 
+const checkVirtualClusterAdmin = async (username) => {
+  const userInfo = await getUser(username);
+  const vcadmins = (userInfo.extension && Array.isArray(userInfo.extension.vcadmins))
+    ? userInfo.extension.vcadmins
+    : [];
+  return vcadmins;
+};
+
 // module exports
 module.exports = {
   getUser,
@@ -126,6 +134,7 @@ module.exports = {
   checkUserVC,
   getUserVCs,
   checkAdmin,
+  checkVirtualClusterAdmin,
   batchUpdateUsers,
   getUserStorages,
   checkUserStorage,
