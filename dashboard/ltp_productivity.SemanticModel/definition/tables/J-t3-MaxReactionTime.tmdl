@@ -1,0 +1,106 @@
+table J-t3-MaxReactionTime
+	lineageTag: d46f4165-21d9-4afa-8188-75a58a67be08
+
+	measure 'JRX Last Week' =
+			
+			VAR LatestWeek = [MaxWeekR]
+			VAR Result =
+			    CALCULATE(
+			        MAX('J-t3-MaxReactionTime'[Max. Reaction Time]),
+			        'J-t3-MaxReactionTime'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result, 0)
+		lineageTag: b3527799-1f79-4d72-811b-9b2c6273cc3c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JRX Previous' =
+			
+			VAR LatestWeek = [MaxWeekR] - 1
+			VAR Result =
+			    CALCULATE(
+			        MAX('J-t3-MaxReactionTime'[Max. Reaction Time]),
+			        'J-t3-MaxReactionTime'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result, 0)
+		lineageTag: 4d6c4133-aca0-4638-9318-f5117a7e1820
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JRX Change' =
+			
+			IF(
+			    [JRX Previous] > [JRX Last Week],
+			    "decreased",
+			    IF(
+			        [JRX Previous] < [JRX Last Week],
+			        "increased",
+			        "unchanged"
+			    )
+			)
+		lineageTag: 1c167ee2-4d5e-466e-8358-8f1a74d602a3
+
+	column Week
+		formatString: 0
+		lineageTag: 84d279b7-9d73-42fe-aaed-2d86f890988a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Week]
+
+		annotation SummarizationSetBy = User
+
+	column 'User Stop'
+		lineageTag: 0497a3ab-2238-4062-8ee7-dc8792de6ffc
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [User Stop]
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Hardware Failure'
+		lineageTag: 0cacf23f-827b-4130-8944-bc2fce930067
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Hardware Failure]
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Software Failure'
+		lineageTag: 819ef3cc-419d-4f56-9beb-b60f6dac87ae
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Software Failure]
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Max. Reaction Time'
+		lineageTag: 1c05c6bb-d345-412e-ae73-a7cda50beeb0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Max. Reaction Time]
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition J-t3-MaxReactionTime = calculated
+		mode: import
+		source =
+				
+				SELECTCOLUMNS(
+				 'J-r1-na',
+				 "Week", 'J-r1-na'[Week],
+				 "User Stop", 'J-r1-na'[MaxUserStop],
+				 "Hardware Failure", 'J-r1-na'[MaxHardwareFailure],
+				 "Software Failure", 'J-r1-na'[MaxSoftwareFailure],
+				 "Max. Reaction Time", 'J-r1-na'[MaxReactionTime]
+				)
+
+	annotation PBI_Id = db9b1dff64a94d4381f14c43ece84a05
+

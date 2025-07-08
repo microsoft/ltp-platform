@@ -1,0 +1,214 @@
+table A-t0-ClusterCapacityStatus
+	lineageTag: 468ac673-14a6-4ddc-bd52-85ebdf9d78e0
+
+	measure 'Available GPU Ratio' =
+			
+			CALCULATE(
+			    AVERAGE('A-t0-ClusterCapacityStatus'[Available VMs (Empty)]),
+			    FILTER(
+			        'A-t0-ClusterCapacityStatus',
+			        'A-t0-ClusterCapacityStatus'[Week] = MAX('A-t0-ClusterCapacityStatus'[Week])
+			    )
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 42f5ee17-a043-4d11-8dad-a8e0aa33bb56
+
+		extendedProperty MeasureTemplate =
+				{
+				  "version": 0,
+				  "daxTemplateName": "AveragePerCategory"
+				}
+
+	measure 'Available GPU Count' =
+			
+			CALCULATE(
+			    SUMX(
+			        FILTER(
+			            'A-t0-ClusterCapacityStatus',
+			            'A-t0-ClusterCapacityStatus'[Week] = MAX('A-t0-ClusterCapacityStatus'[Week])
+			        ),
+			        'A-t0-ClusterCapacityStatus'[Available VMs (Empty)] * 'A-t0-ClusterCapacityStatus'[Total VM Count (Weekly Avg.)] * 8
+			    )
+			)
+		lineageTag: 80b12db9-6ac5-476e-9e7a-fe6f8c6a2a03
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'OFR GPU Count' =
+			
+			CALCULATE(
+			    SUMX(
+			        FILTER(
+			            'A-t0-ClusterCapacityStatus',
+			            'A-t0-ClusterCapacityStatus'[Week] = MAX('A-t0-ClusterCapacityStatus'[Week])
+			        ),
+			        'A-t0-ClusterCapacityStatus'[OFR] * 'A-t0-ClusterCapacityStatus'[Total VM Count (Weekly Avg.)] * 8
+			    )
+			)
+		lineageTag: a34dbe0c-256f-47cc-94a9-a5827fcf2280
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'OFR GPU Ratio' =
+			
+			CALCULATE(
+			    AVERAGE('A-t0-ClusterCapacityStatus'[OFR]),
+			    FILTER(
+			        'A-t0-ClusterCapacityStatus',
+			        'A-t0-ClusterCapacityStatus'[Week] = MAX('A-t0-ClusterCapacityStatus'[Week])
+			    )
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 48e55498-5310-4c39-8d7f-60d8d6db8dca
+
+	measure 'Availability Alert' = ```
+			
+			    SWITCH(
+			        TRUE(),
+			
+			        [Available GPU Ratio] < 0.05 && [OFR GPU Ratio] >= 0.05,
+			        "Low Available ratio and high OFR ratio may cause potential insufficiency. Please investigate.",
+			    
+			        [Available GPU Ratio] >= 0.05 && [OFR GPU Ratio] >= 0.05,
+			        "High OFR ratio may cause potential insufficiency. Please investigate.",
+			    
+			        [Available GPU Ratio] < 0.05 && [OFR GPU Ratio] < 0.05,
+			        "Low Available ratio may cause potential insufficiency. Please investigate.",
+			    
+			        BLANK() -- Returns nothing if the condition is not met
+			    )
+			```
+		lineageTag: c206a646-6a70-4acc-88cf-e08151c9cfec
+
+	column Week
+		formatString: 0
+		lineageTag: d6757eff-ae0c-46ee-9ec1-fe35b25caac0
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Week]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Cluster
+		lineageTag: ae312822-a740-4274-8cd3-429338c36ca6
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Cluster]
+
+		annotation SummarizationSetBy = Automatic
+
+	column OFR
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: fd62e59b-5e53-4ee8-9adb-73049f4939f1
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [OFR]
+
+		annotation SummarizationSetBy = User
+
+	column Unallocatable
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: dec6673f-454d-45ea-b267-a47673da26ed
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Unallocatable]
+
+		annotation SummarizationSetBy = User
+
+	column Date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: b08d30af-de11-48fa-a60d-4d7978ecfe17
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		variation Variation
+			isDefault
+			relationship: 39bee79e-6600-4612-a7bd-e834a7185b9d
+			defaultHierarchy: LocalDateTable_87233e88-b4b1-4a8a-9ecc-b61441c00f5a.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Others
+		lineageTag: 6947f82d-0ab9-4e46-b9d0-80923b404f6f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Others]
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Available VMs (Empty)'
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: b1c03275-3a22-47b1-bf1b-497584920466
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Available VMs (Empty)]
+
+		annotation SummarizationSetBy = User
+
+	column 'Total VM Count (Weekly Avg.)'
+		lineageTag: 746c01d3-b10a-4e55-a669-b5c1d5b1d190
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Total VM Count (Weekly Avg.)]
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Allocated
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 440d9655-96ef-4867-809e-843d69e5172b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Allocated]
+
+		annotation SummarizationSetBy = User
+
+	partition A-t0-ClusterCapacityStatus = calculated
+		mode: import
+		source =
+				
+				SELECTCOLUMNS(
+				    ADDCOLUMNS(
+				        'A-r0-na',
+				        "TotalVMs_Intermediate",
+				        'A-r0-na'[AvgReadyEmpty] + 'A-r0-na'[AvgReadyUsed] + 'A-r0-na'[AvgOFR] +
+				        'A-r0-na'[AvgUnallocatable] + 'A-r0-na'[AvgHumanInvestigate] +
+				        'A-r0-na'[AvgExcluded] + 'A-r0-na'[AvgProbation] + 'A-r0-na'[AvgSuspected]
+				    ),
+				    "Date", 'A-r0-na'[Week],
+				    "Cluster", 'A-r0-na'[Cluster],
+				    "Allocated", DIVIDE(
+				        'A-r0-na'[AvgReadyUsed],
+				        [TotalVMs_Intermediate]
+				    ),
+				    "Available VMs (Empty)", DIVIDE(
+				        'A-r0-na'[AvgReadyEmpty],
+				        [TotalVMs_Intermediate]
+				    ),
+				    "OFR", DIVIDE(
+				        'A-r0-na'[AvgOFR],
+				        [TotalVMs_Intermediate]
+				    ),
+				    "Unallocatable", DIVIDE(
+				        'A-r0-na'[AvgUnallocatable],
+				        [TotalVMs_Intermediate]
+				    ),
+				    "Others", DIVIDE(
+				        'A-r0-na'[AvgHumanInvestigate] + 'A-r0-na'[AvgExcluded] + 'A-r0-na'[AvgProbation] + 'A-r0-na'[AvgSuspected],
+				        [TotalVMs_Intermediate]
+				    ),
+				    "Total VM Count (Weekly Avg.)", [TotalVMs_Intermediate],
+				    "Week", [WeekNum]
+				)
+
+	annotation PBI_Id = 4836dd236f984777b82391a3185e19ae
+

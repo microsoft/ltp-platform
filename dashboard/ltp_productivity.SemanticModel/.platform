@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "ltp_productivity"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "5c77b6a5-41f8-42bb-a57a-417310e0d407"
+  }
+}

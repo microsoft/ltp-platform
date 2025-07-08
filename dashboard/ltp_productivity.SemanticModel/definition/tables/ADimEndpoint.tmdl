@@ -1,0 +1,27 @@
+table ADimEndpoint
+	lineageTag: bf4bd3bf-4efb-41fa-ad5b-a8e47438cde7
+
+	column Endpoint
+		dataType: string
+		lineageTag: 1f819c1b-1500-405b-801f-1956cae3abe2
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ADimEndpoint = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = #"A-r2-na",
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Endpoint"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"Endpoint", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

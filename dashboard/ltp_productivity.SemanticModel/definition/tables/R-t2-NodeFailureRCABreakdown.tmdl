@@ -1,0 +1,113 @@
+table R-t2-NodeFailureRCABreakdown
+	lineageTag: 8aff7681-d42d-4f05-a2f2-57cdca2822ac
+
+	measure 'Top 3 Category Reasons (Max Week)' =
+			
+			VAR MaxWeek = [MaxWeekR]
+			VAR TopNReasonsTable =
+			    TOPN(
+			        3,
+			        FILTER(
+			            ALLSELECTED('R-t2-NodeFailureRCABreakdown'),
+			            'R-t2-NodeFailureRCABreakdown'[Week] = MaxWeek
+			        ),
+			        'R-t2-NodeFailureRCABreakdown'[FailureCount], DESC
+			    )
+			VAR SortedTopNReasonsTable =
+			    ADDCOLUMNS(
+			        TopNReasonsTable,
+			        "ConcatenationString",
+			        "    " & 'R-t2-NodeFailureRCABreakdown'[Category] & ": " & 'R-t2-NodeFailureRCABreakdown'[Reason] & " (" & 'R-t2-NodeFailureRCABreakdown'[FailureCount] & ")"
+			    )
+			VAR ConcatCategoryReason =
+			    CONCATENATEX(
+			        -- Now sort this table directly
+			        SortedTopNReasonsTable,
+			        [ConcatenationString],
+			        UNICHAR(10),
+			        -- Explicitly specify the order for CONCATENATEX
+			        'R-t2-NodeFailureRCABreakdown'[FailureCount], DESC
+			    )
+			RETURN
+			    ConcatCategoryReason
+		lineageTag: 46b65cf6-9431-4486-aeaa-aa4a9272de09
+
+	measure 'Debug MaxWeekR' = [MaxWeekR]
+		formatString: 0
+		lineageTag: 55acf78b-c617-469e-b934-b26b928d58f5
+
+	column Reason
+		dataType: string
+		lineageTag: 91558d4f-0a72-4cec-9e63-1c3b8c3327e6
+		summarizeBy: none
+		sourceColumn: Reason
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 2085033d-8830-4404-9ae6-7af28483cf8e
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column FailureCount
+		dataType: int64
+		formatString: 0
+		lineageTag: ac00ac3b-fdef-4988-bdc8-517ebc23d08f
+		summarizeBy: sum
+		sourceColumn: FailureCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column CategoryReason
+		dataType: string
+		lineageTag: df0ed663-3454-4709-899e-ca4fa35090c9
+		summarizeBy: none
+		sourceColumn: CategoryReason
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: 04ca0804-0a3b-4b65-8d8e-350ff1392c20
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	column Endpoint
+		dataType: string
+		lineageTag: b4d672a7-33bc-469e-aa50-3cc0827fb45d
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'Category Hierarchy'
+		lineageTag: 5d3f7d2c-11eb-4e28-a965-4ac446c7fff9
+
+		level Category
+			lineageTag: 64c46712-90f7-4221-ba1f-573a3cbb8a5f
+			column: Category
+
+		level CategoryReason
+			lineageTag: b95797e4-1f6e-45fe-bdc1-ae43d28e1f3e
+			column: CategoryReason
+
+	partition R-t2-NodeFailureRCABreakdown = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "let src =#(lf)cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')#(lf)    .database('production')#(lf)    .table('NodeActionRecord')#(lf)| join kind=leftouter NodeActionAttributes on Action#(lf)| sort by HostName asc, Timestamp asc, Action asc#(lf)| serialize;#(lf)// 1) mark every row that has a non‑empty Phase#(lf)let withMark =#(lf)    src#(lf)    | extend NonEmptyFlag = iff(isnotempty(Phase), 1, 0);#(lf)// 2) build a running total of NonEmptyFlag **per HostName**#(lf)let running =#(lf)    withMark#(lf)    | extend PhaseGroup =#(lf)        row_cumsum(NonEmptyFlag)   // needs `serialize` earlier#(lf)        ;   // PhaseGroup increments each time we see a non‑empty Phase#(lf)// 3) look up the _latest_ non‑empty Phase in each PhaseGroup#(lf)let phaseLookup =#(lf)    running#(lf)    | where NonEmptyFlag == 1#(lf)    | summarize LastPhase = arg_max(Timestamp, Phase) by HostName, PhaseGroup#(lf)    | project HostName, PhaseGroup, LastPhase = Phase;#(lf)// 4) join back to fill down#(lf)let enriched = running#(lf)| join kind=inner (phaseLookup) on HostName, PhaseGroup#(lf)| project-away NonEmptyFlag, Action1, HostName1, PhaseGroup1#(lf)| sort by HostName asc, Timestamp asc ;#(lf)// ── Step 1: earliest timestamp per HostName + PhaseGroup ───────────────────#(lf)let groupStart =#(lf)    enriched#(lf)    | summarize StartTime = min(Timestamp) by HostName, PhaseGroup;#(lf)// ── Step 3: stitch them together ───────────────────────────────────────────#(lf)let record=enriched#(lf)| join kind=inner groupStart on HostName, PhaseGroup#(lf)| project-reorder StartTime, Timestamp, HostName, PhaseGroup#(lf)| sort by Timestamp asc#(lf)| where Action contains ""cordoned-triaged"" and LastPhase contains ""routine""#(lf)| summarize arg_max(Timestamp, *) by HostName, PhaseGroup#(lf)| project-away HostName1, PhaseGroup1, Phase#(lf)| extend CategoryReason = strcat(Category, ""-"", Reason);#(lf)let startDate = datetime(2025-03-17);#(lf)let endDate = now();#(lf)record#(lf)| extend Week = weekofyear(startofweek(StartTime - 1d, 0)) // Monday as the start of the week#(lf)| summarize FailureCount = count() by Week, Reason, Category, Endpoint#(lf)| extend Reason = iif(isempty(Reason), 'Unknown Reason', Reason)#(lf)| extend Category = iif(isempty(Category), 'uncategorized', Category)#(lf)| order by Week asc", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null]),
+				    #"Added Custom" = Table.AddColumn(Source, "CategoryReason", each [Category] & ": " & [Reason])
+				in
+				    #"Added Custom"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

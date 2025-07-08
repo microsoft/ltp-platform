@@ -1,0 +1,27 @@
+table RDimEndpoint
+	lineageTag: 7d3eb6d1-97d1-4fff-bcbf-b9d40b25fd14
+
+	column Endpoint
+		dataType: string
+		lineageTag: aa44325f-6a4e-43a9-b94a-23d7bcf71974
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	partition RDimEndpoint = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = #"R-t0-DailyNodeRuntimeAvgFailure",
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Endpoint"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"Endpoint", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

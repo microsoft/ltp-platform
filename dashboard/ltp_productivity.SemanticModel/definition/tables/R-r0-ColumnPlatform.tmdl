@@ -1,0 +1,37 @@
+table R-r0-ColumnPlatform
+	lineageTag: 873a5889-a936-4ea6-b5ee-919b969d47a7
+
+	column 'Reasons in Category: Platform'
+		dataType: string
+		lineageTag: 684d1a6a-1a59-42ae-9ef1-962e859ec433
+		summarizeBy: none
+		sourceColumn: Reasons in Category: Platform
+
+		annotation SummarizationSetBy = Automatic
+
+	partition R-r0-ColumnPlatform = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = #table(type table [ColumnName = text], {}),
+				    TableSchema = Table.Schema( #"R-r0-na" ),
+				    ColumnNames = Table.SelectColumns(TableSchema, {"Name"}),
+				    FilteredHardwareColumns = Table.SelectRows(ColumnNames, each Text.StartsWith([Name], "platform")),
+				    ListofHardwareColumns = FilteredHardwareColumns[Name], // This is currently a list of text values
+				
+				    // Step 1: Remove 'Hardware-' prefix from each item in the list
+				    RenamedColumnsStep1 = List.Transform(ListofHardwareColumns, each Text.Replace(_, "platform-", "")), // Corrected: using '_' instead of '$'
+				
+				    // Step 2: Replace "" (empty string) with "UnknownReason"
+				    RenamedColumnsStep2 = List.Transform(RenamedColumnsStep1, each if Text.Length(_) = 0 then "Unknown Reason" else _), // Corrected: using '_'
+				
+				    // Convert the list back to a table (optional, but good for Power BI loading)
+				    FinalTable = Table.FromList(RenamedColumnsStep2, Splitter.SplitByNothing(), {"Reasons in Category: Platform"}, null, ExtraValues.Error)
+				in
+				    FinalTable
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

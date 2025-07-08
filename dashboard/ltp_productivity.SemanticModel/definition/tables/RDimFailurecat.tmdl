@@ -1,0 +1,28 @@
+table RDimFailurecat
+	lineageTag: 1824dd92-3dd5-4d1c-8d7f-b24eb809ee42
+
+	column Category
+		dataType: string
+		lineageTag: 8f5dc367-ffb1-4722-8695-3883947d4b77
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	partition RDimFailurecat = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = #"R-t3-DailyOccurrenceofNodeFailuresRuntime",
+				    #"Removed Other Columns1" = Table.SelectColumns(Source,{"CategoryNew"}),
+				    #"Removed Duplicates1" = Table.Distinct(#"Removed Other Columns1"),
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates1",{{"CategoryNew", Order.Ascending}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Sorted Rows",{{"CategoryNew", "Category"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,26 @@
+table CalendarTable
+	lineageTag: a28751ea-15c4-4050-8d63-8eab27d72669
+	dataCategory: Time
+
+	column Date
+		isKey
+		formatString: yyyy-mm-dd
+		lineageTag: c2327d7f-7f02-44d3-8b04-4eb91fc8a863
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	partition CalendarTable = calculated
+		mode: import
+		source =
+				
+				CALENDAR (
+				    DATE ( 2025, 3, 17 ), TODAY ()
+				)
+
+	annotation PBI_Id = 546d19f7f4b24ecc9d88596699a8082d
+

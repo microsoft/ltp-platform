@@ -1,0 +1,27 @@
+table RDimEndpoint_stage1
+	lineageTag: f91a9b5e-77f2-41ae-bef7-c8c38305915c
+
+	column Endpoint
+		dataType: string
+		lineageTag: 61b94f24-c234-4dca-8842-c9286ee27243
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	partition RDimEndpoint_stage1 = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = #"R-t1-NodeFailureCategorization",
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Endpoint"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"Endpoint", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

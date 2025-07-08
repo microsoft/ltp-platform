@@ -1,0 +1,72 @@
+table R-r1-na
+	lineageTag: 8fdb26ee-99a5-4b05-b25b-e30b30fdeb51
+
+	column Endpoint
+		dataType: string
+		lineageTag: 4697f134-a87f-4d11-834f-d4494b6b4771
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: e42e8783-e467-4ceb-92e9-edc20a2091ef
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeeklyTotal
+		dataType: int64
+		formatString: 0
+		lineageTag: 777fa831-dea4-4756-a1a3-2de25925afaa
+		summarizeBy: sum
+		sourceColumn: WeeklyTotal
+
+		annotation SummarizationSetBy = Automatic
+
+	column DaysinWeek
+		dataType: int64
+		formatString: 0
+		lineageTag: 34257bf5-cbaa-4a05-91a0-1e0d4470891d
+		summarizeBy: sum
+		sourceColumn: DaysinWeek
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: b77c3489-643d-4ff3-9746-bb8b66330f63
+		summarizeBy: none
+		sourceColumn: Date
+
+		variation Variation
+			isDefault
+			relationship: e5468f19-efb0-49d8-b252-c6da8fea5182
+			defaultHierarchy: LocalDateTable_bfd0980a-5f77-4f08-84ec-70c9249006b7.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: f960ae50-b1d7-450c-9f50-dbd940cb9221
+		summarizeBy: sum
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	partition R-r1-na = m
+		mode: import
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "// Original source and initial processing#(lf)let src =#(lf)cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')#(lf)    .database('production')#(lf)    .table('NodeActionRecord')#(lf)| join kind=leftouter NodeActionAttributes on Action#(lf)| sort by HostName asc, Timestamp asc, Action asc#(lf)| serialize;#(lf)// 1) Mark every row that has a non-empty Phase#(lf)let withMark =#(lf)    src#(lf)    | extend NonEmptyFlag = iff(isnotempty(Phase), 1, 0);#(lf)// 2) Build a running total of NonEmptyFlag per HostName#(lf)let running =#(lf)    withMark#(lf)    | extend PhaseGroup =#(lf)        row_cumsum(NonEmptyFlag)   // needs `serialize` earlier#(lf)        ;   // PhaseGroup increments each time we see a non-empty Phase#(lf)// 3) Look up the _latest_ non-empty Phase in each PhaseGroup#(lf)let phaseLookup =#(lf)    running#(lf)    | where NonEmptyFlag == 1#(lf)    | summarize LastPhase = arg_max(Timestamp, Phase) by HostName, PhaseGroup#(lf)    | project HostName, PhaseGroup, LastPhase = Phase;#(lf)// 4) Join back to fill down the LastPhase#(lf)let enriched = running#(lf)| join kind=inner (phaseLookup) on HostName, PhaseGroup#(lf)| project-away NonEmptyFlag, Action1, HostName1, PhaseGroup1#(lf)| sort by HostName asc, Timestamp asc;#(lf)// Step 1: Earliest timestamp per HostName + PhaseGroup#(lf)let groupStart =#(lf)    enriched#(lf)    | summarize StartTime = min(Timestamp) by HostName, PhaseGroup;#(lf)// Step 3: Stitch them together and filter for relevant records#(lf)let record = enriched#(lf)| join kind=inner groupStart on HostName, PhaseGroup#(lf)| project-reorder StartTime, Timestamp, HostName, PhaseGroup#(lf)| sort by Timestamp asc#(lf)| where Action contains ""cordoned-triaged"" and LastPhase contains ""routine""#(lf)| summarize arg_max(Timestamp, *) by HostName, PhaseGroup // Get the latest record per HostName, PhaseGroup#(lf)| project-away HostName1, PhaseGroup1, Phase // Clean up redundant columns#(lf)| extend CategoryReason = strcat(Category, ""-"", Reason); // Create CategoryReason#(lf)// Define date range#(lf)let startDate = datetime(2025-03-17);#(lf)let endDate = now();#(lf)// 1. Generate all dates within the specified range#(lf)let allDates = range StartDate from startDate to endDate step 7d;#(lf)// 2. Get all distinct Endpoints from the 'record' table#(lf)let allEndpoints = record | distinct Endpoint;#(lf)// 3. Get all distinct Categories from the 'record' table#(lf)let allCategories = record | distinct Category;#(lf)// 4. Create a Cartesian product of all dates, endpoints, and categories#(lf)// This ensures every combination exists as a row#(lf)let allCombinations =#(lf)    allDates#(lf)    | extend dummy = 1 // Add a dummy column for cross-joining#(lf)    | join kind=inner (allEndpoints | extend dummy = 1) on dummy#(lf)    | join kind=inner (allCategories | extend dummy = 1) on dummy#(lf)    | project StartDate, Endpoint, Category; // Select the desired combination columns#(lf)// 5. Summarize the actual data from 'record' for joining#(lf)let summarizedRecord =#(lf)    record#(lf)    | summarize Total = count() by bin(StartTime, 7d), Endpoint, Category;#(lf)// 6. Left outer join the full combinations with the summarized data#(lf)// This will keep all combinations and fill 'Total' with 0 where no match is found#(lf)allCombinations#(lf)| join kind=leftouter summarizedRecord on $left.StartDate == $right.StartTime, Endpoint, Category#(lf)| project StartDate,#(lf)          Endpoint,#(lf)          Category,#(lf)          WeeklyTotal = coalesce(Total, 0) // Replace null Total with 0#(lf)| extend CurrentWeekStart = startofweek(now(), 0) + 1d // Calculate the start of the current week (Monday)#(lf)| extend DaysInCurrentWeek = datetime_diff('day', now(), CurrentWeekStart) + 1 // Calculate days passed in current week#(lf)| extend DaysinWeek = iff(StartDate == CurrentWeekStart, DaysInCurrentWeek, 7)#(lf)| extend Date = StartDate#(lf)| extend Week = weekofyear(startofweek(StartDate - 1d, 0)) // Monday as the start of the week#(lf)| extend Category = iff(isempty(Category), ""uncategorized"", Category) // Handle potentially empty categories#(lf)| order by StartDate asc, Endpoint asc, Category asc#(lf)| project-away StartDate, CurrentWeekStart, DaysInCurrentWeek;", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				in
+				    Source
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

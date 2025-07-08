@@ -1,0 +1,159 @@
+table R-t4-DailyNodeRuntimeAvgFailure
+	lineageTag: dcb3f325-dbfc-4f15-a6e0-92562b86e49d
+
+	measure FailureNodesP4 =
+			
+			VAR LatestWeek = [MaxWeekR] - 1
+			VAR Result =
+			    CALCULATE(
+			        SUM('R-t4-DailyNodeRuntimeAvgFailure'[Avg. Failure]),
+			        'R-t4-DailyNodeRuntimeAvgFailure'[Week] = LatestWeek,
+			        'R-t4-DailyNodeRuntimeAvgFailure'[Avg. Failure] <> 0
+			    )
+			RETURN COALESCE(Result, 0)
+		lineageTag: c976fd82-b9d8-4930-a96b-38e9a9c57725
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure FailureNodeL4 = ```
+			
+			VAR LatestWeek = [MaxWeekR]
+			VAR Result = 
+			    CALCULATE(
+			        SUM('R-t4-DailyNodeRuntimeAvgFailure'[Avg. Failure]),
+			        'R-t4-DailyNodeRuntimeAvgFailure'[Week] = LatestWeek,
+			        'R-t4-DailyNodeRuntimeAvgFailure'[Avg. Failure] <> 0
+			    )
+			RETURN
+			    COALESCE(Result, 0)
+			```
+		lineageTag: c7145d78-76c4-4828-abef-ecfa5e7f0afb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure FailureNodeChange4 =
+			
+			IF(
+			    [FailureNodesP4] > [FailureNodeL4],
+			    "decreased",
+			    IF(
+			        [FailureNodesP4] < [FailureNodeL4],
+			        "increased",
+			        "unchanged"
+			    )
+			)
+		lineageTag: 94df461b-1b2d-4954-844d-51091c6bff2a
+
+	measure 'Reliability Alert' = ```
+			
+			    SWITCH(
+			        TRUE(),
+			
+			        [FailureNodeL4] >= 3,
+			        "Large failure node count may affect SLA. Please investigate.",
+			    
+			        BLANK() -- Returns nothing if the condition is not met
+			    )
+			```
+		lineageTag: 8a823e8c-d83f-4cf2-aab9-ae969f9a96b4
+
+	measure HideRows =
+			
+			IF(
+			    ISBLANK(SUM('R-t4-DailyNodeRuntimeAvgFailure'[Avg. Failure])) || SUM('R-t4-DailyNodeRuntimeAvgFailure'[Avg. Failure]) = 0,
+			    0, // Value to indicate "hide"
+			    1  // Value to indicate "show"
+			)
+		formatString: 0
+		lineageTag: 2523c6a2-5ad5-48c7-bc4d-f5c70d40775f
+
+	column Week
+		formatString: 0
+		lineageTag: c77826d1-cb22-49f9-a824-3774e1fabfd4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: R-r1-na[Week]
+
+		annotation SummarizationSetBy = User
+
+	column Date
+		formatString: yyyy-mm-dd
+		lineageTag: 80a1b9b2-ec3a-499e-bb16-b73223035c75
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: R-r1-na[Date]
+
+		variation Variation
+			isDefault
+			relationship: 93ea38d2-0d4c-4f5e-bcc6-c9f267787c11
+			defaultHierarchy: LocalDateTable_4df5af18-8bd0-4a4a-a27d-e2f18cd371c6.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Endpoint
+		lineageTag: 0e7dd4dd-71ff-4813-823d-07ff162aacbd
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: R-r1-na[Endpoint]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Avg. Failure'
+		lineageTag: b771fa6d-6cfa-4470-ae5a-6004e049dd09
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Avg. Failure]
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Category
+		lineageTag: 88761193-672c-428d-a640-270903482176
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: R-r1-na[Category]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition R-t4-DailyNodeRuntimeAvgFailure = calculated
+		mode: import
+		source = ```
+				
+				ADDCOLUMNS(
+				    SUMMARIZE(
+				        'R-r1-na',
+				        'R-r1-na'[Week],
+				        'R-r1-na'[Date],
+				        'R-r1-na'[Endpoint],
+				        'R-r1-na'[Category]
+				    ),
+				    "Avg. Failure", 
+				    DIVIDE(
+				        SUMX(
+				            FILTER(
+				                'R-r1-na',
+				                'R-r1-na'[Week] = EARLIER('R-r1-na'[Week] ) &&
+				                'R-r1-na'[Endpoint] = EARLIER('R-r1-na'[Endpoint]) &&
+				                'R-r1-na'[Category] = EARLIER('R-r1-na'[Category])
+				            ),
+				            'R-r1-na'[WeeklyTotal]
+				        ),
+				        AVERAGEX(
+				            FILTER(
+				                'R-r1-na',
+				                'R-r1-na'[Week] = EARLIER('R-r1-na'[Week]) &&
+				                'R-r1-na'[Endpoint] = EARLIER('R-r1-na'[Endpoint]) &&
+				                'R-r1-na'[Category] = EARLIER('R-r1-na'[Category])
+				            ),
+				            'R-r1-na'[DaysinWeek]
+				        ),
+				        0
+				    )
+				)
+				```
+
+	annotation PBI_Id = 8920d8a619a046319ecdb3cd4955055c
+

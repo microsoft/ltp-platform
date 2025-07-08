@@ -1,0 +1,127 @@
+table R-t1-NodeFailureCategorization
+	lineageTag: bcae397e-31fb-44ef-88c2-988bc1fb50df
+
+	measure 'Top 1 Failure Categories' =
+			
+			VAR MaxWeekNumber = [MaxWeekR]
+			VAR FilteredTable = FILTER('R-t1-NodeFailureCategorization', 'R-t1-NodeFailureCategorization'[Week] = MaxWeekNumber)
+			VAR HasDataForMaxWeek =
+			    CALCULATE(
+			        COUNTROWS('R-t1-NodeFailureCategorization'),
+			        'R-t1-NodeFailureCategorization'[Week] = MaxWeekNumber
+			    )
+			VAR MaxHardware = SUMX(FilteredTable, 'R-t1-NodeFailureCategorization'[Hardware])
+			VAR MaxPlatform = SUMX(FilteredTable, 'R-t1-NodeFailureCategorization'[Platform])
+			VAR MaxUser = SUMX(FilteredTable, 'R-t1-NodeFailureCategorization'[User])
+			VAR MaxValue = MAX(MaxHardware, MAX(MaxPlatform, MaxUser))
+			VAR TotalFailures = (MaxHardware + MaxPlatform + MaxUser)
+			VAR RatioText =
+			    IF(
+			        TotalFailures = 0,
+			        "NA", // If total is 0, set ratio to "NA"
+			        FORMAT(MaxValue / TotalFailures, "0.0%") // Otherwise, calculate and format as percentage
+			    )
+			VAR Result =
+			    SWITCH(
+			        TRUE(),
+			        MaxValue = MaxHardware, "Hardware (" & MaxValue & " instances, account for " & RatioText & " of total failures)",
+			        MaxValue = MaxPlatform, "Platform (" & MaxValue &" instances, account for " & RatioText & " of total failures)",
+			        MaxValue = MaxUser, "User (" & MaxValue & " instances, account for " & RatioText & " of total failures)"
+			    )
+			RETURN
+			IF(
+			    HasDataForMaxWeek = 0,
+			    "0 Failures",
+			    Result
+			)
+		lineageTag: 302f23d5-b6ca-4b34-b37f-2023496f0677
+
+	column hardware
+		dataType: int64
+		formatString: 0
+		lineageTag: 913bf2f9-a475-4710-ba43-50a39e68c1cd
+		summarizeBy: none
+		sourceColumn: hardware
+
+		annotation SummarizationSetBy = User
+
+	column platform
+		dataType: int64
+		formatString: 0
+		lineageTag: bee94495-ee5b-4fca-af96-1b8b32094416
+		summarizeBy: none
+		sourceColumn: platform
+
+		annotation SummarizationSetBy = User
+
+	column user
+		dataType: int64
+		formatString: 0
+		lineageTag: 7a718702-3c40-43ab-a52d-9295258640df
+		summarizeBy: none
+		sourceColumn: user
+
+		annotation SummarizationSetBy = User
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: a6231977-ed8f-40ce-a883-f43a687eff79
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = User
+
+	column unknown
+		dataType: int64
+		formatString: 0
+		lineageTag: 03bdfc8a-44df-4bb2-9dd7-96f2d50e5449
+		summarizeBy: none
+		sourceColumn: unknown
+
+		annotation SummarizationSetBy = User
+
+	column Endpoint
+		dataType: string
+		lineageTag: 10eabedb-de8a-4129-8b7f-fef603eefcc8
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	column Timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: db06940e-a662-4963-ba72-5644159410b1
+		summarizeBy: none
+		sourceColumn: Timestamp
+
+		variation Variation
+			isDefault
+			relationship: fdef23f3-70be-4e85-a029-ed7c832eface
+			defaultHierarchy: LocalDateTable_e78aa197-a9d3-42c7-b595-c6e8aef6b914.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column uncategorized
+		dataType: int64
+		formatString: 0
+		lineageTag: dfc47eda-d6c6-47af-8a79-143e2bb2c31d
+		summarizeBy: none
+		sourceColumn: uncategorized
+
+		annotation SummarizationSetBy = User
+
+	partition R-t1-NodeFailureCategorization = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "let src =#(lf)cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')#(lf)    .database('production')#(lf)    .table('NodeActionRecord')#(lf)| join kind=leftouter NodeActionAttributes on Action#(lf)| sort by HostName asc, Timestamp asc, Action asc#(lf)| serialize;#(lf)// 1) mark every row that has a non‑empty Phase#(lf)let withMark =#(lf)    src#(lf)    | extend NonEmptyFlag = iff(isnotempty(Phase), 1, 0);#(lf)// 2) build a running total of NonEmptyFlag **per HostName**#(lf)let running =#(lf)    withMark#(lf)    | extend PhaseGroup =#(lf)        row_cumsum(NonEmptyFlag)   // needs `serialize` earlier#(lf)        ;   // PhaseGroup increments each time we see a non‑empty Phase#(lf)// 3) look up the _latest_ non‑empty Phase in each PhaseGroup#(lf)let phaseLookup =#(lf)    running#(lf)    | where NonEmptyFlag == 1#(lf)    | summarize LastPhase = arg_max(Timestamp, Phase) by HostName, PhaseGroup#(lf)    | project HostName, PhaseGroup, LastPhase = Phase;#(lf)// 4) join back to fill down#(lf)let enriched = running#(lf)| join kind=inner (phaseLookup) on HostName, PhaseGroup#(lf)| project-away NonEmptyFlag, Action1, HostName1, PhaseGroup1#(lf)| sort by HostName asc, Timestamp asc ;#(lf)// ── Step 1: earliest timestamp per HostName + PhaseGroup ───────────────────#(lf)let groupStart =#(lf)    enriched#(lf)    | summarize StartTime = min(Timestamp) by HostName, PhaseGroup;#(lf)// ── Step 3: stitch them together ───────────────────────────────────────────#(lf)let record=enriched#(lf)| join kind=inner groupStart on HostName, PhaseGroup#(lf)| project-reorder StartTime, Timestamp, HostName, PhaseGroup#(lf)| sort by Timestamp asc#(lf)| where Action contains ""cordoned-triaged"" and LastPhase contains ""routine""#(lf)| summarize arg_max(Timestamp, *) by HostName, PhaseGroup#(lf)| project-away HostName1, PhaseGroup1, Phase#(lf)| extend CategoryReason = strcat(Category, ""-"", Reason);#(lf)let startDate = datetime(2025-03-17);#(lf)let endDate = now();#(lf)// Step 1: Extract unique reasons in the 'routine' phase#(lf)let uniqueReasonsRoutine = record#(lf)| distinct Category;#(lf)// Step 2: Summarize count by reason within weekly intervals#(lf)let summarizedData = record#(lf)| summarize Count = count() by Category, bin(StartTime, 7d), Endpoint;#(lf)// Step 3: Pivot the data to create a column for each unique reason#(lf)summarizedData#(lf)| evaluate pivot(Category, sum(Count))#(lf)| extend Week = weekofyear(startofweek(StartTime - 1d, 0)) // Monday as the start of the week#(lf)| project-rename uncategorized = _Empty, Timestamp = StartTime#(lf)| order by Week asc", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				in
+				    Source
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+

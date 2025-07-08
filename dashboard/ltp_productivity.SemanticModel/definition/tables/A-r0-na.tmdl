@@ -1,0 +1,156 @@
+table A-r0-na
+	lineageTag: e776bc6b-e5e5-4d30-86e8-ab5638122a84
+
+	column Week
+		dataType: string
+		sourceProviderType: nvarchar(max)
+		lineageTag: c622be15-5d1e-4521-9de7-426ed07db94a
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	column Cluster
+		dataType: string
+		sourceProviderType: nvarchar(max)
+		lineageTag: aac3cf21-ae29-45c9-8a0f-f3aed2af9e89
+		summarizeBy: none
+		sourceColumn: Cluster
+
+		annotation SummarizationSetBy = Automatic
+
+	column AvgTotal
+		dataType: double
+		sourceProviderType: double
+		lineageTag: 8891d846-2d80-46d6-8e55-6e279f94fc1d
+		summarizeBy: none
+		sourceColumn: AvgTotal
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AvgReadyEmpty
+		dataType: double
+		sourceProviderType: double
+		lineageTag: 0a055749-ef4f-4af6-a6fe-85c0fbd09a1e
+		summarizeBy: none
+		sourceColumn: AvgReadyEmpty
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AvgReadyUsed
+		dataType: double
+		sourceProviderType: double
+		lineageTag: db8c44ff-e54a-4317-a627-7d814a219986
+		summarizeBy: none
+		sourceColumn: AvgReadyUsed
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AvgOFR
+		dataType: double
+		sourceProviderType: double
+		lineageTag: 010c1c52-3f87-4bbd-ac1b-80c675da2ed9
+		summarizeBy: none
+		sourceColumn: AvgOFR
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AvgUnallocatable
+		dataType: double
+		sourceProviderType: double
+		lineageTag: b39030f4-ba2c-4305-85ac-439cf7adb80c
+		summarizeBy: none
+		sourceColumn: AvgUnallocatable
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AvgHumanInvestigate
+		dataType: double
+		sourceProviderType: double
+		lineageTag: 2361df57-a086-4635-b555-3d12558b08b2
+		summarizeBy: none
+		sourceColumn: AvgHumanInvestigate
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AvgExcluded
+		dataType: double
+		sourceProviderType: double
+		lineageTag: 4e721c98-16b2-47f5-a6f1-4147d4737110
+		summarizeBy: none
+		sourceColumn: AvgExcluded
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AvgProbation
+		dataType: double
+		sourceProviderType: double
+		lineageTag: 2633f92f-a2c2-49f2-a60c-e487a7d299c2
+		summarizeBy: none
+		sourceColumn: AvgProbation
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column AvgSuspected
+		dataType: double
+		sourceProviderType: double
+		lineageTag: 561ff4b9-f46c-4829-b943-d26dcf84f04d
+		summarizeBy: none
+		sourceColumn: AvgSuspected
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TIMESTAMP
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 0ffff2bc-ffc1-40c6-ba51-a56f74af5b7e
+		summarizeBy: none
+		sourceColumn: TIMESTAMP
+
+		variation Variation
+			isDefault
+			relationship: 51b89cd0-a1d5-45c3-8dcc-43b9d45a0f3c
+			defaultHierarchy: LocalDateTable_d10fffc0-c90f-45e8-95eb-b568055c2da3.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeekNum
+		dataType: int64
+		formatString: 0
+		lineageTag: cfc0d7bf-f7d1-45b2-ac30-667714032308
+		summarizeBy: sum
+		sourceColumn: WeekNum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition A-r0-na = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("azcore.centralus", "Fc", "let startdate = datetime(2025-03-20);#(lf)let enddate = now(); #(lf)let mi300 = cluster('https://azcore.centralus.kusto.windows.net').database('Fc').LogContainerPolicySnapshot   #(lf)| where PreciseTimeStamp between (startdate .. enddate)  #(lf)| where hardwareGeneration contains ""AmdMI300X""#(lf)| where Tenant contains ""CYS13PrdGPC02"" or Tenant contains ""LON64PrdGPC01"" or Tenant contains ""PAR40PrdGPC02"" or Tenant contains ""SJC24PrdGPC03""#(lf)| distinct Tenant;  #(lf)cluster('https://azcore.centralus.kusto.windows.net').database('AzureCP').MycroftNodeSnapshot#(lf)| where PreciseTimeStamp between (startdate .. enddate)  #(lf)| where ClusterName in (mi300)  #(lf)| where MachinePoolName contains ""MP2""#(lf)| distinct NodeId, MachinePoolName#(lf)| join kind=rightouter (#(lf)    cluster('https://azcore.centralus.kusto.windows.net').database('AzureCP').MycroftNodeHealthSnapshot#(lf)    | where PreciseTimeStamp between (startdate .. enddate)  #(lf)    | where ClusterName in (mi300) #(lf)) on NodeId#(lf)| extend Day = bin(PreciseTimeStamp, 1d)  #(lf)| summarize arg_max(PreciseTimeStamp, *) by NodeId, Day  #(lf)| summarize arg_max(PreciseTimeStamp, NsdState, AvailabilityState, ContainerCount, FaultInfo) by ClusterName, NodeId, Day  #(lf)| summarize#(lf)    ready_used =countif(NsdState == ""Ready"" and ContainerCount == 1), #(lf)    ready_avail_empty = countif(NsdState == ""Ready"" and AvailabilityState == ""Available"" and ContainerCount == 0),#(lf)    ofr = countif(NsdState == ""OutForRepair""),#(lf)    hi = countif(NsdState == ""HumanInvestigate""),#(lf)    exc = countif(NsdState == ""Excluded""),#(lf)    prob = countif(AvailabilityState == ""Probation""),#(lf)    suspected = countif(AvailabilityState == ""Suspected""),#(lf)    total = count(),#(lf)    ua = countif(NsdState == ""Ready"" and AvailabilityState == ""Unallocatable"")#(lf)    by ClusterName, Day#(lf)| extend DayOfWeek = dayofweek(Day) #(lf)| extend WeekStart = iif(DayOfWeek == 0d, startofweek(Day,-1) + 1d, startofweek(Day) + 1d)   #(lf)| project Day, Week = format_datetime(WeekStart, 'yyyy-MM-dd'), Cluster = ClusterName, Total = total, ReadyEmpty = ready_avail_empty, ReadyContainer=ready_used, OFR=ofr, Unallocatable=ua, HumanInvestigate=hi, Excluded=exc,Probation=prob,Suspected=suspected #(lf)| summarize  #(lf)    AvgTotal = round(avg(Total), 2),  #(lf)    AvgReadyEmpty = round(avg(ReadyEmpty), 2),  #(lf)    AvgReadyUsed = round(avg(ReadyContainer), 2),  #(lf)    AvgOFR = round(avg(OFR), 2),  #(lf)    AvgUnallocatable = round(avg(Unallocatable), 2),  #(lf)    AvgHumanInvestigate = round(avg(HumanInvestigate), 2),  #(lf)    AvgExcluded = round(avg(Excluded), 2),  #(lf)    AvgProbation = round(avg(Probation), 2),  #(lf)    AvgSuspected = round(avg(Suspected), 2)  #(lf)    by Week, Cluster  #(lf)| order by Week asc#(lf)| extend TIMESTAMP = todatetime(Week)#(lf)| extend WeekNum = weekofyear(startofweek(TIMESTAMP - 1d, 0))", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

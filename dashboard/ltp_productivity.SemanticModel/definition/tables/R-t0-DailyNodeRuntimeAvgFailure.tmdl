@@ -1,0 +1,82 @@
+table R-t0-DailyNodeRuntimeAvgFailure
+	lineageTag: bface444-90fa-4c53-aff2-5b61c70b1f37
+
+	column AvgFailure
+		dataType: double
+		lineageTag: 99018dd9-f310-4a28-9d7a-77cac1672e5e
+		summarizeBy: sum
+		sourceColumn: AvgFailure
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 1c1b8425-3214-45fa-b293-11b0a41f323a
+		summarizeBy: none
+		sourceColumn: Date
+
+		variation Variation
+			isDefault
+			relationship: 1aa4a5d4-33cb-4922-b748-fc99512c4d75
+			defaultHierarchy: LocalDateTable_1a030e83-25f1-4b5e-86ce-18fca13f6878.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Endpoint
+		dataType: string
+		lineageTag: 11840865-5067-4858-86da-d1ff4365d458
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: a6190814-6c71-47cc-bf2a-b286b0fc38c0
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	column WeeklyTotal
+		dataType: int64
+		formatString: 0
+		lineageTag: 3d4c1bcf-a913-444d-8320-bbf64dba6b68
+		summarizeBy: sum
+		sourceColumn: WeeklyTotal
+
+		annotation SummarizationSetBy = Automatic
+
+	column DaysinWeek
+		dataType: int64
+		formatString: 0
+		lineageTag: c3a6ee93-9a61-4004-8d78-6e3ca2cc58fa
+		summarizeBy: sum
+		sourceColumn: DaysinWeek
+
+		annotation SummarizationSetBy = Automatic
+
+	partition R-t0-DailyNodeRuntimeAvgFailure = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "let src =#(lf)cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')#(lf)    .database('production')#(lf)    .table('NodeActionRecord')#(lf)| join kind=leftouter NodeActionAttributes on Action#(lf)| sort by HostName asc, Timestamp asc, Action asc#(lf)| serialize;#(lf)// 1) mark every row that has a non‑empty Phase#(lf)let withMark =#(lf)    src#(lf)    | extend NonEmptyFlag = iff(isnotempty(Phase), 1, 0);#(lf)// 2) build a running total of NonEmptyFlag **per HostName**#(lf)let running =#(lf)    withMark#(lf)    | extend PhaseGroup =#(lf)        row_cumsum(NonEmptyFlag)   // needs `serialize` earlier#(lf)        ;   // PhaseGroup increments each time we see a non‑empty Phase#(lf)// 3) look up the _latest_ non‑empty Phase in each PhaseGroup#(lf)let phaseLookup =#(lf)    running#(lf)    | where NonEmptyFlag == 1#(lf)    | summarize LastPhase = arg_max(Timestamp, Phase) by HostName, PhaseGroup#(lf)    | project HostName, PhaseGroup, LastPhase = Phase;#(lf)// 4) join back to fill down#(lf)let enriched = running#(lf)| join kind=inner (phaseLookup) on HostName, PhaseGroup#(lf)| project-away NonEmptyFlag, Action1, HostName1, PhaseGroup1#(lf)| sort by HostName asc, Timestamp asc ;#(lf)// ── Step 1: earliest timestamp per HostName + PhaseGroup ───────────────────#(lf)let groupStart =#(lf)    enriched#(lf)    | summarize StartTime = min(Timestamp) by HostName, PhaseGroup;#(lf)// ── Step 3: stitch them together ───────────────────────────────────────────#(lf)let record=enriched#(lf)| join kind=inner groupStart on HostName, PhaseGroup#(lf)| project-reorder StartTime, Timestamp, HostName, PhaseGroup#(lf)| sort by Timestamp asc#(lf)| where Action contains ""cordoned-triaged"" and LastPhase contains ""routine""#(lf)| summarize arg_max(Timestamp, *) by HostName, PhaseGroup#(lf)| project-away HostName1, PhaseGroup1, Phase#(lf)| extend CategoryReason = strcat(Category, ""-"", Reason);#(lf)let startDate = datetime(2025-03-20);#(lf)let endDate = now();#(lf)range StartDate from startDate to endDate step 1d#(lf)| extend EndDate = StartDate + 1d#(lf)| extend Week = weekofyear(startofweek(StartDate - 1d, 0)) // Monday as the start of the week#(lf)| join kind=leftouter (#(lf)    record#(lf)    | summarize Total = count() by bin(StartTime, 1d), Endpoint#(lf)) on $left.StartDate == $right.StartTime#(lf)| project StartDate, EndDate, Week, Endpoint, Total = coalesce(Total, 0)#(lf)| order by StartDate asc#(lf)| summarize WeeklyTotal = sum(Total) by bin(StartDate, 7d), Endpoint#(lf)| extend CurrentWeekStart = startofweek(now(), 0) + 1d // Calculate the start of the current week (Monday)#(lf)| extend DaysInCurrentWeek = datetime_diff('day', now(), CurrentWeekStart) + 1 // Calculate days passed in current week#(lf)| extend DaysinWeek = iff(StartDate == CurrentWeekStart, DaysInCurrentWeek, 7)#(lf)| extend AvgFailure = toreal(WeeklyTotal) / DaysinWeek#(lf)| extend Week = weekofyear(startofweek(StartDate - 1d, 0)) // Monday as the start of the week#(lf)| project-away CurrentWeekStart, DaysInCurrentWeek#(lf)| order by Week asc, Endpoint asc", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"StartDate", type date}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Changed Type",{{"StartDate", "Date"}}),
+				    #"Sorted Rows" = Table.Sort(#"Renamed Columns",{{"Week", Order.Ascending}, {"Date", Order.Ascending}, {"Endpoint", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Exception
+

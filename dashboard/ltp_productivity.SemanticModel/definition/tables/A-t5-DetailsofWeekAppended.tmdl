@@ -1,0 +1,195 @@
+table A-t5-DetailsofWeekAppended
+	lineageTag: d612e357-4330-4cd2-99c8-0f743e52535a
+
+	measure FilteredMaxWeek =
+			
+			VAR Result = MAX('A-t5-DetailsofWeekAppended'[Week])
+			RETURN
+			    COALESCE(Result, 0)
+		formatString: 0
+		lineageTag: b2dc35b1-8d04-4413-b862-1dcc49ffbd6f
+
+	measure 'Daily Ratio Min' =
+			
+			VAR MaxWeekValue = MAXX(ALL('A-t5-DetailsofWeekAppended'), 'A-t5-DetailsofWeekAppended'[Week])
+			VAR FilteredTableForMaxWeek =
+			    FILTER(
+			        'A-t5-DetailsofWeekAppended',
+			        'A-t5-DetailsofWeekAppended'[Week] = [FilteredMaxWeek]
+			    )
+			VAR Result =
+			    MINX(
+			        FilteredTableForMaxWeek,
+			        'A-t5-DetailsofWeekAppended'[AvailabilityRatio]
+			    )
+			RETURN COALESCE(Result, 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 4bfb7995-a996-4681-b65b-959692b231e9
+
+	measure 'Daily Ratio Max' =
+			
+			VAR MaxWeekValue = MAXX(ALL('A-t5-DetailsofWeekAppended'), 'A-t5-DetailsofWeekAppended'[Week])
+			VAR FilteredTableForMaxWeek =
+			    FILTER(
+			        'A-t5-DetailsofWeekAppended',
+			        'A-t5-DetailsofWeekAppended'[Week] = [FilteredMaxWeek]
+			    )
+			VAR Result =
+			    MAXX(
+			        FilteredTableForMaxWeek,
+			        'A-t5-DetailsofWeekAppended'[AvailabilityRatio]
+			    )
+			RETURN COALESCE(Result, 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: a578d29a-8ae0-4b35-ac3a-3afe0d6418e7
+
+	column Week
+		formatString: 0
+		lineageTag: 59771895-17f9-4c5c-903f-0cfe238c3d55
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Week]
+
+		annotation SummarizationSetBy = User
+
+	column Date
+		formatString: yyyy-mm-dd
+		lineageTag: 43cd249a-e137-4717-9744-57ef78598bc5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		variation Variation
+			isDefault
+			relationship: 3e47992c-fe4d-4953-9d19-efe56b951c42
+			defaultHierarchy: LocalDateTable_f6af1449-a88d-4bce-a581-e4bbfc162fb5.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Endpoint
+		lineageTag: 078ada85-727e-43ca-be57-1ed3c2db8415
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Endpoint]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Validation
+		formatString: 0
+		lineageTag: e509d1f5-7ab1-4465-b209-45b00c89098f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Validation]
+
+		annotation SummarizationSetBy = User
+
+	column Healthy
+		formatString: 0
+		lineageTag: 759d339a-0cfe-44f7-889d-6a54bfc94227
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Healthy]
+
+		annotation SummarizationSetBy = User
+
+	column Cordon
+		formatString: 0
+		lineageTag: ecfd5fbb-6f96-4e7e-8b68-1650485b948c
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Cordon]
+
+		annotation SummarizationSetBy = User
+
+	column HPC-UA
+		formatString: 0
+		lineageTag: 9b1e97b1-4bb3-41e0-a2b1-adbb0979919f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [HPC-UA]
+
+		annotation SummarizationSetBy = User
+
+	column New
+		formatString: 0
+		lineageTag: de7c3fcc-9215-4a4c-9eb1-3a8595e8392b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [New]
+
+		annotation SummarizationSetBy = User
+
+	column Deallocated
+		formatString: 0
+		lineageTag: 86eed9f6-a551-4e84-a1db-f43718c5b32a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Deallocated]
+
+		annotation SummarizationSetBy = User
+
+	column TotalNodes
+		formatString: 0
+		lineageTag: 0d330423-2925-4cef-850b-b03a2aea99f9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [TotalNodes]
+
+		annotation SummarizationSetBy = User
+
+	column TotalGPUs
+		formatString: 0
+		lineageTag: 8efd33bc-3a41-40c7-b752-f68b79884a5d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [TotalGPUs]
+
+		annotation SummarizationSetBy = User
+
+	column AvailabilityRatio
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: dc218e40-3151-4f0e-81fd-3813c137c120
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [AvailabilityRatio]
+
+		annotation SummarizationSetBy = User
+
+	column ClusterName
+		lineageTag: 0307d67d-79ff-4be8-ad17-f72194f77f25
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ClusterName]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition A-t5-DetailsofWeekAppended = calculated
+		mode: import
+		source =
+				
+				VAR IntermediateTable =
+				    ADDCOLUMNS(
+				        SELECTCOLUMNS(
+				            'A-r2-na',
+				            "Week", 'A-r2-na'[Week],
+				            "Date", 'A-r2-na'[Day],
+				            "Endpoint", 'A-r2-na'[Endpoint],
+				            "ClusterName", 'A-r2-na'[ClusterName],
+				            "Validation", 'A-r2-na'[Validation],
+				            "Healthy", 'A-r2-na'[Healthy],
+				            "Cordon", 'A-r2-na'[Cordon],
+				            "HPC-UA", 'A-r2-na'[UA],
+				            "New", 'A-r2-na'[New],
+				            "Deallocated", 'A-r2-na'[Deallocated],
+				            "TotalNodes", 'A-r2-na'[Cordon] + 'A-r2-na'[Healthy] + 'A-r2-na'[New] + 'A-r2-na'[UA] + 'A-r2-na'[Validation]
+				        ),
+				        "TotalGPUs", [TotalNodes] * 8,
+				        "AvailabilityRatio", DIVIDE([Healthy], [TotalNodes], 0)
+				    )
+				RETURN
+				    IntermediateTable
+
+	annotation PBI_Id = 2284f3c3c97941d185301f7ea35de979
+

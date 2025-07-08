@@ -1,0 +1,37 @@
+table R-r0-ColumnEmpty
+	lineageTag: 60a92b88-bad2-4ee9-849c-a59a645e5112
+
+	column 'Reasons in Category: Uncategorized'
+		dataType: string
+		lineageTag: be154255-d83d-4724-bc4c-f97a1ec3259d
+		summarizeBy: none
+		sourceColumn: Reasons in Category: Uncategorized
+
+		annotation SummarizationSetBy = Automatic
+
+	partition R-r0-ColumnEmpty = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = #table(type table [ColumnName = text], {}),
+				    TableSchema = Table.Schema( #"R-r0-na" ),
+				    ColumnNames = Table.SelectColumns(TableSchema, {"Name"}),
+				    FilteredHardwareColumns = Table.SelectRows(ColumnNames, each Text.StartsWith([Name], "-")),
+				    ListofHardwareColumns = FilteredHardwareColumns[Name], // This is currently a list of text values
+				
+				    // Step 1: Remove 'Hardware-' prefix from each item in the list
+				    RenamedColumnsStep1 = List.Transform(ListofHardwareColumns, each Text.Replace(_, "-", "")), // Corrected: using '_' instead of '$'
+				
+				    // Step 2: Replace "" (empty string) with "UnknownReason"
+				    RenamedColumnsStep2 = List.Transform(RenamedColumnsStep1, each if Text.Length(_) = 0 then "Unknown Reason" else _), // Corrected: using '_'
+				
+				    // Convert the list back to a table (optional, but good for Power BI loading)
+				    FinalTable = Table.FromList(RenamedColumnsStep2, Splitter.SplitByNothing(), {"Reasons in Category: Uncategorized"}, null, ExtraValues.Error)
+				in
+				    FinalTable
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

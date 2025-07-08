@@ -1,0 +1,37 @@
+table R-r0-ColumnUnknown
+	lineageTag: c345e766-500c-4171-8934-d4618261243b
+
+	column 'Reasons in Category: Unknown'
+		dataType: string
+		lineageTag: 0b67e277-b29c-4b2f-9b52-7988556159f7
+		summarizeBy: none
+		sourceColumn: Reasons in Category: Unknown
+
+		annotation SummarizationSetBy = Automatic
+
+	partition R-r0-ColumnUnknown = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = #table(type table [ColumnName = text], {}),
+				    TableSchema = Table.Schema( #"R-r0-na" ),
+				    ColumnNames = Table.SelectColumns(TableSchema, {"Name"}),
+				    FilteredHardwareColumns = Table.SelectRows(ColumnNames, each Text.StartsWith([Name], "unknown")),
+				    ListofHardwareColumns = FilteredHardwareColumns[Name], // This is currently a list of text values
+				
+				    // Step 1: Remove 'Hardware-' prefix from each item in the list
+				    RenamedColumnsStep1 = List.Transform(ListofHardwareColumns, each Text.Replace(_, "unknown-", "")), // Corrected: using '_' instead of '$'
+				
+				    // Step 2: Replace "" (empty string) with "UnknownReason"
+				    RenamedColumnsStep2 = List.Transform(RenamedColumnsStep1, each if Text.Length(_) = 0 then "Unknown Reason" else _), // Corrected: using '_'
+				
+				    // Convert the list back to a table (optional, but good for Power BI loading)
+				    FinalTable = Table.FromList(RenamedColumnsStep2, Splitter.SplitByNothing(), {"Reasons in Category: Unknown"}, null, ExtraValues.Error)
+				in
+				    FinalTable
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

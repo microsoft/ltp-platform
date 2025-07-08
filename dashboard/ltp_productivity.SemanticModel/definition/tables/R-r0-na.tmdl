@@ -1,0 +1,317 @@
+table R-r0-na
+	lineageTag: 40a27d6b-e959-4df1-b441-60fa1dcf4c21
+
+	column Timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 9b999374-d193-44b0-bd74-13ceedbe495b
+		summarizeBy: none
+		sourceColumn: Timestamp
+
+		variation Variation
+			isDefault
+			relationship: ceb3c7b1-6dfe-4688-b066-0c288b4f5600
+			defaultHierarchy: LocalDateTable_21e66450-2dd4-4002-b492-041131745eea.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column -
+		dataType: int64
+		formatString: 0
+		lineageTag: adc239fc-5fd2-46ef-a555-0059b3d1c085
+		summarizeBy: sum
+		sourceColumn: -
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: string
+		lineageTag: 0b5de41e-df1e-4317-ac5a-7bc65c050bca
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-AMDGPUSMIHanging
+		dataType: int64
+		formatString: 0
+		lineageTag: aa94a62e-29ec-4662-b438-735ab3d80cee
+		summarizeBy: sum
+		sourceColumn: hardware-AMDGPUSMIHanging
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-Disk Error'
+		dataType: int64
+		formatString: 0
+		lineageTag: 86d333d5-1fde-433c-a0ec-93605c5e1983
+		summarizeBy: sum
+		sourceColumn: hardware-Disk Error
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-Frontend Network Issue'
+		dataType: int64
+		formatString: 0
+		lineageTag: 6b549162-dae0-4965-8a07-765c218c2297
+		summarizeBy: sum
+		sourceColumn: hardware-Frontend Network Issue
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-GPU Driver Hanging'
+		dataType: int64
+		formatString: 0
+		lineageTag: 3448301b-dcf4-4166-932f-0f56e231b369
+		summarizeBy: sum
+		sourceColumn: hardware-GPU Driver Hanging
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-GPU Hanging with Fence Fallback Timer Expired'
+		dataType: int64
+		formatString: 0
+		lineageTag: e4d4765e-2e72-42e1-bc0b-a0dbabd7d045
+		summarizeBy: sum
+		sourceColumn: hardware-GPU Hanging with Fence Fallback Timer Expired
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-GPU Hanging with Segfault'
+		dataType: int64
+		formatString: 0
+		lineageTag: c12de55d-2e2f-4488-b743-5c01040e01ef
+		summarizeBy: sum
+		sourceColumn: hardware-GPU Hanging with Segfault
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-GPU Memory Not Release'
+		dataType: int64
+		formatString: 0
+		lineageTag: 60185f98-12d9-4f10-8c11-61ee85d5f579
+		summarizeBy: sum
+		sourceColumn: hardware-GPU Memory Not Release
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-IB Bandwidth Regression'
+		dataType: int64
+		formatString: 0
+		lineageTag: 74409362-e264-416a-b80f-463006438b2d
+		summarizeBy: sum
+		sourceColumn: hardware-IB Bandwidth Regression
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-IB Link Flapping'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1156defb-5aae-4742-8de3-2c421f3b29cc
+		summarizeBy: sum
+		sourceColumn: hardware-IB Link Flapping
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-IB Nic Failure'
+		dataType: int64
+		formatString: 0
+		lineageTag: 42449d0e-4bc4-49cf-ad90-872e31b40237
+		summarizeBy: sum
+		sourceColumn: hardware-IB Nic Failure
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-IB Port Down'
+		dataType: int64
+		formatString: 0
+		lineageTag: 0cbad5b4-5730-4482-a31a-02634b1e20b5
+		summarizeBy: sum
+		sourceColumn: hardware-IB Port Down
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-IB Reregistration'
+		dataType: int64
+		formatString: 0
+		lineageTag: cec541a6-405a-4261-af79-01e141948e0b
+		summarizeBy: sum
+		sourceColumn: hardware-IB Reregistration
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-Loss NaN'
+		dataType: int64
+		formatString: 0
+		lineageTag: f87d1c34-dde3-4d9b-92d7-520976647a2f
+		summarizeBy: sum
+		sourceColumn: hardware-Loss NaN
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-Memory Access Fault'
+		dataType: int64
+		formatString: 0
+		lineageTag: 558283cb-f5b2-49c9-8e12-f51554e03bb0
+		summarizeBy: sum
+		sourceColumn: hardware-Memory Access Fault
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-PCIe bandwidth Regression'
+		dataType: int64
+		formatString: 0
+		lineageTag: ad78ff1f-cd7a-4f93-b9ca-c8a7721337db
+		summarizeBy: sum
+		sourceColumn: hardware-PCIe bandwidth Regression
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform-DatasetPreCheckFailure
+		dataType: int64
+		formatString: 0
+		lineageTag: 0a4190bf-f2c6-4985-bd1d-af025283d5d4
+		summarizeBy: sum
+		sourceColumn: platform-DatasetPreCheckFailure
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'platform-Disk Full'
+		dataType: int64
+		formatString: 0
+		lineageTag: 99e1d22f-cf86-44e2-8c94-8366db434d88
+		summarizeBy: sum
+		sourceColumn: platform-Disk Full
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'platform-Platform Service Issue'
+		dataType: int64
+		formatString: 0
+		lineageTag: 39c2e4f4-64af-4d9f-9600-37235f74b1ac
+		summarizeBy: sum
+		sourceColumn: platform-Platform Service Issue
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'user-Memory Access Fault'
+		dataType: int64
+		formatString: 0
+		lineageTag: 1ef3193f-d03b-471f-8cd5-7d1e2a8c0fc6
+		summarizeBy: sum
+		sourceColumn: user-Memory Access Fault
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'user-UnreliableNetworkRequest '
+		dataType: int64
+		formatString: 0
+		lineageTag: 55641793-842b-4a17-a710-5ece91bb0255
+		summarizeBy: sum
+		sourceColumn: "user-UnreliableNetworkRequest "
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-GPUHangingwithSegfault
+		dataType: int64
+		formatString: 0
+		lineageTag: 3a50ac28-0e31-466d-bd59-48e47b56c83b
+		summarizeBy: sum
+		sourceColumn: hardware-GPUHangingwithSegfault
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-IBLinkFlapping
+		dataType: int64
+		formatString: 0
+		lineageTag: b8ca8105-64f1-4e5b-b679-3a8ab0517996
+		summarizeBy: sum
+		sourceColumn: hardware-IBLinkFlapping
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-NodeCrash
+		dataType: int64
+		formatString: 0
+		lineageTag: 8f5fa644-db7b-425f-a699-d1c6c271ed06
+		summarizeBy: sum
+		sourceColumn: hardware-NodeCrash
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: 8fe57256-9f44-48a2-b0c8-1be18e73c2cc
+		summarizeBy: sum
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-IBPortDown
+		dataType: int64
+		formatString: 0
+		lineageTag: b65e4683-0068-442d-8482-f8a042ff57e3
+		summarizeBy: sum
+		sourceColumn: hardware-IBPortDown
+
+		annotation SummarizationSetBy = Automatic
+
+	column unknown-
+		dataType: int64
+		formatString: 0
+		lineageTag: 1f7be2a9-d768-49a5-a805-63af3a8443ae
+		summarizeBy: sum
+		sourceColumn: unknown-
+
+		annotation SummarizationSetBy = Automatic
+
+	column unknown-UnknownIssue
+		dataType: int64
+		formatString: 0
+		lineageTag: 6734154a-45d6-4316-833b-0f2b9f8265de
+		summarizeBy: sum
+		sourceColumn: unknown-UnknownIssue
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-NvidiaSmiDoubleEccError
+		dataType: int64
+		formatString: 0
+		lineageTag: c943d299-18de-4a3b-9bf6-e96e7fcdd1de
+		summarizeBy: sum
+		sourceColumn: hardware-NvidiaSmiDoubleEccError
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform-NodeCrash
+		dataType: int64
+		formatString: 0
+		lineageTag: 8106cac3-34e4-44e9-9141-3ba4abc3f590
+		summarizeBy: sum
+		sourceColumn: platform-NodeCrash
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'hardware-GPU Momery Not Release'
+		dataType: int64
+		formatString: 0
+		lineageTag: 8089e2bc-f933-4e6f-966b-31a4fe46d27e
+		summarizeBy: sum
+		sourceColumn: hardware-GPU Momery Not Release
+
+		annotation SummarizationSetBy = Automatic
+
+	partition R-r0-na = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "//1.for the runtime failures, the source data will change into NodeActionRecord in production cluster:#(lf)//here is an example runtime failure query#(lf)let record =#(lf)cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')#(lf)| join kind=leftouter (#(lf)    NodeActionAttributes#(lf)) on Action#(lf)| sort by HostName asc , Timestamp asc, Action asc#(lf)| extend PrevHostName = prev(HostName, 1)#(lf)| extend PrevPhase = prev(Phase, 1)#(lf)| extend IsNewNode = HostName != PrevHostName or isnull(PrevHostName)#(lf)| serialize#(lf)| extend LastPhase = iff(#(lf)    IsNewNode,#(lf)    Phase,  // First record for this node#(lf)    iff(#(lf)        isnotempty(Phase),#(lf)        Phase,  // Current action has phase#(lf)        iff(#(lf)            isnotempty(PrevPhase),#(lf)            PrevPhase,  // Use previous phase#(lf)            """"  // Default to empty#(lf)        )#(lf)    )#(lf))#(lf)| project-away PrevHostName, PrevPhase, IsNewNode, Action1#(lf)| sort by Timestamp asc#(lf)| where Action contains ""cordoned-triaged"" and LastPhase contains ""routine""#(lf)| extend CategoryReason = strcat(Category, ""-"", Reason);#(lf)let startDate = datetime(2025-03-17);#(lf)let endDate = now();#(lf)// Step 1: Extract unique reasons in the 'routine' phase#(lf)let uniqueReasonsRoutine = record#(lf)| distinct CategoryReason;#(lf)// Step 2: Summarize count by reason within weekly intervals#(lf)let summarizedData = record#(lf)| summarize Count = count() by CategoryReason, bin(Timestamp, 7d);#(lf)// Step 3: Pivot the data to create a column for each unique reason#(lf)summarizedData#(lf)| evaluate pivot(CategoryReason, sum(Count))#(lf)| extend Week = weekofyear(startofweek(Timestamp - 1d, 0)) // Monday as the start of the week#(lf)| extend Date = format_datetime(Timestamp, ""yyyy-MM-dd"")#(lf)| order by Week asc#(lf)", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				in
+				    Source
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+

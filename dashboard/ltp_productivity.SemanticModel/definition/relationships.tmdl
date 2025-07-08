@@ -1,0 +1,182 @@
+relationship 33193873-48a9-4226-b97c-61164c1568d9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: R-t3-DailyOccurrenceofNodeFailuresRuntime.EndDate
+	toColumn: LocalDateTable_c8777a3a-5e2f-4fa4-a113-1211d451fdaa.Date
+
+relationship ceb3c7b1-6dfe-4688-b066-0c288b4f5600
+	joinOnDateBehavior: datePartOnly
+	fromColumn: R-r0-na.Timestamp
+	toColumn: LocalDateTable_21e66450-2dd4-4002-b492-041131745eea.Date
+
+relationship 51b89cd0-a1d5-45c3-8dcc-43b9d45a0f3c
+	joinOnDateBehavior: datePartOnly
+	fromColumn: A-r0-na.TIMESTAMP
+	toColumn: LocalDateTable_d10fffc0-c90f-45e8-95eb-b568055c2da3.Date
+
+relationship 00970ea9-4c57-4253-b007-3f98aad17b37
+	joinOnDateBehavior: datePartOnly
+	fromColumn: A-r2-na.Day
+	toColumn: LocalDateTable_cef9989f-cbfb-49d1-926b-43c32f72a0dc.Date
+
+relationship 3e47992c-fe4d-4953-9d19-efe56b951c42
+	joinOnDateBehavior: datePartOnly
+	fromColumn: A-t5-DetailsofWeekAppended.Date
+	toColumn: LocalDateTable_f6af1449-a88d-4bce-a581-e4bbfc162fb5.Date
+
+relationship 39bee79e-6600-4612-a7bd-e834a7185b9d
+	joinOnDateBehavior: datePartOnly
+	fromColumn: A-t0-ClusterCapacityStatus.Date
+	toColumn: LocalDateTable_87233e88-b4b1-4a8a-9ecc-b61441c00f5a.Date
+
+relationship a37368a9-6f20-747b-47d3-7adfa42f5794
+	fromColumn: A-t0-ClusterCapacityStatus.Week
+	toColumn: ADimWeek.Week
+
+relationship 270b7400-b46a-a14b-0409-a4cdbdb6d7ce
+	fromColumn: A-t4-AvailabilityStatus.Week
+	toColumn: ADimWeek.Week
+
+relationship 295204a2-7762-4fd1-a94b-01ba8721870e
+	fromColumn: A-t5-DetailsofWeekAppended.Week
+	toColumn: ADimWeek.Week
+
+relationship 58e36af7-c0ed-582d-2b3a-4854797514b0
+	fromColumn: NR-t0-ORFNodeRecycleTime.Week
+	toColumn: ADimWeek.Week
+
+relationship 535c71ae-13a4-89e1-281b-026b046c041b
+	fromColumn: NR-t1-CordonNodeRecycleTime.Week
+	toColumn: ADimWeek.Week
+
+relationship 414b722c-2e5c-9158-9791-2bc49b8a0f43
+	fromColumn: A-t0-ClusterCapacityStatus.Cluster
+	toColumn: ADimClustername.ClusterName
+
+relationship a1430364-4d43-0536-2bd3-277b05a88429
+	fromColumn: A-t4-AvailabilityStatus.ClusterName
+	toColumn: ADimClustername.ClusterName
+
+relationship 53918775-10b2-cda5-20a9-d47e6e33c679
+	fromColumn: A-t5-DetailsofWeekAppended.ClusterName
+	toColumn: ADimClustername.ClusterName
+
+relationship a6a0d103-9b3e-15f8-dc99-c21c6e1b5398
+	fromColumn: NR-t0-ORFNodeRecycleTime.ClusterName
+	toColumn: ADimClustername.ClusterName
+
+relationship 372320e0-7929-4db6-3a45-1f33fbd359ce
+	fromColumn: NR-t1-CordonNodeRecycleTime.ClusterName
+	toColumn: ADimClustername.ClusterName
+
+relationship f2d49e00-cb7b-83c1-8289-5df47a816319
+	fromColumn: A-t4-AvailabilityStatus.Endpoint
+	toColumn: ADimEndpoint.Endpoint
+
+relationship e5a21446-5db6-388c-6f0b-4e148f94c96d
+	fromColumn: A-t5-DetailsofWeekAppended.Endpoint
+	toColumn: ADimEndpoint.Endpoint
+
+relationship d146efc7-2fe0-2da9-eb1e-17a1dd8a693e
+	fromColumn: NR-t0-ORFNodeRecycleTime.Endpoint
+	toColumn: ADimEndpoint.Endpoint
+
+relationship 8a8d43cb-2dfb-3251-467e-739163880db0
+	fromColumn: NR-t1-CordonNodeRecycleTime.Endpoint
+	toColumn: ADimEndpoint.Endpoint
+
+relationship d10f6ef4-5b1e-0048-7b5c-9b9c9c5fed90
+	fromColumn: R-t1-NodeFailureCategorization.Week
+	toColumn: RDimWeek.Week
+
+relationship 1217dc7c-670c-ca62-14b4-8f0aa43dedae
+	fromColumn: R-t2-NodeFailureRCABreakdown.Week
+	toColumn: RDimWeek.Week
+
+relationship 71171aa7-3d57-ecf7-12b2-6fc08e160643
+	fromColumn: J-t0-JobInterruptionCountandRCA.Week
+	toColumn: RDimWeek.Week
+
+relationship 0a76996a-4464-712a-0875-68036bcb65d7
+	fromColumn: J-t1-AverageandMaxJobDurationTime.Week
+	toColumn: RDimWeek.Week
+
+relationship b7c40f3b-0ee1-1b65-2ca7-466c7dc12563
+	fromColumn: J-t2-AverageReactionTime.Week
+	toColumn: RDimWeek.Week
+
+relationship 78398273-b2f4-8f5d-5543-072dc7815831
+	fromColumn: J-t3-MaxReactionTime.Week
+	toColumn: RDimWeek.Week
+
+relationship 1aa4a5d4-33cb-4922-b748-fc99512c4d75
+	joinOnDateBehavior: datePartOnly
+	fromColumn: R-t0-DailyNodeRuntimeAvgFailure.Date
+	toColumn: LocalDateTable_1a030e83-25f1-4b5e-86ce-18fca13f6878.Date
+
+relationship fdef23f3-70be-4e85-a029-ed7c832eface
+	joinOnDateBehavior: datePartOnly
+	fromColumn: R-t1-NodeFailureCategorization.Timestamp
+	toColumn: LocalDateTable_e78aa197-a9d3-42c7-b595-c6e8aef6b914.Date
+
+relationship 4297d87a-1a52-d935-e119-ae63e6b82a2f
+	fromColumn: R-t1-NodeFailureCategorization.Endpoint
+	toColumn: RDimEndpoint.Endpoint
+
+relationship 0044bc7f-6de6-6879-b010-9c5207a4bae6
+	fromColumn: R-t0-DailyNodeRuntimeAvgFailure.Endpoint
+	toColumn: RDimEndpoint.Endpoint
+
+relationship afcc83b1-0729-dedf-291b-0c6839c2b2f0
+	fromColumn: R-t2-NodeFailureRCABreakdown.Endpoint
+	toColumn: RDimEndpoint.Endpoint
+
+relationship bc340228-ccca-1d25-e716-3a55aef1c033
+	fromColumn: R-t0-DailyNodeRuntimeAvgFailure.Week
+	toColumn: RDimWeek.Week
+
+relationship a70eefd7-1e12-a2b8-fd5b-681516f21e3b
+	fromColumn: R-t3-DailyOccurrenceofNodeFailuresRuntime.Week
+	toColumn: RDimWeek.Week
+
+relationship 4bbe940d-be8f-5881-639d-0e26590d945d
+	fromColumn: R-t3-DailyOccurrenceofNodeFailuresRuntime.Endpoint
+	toColumn: RDimEndpoint.Endpoint
+
+relationship e2a45df6-dd25-5486-dca8-d4f88bb6f70d
+	fromColumn: R-t3-DailyOccurrenceofNodeFailuresRuntime.StartDate
+	toColumn: CalendarTable.Date
+
+relationship 1848dc65-5cf5-c041-15ea-e9ef0ee1f1b1
+	fromColumn: R-t2-NodeFailureRCABreakdown.Category
+	toColumn: RDimFailurecat.Category
+
+relationship 99ae1612-041d-1bc1-2a32-04e6115da223
+	fromColumn: R-t3-DailyOccurrenceofNodeFailuresRuntime.CategoryNew
+	toColumn: RDimFailurecat.Category
+
+relationship e5468f19-efb0-49d8-b252-c6da8fea5182
+	joinOnDateBehavior: datePartOnly
+	fromColumn: R-r1-na.Date
+	toColumn: LocalDateTable_bfd0980a-5f77-4f08-84ec-70c9249006b7.Date
+
+relationship 023c2bdc-0781-2194-0e50-ff3ede8d4cb1
+	fromColumn: R-r1-na.Category
+	toColumn: RDimFailurecat.Category
+
+relationship 5ca4e297-db54-1831-7d4f-c9d10ff01368
+	fromColumn: R-t4-DailyNodeRuntimeAvgFailure.Week
+	toColumn: RDimWeek.Week
+
+relationship 93ea38d2-0d4c-4f5e-bcc6-c9f267787c11
+	joinOnDateBehavior: datePartOnly
+	fromColumn: R-t4-DailyNodeRuntimeAvgFailure.Date
+	toColumn: LocalDateTable_4df5af18-8bd0-4a4a-a27d-e2f18cd371c6.Date
+
+relationship 70716643-4eb6-9e1f-6dd9-0806a03bad4a
+	fromColumn: R-t4-DailyNodeRuntimeAvgFailure.Endpoint
+	toColumn: RDimEndpoint.Endpoint
+
+relationship 9bdc68a0-cdc2-f0b4-7e50-5a0f002e021c
+	fromColumn: R-t4-DailyNodeRuntimeAvgFailure.Category
+	toColumn: RDimFailurecat.Category
+

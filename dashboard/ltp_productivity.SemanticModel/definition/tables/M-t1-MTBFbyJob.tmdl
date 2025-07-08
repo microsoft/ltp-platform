@@ -1,0 +1,35 @@
+table M-t1-MTBFbyJob
+	lineageTag: 6cb89421-8e98-4921-bd63-42e051084b98
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: 5002c89b-513d-49be-aa0d-3ad5857dc0b5
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = User
+
+	column WeeklyAverageDurationHours
+		dataType: double
+		lineageTag: 98673767-49a9-412f-abae-b28d9d429ec4
+		summarizeBy: none
+		sourceColumn: WeeklyAverageDurationHours
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition M-t1-MTBFbyJob = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "test", "let JobActions = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('test').table('JobSummary')#(lf)| where failureCategory in (""Hardware Failure"")#(lf)| project-away userName, jobState, retryCount, attemptId, retryDetails, totalGpuCount, jobPriority, totalGpuHours, idleGpuHours, effectiveGpuHours, failureReason, jobHash#(lf)| extend Week = weekofyear(startofweek(launchTime - 1d, 0)) // Monday as the start of the week#(lf)| sort by launchTime asc;#(lf)let Res = JobActions#(lf)| order by Week asc#(lf)| summarize #(lf)    WeeklyAverageDurationHours = avg(jobDurationHours)#(lf)by Week#(lf)| order by Week asc;#(lf)Res#(lf)", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

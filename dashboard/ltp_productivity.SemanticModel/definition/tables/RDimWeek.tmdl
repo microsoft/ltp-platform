@@ -1,0 +1,39 @@
+table RDimWeek
+	lineageTag: 9760cfed-2382-4b8f-aaa9-733780d7f93d
+
+	measure MaxWeekR =
+			
+			CALCULATE(
+			    MAXX(
+			        ALLSELECTED('RDimWeek'[Week]), -- Assuming your slicer is on 't0'[Week]
+			        'RDimWeek'[Week]
+			    )
+			)
+		formatString: 0
+		lineageTag: b82e77cc-b8a9-4479-b8e8-2603f7fdb805
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: 90fbf2a9-21ed-489a-8594-1ff1216cfa11
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = User
+
+	partition RDimWeek = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = #"R-t0-DailyNodeRuntimeAvgFailure",
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Week"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"Week", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

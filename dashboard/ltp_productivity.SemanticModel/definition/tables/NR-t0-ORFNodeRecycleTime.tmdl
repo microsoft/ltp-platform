@@ -1,0 +1,162 @@
+table NR-t0-ORFNodeRecycleTime
+	lineageTag: 05cf2cb7-9830-428d-996c-79d26aee49b0
+
+	measure 'OFR Recycle Last' = ```
+			
+			VAR LastWeek = [MaxWeek2]
+			VAR FilteredTableForLatWeek =
+			    FILTER(
+			        'NR-t0-ORFNodeRecycleTime',
+			        'NR-t0-ORFNodeRecycleTime'[Week] = LastWeek
+			    )
+			VAR Result = 
+			    AVERAGEX(
+			        FilteredTableForLatWeek,
+			        'NR-t0-ORFNodeRecycleTime'[Node Recycle Time (Hour)]
+			    )
+			RETURN COALESCE(Result, 0)
+			```
+		lineageTag: 194241de-5e38-4a0d-ae20-e9d665046a17
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'OFR Recycle Previous' = ```
+			
+			VAR PreviousWeek = [MaxWeek2]-1
+			VAR FilteredTableForLatWeek =
+			    FILTER(
+			        'NR-t0-ORFNodeRecycleTime',
+			        'NR-t0-ORFNodeRecycleTime'[Week] = PreviousWeek
+			    )
+			VAR Result = 
+			    AVERAGEX(
+			        FilteredTableForLatWeek,
+			        'NR-t0-ORFNodeRecycleTime'[Node Recycle Time (Hour)]
+			    )
+			RETURN COALESCE(Result, 0)
+			```
+		lineageTag: 0663ecab-c916-4ab1-98fd-115d57463e57
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'OFR Recycle Change' =
+			
+			IF(
+			    [OFR Recycle Previous] > [OFR Recycle Last],
+			    "decreased",
+			    IF(
+			        [OFR Recycle Previous] < [OFR Recycle Last],
+			        "increased",
+			        "unchanged"
+			    )
+			)
+		lineageTag: e9355fd0-df26-45d6-9b3f-c0f45c972ff3
+
+	column 'UA Cycle'
+		dataType: double
+		lineageTag: 6df0897a-7d99-4b93-b337-e3cd61cb1b93
+		summarizeBy: none
+		sourceColumn: UA Cycle
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Issue Deteted to UA'
+		dataType: double
+		lineageTag: d3f3bc38-d178-4b96-876a-18fc4b84c6b4
+		summarizeBy: none
+		sourceColumn: Issue Deteted to UA
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Wait for Allocation'
+		dataType: double
+		lineageTag: cd409c82-8ff2-4321-9294-cda11f2ef630
+		summarizeBy: none
+		sourceColumn: Wait for Allocation
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Node Return Processing'
+		dataType: double
+		lineageTag: 9c5cb266-fbbe-4339-bc26-d22e4590b60f
+		summarizeBy: none
+		sourceColumn: Node Return Processing
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Node Count'
+		dataType: int64
+		formatString: 0
+		lineageTag: 31dcad95-ed60-40af-869e-2eb933a08f96
+		summarizeBy: none
+		sourceColumn: Node Count
+
+		annotation SummarizationSetBy = User
+
+	column 'Node Recycle Time (Hour)'
+		dataType: double
+		lineageTag: 6cdc22dd-541d-4573-afa1-373b716cd5b0
+		summarizeBy: none
+		sourceColumn: Node Recycle Time (Hour)
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'UA Count in Single Recycle'
+		dataType: double
+		lineageTag: 408936fb-1127-4077-be1d-665a5166bcae
+		summarizeBy: none
+		sourceColumn: UA Count in Single Recycle
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: 462d1e93-ab1c-4a32-921c-3dbaac23fdfd
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	column ClusterName
+		dataType: string
+		lineageTag: 2c044a46-f7a2-4bd6-b376-ab92130bf80f
+		summarizeBy: none
+		sourceColumn: ClusterName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Endpoint
+		dataType: string
+		lineageTag: 136847cf-cc14-4962-9263-a01214255eaa
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	partition NR-t0-ORFNodeRecycleTime = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "//UA_Time: Issue Detected to UA#(lf)//Allocation_Time: Wait for Allocation#(lf)//Validation_Time: Node Return Processing#(lf)//UA_cycle_Time: UA cycle#(lf)//Node Recyle time: sum of UA_cycle_Time for same big_group_id#(lf)//UA times in Single Recycle:  Node Recyle time/UA_cycle_Time#(lf)let start_actions = dynamic([""cordoned"", ""new""]);#(lf)let ua = ""ua"";#(lf)let ua_dealloc = ""deallocated_ua"";#(lf)let ua_alloc = ""allocated_ua"";#(lf)let end_actions = dynamic([""available"", ""deallocated_capacity""]);#(lf)let data_with_flags = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').NodeStatusRecord#(lf)| distinct Timestamp, HostName, Status, Endpoint#(lf)| join kind=leftouter #(lf)    (VMInfo #(lf)    | distinct HostName, VMSS)#(lf)on HostName#(lf)    | extend VMSS_clean = trim("" "", tolower(VMSS))#(lf)    | join kind=leftouter(#(lf)        ClusterVMSSInfo#(lf)        | extend VMSS_clean = trim("" "", tolower(VMSSName))#(lf)    ) on VMSS_clean#(lf)| extend Timestamp = todatetime(['Timestamp'])#(lf)| where isnotempty(HostName) and isnotempty(Status)#(lf)| sort by HostName  asc, Timestamp  asc, Status asc#(lf)| serialize#(lf)| extend#(lf)    is_start = iif(Status in (start_actions), 1, 0),#(lf)    is_end = iif(Status in (end_actions), 1, 0),#(lf)    is_ua = iif(Status == ua, 1, 0),#(lf)    is_ua_dealloc = iif(Status == ua_dealloc, 1, 0),#(lf)    is_ua_alloc = iif(Status == ua_alloc, 1, 0)#(lf)| extend is_big_start = iff(Status in (start_actions) and prev(Status) in (end_actions), 1 ,0)#(lf)| extend big_group_id = row_cumsum(is_big_start)#(lf)| extend group_key = strcat(HostName, ""_"", tostring(big_group_id))#(lf)| serialize#(lf)| extend sub_group_id = row_cumsum(is_start, group_key != prev(group_key))#(lf)| project-away HostName1;#(lf)let duplicated_rows =#(lf)    data_with_flags#(lf)    | where is_start == 1 and sub_group_id >1#(lf)    | extend sub_group_id = sub_group_id - 1;#(lf)let final_data =#(lf)    data_with_flags#(lf)    | union duplicated_rows#(lf)    | sort by HostName, Timestamp, sub_group_id;#(lf)let summary_final_data =#(lf)final_data#(lf)| summarize#(lf)    StartTime = minif(Timestamp, is_start == 1),#(lf)    UAedTime = minif(Timestamp, is_ua == 1),#(lf)    UADeallocTime = minif(Timestamp, is_ua_dealloc == 1),#(lf)    UAAllocTime = minif(Timestamp, is_ua_alloc == 1),#(lf)    EndTime = max(Timestamp)#(lf)  by HostName, big_group_id, sub_group_id, Endpoint, ClusterName#(lf)| where isnotnull(StartTime) and isnotnull(UADeallocTime)#(lf)| extend#(lf)    UA_Time = todouble(UADeallocTime - StartTime)/todouble(1h),#(lf)    Allocation_Time = todouble(UAAllocTime - UADeallocTime)/todouble(1h),#(lf)    Validation_Time = todouble(EndTime - UAAllocTime)/todouble(1h),#(lf)    UA_cycle_Time = todouble(EndTime - StartTime)/todouble(1h)#(lf)| sort by StartTime#(lf)| extend NodeRecycleEventID = strcat(HostName, '_', big_group_id)#(lf)| project-away UADeallocTime, UAAllocTime;#(lf)let node_recycle_event =#(lf)summary_final_data#(lf)| summarize#(lf)    EventStartTime = min(StartTime),#(lf)    EventEndTime = max(EndTime),#(lf)    EventUACycleTime = sum(UA_cycle_Time),#(lf)    CountUAAction = countif(isnotnull(UA_cycle_Time))#(lf)by NodeRecycleEventID#(lf)| extend Week = weekofyear(startofweek(EventStartTime - 1d, 0));// Monday as the start of the week#(lf)let new_summary_final_data_env =#(lf)summary_final_data#(lf)| join kind=leftouter (#(lf)    node_recycle_event#(lf)) on NodeRecycleEventID;#(lf)let aggregated_weekly_env_1 =#(lf)new_summary_final_data_env#(lf)| summarize#(lf)    UACycleTime_weekly = avg(UA_cycle_Time),#(lf)    UATime_weekly = avg(UA_Time),#(lf)    AllocationTime_weekly = avg(Allocation_Time),#(lf)    ValidationTime_weekly = avg(Validation_Time)#(lf)by Week, ClusterName, Endpoint;#(lf)let aggregated_weekly_env_2 =#(lf)new_summary_final_data_env#(lf)| summarize take_any(EventUACycleTime), take_any(CountUAAction) by NodeRecycleEventID, Week, ClusterName, Endpoint#(lf)| summarize#(lf)    NodeCount = dcount(NodeRecycleEventID), // correct#(lf)    NodeRecycleTime_weekly = avg(EventUACycleTime),#(lf)    UATimeinSingleRecycel_weekly = avg(CountUAAction)#(lf)by Week, ClusterName, Endpoint;#(lf)aggregated_weekly_env_1#(lf)| join kind=inner aggregated_weekly_env_2 on Week, ClusterName, Endpoint#(lf)| project-away Week1, Endpoint1, ClusterName1#(lf)| order by Week asc", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null]),
+				    #"Renamed Columns" = Table.RenameColumns(Source,{{"NodeCount", "Node Count"}, {"NodeRecycleTime_weekly", "Node Recycle Time (Hour)"}, {"UATimeinSingleRecycel_weekly", "UA Count in Single Recycle"}, {"UACycleTime_weekly", "UA Cycle"}, {"UATime_weekly", "Issue Deteted to UA"}, {"AllocationTime_weekly", "Wait for Allocation"}, {"ValidationTime_weekly", "Node Return Processing"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

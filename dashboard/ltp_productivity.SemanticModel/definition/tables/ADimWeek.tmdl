@@ -1,0 +1,39 @@
+table ADimWeek
+	lineageTag: 9515ff61-fc22-44fe-9288-132487cfcfca
+
+	measure MaxWeek2 =
+			
+			CALCULATE(
+			    MAXX(
+			        ALLSELECTED('ADimWeek'[Week]), -- Assuming your slicer is on 't0'[Week]
+			        'ADimWeek'[Week]
+			    )
+			)
+		formatString: 0
+		lineageTag: 25cb98a6-8515-4e45-b72a-22e5f2bd1b1f
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: 97bd6d61-4bc0-4b02-a867-931bd9d26f5b
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = User
+
+	partition ADimWeek = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = #"A-r2-na",
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Week"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"Week", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

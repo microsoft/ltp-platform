@@ -1,0 +1,26 @@
+table ADimClustername_stage1
+	lineageTag: e0c927c0-921f-4bf2-9231-4b0ca206c77d
+
+	column ClusterName
+		dataType: string
+		lineageTag: 5be00f85-abf5-40a7-b1f3-9d11af247e62
+		summarizeBy: none
+		sourceColumn: ClusterName
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ADimClustername_stage1 = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = #"A-r2-na",
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"ClusterName"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns")
+				in
+				    #"Removed Duplicates"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

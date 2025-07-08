@@ -1,0 +1,111 @@
+table A-r2-na
+	lineageTag: e41b61f4-a546-4557-90a7-e6ac54ecad6a
+
+	column Day
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 3fa49594-3c5b-4eb5-b76b-2393a373f959
+		summarizeBy: none
+		sourceColumn: Day
+
+		variation Variation
+			isDefault
+			relationship: 00970ea9-4c57-4253-b007-3f98aad17b37
+			defaultHierarchy: LocalDateTable_cef9989f-cbfb-49d1-926b-43c32f72a0dc.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Endpoint
+		dataType: string
+		lineageTag: ab3719bf-c1f3-464d-a473-ecd78f25ce52
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	column Cordon
+		dataType: int64
+		formatString: 0
+		lineageTag: 48daa381-021a-469d-81df-281eeb1464d5
+		summarizeBy: sum
+		sourceColumn: Cordon
+
+		annotation SummarizationSetBy = Automatic
+
+	column Deallocated
+		dataType: int64
+		formatString: 0
+		lineageTag: c9e906e5-cc56-4aae-b668-6e395dd66d98
+		summarizeBy: sum
+		sourceColumn: Deallocated
+
+		annotation SummarizationSetBy = Automatic
+
+	column Healthy
+		dataType: int64
+		formatString: 0
+		lineageTag: b88a115c-50c7-4a9b-a55f-9df58d9f2ec9
+		summarizeBy: sum
+		sourceColumn: Healthy
+
+		annotation SummarizationSetBy = Automatic
+
+	column New
+		dataType: int64
+		formatString: 0
+		lineageTag: a3074361-1a03-4be5-87be-2be047021131
+		summarizeBy: sum
+		sourceColumn: New
+
+		annotation SummarizationSetBy = Automatic
+
+	column UA
+		dataType: int64
+		formatString: 0
+		lineageTag: 26f451df-aaab-483f-bcab-29d47b7fa39d
+		summarizeBy: sum
+		sourceColumn: UA
+
+		annotation SummarizationSetBy = Automatic
+
+	column Validation
+		dataType: int64
+		formatString: 0
+		lineageTag: 90d12d77-f137-4657-8080-ec199831100e
+		summarizeBy: sum
+		sourceColumn: Validation
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: cba1110c-3be7-49a6-83ac-008c19f2d3c5
+		summarizeBy: sum
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	column ClusterName
+		dataType: string
+		lineageTag: f172eb32-7f9c-4f86-829d-088538c0f1d8
+		summarizeBy: none
+		sourceColumn: ClusterName
+
+		annotation SummarizationSetBy = Automatic
+
+	partition A-r2-na = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "//2.for the availability status, it will change into NodeStatusRecord in production cluster:#(lf)//here is an example per day status count query#(lf)let NSR =#(lf)    cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord');#(lf)let min_day = toscalar(NodeStatusRecord | summarize startofday(min(Timestamp)));#(lf)let max_day = toscalar(NodeStatusRecord | summarize startofday(max(Timestamp)));#(lf)let AllDays = range Day from min_day to max_day step 1d;#(lf)// Step 1: Get all Groups from StatusAttributes#(lf)let AllGroups = NodeStatusAttributes | summarize by Group;#(lf)// Step 2: Build all (Day, Group) combinations#(lf)let AllCombos =#(lf)    AllGroups#(lf)    | extend dummy = 1#(lf)    | join kind=inner (#(lf)        AllDays | extend dummy = 1#(lf)    ) on dummy#(lf)    | project Day, Group;#(lf)// Step 3: Get latest status per node per day#(lf)let LatestPerNodePerDay =#(lf)    NodeStatusRecord#(lf)    | join kind=leftouter(#(lf)        VMInfo#(lf)    ) on HostName#(lf)    | extend VMSS_clean = trim("" "", tolower(VMSS))#(lf)    | join kind=leftouter(#(lf)        ClusterVMSSInfo#(lf)        | extend VMSS_clean = trim("" "", tolower(VMSSName))#(lf)    ) on VMSS_clean#(lf)    | extend DayList = range(min_day, max_day, 1d)#(lf)    | mv-expand Day = DayList to typeof(datetime)#(lf)    | where startofday(Timestamp) <= Day#(lf)    | summarize arg_max(Timestamp, Status) by HostName, Day, Endpoint, ClusterName;#(lf)// Step 4: Map statuses to groups#(lf)let NodeStatusWithGroup =#(lf)    LatestPerNodePerDay#(lf)    | extend Status_clean = trim("" "", tolower(Status))#(lf)    | join kind=leftouter (#(lf)        NodeStatusAttributes#(lf)        | extend Status_clean = trim_start(@""[^\w]+"",Status)#(lf)    ) on Status_clean;#(lf)// Step 5: Count nodes per group per day#(lf)let DailyGroupCounts =#(lf)    NodeStatusWithGroup#(lf)    | summarize NodeCount = count() by Day, Group, Endpoint, ClusterName;#(lf)// Step 6: Merge with full (Day, Group) grid to include 0s#(lf)let DailyGroupNodeCounts =#(lf)    AllCombos#(lf)    | join kind=leftouter (DailyGroupCounts) on Day, Group#(lf)    | extend NodeCount = coalesce(NodeCount, 0)#(lf)    | sort by Day asc, Group asc#(lf)    | project-away Day1, Group1;#(lf)// Step 7:#(lf)DailyGroupNodeCounts#(lf)| summarize arg_max(NodeCount, *) by Day, Group, Endpoint // Ensure all columns are available for pivoting#(lf)| evaluate pivot(Group, sum(NodeCount))#(lf)| where isnotempty(Endpoint) // Add this line to filter out empty Endpoints#(lf)| order by Day asc, Endpoint asc#(lf)| extend Week = weekofyear(startofweek(Day - 1d, 0)) // Monday as the start of the week", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

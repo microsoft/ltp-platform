@@ -1,0 +1,169 @@
+table R-t3-DailyOccurrenceofNodeFailuresRuntime
+	lineageTag: 8595c03f-a2a4-4eff-932b-360c9c8cd83e
+
+	measure MaxTotalForMaxWeek =
+			
+			VAR LatestWeek = [MaxWeekR]
+			VAR Result =
+			    CALCULATE(
+			        MAXX(
+			            FILTER(
+			                ALLSELECTED('R-t3-DailyOccurrenceofNodeFailuresRuntime'),
+			                'R-t3-DailyOccurrenceofNodeFailuresRuntime'[Week] = LatestWeek
+			            ),
+			            'R-t3-DailyOccurrenceofNodeFailuresRuntime'[Total]
+			        )
+			    )
+			RETURN
+			    COALESCE(Result, 0)
+		formatString: 0
+		lineageTag: 4e4e5958-a8af-4e4a-a912-2b18b9a3dab8
+
+	measure DateWithMaxTotalForMaxWeek =
+			
+			VAR DDate = CALCULATE(
+			    MAXX(
+			        FILTER(
+			            ALLSELECTED('R-t3-DailyOccurrenceofNodeFailuresRuntime'),
+			            'R-t3-DailyOccurrenceofNodeFailuresRuntime'[Week] = [MaxWeekR] &&
+			            'R-t3-DailyOccurrenceofNodeFailuresRuntime'[Total] = [MaxTotalForMaxWeek] // Filter to only rows with the max total
+			        ),
+			        'R-t3-DailyOccurrenceofNodeFailuresRuntime'[StartDate] // Return the StartDate
+			    )
+			)
+			RETURN
+			IF(
+			    [MaxTotalForMaxWeek] = 0,
+			    "",
+			    DDate
+			)
+		formatString: mmmm d
+		lineageTag: 99c7ee97-2b9f-4f26-b7bf-a2ea15e9fd4d
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	measure EndpointWithMaxTotalForMaxWeek = ```
+			
+			VAR Endpoint = 
+			CALCULATE(
+			    MAXX( // Using MAXX here, but you might consider MINX or SELECTEDVALUE if you expect only one Endpoint per MaxTotal
+			        FILTER(
+			            ALLSELECTED('R-t3-DailyOccurrenceofNodeFailuresRuntime'),
+			            'R-t3-DailyOccurrenceofNodeFailuresRuntime'[Week] = [MaxWeekR] &&
+			            'R-t3-DailyOccurrenceofNodeFailuresRuntime'[Total] = [MaxTotalForMaxWeek]
+			        ),
+			        'R-t3-DailyOccurrenceofNodeFailuresRuntime'[Endpoint]
+			    )
+			)
+			RETURN
+			IF(
+			    [MaxTotalForMaxWeek] = 0,
+			    "",
+			    Endpoint
+			)
+			```
+		lineageTag: cff8b37b-0f06-4d40-98fd-1bbbfd575087
+
+	measure CategoryWithMaxTotalForMaxWeek =
+			
+			VAR Cat =
+			CALCULATE(
+			    MAXX( // Using MAXX here, but you might consider MINX or SELECTEDVALUE if you expect only one Endpoint per MaxTotal
+			        FILTER(
+			            ALLSELECTED('R-t3-DailyOccurrenceofNodeFailuresRuntime'),
+			            'R-t3-DailyOccurrenceofNodeFailuresRuntime'[Week] = [MaxWeekR] &&
+			            'R-t3-DailyOccurrenceofNodeFailuresRuntime'[Total] = [MaxTotalForMaxWeek]
+			        ),
+			        'R-t3-DailyOccurrenceofNodeFailuresRuntime'[CategoryNew]
+			    )
+			)
+			RETURN
+			IF(
+			    [MaxTotalForMaxWeek] = 0,
+			    "",
+			    Cat
+			)
+		lineageTag: dabb7346-0827-49dc-beeb-686e69dc2773
+
+	column StartDate
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: c7926d67-5cc7-4a37-88b2-2658bf6f5948
+		summarizeBy: none
+		sourceColumn: StartDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column EndDate
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: eefa0a38-1211-42f4-ab8e-5db8ee209eac
+		summarizeBy: none
+		sourceColumn: EndDate
+
+		variation Variation
+			isDefault
+			relationship: 33193873-48a9-4226-b97c-61164c1568d9
+			defaultHierarchy: LocalDateTable_c8777a3a-5e2f-4fa4-a113-1211d451fdaa.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column Total
+		dataType: int64
+		formatString: 0
+		lineageTag: f7da019e-e52d-4a71-a000-1a2eef5b5de7
+		summarizeBy: sum
+		sourceColumn: Total
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: 0e2c7fe3-1675-419f-86c3-2618c941887b
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	column Endpoint
+		dataType: string
+		lineageTag: 4223a657-459e-4efd-8001-228f5b00ff21
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 3a75a96e-098d-4ba0-bb54-23ec115897d8
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column CategoryNew
+		dataType: string
+		lineageTag: 263dea24-5bb9-4983-9641-56fdc5e6c5d3
+		summarizeBy: none
+		sourceColumn: CategoryNew
+
+		annotation SummarizationSetBy = Automatic
+
+	partition R-t3-DailyOccurrenceofNodeFailuresRuntime = m
+		mode: import
+		queryGroup: Reliability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "// Original source and initial processing#(lf)let src =#(lf)cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')#(lf)    .database('production')#(lf)    .table('NodeActionRecord')#(lf)| join kind=leftouter NodeActionAttributes on Action#(lf)| sort by HostName asc, Timestamp asc, Action asc#(lf)| serialize;#(lf)// 1) Mark every row that has a non-empty Phase#(lf)let withMark =#(lf)    src#(lf)    | extend NonEmptyFlag = iff(isnotempty(Phase), 1, 0);#(lf)// 2) Build a running total of NonEmptyFlag per HostName#(lf)let running =#(lf)    withMark#(lf)    | extend PhaseGroup =#(lf)        row_cumsum(NonEmptyFlag)   // needs `serialize` earlier#(lf)        ;   // PhaseGroup increments each time we see a non-empty Phase#(lf)// 3) Look up the _latest_ non-empty Phase in each PhaseGroup#(lf)let phaseLookup =#(lf)    running#(lf)    | where NonEmptyFlag == 1#(lf)    | summarize LastPhase = arg_max(Timestamp, Phase) by HostName, PhaseGroup#(lf)    | project HostName, PhaseGroup, LastPhase = Phase;#(lf)// 4) Join back to fill down the LastPhase#(lf)let enriched = running#(lf)| join kind=inner (phaseLookup) on HostName, PhaseGroup#(lf)| project-away NonEmptyFlag, Action1, HostName1, PhaseGroup1#(lf)| sort by HostName asc, Timestamp asc;#(lf)// Step 1: Earliest timestamp per HostName + PhaseGroup#(lf)let groupStart =#(lf)    enriched#(lf)    | summarize StartTime = min(Timestamp) by HostName, PhaseGroup;#(lf)// Step 3: Stitch them together and filter for relevant records#(lf)let record = enriched#(lf)| join kind=inner groupStart on HostName, PhaseGroup#(lf)| project-reorder StartTime, Timestamp, HostName, PhaseGroup#(lf)| sort by Timestamp asc#(lf)| where Action contains ""cordoned-triaged"" and LastPhase contains ""routine""#(lf)| summarize arg_max(Timestamp, *) by HostName, PhaseGroup // Get the latest record per HostName, PhaseGroup#(lf)| project-away HostName1, PhaseGroup1, Phase // Clean up redundant columns#(lf)| extend CategoryReason = strcat(Category, ""-"", Reason); // Create CategoryReason#(lf)// Define date range#(lf)let startDate = datetime(2025-03-20);#(lf)let endDate = now();#(lf)// 1. Generate all dates within the specified range#(lf)let allDates = range StartDate from startDate to endDate step 1d;#(lf)// 2. Get all distinct Endpoints from the 'record' table#(lf)let allEndpoints = record | distinct Endpoint;#(lf)// 3. Get all distinct Categories from the 'record' table#(lf)let allCategories = record | distinct Category;#(lf)// 4. Create a Cartesian product of all dates, endpoints, and categories#(lf)// This ensures every combination exists as a row#(lf)let allCombinations =#(lf)    allDates#(lf)    | extend dummy = 1 // Add a dummy column for cross-joining#(lf)    | join kind=inner (allEndpoints | extend dummy = 1) on dummy#(lf)    | join kind=inner (allCategories | extend dummy = 1) on dummy#(lf)    | project StartDate, Endpoint, Category; // Select the desired combination columns#(lf)// 5. Summarize the actual data from 'record' for joining#(lf)let summarizedRecord =#(lf)    record#(lf)    | summarize Total = count() by bin(StartTime, 1d), Endpoint, Category;#(lf)// 6. Left outer join the full combinations with the summarized data#(lf)// This will keep all combinations and fill 'Total' with 0 where no match is found#(lf)allCombinations#(lf)| join kind=leftouter summarizedRecord on $left.StartDate == $right.StartTime, Endpoint, Category#(lf)| project StartDate,#(lf)          Endpoint,#(lf)          Category,#(lf)          Total = coalesce(Total, 0) // Replace null Total with 0#(lf)| extend EndDate = StartDate + 1d#(lf)| extend Week = weekofyear(startofweek(StartDate - 1d, 0)) // Monday as the start of the week#(lf)| extend CategoryNew = iff(isempty(Category), ""uncategorized"", Category) // Handle potentially empty categories#(lf)| order by StartDate asc, Endpoint asc, Category asc;", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				in
+				    Source
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+

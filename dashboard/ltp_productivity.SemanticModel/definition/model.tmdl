@@ -1,0 +1,79 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+/// Query group for diagnostics
+queryGroup Diagnostics
+
+	annotation PBI_QueryGroupOrder = 0
+
+queryGroup Availability
+
+	annotation PBI_QueryGroupOrder = 1
+
+queryGroup Reliability
+
+	annotation PBI_QueryGroupOrder = 2
+
+annotation PBI_QueryOrder = ["A-r0-na","A-r2-na","M-t0-MTBFbyNode","M-t1-MTBFbyJob","NR-t0-ORFNodeRecycleTime","NR-t1-CordonNodeRecycleTime","R-r0-na","R-r0-ColumnHardware","R-r0-ColumnPlatform","R-r0-ColumnUser","R-r0-ColumnEmpty","R-r0-ColumnUnknown","R-t0-DailyNodeRuntimeAvgFailure","R-t1-NodeFailureCategorization","R-t2-NodeFailureRCABreakdown","R-t3-DailyOccurrenceofNodeFailuresRuntime","J-r0-na","J-r1-na","ADimWeek","ADimClustername","ADimClustername_stage1","ADimEndpoint","RDimWeek","RDimEndpoint_stage1","RDimEndpoint","RDimFailurecat","R-r1-na"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBIDesktopVersion = 2.145.907.0 (25.07)+08cac3e9c99e1ac1a607ae58202057cfd59f320a
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table A-r0-na
+ref table A-t0-ClusterCapacityStatus
+ref table DateTableTemplate_ad27ff52-3a2a-406a-a1cc-f09f58d58185
+ref table R-t0-DailyNodeRuntimeAvgFailure
+ref table R-t3-DailyOccurrenceofNodeFailuresRuntime
+ref table LocalDateTable_c8777a3a-5e2f-4fa4-a113-1211d451fdaa
+ref table R-r0-na
+ref table R-t1-NodeFailureCategorization
+ref table LocalDateTable_21e66450-2dd4-4002-b492-041131745eea
+ref table LocalDateTable_d10fffc0-c90f-45e8-95eb-b568055c2da3
+ref table J-r0-na
+ref table J-t0-JobInterruptionCountandRCA
+ref table J-t1-AverageandMaxJobDurationTime
+ref table J-r1-na
+ref table J-t2-AverageReactionTime
+ref table J-t3-MaxReactionTime
+ref table R-r0-ColumnHardware
+ref table R-r0-ColumnPlatform
+ref table R-r0-ColumnUser
+ref table R-r0-ColumnEmpty
+ref table R-t2-NodeFailureRCABreakdown
+ref table NR-t1-CordonNodeRecycleTime
+ref table NR-t0-ORFNodeRecycleTime
+ref table A-r2-na
+ref table LocalDateTable_cef9989f-cbfb-49d1-926b-43c32f72a0dc
+ref table A-t5-DetailsofWeekAppended
+ref table A-t4-AvailabilityStatus
+ref table LocalDateTable_f6af1449-a88d-4bce-a581-e4bbfc162fb5
+ref table M-t0-MTBFbyNode
+ref table R-r0-ColumnUnknown
+ref table M-t1-MTBFbyJob
+ref table LocalDateTable_87233e88-b4b1-4a8a-9ecc-b61441c00f5a
+ref table ADimWeek
+ref table ADimClustername
+ref table ADimClustername_stage1
+ref table ADimEndpoint
+ref table RDimWeek
+ref table RDimEndpoint_stage1
+ref table LocalDateTable_1a030e83-25f1-4b5e-86ce-18fca13f6878
+ref table LocalDateTable_e78aa197-a9d3-42c7-b595-c6e8aef6b914
+ref table RDimEndpoint
+ref table CalendarTable
+ref table RDimFailurecat
+ref table R-r1-na
+ref table LocalDateTable_bfd0980a-5f77-4f08-84ec-70c9249006b7
+ref table R-t4-DailyNodeRuntimeAvgFailure
+ref table LocalDateTable_4df5af18-8bd0-4a4a-a27d-e2f18cd371c6
+
+ref cultureInfo en-US
+

@@ -1,0 +1,37 @@
+table ADimClustername
+	lineageTag: ce3bd8a2-ba67-44cd-a8c4-e59d172d6867
+
+	measure UniqueClusterValues2 =
+			
+			VAR UniqueClusters = DISTINCT('ADimClustername'[ClusterName])
+			VAR ConcatenatedClusters = CONCATENATEX(UniqueClusters, [ClusterName], ", ")
+			RETURN ConcatenatedClusters
+		lineageTag: 3d32ec68-3030-4f75-a253-66e4f76e3bf3
+
+	column ClusterName
+		dataType: string
+		lineageTag: 672567fc-44fa-4c26-b48c-0f335ae29c6c
+		summarizeBy: none
+		sourceColumn: ClusterName
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ADimClustername = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = #"A-r0-na",
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Cluster"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Duplicates",{{"Cluster", "ClusterName"}}),
+				    #"Appended Query" = Table.Combine({#"Renamed Columns", ADimClustername_stage1}),
+				    #"Removed Duplicates1" = Table.Distinct(#"Appended Query"),
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates1",{{"ClusterName", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

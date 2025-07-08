@@ -1,0 +1,137 @@
+table A-t4-AvailabilityStatus
+	lineageTag: 10e91d86-c052-41c3-a5ff-648ef705b277
+
+	measure 'Weekly Ratio Last' =
+			
+			VAR FilteredTableForLatWeek =
+			    FILTER(
+			        'A-t4-AvailabilityStatus',
+			        'A-t4-AvailabilityStatus'[Week] = [FilteredMaxWeek]
+			    )
+			VAR Result =
+			    AVERAGEX(
+			        FilteredTableForLatWeek,
+			        'A-t4-AvailabilityStatus'[Average AvailabilityRatio]
+			    )
+			RETURN COALESCE(Result, 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 216fbe7f-66e8-42e3-b749-cf0a9107f19a
+
+	measure 'Weekly Ratio Precious' =
+			
+			VAR PreviousWeek = [FilteredMaxWeek] - 1
+			VAR FilteredTableForPreviousWeek =
+			    FILTER(
+			        'A-t4-AvailabilityStatus',
+			        'A-t4-AvailabilityStatus'[Week] = PreviousWeek
+			    )
+			VAR Result =
+			    AVERAGEX(
+			        FilteredTableForPreviousWeek,
+			        'A-t4-AvailabilityStatus'[Average AvailabilityRatio]
+			    )
+			RETURN COALESCE(Result, 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 0d35562c-ff8b-4bfa-9878-b08701009916
+
+	measure 'Weekly Ratio Change' =
+			
+			IF(
+			    [Weekly Ratio Precious] > [Weekly Ratio Last],
+			    "decreased", // If current ratio is greater than previous, it decreased (because it's a "change" implying magnitude)
+			    IF(
+			        [Weekly Ratio Precious] < [Weekly Ratio Last],
+			        "increased", // If current ratio is less than previous, it increased
+			        "unchanged"  // Otherwise, it must be equal
+			    )
+			)
+		lineageTag: 2a60a50e-8a65-4770-bf63-f875e6ca9581
+
+	column Week
+		formatString: 0
+		lineageTag: c61b500b-b1a0-4fe5-b79c-5372729e5a8d
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Week]
+
+		annotation SummarizationSetBy = User
+
+	column 'Average AvailabilityRatio'
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: cef334da-0a33-4f0b-9470-729f4f9b7689
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Average AvailabilityRatio]
+
+		annotation SummarizationSetBy = User
+
+	column 'Max AvailabilityRatio'
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 75d9adc5-fd47-4033-ab72-d54d0e09175f
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Max AvailabilityRatio]
+
+		annotation SummarizationSetBy = User
+
+	column 'Min AvailabilityRatio'
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 535d1218-d551-40ec-afb8-40ca5d838ab8
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Min AvailabilityRatio]
+
+		annotation SummarizationSetBy = User
+
+	column Endpoint
+		lineageTag: 07cc811b-0ae2-46d7-889e-1c52cf50b809
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Endpoint]
+
+		annotation SummarizationSetBy = Automatic
+
+	column ClusterName
+		lineageTag: a7e6950d-e653-497a-8adf-c48823b34414
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [ClusterName]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition A-t4-AvailabilityStatus = calculated
+		mode: import
+		source =
+				
+				VAR IntermediateTable =
+				    ADDCOLUMNS(
+				        SELECTCOLUMNS(
+				            'A-r2-na',
+				            "Week", 'A-r2-na'[Week],
+				            "Date", 'A-r2-na'[Day],
+				            "Endpoint", 'A-r2-na'[Endpoint],
+				            "ClusterName", 'A-r2-na'[ClusterName],
+				            "Validation", 'A-r2-na'[Validation],
+				            "Healthy", 'A-r2-na'[Healthy],
+				            "Cordon", 'A-r2-na'[Cordon],
+				            "HPC-UA", 'A-r2-na'[UA],
+				            "New", 'A-r2-na'[New],
+				            "Deallocated", 'A-r2-na'[Deallocated],
+				            "TotalNodes", 'A-r2-na'[Cordon] + 'A-r2-na'[Healthy] + 'A-r2-na'[New] + 'A-r2-na'[UA] + 'A-r2-na'[Validation]
+				        ),
+				        "TotalGPUs", [TotalNodes] * 8,
+				        "AvailabilityRatio", DIVIDE([Healthy], [TotalNodes], 0)
+				    )
+				RETURN
+				    SUMMARIZE(
+				        IntermediateTable,
+				        [Week],
+				        [Endpoint],
+				        [ClusterName],
+				        "Average AvailabilityRatio", AVERAGEX(FILTER(IntermediateTable, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [ClusterName] = EARLIER([ClusterName])), [AvailabilityRatio]),
+				        "Max AvailabilityRatio", MAXX(FILTER(IntermediateTable, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [ClusterName] = EARLIER([ClusterName])), [AvailabilityRatio]),
+				        "Min AvailabilityRatio", MINX(FILTER(IntermediateTable, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [ClusterName] = EARLIER([ClusterName])), [AvailabilityRatio])
+				    )
+
+	annotation PBI_Id = e07ea18d5b724ea5b62dac26d796a335
+

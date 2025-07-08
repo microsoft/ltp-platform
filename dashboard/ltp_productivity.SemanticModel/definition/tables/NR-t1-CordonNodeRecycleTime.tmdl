@@ -1,0 +1,111 @@
+table NR-t1-CordonNodeRecycleTime
+	lineageTag: 0df05b71-8de7-48a0-9a68-aa2ad7ec35fd
+
+	measure 'Cordon Recycle Last' =
+			
+			VAR LastWeek = [MaxWeek2]
+			VAR FilteredTableForLatWeek =
+			    FILTER(
+			        'NR-t1-CordonNodeRecycleTime',
+			        'NR-t1-CordonNodeRecycleTime'[Week] = LastWeek
+			    )
+			VAR Result =
+			    AVERAGEX(
+			        FilteredTableForLatWeek,
+			        'NR-t1-CordonNodeRecycleTime'[Node Recycle Time (Hour)]
+			    )
+			RETURN COALESCE(Result, 0)
+		lineageTag: 31a8f54f-f526-4bb4-b439-08834a7ab10d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Cordon Recycle Previous' = ```
+			
+			VAR PreviousWeek = [MaxWeek2]-1
+			VAR FilteredTableForLatWeek =
+			    FILTER(
+			        'NR-t1-CordonNodeRecycleTime',
+			        'NR-t1-CordonNodeRecycleTime'[Week] = PreviousWeek
+			    )
+			VAR Result = 
+			    AVERAGEX(
+			        FilteredTableForLatWeek,
+			        'NR-t1-CordonNodeRecycleTime'[Node Recycle Time (Hour)]
+			    )
+			RETURN COALESCE(Result, 0)
+			```
+		lineageTag: 0be577ec-24e3-4ad3-a132-ded3604f8483
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Cordon Recycle Change' =
+			
+			IF(
+			    [Cordon Recycle Previous] > [Cordon Recycle Last],
+			    "decreased",
+			    IF(
+			        [Cordon Recycle Previous] < [Cordon Recycle Last],
+			        "increased",
+			        "unchanged"
+			    )
+			)
+		lineageTag: b4c88911-d487-4cdb-98f4-44a33dd52df4
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: 79692e6c-b4eb-4ab1-956c-a5edb5a6032f
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Node Recycle Time (Hour)'
+		dataType: double
+		lineageTag: 73a890c6-b5b6-4689-b947-6d512d8be124
+		summarizeBy: none
+		sourceColumn: Node Recycle Time (Hour)
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Node Count'
+		dataType: int64
+		formatString: 0
+		lineageTag: d75fc0a6-4ac7-4b70-ad4c-85d29865d0bd
+		summarizeBy: none
+		sourceColumn: Node Count
+
+		annotation SummarizationSetBy = User
+
+	column Endpoint
+		dataType: string
+		lineageTag: fe68b005-48b6-4f67-a4a4-a894f982317c
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	column ClusterName
+		dataType: string
+		lineageTag: 82a4cfe6-17f0-4d79-a309-ee94fa7c48af
+		summarizeBy: none
+		sourceColumn: ClusterName
+
+		annotation SummarizationSetBy = Automatic
+
+	partition NR-t1-CordonNodeRecycleTime = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "let start_actions = dynamic([""cordoned"", ""new""]);#(lf)let ua = ""ua"";#(lf)let ua_dealloc = ""deallocated_ua"";#(lf)let ua_alloc = ""allocated_ua"";#(lf)let end_actions = dynamic([""available"", ""deallocated_capacity""]);#(lf)let data_with_flags = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').NodeStatusRecord#(lf)| distinct Timestamp, HostName, Status, Endpoint#(lf)| join kind=leftouter #(lf)    (VMInfo #(lf)    | distinct HostName, VMSS)#(lf)on HostName#(lf)    | extend VMSS_clean = trim("" "", tolower(VMSS))#(lf)    | join kind=leftouter(#(lf)        ClusterVMSSInfo#(lf)        | extend VMSS_clean = trim("" "", tolower(VMSSName))#(lf)    ) on VMSS_clean#(lf)| extend Timestamp = todatetime(['Timestamp'])#(lf)| where isnotempty(HostName) and isnotempty(Status)#(lf)| sort by HostName  asc, Timestamp  asc, Status asc#(lf)| serialize#(lf)| extend#(lf)    is_start = iif(Status in (start_actions), 1, 0),#(lf)    is_end = iif(Status in (end_actions), 1, 0),#(lf)    is_ua = iif(Status == ua, 1, 0)#(lf)| extend is_big_start = iff(Status in (start_actions) and prev(Status) in (end_actions), 1 ,0)#(lf)| extend big_group_id = row_cumsum(is_big_start)#(lf)| extend group_key = strcat(HostName, ""_"", tostring(big_group_id))#(lf)| serialize#(lf)| extend sub_group_id = row_cumsum(is_start, group_key != prev(group_key))#(lf)| project-away HostName1;#(lf)let duplicated_rows =#(lf)    data_with_flags#(lf)    | where is_start == 1 and sub_group_id >1#(lf)    | extend sub_group_id = sub_group_id - 1;#(lf)let final_data =#(lf)    data_with_flags#(lf)    | union duplicated_rows#(lf)    | sort by HostName, Timestamp, sub_group_id;#(lf)let sum_final_data =#(lf)    final_data#(lf)    | summarize#(lf)        StartTime = minif(Timestamp, is_start == 1),#(lf)        EndTime = max(Timestamp),#(lf)        UAedTime = minif(Timestamp, is_ua == 1)#(lf)    by HostName, big_group_id, sub_group_id, Endpoint, ClusterName#(lf)    | where isnotnull(StartTime) and isnotnull(EndTime)  and isnull(UAedTime)#(lf)    | extend#(lf)        Node_Recycle_Time = todouble(EndTime - StartTime)/todouble(1h)#(lf)    | sort by StartTime#(lf)    | extend WeekNumber = weekofyear(startofweek(StartTime - 1d, 0)); // Monday as the start of the week#(lf)let grouped_by_week =#(lf)sum_final_data#(lf)| summarize#(lf)    sum_Node_Recycle_Time = avg(Node_Recycle_Time),#(lf)    sum_Node = countif(isnotnull(Node_Recycle_Time))#(lf)  by WeekNumber, Endpoint, ClusterName#(lf)| sort by WeekNumber asc;#(lf)grouped_by_week", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null]),
+				    #"Renamed Columns" = Table.RenameColumns(Source,{{"WeekNumber", "Week"}, {"sum_Node_Recycle_Time", "Node Recycle Time (Hour)"}, {"sum_Node", "Node Count"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

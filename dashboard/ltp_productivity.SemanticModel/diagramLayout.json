@@ -1,0 +1,462 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 3,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 852,
+            "y": 50
+          },
+          "nodeIndex": "A-t0-ClusterCapacityStatus",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 0
+          },
+          "nodeIndex": "R-t0-DailyNodeRuntimeAvgFailure",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 568,
+            "y": 0
+          },
+          "nodeIndex": "A-r0-na",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 0
+          },
+          "nodeIndex": "R-t1-NodeFailureCategorization",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 38
+          },
+          "nodeIndex": "R-t3-DailyOccurrenceofNodeFailuresRuntime",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 0
+          },
+          "nodeIndex": "J-r0-na",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 0
+          },
+          "nodeIndex": "J-r1-na",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 50
+          },
+          "nodeIndex": "J-t0-JobInterruptionCountandRCA",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 50
+          },
+          "nodeIndex": "J-t1-AverageandMaxJobDurationTime",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 0
+          },
+          "nodeIndex": "J-t2-AverageReactionTime",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 0
+          },
+          "nodeIndex": "J-t3-MaxReactionTime",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 688.68391476954048,
+            "y": 0
+          },
+          "nodeIndex": "R-r0-na",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 568,
+            "y": 98
+          },
+          "nodeIndex": "R-r0-ColumnEmpty",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 852,
+            "y": 98
+          },
+          "nodeIndex": "R-r0-ColumnHardware",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 98
+          },
+          "nodeIndex": "R-r0-ColumnPlatform",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1420,
+            "y": 98
+          },
+          "nodeIndex": "R-r0-ColumnUser",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 62
+          },
+          "nodeIndex": "R-t2-NodeFailureRCABreakdown",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 74
+          },
+          "nodeIndex": "NR-t1-CordonNodeRecycleTime",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 14
+          },
+          "nodeIndex": "NR-t0-ORFNodeRecycleTime",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 0
+          },
+          "nodeIndex": "A-r2-na",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 50
+          },
+          "nodeIndex": "A-t5-DetailsofWeekAppended",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 50
+          },
+          "nodeIndex": "A-t4-AvailabilityStatus",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 86
+          },
+          "nodeIndex": "M-t0-MTBFbyNode",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 98
+          },
+          "nodeIndex": "R-r0-ColumnUnknown",
+          "nodeLineageTag": "c345e766-500c-4171-8934-d4618261243b",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 86
+          },
+          "nodeIndex": "M-t1-MTBFbyJob",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 98
+          },
+          "nodeIndex": "ADimWeek",
+          "nodeLineageTag": "9515ff61-fc22-44fe-9288-132487cfcfca",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1136,
+            "y": 0
+          },
+          "nodeIndex": "ADimClustername",
+          "nodeLineageTag": "ce3bd8a2-ba67-44cd-a8c4-e59d172d6867",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1498.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "ADimClustername_stage1",
+          "nodeLineageTag": "e0c927c0-921f-4bf2-9231-4b0ca206c77d",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "ADimEndpoint",
+          "nodeLineageTag": "bf4bd3bf-4efb-41fa-ad5b-a8e47438cde7",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "RDimWeek",
+          "nodeLineageTag": "9760cfed-2382-4b8f-aaa9-733780d7f93d",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "RDimEndpoint_stage1",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "RDimEndpoint",
+          "nodeLineageTag": "7d3eb6d1-97d1-4fff-bcbf-b9d40b25fd14",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "CalendarTable",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "RDimFailurecat",
+          "nodeLineageTag": "1824dd92-3dd5-4d1c-8d7f-b24eb809ee42",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "R-r1-na",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "R-t4-DailyNodeRuntimeAvgFailure",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}
