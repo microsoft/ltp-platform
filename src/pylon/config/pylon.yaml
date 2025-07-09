@@ -29,3 +29,9 @@ deploy-service: false
 #  crt_path: /path/to/xxxxxx
 #  key_name: yyyyyy
 #  key_path: /path/to/yyyyyy
+
+#reverse-proxy:
+#  server_addr: x.x.x.x
+#  server_port: xxxx
+#  server_token: xxx
+#  binded_port: xxxx

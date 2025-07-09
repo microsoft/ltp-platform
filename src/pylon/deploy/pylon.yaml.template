@@ -120,6 +120,19 @@ spec:
             limits:
               memory: "1Gi"
           {%- endif %}
+{% if 'reverse-proxy' in cluster_cfg['pylon'] %}
+        - name: reverseproxy
+          image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}reverseproxy:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: "/app/proxy-client.yaml"
+              name: reverseproxy-configuration
+              subPath: "proxy-client.yaml"
+          command:
+            - "/app/proxy-client"
+            - "-c" 
+            - "/app/proxy-client.yaml"
+{% endif %}
       imagePullSecrets:
         - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       volumes:
@@ -131,4 +144,8 @@ spec:
           configMap:
             name: https-config
 {% endif %}
-
+{% if 'reverse-proxy' in cluster_cfg['pylon'] %}
+        - name: reverseproxy-configuration
+          configMap:
+            name: reverseproxy-config
+{% endif %}

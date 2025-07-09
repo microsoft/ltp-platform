@@ -27,6 +27,7 @@ template-list:
   - pylon.yaml
   - start.sh
   - pylon-config/run.sh
+  - reverseproxy-config/proxy-client.yaml
 
 start-script: start.sh
 stop-script: stop.sh

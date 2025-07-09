@@ -35,6 +35,11 @@ pylon:
     #  crt_path: /path/to/xxxxxx
     #  key_name: yyyyyy
     #  key_path: /path/to/yyyyyy
+    #reverse_proxy:
+    #  server_addr: XXX
+    #  server_port: 80
+    #  server_token: "xxxxxx"
+    #  binded_port: xxx
 ```
 
 ## Table <a name="T_Config"></a>
@@ -48,4 +53,8 @@ pylon:
 | pylon.ssl.crt_path | com["pylon"]["ssl"]["crt_path"] | cluster_cfg["pylon"]["ssl"]["crt_path"] | the path to certificate file |
 | pylon.ssl.key_name | com["pylon"]["ssl"]["key_name"] | cluster_cfg["pylon"]["ssl"]["key_name"] | certificate key file name |
 | pylon.ssl.key_path | com["pylon"]["ssl"]["key_path"] | cluster_cfg["pylon"]["ssl"]["key_path"] | the path to certificate key file |
+| pylon.reverse_proxy.server_addr | com["pylon"]["reverse_proxy"]["server_addr"] | cluster_cfg["pylon"]["reverse_proxy"]["server_addr"] | IP address of the reverse proxy server |
+| pylon.reverse_proxy.server_port | com["pylon"]["reverse_proxy"]["server_port"] | cluster_cfg["pylon"]["reverse_proxy"]["server_port"] | port of the reverse proxy server |
+| pylon.reverse_proxy.server_token | com["pylon"]["reverse_proxy"]["server_token"] | cluster_cfg["pylon"]["reverse_proxy"]["server_token"] | token of the reverse proxy server |
+| pylon.reverse_proxy.binded_port | com["pylon"]["reverse_proxy"]["binded_port"] | cluster_cfg["pylon"]["reverse_proxy"]["binded_port"] | port of the bined port of the reverse proxy server |
 

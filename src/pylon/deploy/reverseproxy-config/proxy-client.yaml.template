@@ -1,0 +1,15 @@
+{% if 'reverse-proxy' in cluster_cfg['pylon'] %}
+
+serverAddr: {{ cluster_cfg['pylon']['reverse-proxy']['server_addr']}}
+serverPort: {{ cluster_cfg['pylon']['reverse-proxy']['server_port']}}
+auth:
+  method: token
+  token: {{ cluster_cfg['pylon']['reverse-proxy']['server_token']}}
+loginFailExit: false
+proxies:
+  - name: webportal-{{ cluster_cfg['pylon']['reverse-proxy']['binded_port']}}
+    type: tcp
+    localIp: 127.0.0.1
+    localPort: 443
+    remotePort: {{ cluster_cfg['pylon']['reverse-proxy']['binded_port']}}
+{% endif %}

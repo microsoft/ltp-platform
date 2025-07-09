@@ -31,6 +31,11 @@ kubectl create configmap https-config --from-file=https-config/ --dry-run=client
 
 kubectl create configmap pylon-config --from-file=pylon-config/ --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
 
+{% if 'reverse-proxy' in cluster_cfg['pylon'] %}
+
+kubectl create configmap reverseproxy-config --from-file=reverseproxy-config/ --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
+{% endif %}
+
 kubectl apply --overwrite=true -f pylon.yaml || exit $?
 
 sleep 10

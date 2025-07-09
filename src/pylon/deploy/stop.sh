@@ -35,4 +35,8 @@ if kubectl get configmap | grep -q "pylon-config"; then
     kubectl delete configmap pylon-config || exit $?
 fi
 
+if kubectl get configmap | grep -q "reverseproxy-config"; then
+    kubectl delete configmap reverseproxy-config || exit $?
+fi
+
 popd > /dev/null

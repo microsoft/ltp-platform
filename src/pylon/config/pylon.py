@@ -55,6 +55,10 @@ class Pylon:
         }
         if 'ssl' in self.service_configuration:
             ret['ssl'] = sslConfig
+        if 'reverse-proxy' in self.service_configuration:
+            ret['reverse-proxy'] = {}
+            for key in self.service_configuration['reverse-proxy']:
+                ret['reverse-proxy'][key] = str(self.service_configuration['reverse-proxy'][key])
 
         return ret
 
