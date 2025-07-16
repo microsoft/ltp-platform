@@ -29,9 +29,12 @@ table ADimWeek
 				    Source = #"A-r2-na",
 				    #"Removed Other Columns" = Table.SelectColumns(Source,{"Week"}),
 				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
-				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"Week", Order.Ascending}})
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"Week", Order.Ascending}}),
+				    #"Appended Query" = Table.Combine({#"Sorted Rows", ADimWeek_stage1}),
+				    #"Removed Duplicates1" = Table.Distinct(#"Appended Query"),
+				    #"Sorted Rows1" = Table.Sort(#"Removed Duplicates1",{{"Week", Order.Ascending}})
 				in
-				    #"Sorted Rows"
+				    #"Sorted Rows1"
 
 	annotation PBI_NavigationStepName = Navigation
 

@@ -68,24 +68,6 @@ table R-r0-na
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'hardware-GPU Hanging with Fence Fallback Timer Expired'
-		dataType: int64
-		formatString: 0
-		lineageTag: e4d4765e-2e72-42e1-bc0b-a0dbabd7d045
-		summarizeBy: sum
-		sourceColumn: hardware-GPU Hanging with Fence Fallback Timer Expired
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'hardware-GPU Hanging with Segfault'
-		dataType: int64
-		formatString: 0
-		lineageTag: c12de55d-2e2f-4488-b743-5c01040e01ef
-		summarizeBy: sum
-		sourceColumn: hardware-GPU Hanging with Segfault
-
-		annotation SummarizationSetBy = Automatic
-
 	column 'hardware-GPU Memory Not Release'
 		dataType: int64
 		formatString: 0
@@ -104,30 +86,12 @@ table R-r0-na
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'hardware-IB Link Flapping'
-		dataType: int64
-		formatString: 0
-		lineageTag: 1156defb-5aae-4742-8de3-2c421f3b29cc
-		summarizeBy: sum
-		sourceColumn: hardware-IB Link Flapping
-
-		annotation SummarizationSetBy = Automatic
-
 	column 'hardware-IB Nic Failure'
 		dataType: int64
 		formatString: 0
 		lineageTag: 42449d0e-4bc4-49cf-ad90-872e31b40237
 		summarizeBy: sum
 		sourceColumn: hardware-IB Nic Failure
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'hardware-IB Port Down'
-		dataType: int64
-		formatString: 0
-		lineageTag: 0cbad5b4-5730-4482-a31a-02634b1e20b5
-		summarizeBy: sum
-		sourceColumn: hardware-IB Port Down
 
 		annotation SummarizationSetBy = Automatic
 
@@ -146,15 +110,6 @@ table R-r0-na
 		lineageTag: f87d1c34-dde3-4d9b-92d7-520976647a2f
 		summarizeBy: sum
 		sourceColumn: hardware-Loss NaN
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'hardware-Memory Access Fault'
-		dataType: int64
-		formatString: 0
-		lineageTag: 558283cb-f5b2-49c9-8e12-f51554e03bb0
-		summarizeBy: sum
-		sourceColumn: hardware-Memory Access Fault
 
 		annotation SummarizationSetBy = Automatic
 
@@ -191,15 +146,6 @@ table R-r0-na
 		lineageTag: 39c2e4f4-64af-4d9f-9600-37235f74b1ac
 		summarizeBy: sum
 		sourceColumn: platform-Platform Service Issue
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'user-Memory Access Fault'
-		dataType: int64
-		formatString: 0
-		lineageTag: 1ef3193f-d03b-471f-8cd5-7d1e2a8c0fc6
-		summarizeBy: sum
-		sourceColumn: user-Memory Access Fault
 
 		annotation SummarizationSetBy = Automatic
 
@@ -293,12 +239,39 @@ table R-r0-na
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'hardware-GPU Momery Not Release'
+	column hardware-GPUHangingwithFenceFallbackTimerExpired
 		dataType: int64
 		formatString: 0
-		lineageTag: 8089e2bc-f933-4e6f-966b-31a4fe46d27e
+		lineageTag: 2b38f8b2-e94c-4f5d-8388-3b757ab7c2d2
 		summarizeBy: sum
-		sourceColumn: hardware-GPU Momery Not Release
+		sourceColumn: hardware-GPUHangingwithFenceFallbackTimerExpired
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-MemoryAccessFault
+		dataType: int64
+		formatString: 0
+		lineageTag: e489ab34-7cc9-460c-8073-e74ca53529b9
+		summarizeBy: sum
+		sourceColumn: hardware-MemoryAccessFault
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'unknown-Blob Mount Failure'
+		dataType: int64
+		formatString: 0
+		lineageTag: 45058ad5-8a30-43f4-b512-bf3d7ba19172
+		summarizeBy: sum
+		sourceColumn: unknown-Blob Mount Failure
+
+		annotation SummarizationSetBy = Automatic
+
+	column user-MemoryAccessFault
+		dataType: int64
+		formatString: 0
+		lineageTag: f7c86a67-1503-4492-b2b4-911673e09a0f
+		summarizeBy: sum
+		sourceColumn: user-MemoryAccessFault
 
 		annotation SummarizationSetBy = Automatic
 

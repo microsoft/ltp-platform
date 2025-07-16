@@ -65,12 +65,71 @@ table M-t0-MTBFbyNode
 
 		annotation SummarizationSetBy = Automatic
 
+	column _debugTotalAvailableDays
+		dataType: double
+		lineageTag: d5a1607e-8f3f-4108-a99d-113179765914
+		summarizeBy: none
+		sourceColumn: _debugTotalAvailableDays
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CumulativeTotalAvaiDays
+		dataType: double
+		lineageTag: 58037ed2-776a-4884-a14a-0bd8a2986235
+		summarizeBy: none
+		sourceColumn: CumulativeTotalAvaiDays
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CumulativeTotalAvaiHours
+		dataType: double
+		lineageTag: 8f3577d9-abf3-40de-9348-24e8edff2125
+		summarizeBy: none
+		sourceColumn: CumulativeTotalAvaiHours
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CumulativeSampleCount
+		dataType: int64
+		formatString: 0
+		lineageTag: 62ee9ece-b48b-4066-9246-5b06d307e6df
+		summarizeBy: none
+		sourceColumn: CumulativeSampleCount
+
+		annotation SummarizationSetBy = User
+
+	column CumulativeMTBFDays
+		dataType: double
+		lineageTag: a80bd8b7-bc20-4677-9f34-fcd515ddab82
+		summarizeBy: none
+		sourceColumn: CumulativeMTBFDays
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CumulativeMTBFHours
+		dataType: double
+		lineageTag: 700101d3-45d7-4822-a8bb-91b9977ab807
+		summarizeBy: none
+		sourceColumn: CumulativeMTBFHours
+
+		annotation SummarizationSetBy = User
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	partition M-t0-MTBFbyNode = m
 		mode: import
-		queryGroup: Availability
+		queryGroup: Reliability
 		source =
 				let
-				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "// preserve the actions to filter, no reference#(lf)let States = datatable (State:string)#(lf)[#(lf)    ""new-validating"", ""validating-available"", ""available-cordoned"", ""cordoned-triaged_hardware""#(lf)];#(lf)// step 1, filter the actions related to Hardware failure, assign an action seq, join to extend the Endpoint and ClusterName column#(lf)let AllRelevantActions = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')#(lf)| where Action in (""new-validating"", ""validating-available"", ""available-cordoned"", ""cordoned-triaged_hardware"") // Filter for relevant actions to optimize performance#(lf)| extend ActionSeq = case(#(lf)    Action == ""new-validating"", ""S00"",#(lf)    Action == ""validating-available"", ""S01"",#(lf)    Action == ""available-cordoned"", ""S02"",#(lf)    Action == ""cordoned-triaged_hardware"", ""S03"",#(lf)    ""S99""#(lf))#(lf)| join kind=leftouter #(lf)    (VMInfo #(lf)    | distinct HostName, VMSS)#(lf)on HostName#(lf)    | extend VMSS_clean = trim("" "", tolower(VMSS))#(lf)    | join kind=leftouter(#(lf)        ClusterVMSSInfo#(lf)        | extend VMSS_clean = trim("" "", tolower(VMSSName))#(lf)    ) on VMSS_clean#(lf)| project-away Reason, Detail, Category#(lf)| project HostName, Timestamp, Action, ActionSeq, Endpoint, ClusterName#(lf)| sort by HostName asc, Timestamp asc, ActionSeq asc; // Sort by HostName and Timestamp for correct sequence matching; Sort by ActionSeq is necessary as some actions could be registered to the same timestamp#(lf)// step 2, create a action flow pattern#(lf)let TransactionTable = AllRelevantActions#(lf)| sort by HostName asc, Timestamp asc, ActionSeq asc#(lf)| serialize#(lf)| extend preAction = prev(Action, 1)#(lf)| extend nextAction = next(Action, 1)#(lf)| extend preHostName = prev(HostName, 1)#(lf)| extend nextHostName = next(HostName, 1)#(lf)| extend isBackVA = iff(Action == ""validating-available"" and (HostName == preHostName and (preAction == ""new-validating"" or preAction == ""cordoned-triaged_hardware"")), 1, 0)#(lf)| extend isNewAC = iff(Action == ""available-cordoned"" and (HostName == nextHostName and nextAction == ""cordoned-triaged_hardware""), 1, 0)#(lf)| extend isNewCTH = iff(Action == ""cordoned-triaged_hardware"" and (HostName == preHostName and preAction == ""available-cordoned""), 1, 0);#(lf)// step 3, filter out the actions using above pattern#(lf)let FocusedTransaction = TransactionTable#(lf)| where isNewAC == 1 or isNewCTH == 1 or isBackVA == 1; // keep only entries with state transactions we desire#(lf)// step 4, calculate duration between failures for the same hostname#(lf)let FaiureDuration = FocusedTransaction#(lf)| serialize // This operator is required to use row-level functions like 'next()'#(lf)| extend#(lf)    LastAction = prev(Action, 1), // Get the action of the next record#(lf)    LastTimestamp = prev(Timestamp, 1), // Get the timestamp of the next record#(lf)    LastHostName = prev(HostName, 1) // Get the HostName of the next record#(lf)| where#(lf)    Action == ""available-cordoned"" // The current action must be 'available-cordoned'#(lf)    and LastAction == ""validating-available"" // The next action must be 'cordoned-triaged_hardware'#(lf)    and HostName == LastHostName // Both actions must belong to the same HostName#(lf)| project#(lf)    HostName,#(lf)    Endpoint,#(lf)    ClusterName,#(lf)    AvailableCordonedTimestamp = Timestamp, // Rename for clarity#(lf)    ValidatingAvailableTimestamp = LastTimestamp // Rename for clarity#(lf)| extend DurationBetweenFailureSpan = AvailableCordonedTimestamp - ValidatingAvailableTimestamp#(lf)| order by HostName asc, AvailableCordonedTimestamp asc // Order the final results for better readability#(lf)| extend Week = weekofyear(startofweek(AvailableCordonedTimestamp - 1d, 0)) // Monday as the start of the week#(lf)| extend DurationBetweenFailureDay = toreal(DurationBetweenFailureSpan) / 36000000000 /24#(lf)| extend DurationBetweenFailureHour = toreal(DurationBetweenFailureSpan) / 36000000000;#(lf)// step 5, average aggregate#(lf)let Res = FaiureDuration#(lf)| order by Week asc#(lf)| summarize #(lf)    MTBFSpan = avg(DurationBetweenFailureSpan),#(lf)    MTBFDays = avg(DurationBetweenFailureDay),#(lf)    MTBFHours = avg(DurationBetweenFailureHour),#(lf)    SampleCounts = count()#(lf)by Week, Endpoint, ClusterName#(lf)| order by Week asc;#(lf)Res#(lf)", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "// preserve the actions to filter, no reference#(lf)let States = datatable (State:string)#(lf)[#(lf)    ""new-validating"", ""validating-available"", ""available-cordoned"", ""cordoned-triaged_hardware""#(lf)];#(lf)// step 1, filter the actions related to Hardware failure, assign an action seq, join to extend the Endpoint and ClusterName column#(lf)let AllRelevantActions = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')#(lf)| where Action in (""new-validating"", ""validating-available"", ""available-cordoned"", ""cordoned-triaged_hardware"") // Filter for relevant actions to optimize performance#(lf)| extend ActionSeq = case(#(lf)    Action == ""new-validating"", ""S00"",#(lf)    Action == ""validating-available"", ""S01"",#(lf)    Action == ""available-cordoned"", ""S02"",#(lf)    Action == ""cordoned-triaged_hardware"", ""S03"",#(lf)    ""S99""#(lf))#(lf)| join kind=leftouter #(lf)    (VMInfo #(lf)    | distinct HostName, VMSS)#(lf)on HostName#(lf)    | extend VMSS_clean = trim("" "", tolower(VMSS))#(lf)    | join kind=leftouter(#(lf)        ClusterVMSSInfo#(lf)        | extend VMSS_clean = trim("" "", tolower(VMSSName))#(lf)    ) on VMSS_clean#(lf)| project-away Reason, Detail, Category#(lf)| project HostName, Timestamp, Action, ActionSeq, Endpoint, ClusterName#(lf)| sort by HostName asc, Timestamp asc, ActionSeq asc; // Sort by HostName and Timestamp for correct sequence matching; Sort by ActionSeq is necessary as some actions could be registered to the same timestamp#(lf)// step 2, create a action flow pattern#(lf)let TransactionTable = AllRelevantActions#(lf)| sort by HostName asc, Timestamp asc, ActionSeq asc#(lf)| serialize#(lf)| extend preAction = prev(Action, 1)#(lf)| extend nextAction = next(Action, 1)#(lf)| extend preHostName = prev(HostName, 1)#(lf)| extend nextHostName = next(HostName, 1)#(lf)| extend isBackVA = iff(Action == ""validating-available"" and (HostName == preHostName and (preAction == ""new-validating"" or preAction == ""cordoned-triaged_hardware"")), 1, 0)#(lf)| extend isNewAC = iff(Action == ""available-cordoned"" and (HostName == nextHostName and nextAction == ""cordoned-triaged_hardware""), 1, 0)#(lf)| extend isNewCTH = iff(Action == ""cordoned-triaged_hardware"" and (HostName == preHostName and preAction == ""available-cordoned""), 1, 0);#(lf)// step 3, filter out the actions using above pattern#(lf)let FocusedTransaction = TransactionTable#(lf)| where isNewAC == 1 or isNewCTH == 1 or isBackVA == 1; // keep only entries with state transactions we desire#(lf)// step 4, calculate duration between failures for the same hostname#(lf)let FaiureDuration = FocusedTransaction#(lf)| serialize // This operator is required to use row-level functions like 'next()'#(lf)| extend#(lf)    LastAction = prev(Action, 1), // Get the action of the next record#(lf)    LastTimestamp = prev(Timestamp, 1), // Get the timestamp of the next record#(lf)    LastHostName = prev(HostName, 1) // Get the HostName of the next record#(lf)| where#(lf)    Action == ""available-cordoned"" // The current action must be 'available-cordoned'#(lf)    and LastAction == ""validating-available"" // The next action must be 'cordoned-triaged_hardware'#(lf)    and HostName == LastHostName // Both actions must belong to the same HostName#(lf)| project#(lf)    HostName,#(lf)    Endpoint,#(lf)    ClusterName,#(lf)    AvailableCordonedTimestamp = Timestamp, // Rename for clarity#(lf)    ValidatingAvailableTimestamp = LastTimestamp // Rename for clarity#(lf)| extend DurationBetweenFailureSpan = AvailableCordonedTimestamp - ValidatingAvailableTimestamp#(lf)| order by HostName asc, AvailableCordonedTimestamp asc // Order the final results for better readability#(lf)| extend Week = weekofyear(startofweek(AvailableCordonedTimestamp - 1d, 0)) // Monday as the start of the week#(lf)| extend DurationBetweenFailureDay = toreal(DurationBetweenFailureSpan) / 36000000000 /24#(lf)| extend DurationBetweenFailureHour = toreal(DurationBetweenFailureSpan) / 36000000000;#(lf)// step 5, average aggregate#(lf)let Res = FaiureDuration#(lf)| order by Week asc#(lf)| summarize #(lf)    MTBFSpan = avg(DurationBetweenFailureSpan),#(lf)    MTBFDays = avg(DurationBetweenFailureDay),#(lf)    MTBFHours = avg(DurationBetweenFailureHour),#(lf)    _debugTotalAvailableDays = sum(DurationBetweenFailureDay),#(lf)    SampleCounts = count()#(lf)by Week, Endpoint, ClusterName#(lf)| order by Endpoint asc, ClusterName asc, Week asc;#(lf)let CumulativeRes = Res#(lf)| extend CumulativeTotalAvaiDays = row_cumsum(SampleCounts * MTBFDays, ClusterName != prev(ClusterName))#(lf)| extend CumulativeTotalAvaiHours = row_cumsum(SampleCounts * MTBFHours, ClusterName != prev(ClusterName))#(lf)| extend CumulativeSampleCount = row_cumsum(SampleCounts, ClusterName != prev(ClusterName))#(lf)| extend CumulativeMTBFDays = iff(CumulativeSampleCount > 0, todouble(CumulativeTotalAvaiDays) / CumulativeSampleCount, 0.0)#(lf)| extend CumulativeMTBFHours = iff(CumulativeSampleCount > 0, todouble(CumulativeTotalAvaiHours) / CumulativeSampleCount, 0.0);#(lf)CumulativeRes#(lf)", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
 				in
 				    Source
 

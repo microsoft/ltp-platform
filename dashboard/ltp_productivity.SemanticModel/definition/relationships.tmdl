@@ -180,3 +180,17 @@ relationship 9bdc68a0-cdc2-f0b4-7e50-5a0f002e021c
 	fromColumn: R-t4-DailyNodeRuntimeAvgFailure.Category
 	toColumn: RDimFailurecat.Category
 
+relationship 4a9484f3-109c-e0ea-b8e0-17489ad538b1
+	fromColumn: M-t0-MTBFbyNode.Week
+	toColumn: RDimWeek.Week
+
+relationship faa6601e-85dc-bd4b-650c-0d64d6d96d26
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: RDimWeek.Week
+	toColumn: M-t1-MTBFbyJob.Week
+
+relationship 3e1425f7-cad0-7d4d-375f-90719f3d66fd
+	fromColumn: M-t0-MTBFbyNode.Endpoint
+	toColumn: RDimEndpoint.Endpoint
+

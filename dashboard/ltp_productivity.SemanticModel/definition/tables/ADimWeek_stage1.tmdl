@@ -1,0 +1,29 @@
+table ADimWeek_stage1
+	lineageTag: dd1b64d0-3ca6-48a0-ad00-a2f3f28e843f
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: ff6f6ebb-e040-4619-95b1-424c74d26e5c
+		summarizeBy: sum
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ADimWeek_stage1 = m
+		mode: import
+		queryGroup: Availability
+		source =
+				let
+				    Source = #"A-r0-na",
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"WeekNum"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"WeekNum", Order.Ascending}}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Sorted Rows",{{"WeekNum", "Week"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

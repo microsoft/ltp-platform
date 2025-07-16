@@ -19,7 +19,7 @@ queryGroup Reliability
 
 	annotation PBI_QueryGroupOrder = 2
 
-annotation PBI_QueryOrder = ["A-r0-na","A-r2-na","M-t0-MTBFbyNode","M-t1-MTBFbyJob","NR-t0-ORFNodeRecycleTime","NR-t1-CordonNodeRecycleTime","R-r0-na","R-r0-ColumnHardware","R-r0-ColumnPlatform","R-r0-ColumnUser","R-r0-ColumnEmpty","R-r0-ColumnUnknown","R-t0-DailyNodeRuntimeAvgFailure","R-t1-NodeFailureCategorization","R-t2-NodeFailureRCABreakdown","R-t3-DailyOccurrenceofNodeFailuresRuntime","J-r0-na","J-r1-na","ADimWeek","ADimClustername","ADimClustername_stage1","ADimEndpoint","RDimWeek","RDimEndpoint_stage1","RDimEndpoint","RDimFailurecat","R-r1-na"]
+annotation PBI_QueryOrder = ["A-r0-na","A-r2-na","NR-t0-ORFNodeRecycleTime","NR-t1-CordonNodeRecycleTime","R-r0-na","R-r0-ColumnHardware","R-r0-ColumnPlatform","R-r0-ColumnUser","R-r0-ColumnEmpty","R-r0-ColumnUnknown","R-t0-DailyNodeRuntimeAvgFailure","R-t1-NodeFailureCategorization","R-t2-NodeFailureRCABreakdown","R-t3-DailyOccurrenceofNodeFailuresRuntime","J-r0-na","J-r1-na","ADimWeek","ADimWeek_stage1","ADimClustername","ADimClustername_stage1","ADimEndpoint","RDimWeek","RDimEndpoint_stage1","RDimEndpoint","RDimFailurecat","M-t0-MTBFbyNode","M-t1-MTBFbyJob","R-r1-na"]
 
 annotation __PBI_TimeIntelligenceEnabled = 1
 
@@ -74,6 +74,7 @@ ref table R-r1-na
 ref table LocalDateTable_bfd0980a-5f77-4f08-84ec-70c9249006b7
 ref table R-t4-DailyNodeRuntimeAvgFailure
 ref table LocalDateTable_4df5af18-8bd0-4a4a-a27d-e2f18cd371c6
+ref table ADimWeek_stage1
 
 ref cultureInfo en-US
 

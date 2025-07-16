@@ -13,8 +13,10 @@ table R-t1-NodeFailureCategorization
 			VAR MaxHardware = SUMX(FilteredTable, 'R-t1-NodeFailureCategorization'[Hardware])
 			VAR MaxPlatform = SUMX(FilteredTable, 'R-t1-NodeFailureCategorization'[Platform])
 			VAR MaxUser = SUMX(FilteredTable, 'R-t1-NodeFailureCategorization'[User])
-			VAR MaxValue = MAX(MaxHardware, MAX(MaxPlatform, MaxUser))
-			VAR TotalFailures = (MaxHardware + MaxPlatform + MaxUser)
+			VAR MaxUnkonwn = SUMX(FilteredTable, 'R-t1-NodeFailureCategorization'[unknown])
+			VAR MaxUncategorized = SUMX(FilteredTable, 'R-t1-NodeFailureCategorization'[uncategorized])
+			VAR MaxValue = MAX(MaxHardware, MAX(MaxPlatform, MAX(MaxUser, MAX(MaxUnkonwn, MaxUncategorized))))
+			VAR TotalFailures = (MaxHardware + MaxPlatform + MaxUser + MaxUnkonwn + MaxUncategorized)
 			VAR RatioText =
 			    IF(
 			        TotalFailures = 0,
@@ -24,9 +26,11 @@ table R-t1-NodeFailureCategorization
 			VAR Result =
 			    SWITCH(
 			        TRUE(),
-			        MaxValue = MaxHardware, "Hardware (" & MaxValue & " instances, account for " & RatioText & " of total failures)",
-			        MaxValue = MaxPlatform, "Platform (" & MaxValue &" instances, account for " & RatioText & " of total failures)",
-			        MaxValue = MaxUser, "User (" & MaxValue & " instances, account for " & RatioText & " of total failures)"
+			        MaxValue = MaxHardware, "Hardware (" & MaxValue & " instances, account for " & RatioText & " of total " & TotalFailures &" failures)",
+			        MaxValue = MaxPlatform, "Platform (" & MaxValue &" instances, account for " & RatioText & " of total " & TotalFailures &" failures)",
+			        MaxValue = MaxUser, "User (" & MaxValue & " instances, account for " & RatioText & " of total " & TotalFailures &" failures)",
+			        MaxValue = MaxUnkonwn, "Unknown (" & MaxValue & " instances, account for " & RatioText & " of total " & TotalFailures &" failures)",
+			        MaxValue = MaxUncategorized, "Uncategorized (" & MaxValue & " instances, account for " & RatioText & " of total " & TotalFailures &" failures)"
 			    )
 			RETURN
 			IF(
@@ -121,7 +125,7 @@ table R-t1-NodeFailureCategorization
 				in
 				    Source
 
-	annotation PBI_ResultType = Exception
+	annotation PBI_ResultType = Table
 
 	annotation PBI_NavigationStepName = Navigation
 

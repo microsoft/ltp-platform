@@ -8269,28 +8269,6 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "rr0na.hardwareGPU_hanging_with_fence_fallback_timer_expired": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "R-r0-na",
-			          "ConceptualProperty": "hardware-GPU Hanging with Fence Fallback Timer Expired"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "hardware-GPU hanging with fence fallback timer expired": {
-			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "hardware GPU hanging with fence fallback timer expired": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        }
-			      ]
-			    },
 			    "rr0na.hardwareGPU_driver_hanging": {
 			      "Definition": {
 			        "Binding": {
@@ -8945,78 +8923,6 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "rr0na.hardwareGPU_hanging_with_segfault": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "R-r0-na",
-			          "ConceptualProperty": "hardware-GPU Hanging with Segfault"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "hardware-GPU hanging with segfault": {
-			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "hardware GPU hanging with segfault": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "hardware gpu drapery with segfault": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.469
-			          }
-			        },
-			        {
-			          "hardware gpu tapestry with segfault": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.455
-			          }
-			        },
-			        {
-			          "hardware gpu carpet with segfault": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.455
-			          }
-			        },
-			        {
-			          "hardware gpu drape with segfault": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.455
-			          }
-			        },
-			        {
-			          "hardware gpu swag with segfault": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.455
-			          }
-			        }
-			      ]
-			    },
 			    "rr0na.hardwareGPU_memory_not_release": {
 			      "Definition": {
 			        "Binding": {
@@ -9303,46 +9209,6 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "rr0na.hardwareIB_link_flapping": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "R-r0-na",
-			          "ConceptualProperty": "hardware-IB Link Flapping"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "hardware-IB link flapping": {
-			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "hardware IB link flapping": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "flapping": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "link flapping": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "IB link flapping": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        }
-			      ]
-			    },
 			    "rr0na.hardwareIB_nic_failure": {
 			      "Definition": {
 			        "Binding": {
@@ -9465,146 +9331,6 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "rr0na.hardwareIB_port_down": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "R-r0-na",
-			          "ConceptualProperty": "hardware-IB Port Down"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "hardware-IB port down": {
-			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "hardware IB port down": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "down": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "port down": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "IB port down": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "hardware-ib seaport down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware-ib anchorage down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware ib seaport down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "hardware ib anchorage down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "ib seaport down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.508
-			          }
-			        },
-			        {
-			          "ib anchorage down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.508
-			          }
-			        },
-			        {
-			          "hardware-ib harbor down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.504
-			          }
-			        },
-			        {
-			          "hardware-ib haven down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.504
-			          }
-			        },
-			        {
-			          "seaport down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.5
-			          }
-			        },
-			        {
-			          "anchorage down": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.5
-			          }
-			        }
-			      ]
-			    },
 			    "rr0na.hardwareIB_reregistration": {
 			      "Definition": {
 			        "Binding": {
@@ -9669,146 +9395,6 @@ cultureInfo en-US
 			          "loss NaN": {
 			            "State": "Generated",
 			            "Weight": 0.97
-			          }
-			        }
-			      ]
-			    },
-			    "rr0na.hardwarememory_access_fault": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "R-r0-na",
-			          "ConceptualProperty": "hardware-Memory Access Fault"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "hardware-memory access fault": {
-			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "hardware memory access fault": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "fault": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "access fault": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "memory access fault": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "hardware-memory access responsibility": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware-memory access liability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware-memory access culpability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware-memory access accountability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware memory access responsibility": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "hardware memory access liability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "hardware memory access culpability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "hardware memory access accountability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "memory access responsibility": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.508
-			          }
-			        },
-			        {
-			          "memory access liability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.508
 			          }
 			        }
 			      ]
@@ -10215,146 +9801,6 @@ cultureInfo en-US
 			              "Agent": "Thesaurus"
 			            },
 			            "Weight": 0.605
-			          }
-			        }
-			      ]
-			    },
-			    "rr0na.usermemory_access_fault": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "R-r0-na",
-			          "ConceptualProperty": "user-Memory Access Fault"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "user-memory access fault": {
-			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "user memory access fault": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "fault": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "access fault": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "memory access fault": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "user-memory access responsibility": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "user-memory access liability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "user-memory access culpability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "user-memory access accountability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "user memory access responsibility": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "user memory access liability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "user memory access culpability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "user memory access accountability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.514
-			          }
-			        },
-			        {
-			          "memory access responsibility": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.508
-			          }
-			        },
-			        {
-			          "memory access liability": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.508
 			          }
 			        }
 			      ]
@@ -12094,7 +11540,7 @@ cultureInfo en-US
 			        "hour"
 			      ]
 			    },
-			    "NRt0ORFNodeRecycleTime.UA_time_in_single_recycle": {
+			    "NRt0ORFNodeRecycleTime.UA_count_in_single_recycle": {
 			      "Definition": {
 			        "Binding": {
 			          "ConceptualEntity": "NR-t0-ORFNodeRecycleTime",
@@ -12104,52 +11550,12 @@ cultureInfo en-US
 			      "State": "Generated",
 			      "Terms": [
 			        {
-			          "UA time in single recycle": {
+			          "UA count in single recycle": {
 			            "State": "Generated"
 			          }
 			        },
 			        {
-			          "ua duration in single recycle": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.78
-			          }
-			        },
-			        {
-			          "ua interval in single recycle": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.78
-			          }
-			        },
-			        {
-			          "ua moment in single recycle": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.78
-			          }
-			        },
-			        {
-			          "ua period in single recycle": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.757
-			          }
-			        },
-			        {
-			          "ua timetable in single recycle": {
+			          "ua amount in single recycle": {
 			            "Type": "Noun",
 			            "State": "Suggested",
 			            "Source": {
@@ -16656,6 +16062,16 @@ cultureInfo en-US
 			            },
 			            "Weight": 0.9
 			          }
+			        },
+			        {
+			          "Failure Occurrence Week (Cumulative)": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
 			        }
 			      ]
 			    },
@@ -17311,140 +16727,25 @@ cultureInfo en-US
 			          "week": {
 			            "State": "Generated"
 			          }
-			        }
-			      ]
-			    },
-			    "mt1MTBFbyJob.weekly_average_duration_hour": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "M-t1-MTBFbyJob",
-			          "ConceptualProperty": "WeeklyAverageDurationHours"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "weekly average duration hour": {
-			            "State": "Generated"
-			          }
 			        },
 			        {
-			          "WeeklyAverageDurationHours": {
-			            "Type": "Noun",
-			            "State": "Generated",
-			            "Weight": 0.99
-			          }
-			        },
-			        {
-			          "duration hour": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "average duration hour": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "weekly average duration period": {
-			            "Type": "Noun",
+			          "Incident Occurrence Week": {
 			            "State": "Suggested",
 			            "Source": {
-			              "Agent": "Thesaurus"
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
 			            },
-			            "Weight": 0.499
+			            "Weight": 0.9
 			          }
 			        },
 			        {
-			          "average duration period": {
-			            "Type": "Noun",
+			          "Incident Occurrence Week (Cumulative)": {
 			            "State": "Suggested",
 			            "Source": {
-			              "Agent": "Thesaurus"
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
 			            },
-			            "Weight": 0.492
-			          }
-			        },
-			        {
-			          "weekly average duration era": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.489
-			          }
-			        },
-			        {
-			          "weekly average duration epoch": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.489
-			          }
-			        },
-			        {
-			          "duration period": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.485
-			          }
-			        },
-			        {
-			          "average duration era": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.482
-			          }
-			        },
-			        {
-			          "average duration epoch": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.482
-			          }
-			        },
-			        {
-			          "duration era": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.475
-			          }
-			        },
-			        {
-			          "duration epoch": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.475
-			          }
-			        },
-			        {
-			          "weekly average duration age": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.474
+			            "Weight": 0.9
 			          }
 			        }
 			      ]
@@ -18940,128 +18241,6 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "rr0na.hardwareGPU_momery_not_release": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "R-r0-na",
-			          "ConceptualProperty": "hardware-GPU Momery Not Release"
-			        }
-			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "hardware-GPU momery not release": {
-			            "State": "Generated"
-			          }
-			        },
-			        {
-			          "hardware GPU momery not release": {
-			            "State": "Generated",
-			            "Weight": 0.97
-			          }
-			        },
-			        {
-			          "hardware gpu momery not announcement": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware gpu momery not statement": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware gpu momery not publication": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware gpu momery not proclamation": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.52
-			          }
-			        },
-			        {
-			          "hardware gpu momery not issue": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.504
-			          }
-			        },
-			        {
-			          "hardware gpu momery not relief": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.494
-			          }
-			        },
-			        {
-			          "hardware gpu momery not freedom": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.494
-			          }
-			        },
-			        {
-			          "hardware gpu momery not liberation": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.494
-			          }
-			        },
-			        {
-			          "hardware gpu momery not emancipation": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.494
-			          }
-			        },
-			        {
-			          "hardware gpu momery not discharge": {
-			            "Type": "Noun",
-			            "State": "Suggested",
-			            "Source": {
-			              "Agent": "Thesaurus"
-			            },
-			            "Weight": 0.479
-			          }
-			        }
-			      ]
-			    },
 			    "rt2NodeFailureRCABreakdown.debug_MaxWeekR": {
 			      "Definition": {
 			        "Binding": {
@@ -20347,9 +19526,1542 @@ cultureInfo en-US
 			          }
 			        }
 			      ]
+			    },
+			    "mt0MTBFbyNode.entity__debugTotalAvailableDay": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t0-MTBFbyNode",
+			          "ConceptualProperty": "_debugTotalAvailableDays"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "_debugTotalAvailableDay": {
+			            "State": "Generated"
+			          }
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode.cumulative_total_avai_day": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t0-MTBFbyNode",
+			          "ConceptualProperty": "CumulativeTotalAvaiDays"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "cumulative total avai day": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "CumulativeTotalAvaiDays": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "cumulative aggregate avai day": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.599
+			          }
+			        },
+			        {
+			          "cumulative overall avai day": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.599
+			          }
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode.cumulative_total_avai_hour": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t0-MTBFbyNode",
+			          "ConceptualProperty": "CumulativeTotalAvaiHours"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "cumulative total avai hour": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "CumulativeTotalAvaiHours": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "cumulative aggregate avai hour": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.599
+			          }
+			        },
+			        {
+			          "cumulative overall avai hour": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.599
+			          }
+			        },
+			        {
+			          "cumulative total avai period": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.499
+			          }
+			        },
+			        {
+			          "cumulative total avai era": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.489
+			          }
+			        },
+			        {
+			          "cumulative total avai epoch": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.489
+			          }
+			        },
+			        {
+			          "cumulative total avai age": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.474
+			          }
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode.cumulative_sample_count": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t0-MTBFbyNode",
+			          "ConceptualProperty": "CumulativeSampleCount"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "cumulative sample count": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "CumulativeSampleCount": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "cumulative sample amount": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.739
+			          }
+			        },
+			        {
+			          "Sample Counts": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode.cumulative_MTBF_day": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t0-MTBFbyNode",
+			          "ConceptualProperty": "CumulativeMTBFDays"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "cumulative MTBF day": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "CumulativeMTBFDays": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "MTBF (Days)": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode.cumulative_MTBF_hour": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t0-MTBFbyNode",
+			          "ConceptualProperty": "CumulativeMTBFHours"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "cumulative MTBF hour": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "CumulativeMTBFHours": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "cumulative mtbf period": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.492
+			          }
+			        },
+			        {
+			          "cumulative mtbf era": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.482
+			          }
+			        },
+			        {
+			          "cumulative mtbf epoch": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.482
+			          }
+			        },
+			        {
+			          "cumulative mtbf age": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.468
+			          }
+			        },
+			        {
+			          "MTBF (Hours)": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "mt1MTBFbyJob.MTBI_hour": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t1-MTBFbyJob",
+			          "ConceptualProperty": "MTBIHours"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "MTBI hour": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "MTBIHours": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "mtbi period": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.485
+			          }
+			        },
+			        {
+			          "mtbi era": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.475
+			          }
+			        },
+			        {
+			          "mtbi epoch": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.475
+			          }
+			        },
+			        {
+			          "mtbi age": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.461
+			          }
+			        },
+			        {
+			          "MTBI (Hours)": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "mt1MTBFbyJob.sample_count": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t1-MTBFbyJob",
+			          "ConceptualProperty": "SampleCount"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "sample count": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "SampleCount": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "sample amount": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.727
+			          }
+			        }
+			      ]
+			    },
+			    "mt1MTBFbyJob.cumulative_total_hour": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t1-MTBFbyJob",
+			          "ConceptualProperty": "CumulativeTotalHours"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "cumulative total hour": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "CumulativeTotalHours": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "total hour": {
+			            "State": "Generated",
+			            "Weight": 0.97
+			          }
+			        },
+			        {
+			          "cumulative aggregate hour": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.591
+			          }
+			        },
+			        {
+			          "cumulative overall hour": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.591
+			          }
+			        },
+			        {
+			          "aggregate hour": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.582
+			          }
+			        },
+			        {
+			          "overall hour": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.582
+			          }
+			        },
+			        {
+			          "cumulative total period": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.492
+			          }
+			        },
+			        {
+			          "total period": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.485
+			          }
+			        },
+			        {
+			          "cumulative total era": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.482
+			          }
+			        },
+			        {
+			          "cumulative total epoch": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.482
+			          }
+			        },
+			        {
+			          "total era": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.475
+			          }
+			        },
+			        {
+			          "total epoch": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.475
+			          }
+			        }
+			      ]
+			    },
+			    "mt1MTBFbyJob.cumulative_sample_count": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t1-MTBFbyJob",
+			          "ConceptualProperty": "CumulativeSampleCount"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "cumulative sample count": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "CumulativeSampleCount": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "cumulative sample amount": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.739
+			          }
+			        },
+			        {
+			          "SampleCount": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "mt1MTBFbyJob.cumulative_MTBI_hour": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "M-t1-MTBFbyJob",
+			          "ConceptualProperty": "CumulativeMTBIHours"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "cumulative MTBI hour": {
+			            "State": "Generated"
+			          }
+			        },
+			        {
+			          "CumulativeMTBIHours": {
+			            "Type": "Noun",
+			            "State": "Generated",
+			            "Weight": 0.99
+			          }
+			        },
+			        {
+			          "cumulative mtbi period": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.492
+			          }
+			        },
+			        {
+			          "cumulative mtbi era": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.482
+			          }
+			        },
+			        {
+			          "cumulative mtbi epoch": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.482
+			          }
+			        },
+			        {
+			          "cumulative mtbi age": {
+			            "Type": "Noun",
+			            "State": "Suggested",
+			            "Source": {
+			              "Agent": "Thesaurus"
+			            },
+			            "Weight": 0.468
+			          }
+			        },
+			        {
+			          "MTBI (Hours)": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
 			    }
 			  },
 			  "Relationships": {
+			    "at5DetailsofWeekAppended_date_date_hierarchy_has_at5DetailsofWeekAppended_date_month": {
+			      "Binding": {
+			        "ConceptualEntity": "A-t5-DetailsofWeekAppended"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "at5DetailsofWeekAppended.date.date_hierarchy": {
+			          "Target": {
+			            "Entity": "at5DetailsofWeekAppended.date.date_hierarchy"
+			          }
+			        },
+			        "at5DetailsofWeekAppended.date.month": {
+			          "Target": {
+			            "Entity": "at5DetailsofWeekAppended.date.month"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "at5DetailsofWeekAppended.date.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "at5DetailsofWeekAppended.date.month"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "date_hierarchies_have_months"
+			        }
+			      ]
+			    },
+			    "at5DetailsofWeekAppended_date_date_hierarchy_has_at5DetailsofWeekAppended_date_quarter": {
+			      "Binding": {
+			        "ConceptualEntity": "A-t5-DetailsofWeekAppended"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "at5DetailsofWeekAppended.date.date_hierarchy": {
+			          "Target": {
+			            "Entity": "at5DetailsofWeekAppended.date.date_hierarchy"
+			          }
+			        },
+			        "at5DetailsofWeekAppended.date.quarter": {
+			          "Target": {
+			            "Entity": "at5DetailsofWeekAppended.date.quarter"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "at5DetailsofWeekAppended.date.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "at5DetailsofWeekAppended.date.quarter"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "date_hierarchies_have_quarters"
+			        }
+			      ]
+			    },
+			    "at5DetailsofWeekAppended_date_date_hierarchy_has_at5DetailsofWeekAppended_date_year": {
+			      "Binding": {
+			        "ConceptualEntity": "A-t5-DetailsofWeekAppended"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "at5DetailsofWeekAppended.date.date_hierarchy": {
+			          "Target": {
+			            "Entity": "at5DetailsofWeekAppended.date.date_hierarchy"
+			          }
+			        },
+			        "at5DetailsofWeekAppended.date.year": {
+			          "Target": {
+			            "Entity": "at5DetailsofWeekAppended.date.year"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "at5DetailsofWeekAppended.date.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "at5DetailsofWeekAppended.date.year"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "date_hierarchies_have_years"
+			        }
+			      ]
+			    },
+			    "at5DetailsofWeekAppended_date_has_date_hierarchy": {
+			      "Binding": {
+			        "ConceptualEntity": "A-t5-DetailsofWeekAppended"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "at5DetailsofWeekAppended.date": {
+			          "Target": {
+			            "Entity": "at5DetailsofWeekAppended.date"
+			          }
+			        },
+			        "at5DetailsofWeekAppended.date.date_hierarchy": {
+			          "Target": {
+			            "Entity": "at5DetailsofWeekAppended.date.date_hierarchy"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "at5DetailsofWeekAppended.date"
+			            },
+			            "Object": {
+			              "Role": "at5DetailsofWeekAppended.date.date_hierarchy"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dates_have_date_hierarchies"
+			        }
+			      ]
+			    },
+			    "ar2na_day_date_hierarchy_has_ar2na_day_day": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r2-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar2na.day.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar2na.day.date_hierarchy"
+			          }
+			        },
+			        "ar2na.day.day": {
+			          "Target": {
+			            "Entity": "ar2na.day.day"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar2na.day.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "ar2na.day.day"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "day_date_hierarchies_have_day_days"
+			        }
+			      ]
+			    },
+			    "ar2na_day_date_hierarchy_has_ar2na_day_month": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r2-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar2na.day.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar2na.day.date_hierarchy"
+			          }
+			        },
+			        "ar2na.day.month": {
+			          "Target": {
+			            "Entity": "ar2na.day.month"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar2na.day.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "ar2na.day.month"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "day_date_hierarchies_have_day_months"
+			        }
+			      ]
+			    },
+			    "ar2na_day_date_hierarchy_has_ar2na_day_quarter": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r2-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar2na.day.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar2na.day.date_hierarchy"
+			          }
+			        },
+			        "ar2na.day.quarter": {
+			          "Target": {
+			            "Entity": "ar2na.day.quarter"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar2na.day.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "ar2na.day.quarter"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "day_date_hierarchies_have_day_quarters"
+			        }
+			      ]
+			    },
+			    "ar2na_day_date_hierarchy_has_ar2na_day_year": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r2-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar2na.day.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar2na.day.date_hierarchy"
+			          }
+			        },
+			        "ar2na.day.year": {
+			          "Target": {
+			            "Entity": "ar2na.day.year"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar2na.day.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "ar2na.day.year"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "day_date_hierarchies_have_day_years"
+			        }
+			      ]
+			    },
+			    "ar2na_day_has_date_hierarchy": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r2-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar2na.day": {
+			          "Target": {
+			            "Entity": "ar2na.day"
+			          }
+			        },
+			        "ar2na.day.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar2na.day.date_hierarchy"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar2na.day"
+			            },
+			            "Object": {
+			              "Role": "ar2na.day.date_hierarchy"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "days_have_day_date_hierarchies"
+			        }
+			      ]
+			    },
+			    "rt2NodeFailureRCABreakdown_category_hierarchy_category_has_rt2NodeFailureRCABreakdown_category_hierarchy_category_reason": {
+			      "Binding": {
+			        "ConceptualEntity": "R-t2-NodeFailureRCABreakdown"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "rt2NodeFailureRCABreakdown.category_hierarchy.category": {
+			          "Target": {
+			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
+			          }
+			        },
+			        "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason": {
+			          "Target": {
+			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
+			            },
+			            "Object": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "categories_have_category_reasons"
+			        },
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
+			            },
+			            "Object": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "category_reasons_have_categories"
+			        },
+			        {
+			          "Preposition": {
+			            "Subject": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
+			            },
+			            "Prepositions": [
+			              {
+			                "in": {
+			                  "State": "Generated"
+			                }
+			              }
+			            ],
+			            "Object": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "category_reasons_are_in_categories"
+			        }
+			      ]
+			    },
+			    "rt2NodeFailureRCABreakdown_category_hierarchy_has_category_reason": {
+			      "Binding": {
+			        "ConceptualEntity": "R-t2-NodeFailureRCABreakdown"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "rt2NodeFailureRCABreakdown.category_hierarchy": {
+			          "Target": {
+			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy"
+			          }
+			        },
+			        "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason": {
+			          "Target": {
+			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "category_hierarchies_have_category_reasons"
+			        }
+			      ]
+			    },
+			    "rt2NodeFailureRCABreakdown_category_hierarchy_has_category": {
+			      "Binding": {
+			        "ConceptualEntity": "R-t2-NodeFailureRCABreakdown"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "rt2NodeFailureRCABreakdown.category_hierarchy": {
+			          "Target": {
+			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy"
+			          }
+			        },
+			        "rt2NodeFailureRCABreakdown.category_hierarchy.category": {
+			          "Target": {
+			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "category_hierarchies_have_categories"
+			        }
+			      ]
+			    },
+			    "ar0na_timestamp_date_hierarchy_has_ar0na_timestamp_day": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r0-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar0na.timestamp.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp.date_hierarchy"
+			          }
+			        },
+			        "ar0na.timestamp.day": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp.day"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar0na.timestamp.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "ar0na.timestamp.day"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "timestamp_date_hierarchies_have_timestamp_days"
+			        }
+			      ]
+			    },
+			    "ar0na_timestamp_date_hierarchy_has_ar0na_timestamp_month": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r0-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar0na.timestamp.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp.date_hierarchy"
+			          }
+			        },
+			        "ar0na.timestamp.month": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp.month"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar0na.timestamp.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "ar0na.timestamp.month"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "timestamp_date_hierarchies_have_timestamp_months"
+			        }
+			      ]
+			    },
+			    "ar0na_timestamp_date_hierarchy_has_ar0na_timestamp_quarter": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r0-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar0na.timestamp.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp.date_hierarchy"
+			          }
+			        },
+			        "ar0na.timestamp.quarter": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp.quarter"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar0na.timestamp.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "ar0na.timestamp.quarter"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "timestamp_date_hierarchies_have_timestamp_quarters"
+			        }
+			      ]
+			    },
+			    "ar0na_timestamp_date_hierarchy_has_ar0na_timestamp_year": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r0-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar0na.timestamp.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp.date_hierarchy"
+			          }
+			        },
+			        "ar0na.timestamp.year": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp.year"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar0na.timestamp.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "ar0na.timestamp.year"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "timestamp_date_hierarchies_have_timestamp_years"
+			        }
+			      ]
+			    },
+			    "ar0na_timestamp_has_date_hierarchy": {
+			      "Binding": {
+			        "ConceptualEntity": "A-r0-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "ar0na.timestamp": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp"
+			          }
+			        },
+			        "ar0na.timestamp.date_hierarchy": {
+			          "Target": {
+			            "Entity": "ar0na.timestamp.date_hierarchy"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "ar0na.timestamp"
+			            },
+			            "Object": {
+			              "Role": "ar0na.timestamp.date_hierarchy"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "timestamps_have_timestamp_date_hierarchies"
+			        }
+			      ]
+			    },
+			    "at0ClusterCapacityStatus_date_date_hierarchy_has_at0ClusterCapacityStatus_date_day": {
+			      "Binding": {
+			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "at0ClusterCapacityStatus.date.date_hierarchy": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
+			          }
+			        },
+			        "at0ClusterCapacityStatus.date.day": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date.day"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "at0ClusterCapacityStatus.date.day"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "date_hierarchies_have_days"
+			        }
+			      ]
+			    },
+			    "at0ClusterCapacityStatus_date_date_hierarchy_has_at0ClusterCapacityStatus_date_month": {
+			      "Binding": {
+			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "at0ClusterCapacityStatus.date.date_hierarchy": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
+			          }
+			        },
+			        "at0ClusterCapacityStatus.date.month": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date.month"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "at0ClusterCapacityStatus.date.month"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "date_hierarchies_have_months1"
+			        }
+			      ]
+			    },
+			    "at0ClusterCapacityStatus_date_date_hierarchy_has_at0ClusterCapacityStatus_date_quarter": {
+			      "Binding": {
+			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "at0ClusterCapacityStatus.date.date_hierarchy": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
+			          }
+			        },
+			        "at0ClusterCapacityStatus.date.quarter": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date.quarter"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "at0ClusterCapacityStatus.date.quarter"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "date_hierarchies_have_quarters1"
+			        }
+			      ]
+			    },
+			    "at0ClusterCapacityStatus_date_date_hierarchy_has_at0ClusterCapacityStatus_date_year": {
+			      "Binding": {
+			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "at0ClusterCapacityStatus.date.date_hierarchy": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
+			          }
+			        },
+			        "at0ClusterCapacityStatus.date.year": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date.year"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "at0ClusterCapacityStatus.date.year"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "date_hierarchies_have_years1"
+			        }
+			      ]
+			    },
+			    "at0ClusterCapacityStatus_date_has_date_hierarchy": {
+			      "Binding": {
+			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "at0ClusterCapacityStatus.date": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date"
+			          }
+			        },
+			        "at0ClusterCapacityStatus.date.date_hierarchy": {
+			          "Target": {
+			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "at0ClusterCapacityStatus.date"
+			            },
+			            "Object": {
+			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "dates_have_date_hierarchies1"
+			        }
+			      ]
+			    },
+			    "rr0na_timestamp_date_hierarchy_has_rr0na_timestamp_day": {
+			      "Binding": {
+			        "ConceptualEntity": "R-r0-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "rr0na.timestamp.date_hierarchy": {
+			          "Target": {
+			            "Entity": "rr0na.timestamp.date_hierarchy"
+			          }
+			        },
+			        "rr0na.timestamp.day": {
+			          "Target": {
+			            "Entity": "rr0na.timestamp.day"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "rr0na.timestamp.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "rr0na.timestamp.day"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "timestamp_date_hierarchies_have_timestamp_days1"
+			        }
+			      ]
+			    },
+			    "rr0na_timestamp_date_hierarchy_has_rr0na_timestamp_month": {
+			      "Binding": {
+			        "ConceptualEntity": "R-r0-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "rr0na.timestamp.date_hierarchy": {
+			          "Target": {
+			            "Entity": "rr0na.timestamp.date_hierarchy"
+			          }
+			        },
+			        "rr0na.timestamp.month": {
+			          "Target": {
+			            "Entity": "rr0na.timestamp.month"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "rr0na.timestamp.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "rr0na.timestamp.month"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "timestamp_date_hierarchies_have_timestamp_months1"
+			        }
+			      ]
+			    },
+			    "rr0na_timestamp_date_hierarchy_has_rr0na_timestamp_quarter": {
+			      "Binding": {
+			        "ConceptualEntity": "R-r0-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "rr0na.timestamp.date_hierarchy": {
+			          "Target": {
+			            "Entity": "rr0na.timestamp.date_hierarchy"
+			          }
+			        },
+			        "rr0na.timestamp.quarter": {
+			          "Target": {
+			            "Entity": "rr0na.timestamp.quarter"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "rr0na.timestamp.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "rr0na.timestamp.quarter"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "timestamp_date_hierarchies_have_timestamp_quarters1"
+			        }
+			      ]
+			    },
+			    "rr0na_timestamp_date_hierarchy_has_rr0na_timestamp_year": {
+			      "Binding": {
+			        "ConceptualEntity": "R-r0-na"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "rr0na.timestamp.date_hierarchy": {
+			          "Target": {
+			            "Entity": "rr0na.timestamp.date_hierarchy"
+			          }
+			        },
+			        "rr0na.timestamp.year": {
+			          "Target": {
+			            "Entity": "rr0na.timestamp.year"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "rr0na.timestamp.date_hierarchy"
+			            },
+			            "Object": {
+			              "Role": "rr0na.timestamp.year"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "timestamp_date_hierarchies_have_timestamp_years1"
+			        }
+			      ]
+			    },
 			    "rr0na_timestamp_has_date_hierarchy": {
 			      "Binding": {
 			        "ConceptualEntity": "R-r0-na"
@@ -20379,7 +21091,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "timestamps_have_timestamp_date_hierarchies"
+			          "ID": "timestamps_have_timestamp_date_hierarchies1"
 			        }
 			      ]
 			    },
@@ -20412,7 +21124,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_days"
+			          "ID": "timestamp_date_hierarchies_have_timestamp_days2"
 			        }
 			      ]
 			    },
@@ -20445,7 +21157,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_months"
+			          "ID": "timestamp_date_hierarchies_have_timestamp_months2"
 			        }
 			      ]
 			    },
@@ -20478,7 +21190,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_quarters"
+			          "ID": "timestamp_date_hierarchies_have_timestamp_quarters2"
 			        }
 			      ]
 			    },
@@ -20511,7 +21223,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_years"
+			          "ID": "timestamp_date_hierarchies_have_timestamp_years2"
 			        }
 			      ]
 			    },
@@ -20544,7 +21256,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "timestamps_have_timestamp_date_hierarchies1"
+			          "ID": "timestamps_have_timestamp_date_hierarchies2"
 			        }
 			      ]
 			    },
@@ -20742,7 +21454,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_days"
+			          "ID": "date_hierarchies_have_days1"
 			        }
 			      ]
 			    },
@@ -20775,7 +21487,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_months"
+			          "ID": "date_hierarchies_have_months2"
 			        }
 			      ]
 			    },
@@ -20808,7 +21520,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_quarters"
+			          "ID": "date_hierarchies_have_quarters2"
 			        }
 			      ]
 			    },
@@ -20841,7 +21553,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_years"
+			          "ID": "date_hierarchies_have_years2"
 			        }
 			      ]
 			    },
@@ -20874,7 +21586,7 @@ cultureInfo en-US
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "dates_have_date_hierarchies"
+			          "ID": "dates_have_date_hierarchies2"
 			        }
 			      ]
 			    },
@@ -22578,6 +23290,369 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
+			    "mt1MTBFbyJob_has_cumulative_MTBI_hour": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t1-MTBFbyJob"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt1MTBFbyJob": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob"
+			          }
+			        },
+			        "mt1MTBFbyJob.cumulative_MTBI_hour": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob.cumulative_MTBI_hour"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt1MTBFbyJob"
+			            },
+			            "Object": {
+			              "Role": "mt1MTBFbyJob.cumulative_MTBI_hour"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt1MTBFbyJobs_have_cumulative_MTBI_hours"
+			        }
+			      ]
+			    },
+			    "mt1MTBFbyJob_has_cumulative_sample_count": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t1-MTBFbyJob"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt1MTBFbyJob": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob"
+			          }
+			        },
+			        "mt1MTBFbyJob.cumulative_sample_count": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob.cumulative_sample_count"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt1MTBFbyJob"
+			            },
+			            "Object": {
+			              "Role": "mt1MTBFbyJob.cumulative_sample_count"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt1MTBFbyJobs_have_cumulative_sample_counts"
+			        }
+			      ]
+			    },
+			    "mt1MTBFbyJob_has_cumulative_total_hour": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t1-MTBFbyJob"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt1MTBFbyJob": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob"
+			          }
+			        },
+			        "mt1MTBFbyJob.cumulative_total_hour": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob.cumulative_total_hour"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt1MTBFbyJob"
+			            },
+			            "Object": {
+			              "Role": "mt1MTBFbyJob.cumulative_total_hour"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt1MTBFbyJobs_have_cumulative_total_hours"
+			        }
+			      ]
+			    },
+			    "mt1MTBFbyJob_has_sample_count": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t1-MTBFbyJob"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt1MTBFbyJob": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob"
+			          }
+			        },
+			        "mt1MTBFbyJob.sample_count": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob.sample_count"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt1MTBFbyJob"
+			            },
+			            "Object": {
+			              "Role": "mt1MTBFbyJob.sample_count"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt1MTBFbyJobs_have_sample_counts"
+			        }
+			      ]
+			    },
+			    "mt1MTBFbyJob_has_MTBI_hour": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t1-MTBFbyJob"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt1MTBFbyJob": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob"
+			          }
+			        },
+			        "mt1MTBFbyJob.MTBI_hour": {
+			          "Target": {
+			            "Entity": "mt1MTBFbyJob.MTBI_hour"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt1MTBFbyJob"
+			            },
+			            "Object": {
+			              "Role": "mt1MTBFbyJob.MTBI_hour"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt1MTBFbyJobs_have_MTBI_hours"
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode_has_cumulative_MTBF_hour": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t0-MTBFbyNode"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt0MTBFbyNode": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode"
+			          }
+			        },
+			        "mt0MTBFbyNode.cumulative_MTBF_hour": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode.cumulative_MTBF_hour"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt0MTBFbyNode"
+			            },
+			            "Object": {
+			              "Role": "mt0MTBFbyNode.cumulative_MTBF_hour"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt0MTBFbyNodes_have_cumulative_MTBF_hours"
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode_has_cumulative_MTBF_day": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t0-MTBFbyNode"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt0MTBFbyNode": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode"
+			          }
+			        },
+			        "mt0MTBFbyNode.cumulative_MTBF_day": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode.cumulative_MTBF_day"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt0MTBFbyNode"
+			            },
+			            "Object": {
+			              "Role": "mt0MTBFbyNode.cumulative_MTBF_day"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt0MTBFbyNodes_have_cumulative_MTBF_days"
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode_has_cumulative_sample_count": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t0-MTBFbyNode"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt0MTBFbyNode": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode"
+			          }
+			        },
+			        "mt0MTBFbyNode.cumulative_sample_count": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode.cumulative_sample_count"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt0MTBFbyNode"
+			            },
+			            "Object": {
+			              "Role": "mt0MTBFbyNode.cumulative_sample_count"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt0MTBFbyNodes_have_cumulative_sample_counts"
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode_has_cumulative_total_avai_hour": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t0-MTBFbyNode"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt0MTBFbyNode": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode"
+			          }
+			        },
+			        "mt0MTBFbyNode.cumulative_total_avai_hour": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode.cumulative_total_avai_hour"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt0MTBFbyNode"
+			            },
+			            "Object": {
+			              "Role": "mt0MTBFbyNode.cumulative_total_avai_hour"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt0MTBFbyNodes_have_cumulative_total_avai_hours"
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode_has_cumulative_total_avai_day": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t0-MTBFbyNode"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt0MTBFbyNode": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode"
+			          }
+			        },
+			        "mt0MTBFbyNode.cumulative_total_avai_day": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode.cumulative_total_avai_day"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt0MTBFbyNode"
+			            },
+			            "Object": {
+			              "Role": "mt0MTBFbyNode.cumulative_total_avai_day"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt0MTBFbyNodes_have_cumulative_total_avai_days"
+			        }
+			      ]
+			    },
+			    "mt0MTBFbyNode_has_entity__debugTotalAvailableDay": {
+			      "Binding": {
+			        "ConceptualEntity": "M-t0-MTBFbyNode"
+			      },
+			      "State": "Generated",
+			      "Roles": {
+			        "mt0MTBFbyNode": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode"
+			          }
+			        },
+			        "mt0MTBFbyNode.entity__debugTotalAvailableDay": {
+			          "Target": {
+			            "Entity": "mt0MTBFbyNode.entity__debugTotalAvailableDay"
+			          }
+			        }
+			      },
+			      "Phrasings": [
+			        {
+			          "Attribute": {
+			            "Subject": {
+			              "Role": "mt0MTBFbyNode"
+			            },
+			            "Object": {
+			              "Role": "mt0MTBFbyNode.entity__debugTotalAvailableDay"
+			            }
+			          },
+			          "State": "Generated",
+			          "Weight": 0.99,
+			          "ID": "mt0MTBFbyNodes_have__debugTotalAvailableDays"
+			        }
+			      ]
+			    },
 			    "rt4DailyNodeRuntimeAvgFailure_has_hide_rows": {
 			      "Binding": {
 			        "ConceptualEntity": "R-t4-DailyNodeRuntimeAvgFailure"
@@ -23783,39 +24858,6 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.99,
 			          "ID": "A_dim_week_have_weeks"
-			        }
-			      ]
-			    },
-			    "mt1MTBFbyJob_has_weekly_average_duration_hour": {
-			      "Binding": {
-			        "ConceptualEntity": "M-t1-MTBFbyJob"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "mt1MTBFbyJob": {
-			          "Target": {
-			            "Entity": "mt1MTBFbyJob"
-			          }
-			        },
-			        "mt1MTBFbyJob.weekly_average_duration_hour": {
-			          "Target": {
-			            "Entity": "mt1MTBFbyJob.weekly_average_duration_hour"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "mt1MTBFbyJob"
-			            },
-			            "Object": {
-			              "Role": "mt1MTBFbyJob.weekly_average_duration_hour"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "mt1MTBFbyJobs_have_weekly_average_duration_hours"
 			        }
 			      ]
 			    },
@@ -26324,7 +27366,7 @@ cultureInfo en-US
 			        }
 			      ]
 			    },
-			    "NRt0ORFNodeRecycleTime_has_UA_time_in_single_recycle": {
+			    "NRt0ORFNodeRecycleTime_has_UA_count_in_single_recycle": {
 			      "Binding": {
 			        "ConceptualEntity": "NR-t0-ORFNodeRecycleTime"
 			      },
@@ -26335,9 +27377,9 @@ cultureInfo en-US
 			            "Entity": "NRt0ORFNodeRecycleTime"
 			          }
 			        },
-			        "NRt0ORFNodeRecycleTime.UA_time_in_single_recycle": {
+			        "NRt0ORFNodeRecycleTime.UA_count_in_single_recycle": {
 			          "Target": {
-			            "Entity": "NRt0ORFNodeRecycleTime.UA_time_in_single_recycle"
+			            "Entity": "NRt0ORFNodeRecycleTime.UA_count_in_single_recycle"
 			          }
 			        }
 			      },
@@ -26348,12 +27390,12 @@ cultureInfo en-US
 			              "Role": "NRt0ORFNodeRecycleTime"
 			            },
 			            "Object": {
-			              "Role": "NRt0ORFNodeRecycleTime.UA_time_in_single_recycle"
+			              "Role": "NRt0ORFNodeRecycleTime.UA_count_in_single_recycle"
 			            }
 			          },
 			          "State": "Generated",
 			          "Weight": 0.99,
-			          "ID": "NRt0ORFNodeRecycleTimes_have_UA_time_in_single_recycle"
+			          "ID": "NRt0ORFNodeRecycleTimes_have_UA_count_in_single_recycle"
 			        }
 			      ]
 			    },
@@ -30161,897 +31203,6 @@ cultureInfo en-US
 			          "State": "Generated",
 			          "Weight": 0.9,
 			          "ID": "rt3DailyOccurrenceofNodeFailuresRuntimes_are_started_on_start_dates"
-			        }
-			      ]
-			    },
-			    "rr0na_timestamp_date_hierarchy_has_rr0na_timestamp_year": {
-			      "Binding": {
-			        "ConceptualEntity": "R-r0-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "rr0na.timestamp.date_hierarchy": {
-			          "Target": {
-			            "Entity": "rr0na.timestamp.date_hierarchy"
-			          }
-			        },
-			        "rr0na.timestamp.year": {
-			          "Target": {
-			            "Entity": "rr0na.timestamp.year"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "rr0na.timestamp.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "rr0na.timestamp.year"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_years1"
-			        }
-			      ]
-			    },
-			    "rr0na_timestamp_date_hierarchy_has_rr0na_timestamp_quarter": {
-			      "Binding": {
-			        "ConceptualEntity": "R-r0-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "rr0na.timestamp.date_hierarchy": {
-			          "Target": {
-			            "Entity": "rr0na.timestamp.date_hierarchy"
-			          }
-			        },
-			        "rr0na.timestamp.quarter": {
-			          "Target": {
-			            "Entity": "rr0na.timestamp.quarter"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "rr0na.timestamp.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "rr0na.timestamp.quarter"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_quarters1"
-			        }
-			      ]
-			    },
-			    "rr0na_timestamp_date_hierarchy_has_rr0na_timestamp_month": {
-			      "Binding": {
-			        "ConceptualEntity": "R-r0-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "rr0na.timestamp.date_hierarchy": {
-			          "Target": {
-			            "Entity": "rr0na.timestamp.date_hierarchy"
-			          }
-			        },
-			        "rr0na.timestamp.month": {
-			          "Target": {
-			            "Entity": "rr0na.timestamp.month"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "rr0na.timestamp.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "rr0na.timestamp.month"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_months1"
-			        }
-			      ]
-			    },
-			    "rr0na_timestamp_date_hierarchy_has_rr0na_timestamp_day": {
-			      "Binding": {
-			        "ConceptualEntity": "R-r0-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "rr0na.timestamp.date_hierarchy": {
-			          "Target": {
-			            "Entity": "rr0na.timestamp.date_hierarchy"
-			          }
-			        },
-			        "rr0na.timestamp.day": {
-			          "Target": {
-			            "Entity": "rr0na.timestamp.day"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "rr0na.timestamp.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "rr0na.timestamp.day"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_days1"
-			        }
-			      ]
-			    },
-			    "at0ClusterCapacityStatus_date_has_date_hierarchy": {
-			      "Binding": {
-			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "at0ClusterCapacityStatus.date": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date"
-			          }
-			        },
-			        "at0ClusterCapacityStatus.date.date_hierarchy": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "at0ClusterCapacityStatus.date"
-			            },
-			            "Object": {
-			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dates_have_date_hierarchies1"
-			        }
-			      ]
-			    },
-			    "at0ClusterCapacityStatus_date_date_hierarchy_has_at0ClusterCapacityStatus_date_year": {
-			      "Binding": {
-			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "at0ClusterCapacityStatus.date.date_hierarchy": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
-			          }
-			        },
-			        "at0ClusterCapacityStatus.date.year": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date.year"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "at0ClusterCapacityStatus.date.year"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_years1"
-			        }
-			      ]
-			    },
-			    "at0ClusterCapacityStatus_date_date_hierarchy_has_at0ClusterCapacityStatus_date_quarter": {
-			      "Binding": {
-			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "at0ClusterCapacityStatus.date.date_hierarchy": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
-			          }
-			        },
-			        "at0ClusterCapacityStatus.date.quarter": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date.quarter"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "at0ClusterCapacityStatus.date.quarter"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_quarters1"
-			        }
-			      ]
-			    },
-			    "at0ClusterCapacityStatus_date_date_hierarchy_has_at0ClusterCapacityStatus_date_month": {
-			      "Binding": {
-			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "at0ClusterCapacityStatus.date.date_hierarchy": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
-			          }
-			        },
-			        "at0ClusterCapacityStatus.date.month": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date.month"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "at0ClusterCapacityStatus.date.month"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_months1"
-			        }
-			      ]
-			    },
-			    "at0ClusterCapacityStatus_date_date_hierarchy_has_at0ClusterCapacityStatus_date_day": {
-			      "Binding": {
-			        "ConceptualEntity": "A-t0-ClusterCapacityStatus"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "at0ClusterCapacityStatus.date.date_hierarchy": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date.date_hierarchy"
-			          }
-			        },
-			        "at0ClusterCapacityStatus.date.day": {
-			          "Target": {
-			            "Entity": "at0ClusterCapacityStatus.date.day"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "at0ClusterCapacityStatus.date.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "at0ClusterCapacityStatus.date.day"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_days1"
-			        }
-			      ]
-			    },
-			    "ar0na_timestamp_has_date_hierarchy": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r0-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar0na.timestamp": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp"
-			          }
-			        },
-			        "ar0na.timestamp.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp.date_hierarchy"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar0na.timestamp"
-			            },
-			            "Object": {
-			              "Role": "ar0na.timestamp.date_hierarchy"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "timestamps_have_timestamp_date_hierarchies2"
-			        }
-			      ]
-			    },
-			    "ar0na_timestamp_date_hierarchy_has_ar0na_timestamp_year": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r0-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar0na.timestamp.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp.date_hierarchy"
-			          }
-			        },
-			        "ar0na.timestamp.year": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp.year"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar0na.timestamp.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "ar0na.timestamp.year"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_years2"
-			        }
-			      ]
-			    },
-			    "ar0na_timestamp_date_hierarchy_has_ar0na_timestamp_quarter": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r0-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar0na.timestamp.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp.date_hierarchy"
-			          }
-			        },
-			        "ar0na.timestamp.quarter": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp.quarter"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar0na.timestamp.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "ar0na.timestamp.quarter"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_quarters2"
-			        }
-			      ]
-			    },
-			    "ar0na_timestamp_date_hierarchy_has_ar0na_timestamp_month": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r0-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar0na.timestamp.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp.date_hierarchy"
-			          }
-			        },
-			        "ar0na.timestamp.month": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp.month"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar0na.timestamp.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "ar0na.timestamp.month"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_months2"
-			        }
-			      ]
-			    },
-			    "ar0na_timestamp_date_hierarchy_has_ar0na_timestamp_day": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r0-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar0na.timestamp.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp.date_hierarchy"
-			          }
-			        },
-			        "ar0na.timestamp.day": {
-			          "Target": {
-			            "Entity": "ar0na.timestamp.day"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar0na.timestamp.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "ar0na.timestamp.day"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "timestamp_date_hierarchies_have_timestamp_days2"
-			        }
-			      ]
-			    },
-			    "rt2NodeFailureRCABreakdown_category_hierarchy_has_category": {
-			      "Binding": {
-			        "ConceptualEntity": "R-t2-NodeFailureRCABreakdown"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "rt2NodeFailureRCABreakdown.category_hierarchy": {
-			          "Target": {
-			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy"
-			          }
-			        },
-			        "rt2NodeFailureRCABreakdown.category_hierarchy.category": {
-			          "Target": {
-			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "category_hierarchies_have_categories"
-			        }
-			      ]
-			    },
-			    "rt2NodeFailureRCABreakdown_category_hierarchy_has_category_reason": {
-			      "Binding": {
-			        "ConceptualEntity": "R-t2-NodeFailureRCABreakdown"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "rt2NodeFailureRCABreakdown.category_hierarchy": {
-			          "Target": {
-			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy"
-			          }
-			        },
-			        "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason": {
-			          "Target": {
-			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "category_hierarchies_have_category_reasons"
-			        }
-			      ]
-			    },
-			    "rt2NodeFailureRCABreakdown_category_hierarchy_category_has_rt2NodeFailureRCABreakdown_category_hierarchy_category_reason": {
-			      "Binding": {
-			        "ConceptualEntity": "R-t2-NodeFailureRCABreakdown"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "rt2NodeFailureRCABreakdown.category_hierarchy.category": {
-			          "Target": {
-			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
-			          }
-			        },
-			        "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason": {
-			          "Target": {
-			            "Entity": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
-			            },
-			            "Object": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "categories_have_category_reasons"
-			        },
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
-			            },
-			            "Object": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "category_reasons_have_categories"
-			        },
-			        {
-			          "Preposition": {
-			            "Subject": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category_reason"
-			            },
-			            "Prepositions": [
-			              {
-			                "in": {
-			                  "State": "Generated"
-			                }
-			              }
-			            ],
-			            "Object": {
-			              "Role": "rt2NodeFailureRCABreakdown.category_hierarchy.category"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "category_reasons_are_in_categories"
-			        }
-			      ]
-			    },
-			    "ar2na_day_has_date_hierarchy": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r2-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar2na.day": {
-			          "Target": {
-			            "Entity": "ar2na.day"
-			          }
-			        },
-			        "ar2na.day.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar2na.day.date_hierarchy"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar2na.day"
-			            },
-			            "Object": {
-			              "Role": "ar2na.day.date_hierarchy"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "days_have_day_date_hierarchies"
-			        }
-			      ]
-			    },
-			    "ar2na_day_date_hierarchy_has_ar2na_day_year": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r2-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar2na.day.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar2na.day.date_hierarchy"
-			          }
-			        },
-			        "ar2na.day.year": {
-			          "Target": {
-			            "Entity": "ar2na.day.year"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar2na.day.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "ar2na.day.year"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "day_date_hierarchies_have_day_years"
-			        }
-			      ]
-			    },
-			    "ar2na_day_date_hierarchy_has_ar2na_day_quarter": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r2-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar2na.day.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar2na.day.date_hierarchy"
-			          }
-			        },
-			        "ar2na.day.quarter": {
-			          "Target": {
-			            "Entity": "ar2na.day.quarter"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar2na.day.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "ar2na.day.quarter"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "day_date_hierarchies_have_day_quarters"
-			        }
-			      ]
-			    },
-			    "ar2na_day_date_hierarchy_has_ar2na_day_month": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r2-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar2na.day.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar2na.day.date_hierarchy"
-			          }
-			        },
-			        "ar2na.day.month": {
-			          "Target": {
-			            "Entity": "ar2na.day.month"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar2na.day.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "ar2na.day.month"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "day_date_hierarchies_have_day_months"
-			        }
-			      ]
-			    },
-			    "ar2na_day_date_hierarchy_has_ar2na_day_day": {
-			      "Binding": {
-			        "ConceptualEntity": "A-r2-na"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "ar2na.day.date_hierarchy": {
-			          "Target": {
-			            "Entity": "ar2na.day.date_hierarchy"
-			          }
-			        },
-			        "ar2na.day.day": {
-			          "Target": {
-			            "Entity": "ar2na.day.day"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "ar2na.day.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "ar2na.day.day"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "day_date_hierarchies_have_day_days"
-			        }
-			      ]
-			    },
-			    "at5DetailsofWeekAppended_date_has_date_hierarchy": {
-			      "Binding": {
-			        "ConceptualEntity": "A-t5-DetailsofWeekAppended"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "at5DetailsofWeekAppended.date": {
-			          "Target": {
-			            "Entity": "at5DetailsofWeekAppended.date"
-			          }
-			        },
-			        "at5DetailsofWeekAppended.date.date_hierarchy": {
-			          "Target": {
-			            "Entity": "at5DetailsofWeekAppended.date.date_hierarchy"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "at5DetailsofWeekAppended.date"
-			            },
-			            "Object": {
-			              "Role": "at5DetailsofWeekAppended.date.date_hierarchy"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "dates_have_date_hierarchies2"
-			        }
-			      ]
-			    },
-			    "at5DetailsofWeekAppended_date_date_hierarchy_has_at5DetailsofWeekAppended_date_year": {
-			      "Binding": {
-			        "ConceptualEntity": "A-t5-DetailsofWeekAppended"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "at5DetailsofWeekAppended.date.date_hierarchy": {
-			          "Target": {
-			            "Entity": "at5DetailsofWeekAppended.date.date_hierarchy"
-			          }
-			        },
-			        "at5DetailsofWeekAppended.date.year": {
-			          "Target": {
-			            "Entity": "at5DetailsofWeekAppended.date.year"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "at5DetailsofWeekAppended.date.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "at5DetailsofWeekAppended.date.year"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_years2"
-			        }
-			      ]
-			    },
-			    "at5DetailsofWeekAppended_date_date_hierarchy_has_at5DetailsofWeekAppended_date_quarter": {
-			      "Binding": {
-			        "ConceptualEntity": "A-t5-DetailsofWeekAppended"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "at5DetailsofWeekAppended.date.date_hierarchy": {
-			          "Target": {
-			            "Entity": "at5DetailsofWeekAppended.date.date_hierarchy"
-			          }
-			        },
-			        "at5DetailsofWeekAppended.date.quarter": {
-			          "Target": {
-			            "Entity": "at5DetailsofWeekAppended.date.quarter"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "at5DetailsofWeekAppended.date.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "at5DetailsofWeekAppended.date.quarter"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_quarters2"
-			        }
-			      ]
-			    },
-			    "at5DetailsofWeekAppended_date_date_hierarchy_has_at5DetailsofWeekAppended_date_month": {
-			      "Binding": {
-			        "ConceptualEntity": "A-t5-DetailsofWeekAppended"
-			      },
-			      "State": "Generated",
-			      "Roles": {
-			        "at5DetailsofWeekAppended.date.date_hierarchy": {
-			          "Target": {
-			            "Entity": "at5DetailsofWeekAppended.date.date_hierarchy"
-			          }
-			        },
-			        "at5DetailsofWeekAppended.date.month": {
-			          "Target": {
-			            "Entity": "at5DetailsofWeekAppended.date.month"
-			          }
-			        }
-			      },
-			      "Phrasings": [
-			        {
-			          "Attribute": {
-			            "Subject": {
-			              "Role": "at5DetailsofWeekAppended.date.date_hierarchy"
-			            },
-			            "Object": {
-			              "Role": "at5DetailsofWeekAppended.date.month"
-			            }
-			          },
-			          "State": "Generated",
-			          "Weight": 0.99,
-			          "ID": "date_hierarchies_have_months2"
 			        }
 			      ]
 			    },
