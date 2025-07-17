@@ -152,6 +152,15 @@ const runtimePluginSchema = Joi.object().keys({
           }),
         })
         .required(),
+    })
+    .when('plugin', {
+      is: 'dind',
+      then: Joi.object()
+        .keys({
+          dockerVersion: Joi.string().optional(),
+          ubuntuVersion: Joi.string().optional(),
+        })
+        .optional(),
     }),
   failurePolicy: Joi.string().allow('fail', 'ignore'),
   hook: Joi.string().allow('preTaskStarts', 'postTaskSucceeds'),

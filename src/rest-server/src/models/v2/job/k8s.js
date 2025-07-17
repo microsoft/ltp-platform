@@ -389,6 +389,12 @@ const generateTaskRole = (
     'extraContainerOptions' in config.taskRoles[taskRole] &&
       config.taskRoles[taskRole].extraContainerOptions.infiniband,
   );
+  // check if dind runtime plugin is enabled
+  const dindMode = Boolean(
+    config.extras &&
+    config.extras['com.microsoft.pai.runtimeplugin'] &&
+    config.extras['com.microsoft.pai.runtimeplugin'].some(plugin => plugin.plugin === 'dind')
+  );
   // enable gang scheduling or not
   let gangAllocation = 'true';
   const retryPolicy = {
@@ -526,6 +532,7 @@ const generateTaskRole = (
                 },
               ],
               securityContext: {
+                ...((dindMode) && { privileged: true }),
                 capabilities: {
                   add: ['SYS_ADMIN', 'IPC_LOCK', 'DAC_READ_SEARCH'],
                   drop: ['MKNOD'],
