@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from collections import defaultdict
 import os
 import time
 from typing import Dict
@@ -32,6 +33,7 @@ class NodeIssueClassifierScheduler:
         self.classifier = NodeIssueClassifier()
         self.is_running = False
         self.node_record_updater = NodeRecordUpdater()
+        self.coccurred_hardware_limit = int(os.getenv("COOCCURRED_HARDWARE_FAILURE_LIMIT", "5"))
         
     def run_classification_job(self):
         """Run a single classification job"""
@@ -113,6 +115,7 @@ class NodeIssueClassifierScheduler:
             logger.info(f"Found {len(cordoned_nodes)} cordoned nodes to classify: {cordoned_nodes}")
             
             results = {}
+            nodes_to_update = []
             for node_status in cordoned_nodes:
                 node_name = node_status['HostName']
                 logger.info(f"Processing cordoned node: {node_name}")
@@ -132,14 +135,56 @@ class NodeIssueClassifierScheduler:
                 issue, category, to_status, detail = self.classifier.classify_node_issue(node_name, node_status, node_action)
                 
                 # Update the node status
-                success = self.update_node_after_classification(
-                    node_name, node_status, issue, category, to_status, detail
-                )
-                
-                results[node_name] = success
-                
-                # Add small delay to avoid overwhelming the system
-                time.sleep(0.1)
+                nodes_to_update.append({
+                    'node_name': node_name,
+                    'node_status': node_status,
+                    'issue': issue,
+                    'category': category,
+                    'to_status': to_status,
+                    'detail': detail
+                })
+            
+            # Process updates for all nodes
+            # group every dict by its issue
+            grouped = defaultdict(list)
+            for nd in nodes_to_update:
+                grouped[nd['issue']].append(nd)
+
+            # build a summary: how many nodes and their list
+            summary = {
+                issue: {
+                    'count': len(nodes),           # total nodes for this issue
+                    'nodes': nodes                 # the full list, already time‑sorted
+                }
+                for issue, nodes in grouped.items()
+            }
+            
+            for issue, nodes in summary.items():
+                logger.info(f"Classifying issue '{issue}' for {nodes['count']} nodes")
+                if nodes['count'] >= self.coccurred_hardware_limit:
+                    logger.warning(f"High number of nodes ({nodes['count']}) with issue '{issue}'. Manual review recommended.")
+                    to_status = NodeStatus.TRIAGED_UNKNOWN.value  # Keep cordoned status for high issue count
+                    for nd in nodes['nodes']:
+                        success = self.update_node_after_classification(
+                            node_name=nd['node_name'],
+                            node_status=nd['node_status'],
+                            issue=issue,
+                            category=nd['category'],
+                            to_status=to_status,
+                            detail=nd['detail']
+                        )
+                        results[nd['node_name']] = success
+                else:
+                    for nd in nodes['nodes']:
+                        success = self.update_node_after_classification(
+                            node_name=nd['node_name'],
+                            node_status=nd['node_status'],
+                            issue=issue,
+                            category=nd['category'],
+                            to_status=nd['to_status'],
+                            detail=nd['detail']
+                        )
+                        results[nd['node_name']] = success
             
             successful_count = sum(results.values())
             logger.info(f"Classification completed: {successful_count}/{len(results)} nodes successfully processed")

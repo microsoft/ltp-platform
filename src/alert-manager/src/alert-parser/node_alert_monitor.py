@@ -195,7 +195,7 @@ class NodeAvailabilityMonitor:
                     reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
                     self.node_updater.update_status_action(node, from_status, to_status, validation_time, reason, detail)
                 # TODO check validation job status
-                elif len(shrinked_new_alerts) > 0 and not period_alerts['alertname'].str.contains('NodeNotReady').any():
+                elif len(shrinked_new_alerts) > 0 and not period_alerts['alertname'].str.contains('NodeNotReady').any() and not period_alerts['alertname'].str.contains('RecoverValidatedNodes').any():
                     to_status = NodeStatus.CORDONED.value
                     reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_new_alerts)
                     self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)

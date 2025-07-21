@@ -154,6 +154,8 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["node-action-table"]
                     | default(cluster_cfg["alert-manager"]["node-action-table"])
                     | default("NodeActionRecord") }}
+        - name: COOCCURRED_HARDWARE_FAILURE_LIMIT
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["coccurred_hardware_failure_node_limit"] | default("5") }}
 {% endif %}
         resources:
           requests:

@@ -420,6 +420,17 @@ class NodeRecycler:
                         to_state=NodeStatus.ALLOCATED_UA.value
                     )
                 )
+                futures.append(
+                    executor.submit(
+                        cls.operate,
+                        vmss_id,
+                        operation="start",
+                        status_client=status_client,
+                        action_client=action_client,
+                        from_state=NodeStatus.DEALLOCATED_PLATFORM.value,
+                        to_state=NodeStatus.ALLOCATED_PLATFORM.value
+                    )
+                )
 
             for f in futures:
                 try:
@@ -438,9 +449,13 @@ class NodeRecycler:
         logger.info("Starting to Validate Allocated Nodes")
         cls.validate(status_client=status_client, action_client=action_client,
                      filter_state=NodeStatus.ALLOCATED_UA.value)
+        cls.validate(status_client=status_client, action_client=action_client,
+                     filter_state=NodeStatus.ALLOCATED_PLATFORM.value)
+        cls.validate(status_client=status_client, action_client=action_client,
+                     filter_state=NodeStatus.TRIAGED_USER.value)
 
     @classmethod
-    def node_recycle_pipeline_loop(cls, interval=1800):
+    def node_recycle_pipeline_loop(cls, interval=600):
         """Pipeline loop to recycle nodes with hardware failures.
         Update Kusto status and action tables accordingly.
 
