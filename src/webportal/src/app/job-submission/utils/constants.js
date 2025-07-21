@@ -115,58 +115,23 @@ All lines will be concatenated by "&&". So do not use characters like "#", "\\" 
 
 export const DOCKER_OPTIONS = [
   {
-    key: 'python_3.6-pytorch_1.4.0-gpu',
-    text: 'PyTorch 1.4.0 + Python 3.6 with GPU, CUDA 10.1',
-    image: 'openpai/standard:python_3.6-pytorch_1.4.0-gpu',
+    key: 'cuda12.8-gpu',
+    text: 'CUDA 12.8',
+    image: 'luciatrainingplatform.azurecr.io/cuda-12.8.x/main:latest',
   },
   {
-    key: 'python_3.6-pytorch_1.2.0-gpu',
-    text: 'PyTorch 1.2.0 + Python 3.6 with GPU, CUDA 10.0',
-    image: 'openpai/standard:python_3.6-pytorch_1.2.0-gpu',
+    key: 'rocm-6.3-gpu',
+    text: 'ROCm 6.3',
+    image: 'luciatrainingplatform.azurecr.io/rocm-6.3.x/main:latest',
   },
   {
-    key: 'python_3.6-tensorflow_2.1.0-gpu',
-    text: 'TensorFlow 2.1.0 + Python 3.6 with GPU, CUDA 10.1',
-    image: 'openpai/standard:python_3.6-tensorflow_2.1.0-gpu',
-  },
-  {
-    key: 'python_3.6-tensorflow_1.15.0-gpu',
-    text: 'TensorFlow 1.15.0 + Python 3.6 with GPU, CUDA 10.0',
-    image: 'openpai/standard:python_3.6-tensorflow_1.15.0-gpu',
-  },
-  {
-    key: 'python_3.6-mxnet_1.5.1-gpu',
-    text: 'MXNet 1.5.1 + Python 3.6 with GPU, CUDA 10.1',
-    image: 'openpai/standard:python_3.6-mxnet_1.5.1-gpu',
-  },
-  {
-    key: 'python_3.6-cntk_2.7-gpu',
-    text: 'CNTK 2.7 + Python 3.6 with GPU, CUDA 10.1',
-    image: 'openpai/standard:python_3.6-cntk_2.7-gpu',
-  },
-  {
-    key: 'python_3.6-pytorch_1.4.0-cpu',
-    text: 'PyTorch 1.4.0 + Python 3.6 with CPU',
-    image: 'openpai/standard:python_3.6-pytorch_1.4.0-cpu',
-  },
-  {
-    key: 'python_3.6-pytorch_1.2.0-cpu',
-    text: 'PyTorch 1.2.0 + Python 3.6 with CPU',
-    image: 'openpai/standard:python_3.6-pytorch_1.2.0-cpu',
-  },
-  {
-    key: 'python_3.6-tensorflow_2.1.0-cpu',
-    text: 'TensorFlow 2.1.0 + Python 3.6 with CPU',
-    image: 'openpai/standard:python_3.6-tensorflow_2.1.0-cpu',
-  },
-  {
-    key: 'python_3.6-tensorflow_1.15.0-cpu',
-    text: 'TensorFlow 1.15.0 + Python 3.6 with CPU',
-    image: 'openpai/standard:python_3.6-tensorflow_1.15.0-cpu',
+    key: 'rocm-6.3.x-te-v1.12-gpu',
+    text: 'ROCm 6.3.x + TransformerEngine v1.12',
+    image: 'luciatrainingplatform.azurecr.io/rocm-6.3.x-te-v1.12/main:latest',
   },
 ];
 export const DEFAULT_DOCKER_URI =
-  'openpai/standard:python_3.6-pytorch_1.2.0-gpu';
+  'luciatrainingplatform.azurecr.io/cuda-12.8.x/main:latest';
 // For PAI runtime only
 export const PAI_PLUGIN = 'com.microsoft.pai.runtimeplugin';
 
