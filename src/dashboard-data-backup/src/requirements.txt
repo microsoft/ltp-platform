@@ -1,0 +1,5 @@
+# Add your Python dependencies here
+# For example:
+# pandas
+
+azure-kusto-data

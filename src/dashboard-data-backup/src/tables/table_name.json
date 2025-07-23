@@ -1,0 +1,15 @@
+[
+  {
+    "name": "A-r0-na.tmdl",
+    "src_table": {
+      "cluster": "https://azcore.centralus.kusto.windows.net",
+      "db": "Fc",
+      "table": "LogContainerPolicySnapshot"
+    },
+    "dst_table": {
+      "cluster": "https://luciatrainingplatform.westcentralus.kusto.windows.net/",
+      "db": "production",
+      "table": "PBICacheClusterCapacityStatus"
+    }
+  }
+]
