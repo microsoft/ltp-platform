@@ -203,9 +203,22 @@ const vcListColumns = colProps => {
 };
 
 export const VirtualClusterDetailsList = props => {
-  const virtualClusters = props.virtualClusters;
+  const propsCopy = { ...props };
+  let virtualClusters = propsCopy.virtualClusters || {};
+  // Filter out virtual clusters with all resources zero
+  virtualClusters = Object.fromEntries(
+    Object.entries(virtualClusters).filter(([, { resourcesTotal }]) =>
+      resourcesTotal &&
+      (resourcesTotal.memory > 0 ||
+        resourcesTotal.vCores > 0 ||
+        resourcesTotal.GPUs > 0)
+    )
+  );
+  // Write the updated virtualClusters back to propsCopy
+  propsCopy.virtualClusters = virtualClusters;
+
   const otherProps = {
-    ...props,
+    ...propsCopy,
   };
   delete otherProps.virtualClusters;
   delete otherProps.groups;
@@ -222,7 +235,7 @@ export const VirtualClusterDetailsList = props => {
     <>
       <DetailsList
         columns={vcListColumns({
-          ...props,
+          ...propsCopy,
           ...{ setGroupDetails },
         })}
         disableSelectionZone
