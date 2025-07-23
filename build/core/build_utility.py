@@ -23,14 +23,7 @@ import sys
 import os
 import subprocess
 import yaml
-import re
 
-def sanitize_command(command):
-    """
-    Redacts sensitive information such as passwords from a command string.
-    """
-    # Example: Redact `-p <password>` or `--password <password>`
-    return re.sub(r'(-p\s+\S+|--password\s+\S+)', '-p <redacted>', command)
 
 class DockerClient:
 
@@ -56,9 +49,8 @@ class DockerClient:
 
 
     def docker_login(self):
-        sanitized_cmd  = "docker login -u {0} -p <redacted> {1}".format(self.docker_username, self.docker_registry)
         full_cmd = "docker login -u {0} -p {1} {2}".format(self.docker_username, self.docker_password, self.docker_registry)
-        execute_shell(full_cmd, sanitized_cmd=sanitized_cmd)
+        execute_shell(full_cmd)
 
     def docker_image_build(self, image_name, dockerfile_path, build_path):
         if self.build_nocache:
@@ -97,25 +89,24 @@ def setup_logger_config(logger):
 logger = logging.getLogger(__name__)
 setup_logger_config(logger)
 
-def execute_shell(shell_cmd, sanitized_cmd=None):
+def execute_shell(shell_cmd):
     try:        
-        log_cmd = sanitized_cmd if sanitized_cmd else sanitize_command(shell_cmd)
-        logger.info("Begin to execute the command: {0}".format(log_cmd))
+        logger.info("Begin to execute the command...")
         subprocess.check_call( shell_cmd, shell=True )
-        logger.info("Executing command successfully: {0}".format(log_cmd))
+        logger.info("Executing command successfully...")
     except subprocess.CalledProcessError:
-        logger.error("Executing command failed: {0}".format(log_cmd))
+        logger.error("Executing command failed.")
         sys.exit(1)
 
 
 
 def execute_shell_with_output(shell_cmd):
     try:
-        logger.info("Begin to execute the command: {0}".format(shell_cmd))
+        logger.info("Begin to execute the command...")
         res = subprocess.check_output( shell_cmd, shell=True )
-        logger.info("Executes command successfully: {0}".format(shell_cmd))
+        logger.info("Executes command successfully...")
     except subprocess.CalledProcessError:
-        logger.error("Executes command failed: {0}".format(shell_cmd))
+        logger.error("Executes command failed.")
         sys.exit(1)
 
     return res
