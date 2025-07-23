@@ -23,7 +23,14 @@ import sys
 import os
 import subprocess
 import yaml
+import re
 
+def sanitize_command(command):
+    """
+    Redacts sensitive information such as passwords from a command string.
+    """
+    # Example: Redact `-p <password>` or `--password <password>`
+    return re.sub(r'(-p\s+\S+|--password\s+\S+)', '-p <redacted>', command)
 
 class DockerClient:
 
@@ -49,9 +56,9 @@ class DockerClient:
 
 
     def docker_login(self):
-        shell_cmd = "docker login -u {0} -p <redacted> {1}".format(self.docker_username, self.docker_registry)
+        sanitized_cmd  = "docker login -u {0} -p <redacted> {1}".format(self.docker_username, self.docker_registry)
         full_cmd = "docker login -u {0} -p {1} {2}".format(self.docker_username, self.docker_password, self.docker_registry)
-        execute_shell(full_cmd, sanitized_cmd=shell_cmd)
+        execute_shell(full_cmd, sanitized_cmd=sanitized_cmd)
 
     def docker_image_build(self, image_name, dockerfile_path, build_path):
         if self.build_nocache:
@@ -92,7 +99,7 @@ setup_logger_config(logger)
 
 def execute_shell(shell_cmd, sanitized_cmd=None):
     try:        
-        log_cmd = sanitized_cmd if sanitized_cmd else shell_cmd
+        log_cmd = sanitized_cmd if sanitized_cmd else sanitize_command(shell_cmd)
         logger.info("Begin to execute the command: {0}".format(log_cmd))
         subprocess.check_call( shell_cmd, shell=True )
         logger.info("Executing command successfully: {0}".format(log_cmd))
