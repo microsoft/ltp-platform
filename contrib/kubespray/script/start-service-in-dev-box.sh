@@ -12,7 +12,7 @@ echo "Pushing cluster config to k8s..."
 
 echo "Starting OpenPAI service..."
 ./paictl.py service start -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime \
-  log-manager prometheus grafana alert-manager watchdog internal-storage postgresql frameworkcontroller database-controller \
+  log-manager prometheus grafana alert-manager watchdog postgresql frameworkcontroller database-controller \
   hivedscheduler rest-server webportal pylon < cluster-id
 
 rm cluster-id

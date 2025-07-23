@@ -30,14 +30,6 @@ spec:
         app: postgresql
     spec:
       hostNetwork: true
-      initContainers:
-      - name: internal-storage-barrier
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}internal-storage-barrier:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
-        imagePullPolicy: Always
-        volumeMounts:
-        - name: internal-data-dir
-          mountPath: /paiInternalStorage
-          mountPropagation: "None"
       containers:
       - name: postgresql
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}postgresql:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
@@ -77,7 +69,7 @@ spec:
           periodSeconds: 10
       volumes:
         - name: internal-data-dir
-          hostPath:
-            path: '{{ cluster_cfg["internal-storage"]["root-path"] }}/storage'
+          persistentVolumeClaim:
+            claimName: {{ cluster_cfg["postgresql"]["db-disk"] }}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}

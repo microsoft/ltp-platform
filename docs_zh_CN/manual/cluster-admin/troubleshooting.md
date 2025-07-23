@@ -119,32 +119,3 @@ ansible-playbook -i inventory/mycluster/hosts.yml upgrade-cluster.yml --become -
 ```
 
 `${limit_list}`代表那些被取消分配的结点。例如，如果该cron job发现结点`a`和结点`b`现在可以使用了，但是在Kubernetes中它们还是`NotReady`状态，就可以指定`limit_list=a,b`。
-
-### 如何增加Internal Storage的大小
-
-目前，OpenPAI使用[internal storage](https://github.com/microsoft/pai/tree/master/src/internal-storage)来存储数据库。Internal storage使用Linux loop device来提供一个有严格大小限制的存储。默认的限制是30 GB (或者，在OpenPAI <= `v1.1.0`时，为10GB)。这些空间大概可以保存1,000,000个任务。如果您想要更大的空间，可以follow下面的步骤：
-
-第一步. [登录进一个dev box container](./basic-management-operations.md#pai-service-management-and-paictl)
-
-第二步. 在dev box container内，结束所有PAI服务： `./paictl.py service stop`.
-
-第三步. 登录Master结点，找到internal storage对应的文件夹 (默认路径为`/mnt/paiInternal`)，将它移动到另一处`sudo mv /mnt/paiInternal /mnt/paiInternalBak`。
-
-第四步. 在 `services-configuration.yaml`中更新internal storage的设置。 例如，将大小限制调整为100 GB： 
-```
-internal-storage:
-    quota-gb: 100
-```
-如果该文件中没有 `internal-storage` 字段，您可以手动创建它。
-
-更新集群配置 `./paictl.py config push -p <config-folder> -m service`
-
-第五步. 在dev box container内，启动internal storage：`./paictl.py service start -n internal-storage`
-
-第六步. 在internal storage ready后，Master结点上将会有一个新的`/mnt/paiInternal`目录。将原来的目录移动到里面，目前我们只需要移动`pgdata`文件夹：`sudo mv /mnt/paiInternalBak/pgdata /mnt/paiInternal/`.
-
-第七步. 在dev box container内，启动所有PAI service： `./paictl.py service start`。
-
-### <div id="solve-unmounted-database-problem">解决 Unmounted Database Issue</div>
-
-请参考对应的英文文档。

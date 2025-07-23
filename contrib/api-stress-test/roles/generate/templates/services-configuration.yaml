@@ -26,9 +26,6 @@ rest-server:
 webportal:
   server-port: 9286
 
-internal-storage:
-  enable: true
-
 postgresql:
   enable: true
 

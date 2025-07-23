@@ -22,3 +22,5 @@ passwd: rootpass
 db: openpai
 port: 5432
 max-connection: 1000
+
+db-disk: pvc-postgresql-db-disk

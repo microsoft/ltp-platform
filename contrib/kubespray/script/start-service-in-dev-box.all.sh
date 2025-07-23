@@ -44,7 +44,7 @@ echo "Pushing cluster config to k8s..."
 echo "Starting OpenPAI service..."
 services=(
   cluster-configuration device-plugin node-exporter job-exporter openpai-runtime 
-  log-manager prometheus grafana alert-manager watchdog internal-storage postgresql frameworkcontroller database-controller fluentd
+  log-manager prometheus grafana alert-manager watchdog postgresql frameworkcontroller database-controller fluentd
   hivedscheduler rest-server webportal pylon
 )
 

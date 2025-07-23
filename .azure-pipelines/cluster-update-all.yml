@@ -61,12 +61,12 @@ jobs:
       displayName: Arrange Config Files
     - script: |
         # Build all services # Skip"k8s-dashboard" "marketplace-db" "node-exporter" "prometheus"
-        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana alert-manager frameworkcontroller hivedscheduler openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal 
+        $(Build.Repository.LocalPath)/build/pai_build.py build -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana alert-manager frameworkcontroller hivedscheduler openpai-runtime watchdog postgresql database-controller fluentd pylon rest-server webportal 
       displayName: 'Build all Services images'
       condition: or(eq(${{ parameters.rebuildImage }}, 'true'), eq(${{ parameters.repushImage }}, 'true'))
     - script: |
         # Push all services # Skip "k8s-dashboard" "marketplace-db" "node-exporter" "prometheus"
-        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana alert-manager frameworkcontroller hivedscheduler openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
+        $(Build.Repository.LocalPath)/build/pai_build.py push -c $(Pipeline.Workspace)/config/cluster-configuration -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana alert-manager frameworkcontroller hivedscheduler openpai-runtime watchdog postgresql database-controller fluentd pylon rest-server webportal
       displayName: 'Push all Services'
       condition: eq(${{ parameters.repushImage }}, 'true')
     - task: AzureCLI@2
@@ -82,7 +82,7 @@ jobs:
           kubelogin convert-kubeconfig -l azurecli
           echo "Stopping all pai services..." 
           # Skip the pylon service to avoid changing extenral IP
-          echo -e $(paiClusterName) | $(Build.Repository.LocalPath)/paictl.py service stop -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana alert-manager watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
+          echo -e $(paiClusterName) | $(Build.Repository.LocalPath)/paictl.py service stop -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana alert-manager watchdog postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
           echo "Starting to update pai..."
           bash $(Build.Repository.LocalPath)/contrib/kubespray/script/start-service-in-dev-box.all.sh -c $(Pipeline.Workspace)/config/cluster-configuration -n $(paiClusterName)
           echo "Checking pai cluster status..."
