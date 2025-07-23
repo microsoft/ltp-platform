@@ -49,7 +49,7 @@ const checkReqeustedCommand = (protocol) => {
     const gitCloneRegexModel = new RegExp(`^git\\s+clone\\s+https://([a-zA-Z0-9-_]+):([a-zA-Z0-9_]+)@(${launcherConfig.jobRestrictionGitRepoUrlModel})\\s+-b\\s+(${launcherConfig.jobRestrictionGitRepoBranchModel})$`);
     const cpRegex = new RegExp(`^cp\\s+-r\\s+(${jobRestrictionGitRepoNameModel})/\\*\\s+(${jobRestrictionGitRepoNameInfra})/$`);
     const cdRegex = new RegExp(`^cd\\s+(${jobRestrictionGitRepoNameInfra})$`);
-    const bashRegex = new RegExp(`^bash\\s+(${launcherConfig.jobRestrictionGitScriptPrefix})\\s*/\\s*(${launcherConfig.jobRestrictionGitScriptName}[a-zA-Z0-9-_\.]*\\.sh)$`);
+    const bashRegex = new RegExp(`^bash\\s+(${launcherConfig.jobRestrictionGitScriptPrefix})\\s*/\\s*(${launcherConfig.jobRestrictionGitScriptName}[a-zA-Z0-9-_.]*\\.sh)$`);
 
     const setWanDbApiKeyMatch = setWanDbApiKeyCommandRegex.test(setWanDbApiKeyCommand);
     const gitCloneMatch = gitCloneRegexInfra.test(gitCloneCommandInfra) && gitCloneRegexModel.test(gitCloneCommandModel);

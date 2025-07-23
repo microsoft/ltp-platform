@@ -114,7 +114,7 @@ class TransferClient:
                 )
                 api_instance.create_namespace(body)
                 return True
-            logger.error("Failed to create namespace [{0}]".format(name))
+            logger.error("Failed to create namespace.")
             sys.exit(1)
         return False
 

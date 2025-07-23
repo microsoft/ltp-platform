@@ -221,7 +221,7 @@ const getContainerPorts = (ports, taskIndex, podUID) => {
   //  int(md5(podUid + portName + portIndex)[24:32] ,16)) % (schedulePortEnd - schedulePortStart) + schedulePortStart
   const containerPorts = {};
   const hashFunc = (str) => {
-    const hexStr = crypto.createHash('md5').update(str).digest('hex');
+    const hexStr = crypto.createHash('sha256').update(str).digest('hex');
     return (
       parseInt(hexStr.substring(0, 12), 16) +
       parseInt(hexStr.substring(12, 24), 16) +

@@ -198,7 +198,7 @@ def sftp_paramiko(src, dst, filename, host_config):
             logger.warn("The key file: {0} specified doesn't exist".format(host_config['keyfile-path']))
     # First make sure the folder exist.
     ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
     ssh.connect(hostname=hostip, port=port, key_filename=key_filename, username=username, password=password, allow_agent=True)
 
     password = password if password is not None else ''
@@ -252,7 +252,7 @@ def ssh_shell_paramiko_with_result(host_config, commandline):
             logger.warn("The key file: {0} specified doesn't exist".format(host_config['keyfile-path']))
     logger.info("Start executing the command on host [{0}]: {1}".format(hostip, commandline))
     ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
     ssh.connect(hostname=hostip, port=port, key_filename=key_filename, username=username, password=password)
     stdin, stdout, stderr = ssh.exec_command(commandline, get_pty=True)
     logger.info("Finished executing the command on host [{0}]: {1}".format(hostip, commandline))
@@ -297,7 +297,8 @@ def ssh_shell_with_password_input_paramiko(host_config, commandline):
             logger.warn("The key file: {0} specified doesn't exist".format(host_config['keyfile-path']))
 
     ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
+    ssh.load_system_host_keys()  # Load known hosts from the system's known_hosts file
     ssh.connect(hostname=hostip, port=port, key_filename=key_filename, username=username, password=password)
     password = password if password is not None else ''
     if (commandline.strip().startswith('sudo')):

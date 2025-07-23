@@ -49,9 +49,9 @@ class DockerClient:
 
 
     def docker_login(self):
-        shell_cmd = "docker login -u {0} -p {1} {2}".format(self.docker_username, self.docker_password, self.docker_registry)
-        execute_shell(shell_cmd)
-
+        shell_cmd = "docker login -u {0} -p <redacted> {1}".format(self.docker_username, self.docker_registry)
+        full_cmd = "docker login -u {0} -p {1} {2}".format(self.docker_username, self.docker_password, self.docker_registry)
+        execute_shell(full_cmd, sanitized_cmd=shell_cmd)
 
     def docker_image_build(self, image_name, dockerfile_path, build_path):
         if self.build_nocache:
@@ -90,13 +90,14 @@ def setup_logger_config(logger):
 logger = logging.getLogger(__name__)
 setup_logger_config(logger)
 
-def execute_shell(shell_cmd):
-    try:
-        logger.info("Begin to execute the command: {0}".format(shell_cmd))
+def execute_shell(shell_cmd, sanitized_cmd=None):
+    try:        
+        log_cmd = sanitized_cmd if sanitized_cmd else shell_cmd
+        logger.info("Begin to execute the command: {0}".format(log_cmd))
         subprocess.check_call( shell_cmd, shell=True )
-        logger.info("Executing command successfully: {0}".format(shell_cmd))
+        logger.info("Executing command successfully: {0}".format(log_cmd))
     except subprocess.CalledProcessError:
-        logger.error("Executing command failed: {0}".format(shell_cmd))
+        logger.error("Executing command failed: {0}".format(log_cmd))
         sys.exit(1)
 
 
