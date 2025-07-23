@@ -28,7 +28,7 @@ const userTemplate = path.join(__dirname, '../data/nock/user-template.yaml');
 const encrypt = (username, password) => {
   const iterations = 10000;
   const keylen = 64;
-  const salt = crypto.createHash('md5').update(username).digest('hex');
+  const salt = crypto.createHash('sha256').update(username).digest('hex');
   return crypto.pbkdf2Sync(password, salt, iterations, keylen, 'sha512').toString('hex');
 };
 

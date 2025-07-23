@@ -8,6 +8,7 @@ require "pg"
 require "yajl"
 require "json"
 require 'digest'
+require 'openssl'
 
 module Fluent::Plugin
   class PgJsonOutput < Fluent::Plugin::Output
@@ -185,7 +186,7 @@ module Fluent::Plugin
       podUid = record["objectSnapshot"]["status"]["attemptStatus"]["podUID"]
       snapshot = record_value(record["objectSnapshot"])
       # use taskUid + taskAttemptIndex + historyType to generate a uid
-      uid = Digest::MD5.hexdigest "#{taskUid}+#{taskAttemptIndex}+#{historyType}"
+      uid = OpenSSL::Digest.new('SHA256').hexdigest "#{taskUid}+#{taskAttemptIndex}+#{historyType}"      
       # select from framework_history, ensure there is no corresponding history object
       selectResult = thread[:conn].exec_params('SELECT uid from task_history where uid=$1', [uid])
       if selectResult.cmd_tuples == 0

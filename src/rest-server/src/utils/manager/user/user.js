@@ -41,7 +41,7 @@ function userValidate(userValue) {
 function encrypt(username, password) {
   const iterations = 10000;
   const keylen = 64;
-  const salt = crypto.createHash('md5').update(username).digest('hex');
+  const salt = crypto.createHash('sha256').update(username).digest('hex');
   return new Promise((resolve, reject) => {
     crypto.pbkdf2(password, salt, iterations, keylen, 'sha512', (err, key) => {
       err ? reject(err) : resolve(key.toString('hex'));

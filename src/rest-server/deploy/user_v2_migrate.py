@@ -119,7 +119,7 @@ class TransferClient:
                 if group_dict['extension'].get('groupType') == 'vc':
                     vc_set.add(group_dict['groupname'])
             except Exception as e:
-                logger.debug("Filter the secret {0} in namespace {1} due to group schema.".format(group.metadata.name, self.secret_ns_group_v2))
+                logger.debug(""Filtered a secret in the specified namespace due to group schema.")
         return decode_group_list, vc_set
 
     def convert_v2_group(self, data_dict, all_vcs):
@@ -188,7 +188,7 @@ class TransferClient:
                 )
                 api_instance.create_namespace(body)
                 return True
-            logger.error("Failed to create namespace [{0}]".format(name))
+            logger.error("Failed to create namespace. Please check the configuration and permissions.")
             sys.exit(1)
         return False
 
