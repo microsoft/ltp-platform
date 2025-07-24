@@ -44,9 +44,93 @@ local function is_directory_empty(directory)
   return true
 end
 
+-- Check if journalctl can access the given path
+local function can_access_journal(journal_path)
+  local cmd = "journalctl --directory=" .. journal_path .. " --list-boots -n 1 >/dev/null 2>&1"
+  local success = os.execute(cmd)
+  return success == 0 or success == true
+end
+
+-- Allowed system log files for security
+local allowed_logs = {
+  -- Traditional syslog files
+  "syslog", 
+  "kern.log", 
+  "dmesg",
+  -- Systemd journal files
+  "journal",
+  "journal.log",
+  "systemd/journal"
+}
+
+-- Check if a log filename is in the allowed list (including rotated logs)
+-- Function to determine if a log file is a systemd journal
+local function is_journal_log(filename)
+  return string.match(filename, "^journal$") or 
+         string.match(filename, "^journal/") or
+         string.match(filename, "^systemd/journal") or
+         string.match(filename, "^systemd%-journal$") or
+         string.match(filename, "^journal%-.*$") -- For service-specific journal logs
+end
+
+-- Get the path to the mounted journal logs directory
+local function get_journal_path()
+  -- List of paths to check in order of preference
+  local paths_to_check = {
+    "/usr/local/node/log/journal"      -- Primary custom mount path
+  }
+  
+  -- Check each path and return the first valid directory
+  for _, path in ipairs(paths_to_check) do
+    local attr = lfs.attributes(path)
+    if attr and attr.mode == "directory" then
+      -- Check if there are actual journal files in this directory
+      local has_files = false
+      for _ in lfs.dir(path) do
+        has_files = true
+        break
+      end
+      
+      if has_files then
+        return path
+      end
+    end
+  end
+  
+  -- If no valid path found, return the primary path anyway
+  -- journalctl will handle the error if it doesn't exist
+  return "/usr/local/node/log/journal"
+end
+
+local function is_allowed_log(filename)
+  -- Check standard log files and their rotated versions
+  for _, allowed in ipairs(allowed_logs) do
+    if filename == allowed or 
+       string.match(filename, "^" .. allowed .. "%.%d+$") or
+       string.match(filename, "^" .. allowed .. "%.%d+%.gz$") then
+      return true
+    end
+  end
+  
+  -- Special handling for systemd journal files
+  if is_journal_log(filename) or
+     string.match(filename, "^journal/[^/]*$") or
+     string.match(filename, "^journal%-[^/]*$") then
+    return true
+  end
+  
+  return false
+end
+
+-- Export all utility functions
 return {
   is_path_under_log_dir = is_path_under_log_dir,
   is_input_validated = is_input_validated,
-  is_directory_empty = is_directory_empty
+  is_directory_empty = is_directory_empty,
+  allowed_logs = allowed_logs,
+  is_allowed_log = is_allowed_log,
+  is_journal_log = is_journal_log,
+  get_journal_path = get_journal_path,
+  can_access_journal = can_access_journal
 }
 

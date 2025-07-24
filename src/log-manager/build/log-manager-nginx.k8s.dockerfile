@@ -15,12 +15,18 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM openresty/openresty:1.27.1.2-2-alpine-fat
+FROM openresty/openresty:1.25.3.2-jammy
 
-RUN apk update && apk upgrade
-
-RUN luarocks install lua-cjson && luarocks install lua-resty-jwt && \
-  luarocks install luafilesystem && luarocks install lua-path
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+    apt-get install -y systemd && \
+    # LuaRocks modules you need
+    luarocks install lua-cjson && \
+    luarocks install lua-resty-jwt && \
+    luarocks install luafilesystem && \
+    luarocks install lua-path && \
+    # clean apt cache to keep image slim
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY src/nginx/nginx.conf.default /etc/nginx/conf.d/default.conf
 COPY src/nginx/nginx.conf /usr/local/openresty/nginx/conf/nginx.conf

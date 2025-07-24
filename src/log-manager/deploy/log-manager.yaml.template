@@ -70,6 +70,9 @@ spec:
         volumeMounts:
         - name: pai-log
           mountPath: /usr/local/pai/logs
+        - name: system-log
+          mountPath: /usr/local/node/log
+          readOnly: true
         {%- if cluster_cfg['log-manager']['remote_storage_pvc'] %}
         - name: log-manager-remote-storage
           mountPath: /usr/local/pai/remotelogs
@@ -108,6 +111,9 @@ spec:
         - name: pai-log
           hostPath:
             path: /var/log/pai
+        - name: system-log
+          hostPath:
+            path: /var/log
         {%- if cluster_cfg['log-manager']['remote_storage_pvc'] %}
         - name: log-manager-remote-storage
           persistentVolumeClaim:

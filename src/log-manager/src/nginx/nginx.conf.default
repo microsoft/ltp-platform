@@ -81,6 +81,45 @@ server {
     rewrite_by_lua_file /etc/nginx/lua/get_log_content.lua;
   }
 
+  #
+  # Get node log list
+  #
+  location /api/v1/node-logs {
+    add_header Access-Control-Allow-Origin *;
+    add_header Access-Control-Allow-Methods 'GET';
+    limit_except GET {
+      deny all;
+    }
+    default_type application/json;
+    access_by_lua_block {
+      local guard = require "guard"
+      guard.check_token()
+    }
+    content_by_lua_file /etc/nginx/lua/list_node_logs.lua;
+  }
+
+  #
+  # Get node log content
+  #
+  location ~ ^/api/v1/node-logs/(.*)$ {
+    add_header Access-Control-Allow-Origin *;
+    add_header Access-Control-Allow-Methods 'GET';
+    
+    limit_except GET {
+      deny all;
+    }
+    default_type text/plain;
+    limit_rate_after 1m;
+    limit_rate 1m;
+    
+    access_by_lua_block {
+      local guard = require "guard"
+      guard.check_token()
+    }
+    
+    rewrite_by_lua_file /etc/nginx/lua/get_node_log_content.lua;
+  }
+
   location ~ /~/(current|remotelogs)/(.*)$ {
     internal;
     add_header Accept-Ranges bytes;
