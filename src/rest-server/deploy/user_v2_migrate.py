@@ -119,7 +119,7 @@ class TransferClient:
                 if group_dict['extension'].get('groupType') == 'vc':
                     vc_set.add(group_dict['groupname'])
             except Exception as e:
-                logger.debug(""Filtered a secret in the specified namespace due to group schema.")
+                logger.debug("Filtered a secret in the specified namespace due to group schema.")
         return decode_group_list, vc_set
 
     def convert_v2_group(self, data_dict, all_vcs):
