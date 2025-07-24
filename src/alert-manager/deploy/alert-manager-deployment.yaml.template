@@ -155,7 +155,7 @@ spec:
                     | default(cluster_cfg["alert-manager"]["node-action-table"])
                     | default("NodeActionRecord") }}
         - name: COOCCURRED_HARDWARE_FAILURE_LIMIT
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["coccurred_hardware_failure_node_limit"] | default("5") }}
+          value: "{{ cluster_cfg["alert-manager"]["node-issue-classifier"]["coccurred_hardware_failure_node_limit"] | default("5") }}"
 {% endif %}
         resources:
           requests:
@@ -182,7 +182,7 @@ spec:
         - name: UPDATE_INTERVAL
           value: "{{ cluster_cfg["alert-manager"]["alert-parser"]["update-interval"] | default("10") }}"
         - name: REST_SERVER_URI
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["uri"] }} 
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["uri"] | default(cluster_cfg["alert-manager"]["prometheus-uri"]) }}
         - name: PAI_TOKEN
           value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
@@ -286,6 +286,53 @@ spec:
         - name: icm-certs
           mountPath: /etc/icm/certs
 {% endif %}
+{% endif %}
+
+{% if cluster_cfg["alert-manager"]["job-data-recorder"]["configured"] %}
+      - name: job-data-recorder
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}job-data-recorder:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        env:
+        - name: CLUSTER_ID
+          value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
+        - name: ENVIRONMENT
+          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["environment"] | default(cluster_cfg["alert-manager"]["environment"]) | default("prod") }}
+        - name: LOG_LEVEL
+          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["log-level"] | default(cluster_cfg["alert-manager"]["log-level"]) | default("INFO") }}
+        - name: RUN_INTERVAL
+          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["run-interval"] | default("60") }}"
+        - name: RECORD_RETAIN_TIME
+          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["record-retain-time"] | default("30d") }}"
+        - name: KUSTO_METRICS_TABLE
+          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["kusto-metrics-table"] | default("JobSummary") }}"
+        - name: KUSTO_REACT_TABLE
+          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["kusto-react-table"] | default("JobReactTime") }}"
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
+        - name: LTP_KUSTO_CLUSTER_URI
+          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
+        - name: LTP_KUSTO_DATABASE_NAME
+          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
+        - name: REST_SERVER_URI
+          value: {{ cluster_cfg["rest-server"]["uri"] }}
+        - name: PROMETHEUS_SERVER_URI
+          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["prometheus-uri"] | default(cluster_cfg["alert-manager"]["prometheus-uri"]) }}
+        - name: KUSTO_NODE_ACTION_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["node-action-table"]
+                    | default(cluster_cfg["alert-manager"]["node-action-table"])
+                    | default("NodeActionRecord") }}
+        - name: PAI_TOKEN
+          value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "100m"
+          limits:
+            memory: "4Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
 {% endif %}
 
       imagePullSecrets:

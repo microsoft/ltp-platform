@@ -19,6 +19,8 @@ alert-parser:
   configured: False
 cluster-utilization:
   configured: False
+job-data-recorder:
+  configured: False
 job-status-change-notification:
   # Max connection number to database in poller.
   configured: False

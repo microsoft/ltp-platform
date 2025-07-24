@@ -1,0 +1,9 @@
+tqdm
+joblib
+pandas
+pytest
+requests
+apscheduler
+numpy
+PyYAML
+./kusto-sdk
