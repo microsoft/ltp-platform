@@ -20,3 +20,7 @@ param vmssSubnetAddressPrefix = '10.16.4.0/23'
 // storage
 param storageIdentityName = 'pai-storage-identity'
 param storageAccountName = 'paistorageaccount'
+
+// managed disk
+param prometheusDiskName = 'prometheus-disk'
+param prometheusDiskSize = 8192 // 8192 GiB

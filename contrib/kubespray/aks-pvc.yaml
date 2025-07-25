@@ -12,3 +12,33 @@ spec:
   volumeName: pv-user-logs
   storageClassName: azureblob-fuse-premium
   volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-prometheus-blob
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Pi
+  volumeName: pv-prometheus-blob
+  storageClassName: azureblob-fuse-premium
+  volumeMode: Filesystem
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-prometheus-disk
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  volumeName: pv-prometheus-disk
+  storageClassName: managed-csi
+  volumeMode: Filesystem

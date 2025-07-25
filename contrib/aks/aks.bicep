@@ -24,6 +24,10 @@ param storageAccountName string
 param storageAccountSku string = 'Standard_GRS'
 param storageAccountKind string = 'StorageV2'
 
+// managed disk
+param prometheusDiskName string
+param prometheusDiskSize int
+
 // UAI for AKS
 resource aksUai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   location: location
@@ -89,7 +93,6 @@ resource aksNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
           destinationAddressPrefix: '*'
           access: 'Allow'
           direction: 'Inbound'
-          
         }
       }
     ]
@@ -190,8 +193,16 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01'
   parent: storageAccount
 }
 
-resource storageAccountContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+resource userLogsContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
   name: 'user-logs'
+  parent: blobService
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
+resource prometheusContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  name: 'prometheus'
   parent: blobService
   properties: {
     publicAccess: 'None'
@@ -462,5 +473,21 @@ resource aksClusterAdminRoleAssignment 'Microsoft.Authorization/roleAssignments@
       'Microsoft.Authorization/roleDefinitions',
       'b1ff04bb-8a4e-4dc4-8eb5-8693973ce19b'
     ) // Azure Kubernetes Service RBAC Cluster Admin
+  }
+}
+
+resource prometheusManagedDisk 'Microsoft.Compute/disks@2025-01-02' = {
+  name: prometheusDiskName
+  location: location
+  properties: {
+    diskSizeGB: prometheusDiskSize
+    creationData: {
+      createOption: 'Empty'
+    }
+    networkAccessPolicy: 'AllowAll'
+    publicNetworkAccess: 'Enabled'
+  }
+  sku: {
+    name: 'Premium_LRS'
   }
 }

@@ -27,3 +27,52 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: azureblob-fuse-premium
   volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-prometheus-blob
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 1Pi
+  csi:
+    driver: blob.csi.azure.com
+    volumeAttributes:
+      AzureStorageAuthType: MSI
+      AzureStorageIdentityClientID: {{STORAGE_MANAGED_IDENTITY_ID}}
+      containerName: prometheus
+      protocol: fuse
+      resourceGroup: {{RESOURCE_GROUP}}
+      storageAccount: {{STORAGE_ACCOUNT}}
+    volumeHandle: pv-prometheus-blob
+  mountOptions:
+  - --allow-other
+  - --attr-timeout=120
+  - --entry-timeout=120
+  - --attr-cache-timeout=120
+  - --tmp-path=/mnt/blobfuse2
+  - --file-cache-timeout=7200
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: azureblob-fuse-premium
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-prometheus-disk
+spec:
+  capacity:
+    storage: 8Ti
+  csi:
+    driver: disk.csi.azure.com
+    volumeHandle: >-
+      /subscriptions/{{ SUBSCRIPTION_ID }}/resourceGroups/{{ RESOURCE_GROUP }}/providers/Microsoft.Compute/disks/{{ prometheusDiskName }}
+    volumeAttributes:
+      fsType: ext4
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: managed-csi
+  volumeMode: Filesystem

@@ -48,7 +48,13 @@ spec:
         volumeMounts:
         - name: prometheus-data
           mountPath: /prometheus-data
+        {% if cluster_cfg["prometheus"]["blob"] %}
+        - name: prometheus-blob
+          mountPath: /prometheus-blob
+        command: ["sh", "-c", "chown -R nobody:nobody /prometheus-data && chown -R nobody:nobody /prometheus-blob"]
+        {% else %}
         command: ["chown", "-R", "nobody:nobody", "/prometheus-data"]
+        {% endif %}
       containers:
       {% if cluster_cfg["prometheus"]["remote_write"] %}
       - name: prom-remotewrite
@@ -120,8 +126,20 @@ spec:
         configMap:
           name: prometheus-record
       - name: prometheus-data
+        {% if cluster_cfg["prometheus"]["disk"] %}
+        persistentVolumeClaim:
+          claimName: pvc-prometheus-disk
+        {% else %}
         hostPath:
           path: {{ cluster_cfg["cluster"]["common"]["data-path"] }}/prometheus/data
+        {% endif %}
+      {% if cluster_cfg["prometheus"]["blob"] %}
+      - name: prometheus-blob
+        persistentVolumeClaim:
+          claimName: pvc-prometheus-blob
+        hostPath:
+          path: {{ cluster_cfg["cluster"]["common"]["data-path"] }}/prometheus/blob
+      {% endif %}
       tolerations:
       - key: node.kubernetes.io/memory-pressure
         operator: "Exists"
