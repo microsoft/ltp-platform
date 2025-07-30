@@ -34,6 +34,7 @@ class NodeStatus(str, Enum):
     NEW = "new"
     VALIDATING = "validating"
     AVAILABLE = "available"
+    AVAILABLE_NODATA = "available_nodata"
     CORDONED = "cordoned"
     DEALLOCATED_CAPACITY = "deallocated_capacity"
 
@@ -138,6 +139,7 @@ STATUS_METADATA = {
                    description="Node is being validated",
                    allowed_transitions=[
                        NodeStatus.AVAILABLE.value, NodeStatus.CORDONED.value,
+                       NodeStatus.AVAILABLE_NODATA.value,
                        NodeStatus.DEALLOCATED_CAPACITY.value,
                        NodeStatus.TRIAGED_HARDWARE.value,
                        NodeStatus.TRIAGED_USER.value,
@@ -148,6 +150,19 @@ STATUS_METADATA = {
     StatusMetadata(group=StatusGroup.AVAILABLE,
                    description="Node is available for use",
                    allowed_transitions=[
+                       NodeStatus.CORDONED.value,
+                       NodeStatus.AVAILABLE_NODATA.value,
+                       NodeStatus.TRIAGED_HARDWARE.value,
+                       NodeStatus.TRIAGED_USER.value,
+                       NodeStatus.TRIAGED_PLATFORM.value,
+                       NodeStatus.TRIAGED_UNKNOWN.value,
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                   ]),
+    NodeStatus.AVAILABLE_NODATA.value:
+    StatusMetadata(group=StatusGroup.CORDONED,
+                   description="Node is available but missing data",
+                   allowed_transitions=[
+                       NodeStatus.AVAILABLE.value,
                        NodeStatus.CORDONED.value,
                        NodeStatus.TRIAGED_HARDWARE.value,
                        NodeStatus.TRIAGED_USER.value,
@@ -160,6 +175,7 @@ STATUS_METADATA = {
                    description="Node is cordoned off",
                    allowed_transitions=[
                        NodeStatus.AVAILABLE.value,
+                       NodeStatus.AVAILABLE_NODATA.value,
                        NodeStatus.TRIAGED_HARDWARE.value,
                        NodeStatus.TRIAGED_USER.value,
                        NodeStatus.TRIAGED_PLATFORM.value,
@@ -187,6 +203,7 @@ STATUS_METADATA = {
                    allowed_transitions=[
                        NodeStatus.VALIDATING.value,
                        NodeStatus.AVAILABLE.value,
+                       NodeStatus.AVAILABLE_NODATA.value,
                        NodeStatus.DEALLOCATED_CAPACITY.value,
                    ]),
     NodeStatus.TRIAGED_PLATFORM.value:
@@ -197,6 +214,7 @@ STATUS_METADATA = {
                        NodeStatus.ALLOCATED_PLATFORM.value,
                        NodeStatus.VALIDATING.value,
                        NodeStatus.AVAILABLE.value,
+                       NodeStatus.AVAILABLE_NODATA.value,
                        NodeStatus.DEALLOCATED_CAPACITY.value,
                    ]),
     NodeStatus.TRIAGED_UNKNOWN.value:
@@ -204,6 +222,7 @@ STATUS_METADATA = {
                    description="Node is triaged for unknown issues",
                    allowed_transitions=[
                        NodeStatus.VALIDATING.value, NodeStatus.CORDONED.value,
+                       NodeStatus.AVAILABLE_NODATA.value,
                        NodeStatus.DEALLOCATED_CAPACITY.value,
                        NodeStatus.TRIAGED_PLATFORM.value,
                        NodeStatus.TRIAGED_USER.value,
