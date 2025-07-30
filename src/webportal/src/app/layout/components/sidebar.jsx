@@ -259,6 +259,9 @@ const Sidebar = ({ className, style }) => {
                     (window.location.href = `/plugin.html?index=${idx}`),
                   key: KEY_PLUGIN_PREFIX + idx,
                   icon: 'Puzzle',
+                  style: {
+                    display: isAdmin || !item.onlyadmin ? undefined : 'none',
+                  },
                 })),
               },
             ],
