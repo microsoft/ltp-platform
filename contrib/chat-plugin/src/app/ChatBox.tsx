@@ -1,10 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2,  SendHorizonal } from "lucide-react";
+import { Loader2, SendHorizonal, CircleStop } from "lucide-react";
 import { toast } from "sonner";
 
-import { chatRequest} from "../libs/api";
+import {
+  chatRequest,
+  currentAbortController,
+  createChatAbortController,
+  stopChatRequest
+} from "../libs/api";
 import { useChatStore } from "../libs/state";
 
 
@@ -15,6 +20,7 @@ export default function ChatBox() {
   const [loading, setLoading] = useState(false);
 
   const currentModel = useChatStore((state) => state.currentModel);
+
 
   const makeChatRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +35,9 @@ export default function ChatBox() {
     });
     setPrompt("");
     setLoading(true);
-    
-    const newMsg = await chatRequest();
+
+    createChatAbortController();
+    const newMsg = await chatRequest(currentAbortController?.signal);
     if (!newMsg) {
       toast.error("Failed to get response from Model");
     }
@@ -38,14 +45,25 @@ export default function ChatBox() {
       useChatStore.getState().addChat(newMsg);
     }
     setLoading(false);
-  }      
+  }
+
+  const stopChatRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentAbortController) {
+      currentAbortController.abort();
+      toast.info("Chat request stopped");
+    } else {
+      toast.info("No chat request to stop.");
+    }
+    setLoading(false);
+  }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       if (!loading && currentModel != null) {
         makeChatRequest(new Event('submit') as unknown as React.FormEvent<HTMLFormElement>);
-      }else{
+      } else {
         toast.info("Please select a model to chat with.");
       }
     }
@@ -64,31 +82,35 @@ export default function ChatBox() {
 
       <form onSubmit={makeChatRequest} className="flex flex-col gap-2">
         <div className="relative flex-1 text-base">
-          <div className="mr-10">
+          <div className="mr-20">
             <textarea
               value={prompt}
-              className="w-full p-2 mr-10 border border-gray-300 rounded-md shadow-sm text-base resize-none"
-              placeholder={currentModel? "Your prompt..." : "Please select a model to chat with."}
+              className="w-full p-2 mr-20 border border-gray-300 rounded-md shadow-sm text-base resize-none"
+              placeholder={currentModel ? "Your prompt..." : "Please select a model to chat with."}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
-              // rows={Math.min(8, Math.max(1, Math.ceil(prompt.length/50) ))} // Adjust height based on content
+            // rows={Math.min(8, Math.max(1, Math.ceil(prompt.length/50) ))} // Adjust height based on content
             />
           </div>
 
-            <div className="absolute inset-y-0 right-1 flex items-center justify-center h-full w-8">
-            <button type="submit" disabled={loading } className="p-2 rounded-full bg-indigo-500 text-white hover:bg-indigo-600 disabled:bg-gray-300">
+          <div className="absolute inset-y-0 right-1 flex items-center justify-center h-full w-16">
             {currentModel ? (
-              loading ? (
-              <Loader2 className="animate-spin" />
+              !loading ? (
+                <button type="submit" className="p-2 rounded-full bg-indigo-500 text-white hover:bg-indigo-600 disabled:bg-gray-300">
+                  <SendHorizonal size={20} strokeWidth={1.5} />
+                </button>
               ) : (
-              <SendHorizonal size={20} strokeWidth={1.5} />
+                <button type="button" onClick={stopChatRequest} className="ml-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 flex items-center gap-1">
+                  <Loader2 className="animate-spin" size={30} strokeWidth={1.5} />
+                  <CircleStop size={30} strokeWidth={1.5} />
+                </button>
               )
             ) : (
-              <SendHorizonal size={20} strokeWidth={1.5} className="text-gray-400" />
+              <button type="button" disabled className="p-2 rounded-full bg-gray-300 text-gray-500 hover:bg-gray-400">
+                <SendHorizonal size={20} strokeWidth={1.5} className="text-gray-400" />
+              </button>
             )}
-              
-            </button>
-            </div>
+          </div>
         </div>
       </form>
     </div>

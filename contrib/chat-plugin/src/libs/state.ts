@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { cn } from "./utils";
 
 export type Status = "loading" | "online" | "offline" | "unknown";
 
@@ -16,11 +17,6 @@ export type Job = {
   ip: string;
   port: number;
 }
-
-var init_msg = `
-Welcome to the Chat Plugin!
-`;
-
 
 interface State {
 
@@ -47,6 +43,7 @@ interface State {
   setAllModelsInCurrentJob: (models: string[]) => void;
   setCurrentModel: (model: string | null) => void;
   addChat: (chat: ChatMessage) => void;
+  cleanChat: () => void;
 }
 
 
@@ -61,13 +58,6 @@ export const useChatStore = create<State>((set) => ({
   allModelsInCurrentJob: [],
   currentModel: null,
 
-
-  // chatMsgs: [{
-  //   role: "welcome",
-  //   message: init_msg,
-  //   requiresAnswer: false,
-  //   timestamp: new Date()
-  // }],
   chatMsgs: [],
 
   setUser: (paiuser) => set({ paiuser }),
@@ -81,5 +71,5 @@ export const useChatStore = create<State>((set) => ({
   setCurrentModel: (model) => set({ currentModel: model }),
 
   addChat: (log) => set((state) => ({ chatMsgs: [...state.chatMsgs, log] })),
-
+  cleanChat: () => set({ chatMsgs: [] })
 }));

@@ -13,8 +13,11 @@ export const api = {
         Authorization: `Bearer ${key}`,
       };
     }
-
-    const response = await ky.post(`${API_BASE_URL}/${path}`, {
+    if (!path.startsWith("http")) {
+      // If the path is relative, prepend the API base URL
+      path = `${API_BASE_URL}/${path}`;
+    }
+    const response = await ky.post(path, {
       ...options,
       timeout: options.timeout !== undefined ? options.timeout : false, // disables timeout by default
     }).json();
@@ -29,7 +32,11 @@ export const api = {
         Authorization: `Bearer ${key}`,
       };
     }
-    const response = await ky.get(`${API_BASE_URL}/${path}`, {
+    if (!path.startsWith("http")) {
+      // If the path is relative, prepend the API base URL
+      path = `${API_BASE_URL}/${path}`;
+    }
+    const response = await ky.get(path, {
       ...options,
       timeout: options.timeout !== undefined ? options.timeout : false, // disables timeout by default
     }).json();
@@ -109,7 +116,6 @@ export async function fetchModelsInCurrentJob(): Promise<string[]> {
     }
     const modelList = models.data.map((model: { id: string }) => model.id);
     useChatStore.getState().setAllModelsInCurrentJob(modelList);
-    console.log("Fetched models in current job:", models);
     return modelList;
   } catch (error) {
     console.error("Failed to fetch models in current job:", error);
@@ -118,7 +124,7 @@ export async function fetchModelsInCurrentJob(): Promise<string[]> {
   }
 }
 
-export async function chatRequest() {
+export async function chatRequest(abortSignal?: AbortSignal) {
   const currentJob = useChatStore.getState().currentJob;
   if (!currentJob) {
     console.warn("No current job selected");
@@ -134,7 +140,7 @@ export async function chatRequest() {
   const data = {
     model: currentModel,
     messages: chatMsgs.filter(
-      (msg) => msg.role === "user" || msg.role === "assistant" 
+      (msg) => msg.role === "user" || msg.role === "assistant"
     ).map((msg) => ({
       role: msg.role,
       content: msg.message,
@@ -143,13 +149,14 @@ export async function chatRequest() {
   try {
     const response: any = await api.post(modelsUrl, jobServerToken, {
       json: data,
+      signal: abortSignal,
     });
     const respMessages = response.choices.map((choice: any) => choice.message.content);
     if (respMessages.length === 0) {
       console.warn("No response messages received from chat request");
       return;
     }
-    
+
     // Return the response message to be added by the component
     return {
       role: "assistant",
@@ -157,8 +164,31 @@ export async function chatRequest() {
       timestamp: new Date(),
     };
   }
-  catch (error) {
-    toast.error("Failed to send chat request:"+ error);
+  catch (error: any) {
+    if (error.name === 'AbortError') {
+      return null;
+    }
+    toast.error("Failed to send chat request:" + error);
     return null;
+  }
+}
+
+// Store the abort controller at module level
+export let currentAbortController: AbortController | null = null;
+
+export function createChatAbortController() {
+  // Cancel any existing request
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
+  currentAbortController = new AbortController();
+  return currentAbortController;
+}
+
+export async function stopChatRequest() {
+  if (currentAbortController) {
+    currentAbortController.abort();
+    currentAbortController = null;
+    toast.info("Chat request stopped");
   }
 }
