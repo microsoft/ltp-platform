@@ -46,9 +46,9 @@ location ~ ^/log-manager/([^/]+):(\d+)/(.*)$ {
 # job server
 location ~ ^/job-server/([^/]+):(\d+)/(.*)$ {
   proxy_pass http://$1:$2/$3$is_args$args;
-  proxy_connect_timeout 10m;
-  proxy_read_timeout 10m;
-  proxy_send_timeout 10m;
+  proxy_connect_timeout 180m;
+  proxy_read_timeout 180m;
+  proxy_send_timeout 180m;
 }
 
 #
