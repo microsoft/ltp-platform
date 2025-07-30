@@ -269,7 +269,7 @@ spec:
         command: ["node", "--max-old-space-size={{ cluster_cfg['database-controller']['db-poller-max-heap-mb'] }}", "poller/index.js"]
       volumes:
         - name: internal-data-dir
-          persistentVolumeClaim:
-            claimName: "{{ cluster_cfg["postgresql"]["db-disk"] }}"
+          hostPath:
+            path: '{{ cluster_cfg["internal-storage"]["root-path"] }}/storage'
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}

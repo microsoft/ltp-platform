@@ -19,6 +19,9 @@ cluster-type:
   - k8s
   - yarn
 
+prerequisite:
+  - internal-storage
+
 template-list:
   - postgresql.yaml
   - start.sh

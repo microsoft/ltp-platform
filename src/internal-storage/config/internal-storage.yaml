@@ -17,8 +17,6 @@
 
 service_type: "common"
 
-user: root
-passwd: rootpass
-db: openpai
-port: 5432
-max-connection: 1000
+type: hostPath
+root-path: /mnt/paiInternal
+quota-gb: 30

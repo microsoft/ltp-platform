@@ -15,10 +15,12 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-service_type: "common"
+FROM ubuntu:22.04
 
-user: root
-passwd: rootpass
-db: openpai
-port: 5432
-max-connection: 1000
+RUN apt update && apt upgrade -y
+
+RUN mkdir -p /init_scripts
+
+COPY src/delete.sh /init_scripts
+
+ENTRYPOINT /bin/bash /init_scripts/delete.sh

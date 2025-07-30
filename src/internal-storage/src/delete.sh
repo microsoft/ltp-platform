@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright (c) Microsoft Corporation
 # All rights reserved.
 #
@@ -15,10 +17,17 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-service_type: "common"
+cd /paiInternal
 
-user: root
-passwd: rootpass
-db: openpai
-port: 5432
-max-connection: 1000
+if [ -d storage ]; then
+	umount storage
+	rm -rf storage
+fi
+
+if [ -f storage.ext4 ]; then
+	rm -f storage.ext4
+fi
+
+touch /DELETED
+
+sleep infinity

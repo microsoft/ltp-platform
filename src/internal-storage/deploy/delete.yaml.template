@@ -15,10 +15,41 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-service_type: "common"
-
-user: root
-passwd: rootpass
-db: openpai
-port: 5432
-max-connection: 1000
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: internal-storage-delete-ds
+spec:
+  selector:
+    matchLabels:
+      app: internal-storage-delete
+  template:
+    metadata:
+      name: internal-storage-delete
+      labels:
+        app: internal-storage-delete
+    spec:
+      hostNetwork: false
+      containers:
+      - name: internal-storage-delete
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}internal-storage-delete:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        securityContext:
+          privileged: true
+        imagePullPolicy: Always
+        readinessProbe:
+          exec:
+            command:
+            - ls
+            - /DELETED
+          initialDelaySeconds: 10
+          periodSeconds: 3
+        volumeMounts:
+        - name: internal-data-dir
+          mountPath: /paiInternal
+          mountPropagation: Bidirectional
+      volumes:
+        - name: internal-data-dir
+          hostPath:
+            path: {{ cluster_cfg["internal-storage"]["root-path"] }}
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}

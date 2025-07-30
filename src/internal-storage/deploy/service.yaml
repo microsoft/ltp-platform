@@ -15,10 +15,24 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-service_type: "common"
+cluster-type:
+  - k8s
+  - yarn
 
-user: root
-passwd: rootpass
-db: openpai
-port: 5432
-max-connection: 1000
+prerequisite:
+  - cluster-configuration
+  - docker-cache
+
+template-list:
+  - create.yaml
+  - delete.yaml
+  - start.sh
+  - delete.sh
+
+start-script: start.sh
+stop-script: stop.sh
+delete-script: delete.sh
+refresh-script: refresh.sh
+
+deploy-rules:
+  - in: pai-master

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright (c) Microsoft Corporation
 # All rights reserved.
 #
@@ -14,11 +16,39 @@
 # NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+cd /paiInternal
 
-service_type: "common"
+if [ -f storage.ext4 ]; then
+    echo "Skip storage.ext4 creation."
+else
+    echo "Creating storage.ext4 of ${QUOTA_GB}G, please wait..."
+    fallocate -l ${QUOTA_GB}G storage.ext4 || { echo "allocation failed!"; sleep infinity; }
+    /sbin/mkfs -t ext4 -q storage.ext4 -F
+fi
 
-user: root
-passwd: rootpass
-db: openpai
-port: 5432
-max-connection: 1000
+ls storage/READY &> /dev/null
+
+if [ $? -ne 0 ]; then
+    if [ -d storage ]; then
+        umount storage
+    else
+        mkdir -p storage
+    fi
+    mount -o loop,rw,usrquota,grpquota storage.ext4 storage || { echo "mount failed!"; sleep infinity; }
+    touch storage/READY
+fi
+
+while true; do
+    ls storage/READY &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo "Cannot find storage/READY! Abort."
+        exit 1
+    fi
+    if [ ! -f storage.ext4 ]; then
+        echo "Cannot find storage.ext4! Abort."
+        exit 1
+    fi
+    sleep 1m
+done
+
+
