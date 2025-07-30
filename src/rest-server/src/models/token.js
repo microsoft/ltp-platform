@@ -24,6 +24,8 @@ const logger = require('@pai/config/logger');
 const databaseModel = require('@pai/utils/dbUtils');
 const { encodeName } = require('@pai/models/v2/utils/name');
 
+const { Mutex } = require('async-mutex');
+
 // job-specific tokens and other tokens are saved in different namespaces
 const userTokenNamespace =
   process.env.PAI_USER_TOKEN_NAMESPACE || 'pai-user-token';
@@ -32,6 +34,9 @@ const userTokenNamespace =
 if (process.env.NODE_ENV !== 'test') {
   k8sModel.createNamespace(userTokenNamespace);
 }
+
+const cache = new Map();
+const tokenMutex = new Mutex();
 
 const sign = async (
   username,
@@ -78,17 +83,41 @@ const purge = (data) => {
   return result;
 };
 
-const list = async (username) => {
-  const namespace = userTokenNamespace;
-  const tokens = await k8sSecret.get(namespace, username, { encode: 'hex' });
-  if (tokens === null) {
-    return {};
-  }
+const cleanExistingTokens = async (username, tokens) => {
   const purged = purge(tokens);
   if (Object.keys(tokens).length !== Object.keys(purged).length) {
-    await k8sSecret.replace(namespace, username, purged, { encode: 'hex' });
+    logger.info(`Purged invalid tokens for user: ${username}`);
+    await k8sSecret.replace(userTokenNamespace, username, purged, { encode: 'hex' });
   }
-  return Object.values(purged);
+  return purged;
+};
+
+const list = async (username) => {
+  // check if the token is cached
+  if (cache.has(username)) {
+    const tokens = await cleanExistingTokens(username, cache.get(username));
+    cache.set(username, tokens);
+    return Object.values(tokens);
+  }
+
+  return tokenMutex.runExclusive(async () => {
+    if (cache.has(username)) {
+      const tokens = await cleanExistingTokens(username, cache.get(username));
+      cache.set(username, tokens);
+      return Object.values(tokens);
+    }
+    // if not cached, read from k8s secret
+    logger.info(`Reading tokens for user: ${username} from k8s secret`);
+    const tokens = await k8sSecret.get(userTokenNamespace, username, { encode: 'hex' });
+    if (tokens === null) {
+      return [];
+    }
+
+    const purged = await cleanExistingTokens(username, tokens);
+    cache.set(username, purged);
+
+    return Object.values(purged);
+  });
 };
 
 const create = async (
@@ -129,6 +158,18 @@ const create = async (
     result[key] = token;
     await k8sSecret.replace(namespace, username, result, { encode: 'hex' });
   }
+
+  // cache the token
+  await tokenMutex.runExclusive(() => {
+    if (cache.has(username)) {
+      const tokens = cache.get(username);
+      tokens[key] = token;
+      cache.set(username, tokens);
+    } else {
+      cache.set(username, { [key]: token });
+    }
+  });
+
   return token;
 };
 
@@ -143,6 +184,19 @@ const revoke = async (token) => {
     logger.info('No need to revoke job specific token.');
     return;
   }
+
+  await tokenMutex.runExclusive(async () => {
+    if (cache.has(username)) {
+      const tokens = cache.get(username);
+      for (const [key, val] of Object.entries(tokens)) {
+        if (val === token) {
+          delete tokens[key];
+        }
+      }
+      cache.set(username, tokens);
+    }
+  });
+
   const item = await k8sSecret.get(namespace, username, { encode: 'hex' });
   if (item === null) {
     // TODO: for test purpose. We only revoke the token if it exists.
@@ -161,6 +215,21 @@ const revoke = async (token) => {
 };
 
 const batchRevoke = async (username, filter) => {
+  await tokenMutex.runExclusive(async () => {
+    if (cache.has(username)) {
+      const tokens = cache.get(username);
+      let changed = false;
+      for (const [key, val] of Object.entries(tokens)) {
+        if (filter(val)) {
+          delete tokens[key];
+          changed = true;
+        }
+      }
+      if (changed) {
+        cache.set(username, tokens);
+      }
+    }
+  });
   const namespace = userTokenNamespace;
   const item = await k8sSecret.get(namespace, username, { encode: 'hex' });
   const result = purge(item || {});
@@ -173,7 +242,12 @@ const batchRevoke = async (username, filter) => {
 };
 
 const verify = async (token) => {
-  const payload = jwt.verify(token, secret);
+  let payload;
+  try {
+    payload = jwt.verify(token, secret);
+  } catch (err) {
+    throw new Error('Token is invalid');
+  }
   const username = payload.username;
   if (!username) {
     throw new Error('user name is null so Token is invalid');
@@ -196,9 +270,57 @@ const verify = async (token) => {
     }
   }
 
-  // TODO: for test purpose only
-  // we need to sync with the code author to verify the logic 
-  return payload;
+  // verify from user token cache
+  // if the token is cached, check if the token exists in the cache
+  if (cache.has(username)) {
+    const tokens = await cleanExistingTokens(username, cache.get(username));
+    // if tokens are changed, update the cache
+    if (Object.keys(tokens).length !== Object.keys(cache.get(username)).length) {
+      await tokenMutex.runExclusive(() => {
+        cache.set(username, tokens);
+      });
+    }
+    for (const val of Object.values(tokens)) {
+      if (val === token) {
+        logger.info('token verified from cache');
+        return payload;
+      }
+    }
+  }
+
+  // if not cached, read from k8s secret
+  const namespace = userTokenNamespace;
+  return tokenMutex.runExclusive(async () => {
+    if (cache.has(username)) {
+      const tokens = await cleanExistingTokens(username, cache.get(username));
+      cache.set(username, tokens);
+      for (const val of Object.values(tokens)) {
+        if (val === token) {
+          logger.info('token verified from cache');
+          return payload;
+        }
+      }
+    }
+
+    const items = await k8sSecret.get(namespace, username, { encode: 'hex' });
+    const tokens = await cleanExistingTokens(username, items || {});
+
+    cache.set(username, tokens);
+    for (const val of Object.values(tokens)) {
+      if (val === token) {
+        logger.info('token verified from k8s secret');
+        return payload;
+      }
+    }
+    throw new Error('Token is invalid');
+  });
+};
+
+const revokeAll = async () => {
+  // clear the cache
+  cache.clear();
+  // delete all tokens in the user token namespace
+  await k8sSecret.deleteAll(userTokenNamespace);
 };
 
 module.exports = {
@@ -207,4 +329,5 @@ module.exports = {
   batchRevoke,
   revoke,
   verify,
+  revokeAll,
 };

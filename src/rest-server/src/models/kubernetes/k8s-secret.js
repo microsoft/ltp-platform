@@ -232,6 +232,30 @@ const patchMetadata = async (namespace, name, metadata, options = {}) => {
   logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished patching secret, response time: ${endTime - startTime}ms`);  
 };
 
+const deleteAll = async (namespace) => {
+  const client = initClient(namespace);
+
+  const logId = Math.floor(Math.random() * 100000);
+  const startTime = Date.now();
+  logger.info(`[${logId}] ${new Date(startTime).toISOString()} - Starting to delete all secrets in namespace ${namespace}`);
+
+  // List all secrets in the namespace
+  const response = await client.get('/');
+  const items = (response.data && response.data.items) || [];
+  for (const item of items) {
+    const secretName = item.metadata.name;
+    try {
+      await client.delete(`/${secretName}`);
+      logger.info(`[${logId}] Deleted secret: ${secretName}`);
+    } catch (err) {
+      logger.warn(`[${logId}] Failed to delete secret: ${secretName} - ${err.message}`);
+    }
+  }
+
+  const endTime = Date.now();
+  logger.info(`[${logId}] ${new Date(endTime).toISOString()} - Finished deleting all secrets, response time: ${endTime - startTime}ms`);
+};
+
 module.exports = {
   get,
   list,
@@ -239,4 +263,5 @@ module.exports = {
   replace,
   remove,
   patchMetadata,
+  deleteAll,
 };

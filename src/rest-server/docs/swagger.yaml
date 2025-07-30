@@ -119,6 +119,27 @@ paths:
                   - "JWT Token Example"
         "401":
           $ref: "#/components/responses/UnauthorizedUserError"
+    delete:
+      tags:
+        - token
+      summary: Revoke all tokens.
+      description: Revoke all tokens.
+      operationId: deleteTokens
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                message: revoke successfully
+        "401":
+          $ref: "#/components/responses/UnauthorizedUserError"
+        "403":
+          $ref: "#/components/responses/ForbiddenUserError"
   "/api/v2/tokens/{token}":
     delete:
       tags:

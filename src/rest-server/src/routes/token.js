@@ -103,5 +103,23 @@ router.get('/check', tokenMiddleware.check, async (req, res, next) => {
   }
 });
 
+// remove all the tokens in the system
+/** DELETE /api/v2/token - Revoke all the tokens in the system */
+router.delete(
+  '/',
+  tokenMiddleware.checkNotApplication,
+  tokenMiddleware.checkAdmin,
+  async (req, res, next) => {
+    try {
+      await tokenModel.revokeAll();
+      res.status(200).json({
+        message: 'All tokens revoked successfully',
+      });
+    } catch (err) {
+      next(createError.unknown(err));
+    }
+  },
+);
+
 // module exports
 module.exports = router;
