@@ -39,6 +39,15 @@ cp {{ cluster_cfg["alert-manager"]["node-recycler"]["icm"]["key_path"] }} icm-ce
 kubectl create configmap icm-certs --from-file=icm-certs/ --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
 {% endif %}
 
+{% if cluster_cfg["alert-manager"]["cert-expiration-checker"] %}
+{% if cluster_cfg['authentication']['AAD'] and cluster_cfg['authentication']['AAD']['certificate'] %}
+kubectl create configmap oidc-cert \
+    --from-file="public.crt"={{ cluster_cfg['authentication']['AAD']['certificate']['certPath'] }} \
+    --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
+{% endif %}
+kubectl apply --overwrite=true -f alert-manager-cert-expiration-check-cronjob.yaml || exit $?
+{% endif %}
+
 kubectl apply --overwrite=true -f rbac.yaml || exit $?
 kubectl apply --overwrite=true -f alert-manager-configmap.yaml || exit $?
 kubectl apply --overwrite=true -f alert-manager-deployment.yaml || exit $?

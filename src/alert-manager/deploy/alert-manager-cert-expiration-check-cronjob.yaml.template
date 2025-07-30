@@ -22,15 +22,23 @@ spec:
     {%- else %}
               value: "{{ cluster_cfg['pylon']['uri']}}"
     {%- endif %}
+            - name: ALERT_MANAGER_URL
+              value: {{ cluster_cfg["alert-manager"]["url"] }}
             - name: ALERT_RESIDUAL_DAYS
               value: "{{ cluster_cfg["alert-manager"]["cert-expiration-checker"]["alert-residual-days"] }}"
+            - name: ALERT_GROUP_EMAIL
+              value: "{{ cluster_cfg["alert-manager"]["cert-expiration-checker"]["alert_group_email"] }}"
+    {% if cluster_cfg['authentication']['OIDC'] %}
+            - name: OIDC_CERT_FILE_PATH
+              value: /oidc-cert/public.crt
             volumeMounts:
-            - mountPath: /etc/kubernetes/ssl
-              name: kubernetes-ssl
+            - mountPath: /oidc-cert
+              name: oidc-cert
           volumes:
-            - name: kubernetes-ssl
-              hostPath:
-                path: {{ cluster_cfg["alert-manager"]["cert-expiration-checker"]["cert-path"] }}
+            - name: oidc-cert
+              configMap:
+                name: oidc-cert
+    {% endif %}
           imagePullSecrets:
           - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
           restartPolicy: OnFailure

@@ -71,7 +71,7 @@ class BuildHandler:
             sys.exit(1)
         else:
             if os.path.isdir(destination):
-               shutil.rmtree(destination)
+                shutil.rmtree(destination)
             shutil.copytree(source,destination)
 
     def clean_temp_folder(self, service_path):
@@ -83,4 +83,3 @@ class BuildHandler:
 
         if os.path.isdir(temp_dependency_dir):
             shutil.rmtree(temp_dependency_dir)
-

@@ -1,0 +1,37 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml"
+    style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+
+<body>
+    Dear LTP admin:
+    </br>
+    </br>
+    There are certificate expiration alerts for cluster <b>
+        <%= cluster_id %>
+    </b>.
+    </br>
+    </br>
+    Related Certificate(s):
+    </br>
+    </br>
+    <% alerts.filter(element=> element.status == "firing").forEach(function(alert) { %>
+        Certificate: <b><%= alert.annotations.cert %></b>
+        <br />
+        <br />
+        Certificate Expiry Date: <b><%= alert.annotations.expiry_date %></b>
+        <br />
+        <br />
+        <i><%= alert.annotations.description %></i>
+        <br />
+        <br />
+    <% }); %>
+    </br>
+    Please check the certificate expiration status and renew the certificate if necessary.
+    </br>
+    </br>
+    LTP Admin Team
+</body>
+
+</html>

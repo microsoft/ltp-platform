@@ -130,6 +130,11 @@ data:
       - receiver: pai-adjust-user-quota
         match:
           report_type: adjust-user-quota
+      
+      - receiver: pai-cert-expiration-checker
+        match:
+          alertname: cert-expiration
+        continue: true
 
       {% if 'routes' in cluster_cfg["alert-manager"]["customized-routes"] %}
       {% for route in cluster_cfg["alert-manager"]["customized-routes"]["routes"] %}
@@ -155,6 +160,13 @@ data:
       {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
         send_resolved: true
+      {% endif %}
+
+    - name: pai-cert-expiration-checker
+      webhook_configs:
+      {% if 'cert-expiration-checker' in cluster_cfg["alert-manager"]["actions-available"] %}
+      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-group/?template=cert-expiration'
+        send_resolved: false
       {% endif %}
 
     - name: pai-cluster-usage
