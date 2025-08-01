@@ -14,7 +14,7 @@ export default function ChatBox() {
   
   // Values needed by Lucia Agent API Server
   const TRACE_ID = 'cafe66d8-f37b-42b4-b765-bca9b1f09c2b';
-  const REMOTE_SERVER_URL = `/api/v1/instance/operation`;
+  const REMOTE_SERVER_URL = `/copilot/api/operation`;
 
   const makeChatRequest = async (e: React.FormEvent) => {
     e.preventDefault();

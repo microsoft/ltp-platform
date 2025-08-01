@@ -14,7 +14,7 @@ import { Pane } from "../components/pane";
 const IP_ADDRESS = 'copilot.openpai.org';
 const PORT = 8443;
 const TRACE_ID = 'cafe66d8-f37b-42b4-b765-bca9b1f09c2b';
-const REMOTE_SERVER_URL = `https://${IP_ADDRESS}:${PORT}/api/v1/instance/operation`;
+const REMOTE_SERVER_URL = `/copilot/api/operation`;
 
 type MessageGroup = {
   sender: "assistant" | "user";
