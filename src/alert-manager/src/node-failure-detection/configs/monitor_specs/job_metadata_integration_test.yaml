@@ -1,0 +1,17 @@
+spec_id: "job_metadata_integration_test_v1"
+request_type: "investigation"
+priority: "medium"
+
+target_jobs:
+  job_selector: 
+    status: ["running"]
+    runtime_more_than: "10m"
+
+time_window:
+  start_time_offset: "3600"
+  end_time_offset: "0"
+
+api_requirements:
+  - name: "job_metadata"
+    source: "job_metadata"
+

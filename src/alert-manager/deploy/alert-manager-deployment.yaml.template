@@ -121,10 +121,12 @@ spec:
           value: {{ cluster_cfg['rest-server']['uri'] }}
         - name: PAI_BEARER_TOKEN
           value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+        {%- if "prod_vc" in cluster_cfg["alert-manager"]["job-status-change-notification"] %}
         {%- for group in cluster_cfg["alert-manager"]["job-status-change-notification"]["prod_vc"] %}
         - name: PAI_PROD_JOB_STATUS_CHANGE_GROUP_EMAIL_{{ group | replace('-', '_') }}
           value: "{{ cluster_cfg['alert-manager']['job-status-change-notification']['prod_vc_group_emails'][group] }}"
         {%- endfor %}
+        {%- endif %}
 {% endif %}
 {% if cluster_cfg["alert-manager"]["node-issue-classifier"]["configured"] %}
       - name: node-issue-classifier
@@ -288,6 +290,80 @@ spec:
 {% endif %}
 {% endif %}
 
+{% if cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["configured"] %}
+      - name: monitor
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}node-failure-detection:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        command: ["python", "-u", "monitor/service_runner.py"]
+        env:
+        - name: REDIS_ENABLED
+          value: "{{ cluster_cfg['alert-manager']['node-failure-detection']['redis']['enabled'] | default('false') }}"
+        - name: REDIS_HOST
+          value: "{{ cluster_cfg['alert-manager']['node-failure-detection']['redis']['host'] | default('redis') }}"
+        - name: REDIS_PORT
+          value: "{{ cluster_cfg['alert-manager']['node-failure-detection']['redis']['port'] | default('6379') }}"
+        - name: REDIS_DB
+          value: "{{ cluster_cfg['alert-manager']['node-failure-detection']['redis']['db'] | default('0') }}"
+        - name: SPECS_DIR
+          value: "/app/config_specs"
+        - name: LOG_LEVEL
+          value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["log-level"] | default("INFO") }}
+        - name: PROMETHEUS_SERVER_URI
+          value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["prometheus-server-uri"] }}
+        - name: REST_SERVER_URI
+          value: {{ cluster_cfg["rest-server"]["uri"] }}
+        - name: PAI_TOKEN
+          value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+        - name: LOG_MANAGER_USERNAME
+          value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["log-manager-username"] | default("admin") }}
+        - name: LOG_MANAGER_PASSWORD
+          value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["log-manager-password"] | default("admin") }}
+        {% if "result-output-dir" in cluster_cfg["alert-manager"]["node-failure-detection"]["monitor""] %}
+        - name: RESULT_OUTPUT_DIR
+          value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["result-output-dir"] | }}
+        {% endif %}
+        volumeMounts:
+        - name: monitor-specs-config
+          mountPath: /app/config_specs
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+{% endif %}
+{% if cluster_cfg["alert-manager"]["node-failure-detection"]["detector"]["configured"] %}
+      - name: detector
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}node-failure-detection:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        command: ["python", "-u", "detector/detector_service.py"]
+        env:
+        - name: REDIS_ENABLED
+          value: "{{ cluster_cfg['alert-manager']['node-failure-detection']['redis']['enabled'] | default('false') }}"
+        - name: REDIS_HOST
+          value: "{{ cluster_cfg['alert-manager']['node-failure-detection']['redis']['host'] | default('redis') }}"
+        - name: REDIS_PORT
+          value: "{{ cluster_cfg['alert-manager']['node-failure-detection']['redis']['port'] | default('6379') }}"
+        - name: REDIS_DB
+          value: "{{ cluster_cfg['alert-manager']['node-failure-detection']['redis']['db'] | default('0') }}"
+        - name: LOG_LEVEL
+          value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["detector"]["log-level"] | default("INFO") }}
+        - name: PATTERNS_DIR
+          value: "/app/detector/config_patterns"
+        - name: ALERT_MANAGER_URL
+          value: "{{ cluster_cfg['alert-manager']['url'] | default('http://localhost:9093') }}"
+        volumeMounts:
+        - name: detector-patterns-config
+          mountPath: /app/detector/config_patterns
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+{% endif %}
 {% if cluster_cfg["alert-manager"]["job-data-recorder"]["configured"] %}
       - name: job-data-recorder
         image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}job-data-recorder:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
@@ -364,6 +440,16 @@ spec:
 {% endif %}
       - name: alertmanager
         emptyDir: {}
+{% if cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["configured"] %}
+      - name: monitor-specs-config
+        configMap:
+          name: monitor-specs-config
+{% endif %}
+{% if cluster_cfg["alert-manager"]["node-failure-detection"]["detector"]["configured"] %}
+      - name: detector-patterns-config
+        configMap:
+          name: detector-patterns-config
+{% endif %}
       tolerations:
       - key: node.kubernetes.io/memory-pressure
         operator: "Exists"

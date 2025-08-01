@@ -52,3 +52,12 @@ cert-expiration-checker:
   schedule: '0 0 * * *'
   alert-residual-days: 10
   alert_group_email: ''
+node-failure-detection:
+  redis:
+    enabled: False
+  monitor:
+    configured: False
+  detector:
+    configured: False
+
+

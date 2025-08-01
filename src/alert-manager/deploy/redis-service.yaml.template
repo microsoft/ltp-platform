@@ -15,33 +15,18 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-cluster-type:
-  - yarn
-  - k8s
-
-prerequisite:
-  - cluster-configuration
-  - drivers
-
-template-list:
-  - alert-manager-deployment.yaml
-  - alert-manager-configmap.yaml
-  - alert-manager-cronjob.yaml
-  - alert-manager-cert-expiration-check-cronjob.yaml
-  - alert-manager-abnormal-detector.yaml
-  - redis-configmap.yaml
-  - redis-deployment.yaml
-  - redis-service.yaml
-  - monitor-specs-configmap.yaml
-  - detector-patterns-configmap.yaml
-  - start.sh
-
-start-script: start.sh
-stop-script: stop.sh
-delete-script: delete.sh
-refresh-script: refresh.sh
-upgraded-script: upgraded.sh
-
-
-deploy-rules:
-  - in: pai-master
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+    name: redis
+  selector:
+    app: redis 

@@ -1,0 +1,30 @@
+spec_id: "job_failure_investigation_v1"
+request_type: "pattern"
+priority: "medium"
+
+schedule:
+  enabled: true
+  interval: "5m"
+
+target_nodes:
+  node_selector: 
+    schedulable: true
+    job:
+      state: "failed"
+
+metrics_requirements:
+  - name: "job_failure_rate"
+    source: "prometheus"
+    query: 'rate(job_failures_total[5m]) > 0.1'
+    step: "30s"
+
+logs_requirements:
+  - name: "job_error_logs"
+    source: "job_logs"
+    patterns:
+      - regex: ".*ERROR.*"
+        description: "Job error messages"
+      - regex: ".*Exception.*"
+        description: "Job exceptions"
+    parsing_format: "regex"
+    tail: true 

@@ -20,7 +20,12 @@
 
 kubectl delete --ignore-not-found --now configmap/alert-templates
 kubectl delete --ignore-not-found --now configmap/alertmanager
+kubectl delete --ignore-not-found --now configmap/redis-config
+kubectl delete --ignore-not-found --now configmap/monitor-specs-config
+kubectl delete --ignore-not-found --now configmap/detector-patterns-config
 kubectl delete --ignore-not-found --now deployment/alertmanager
+kubectl delete --ignore-not-found --now deployment/redis
+kubectl delete --ignore-not-found --now service/redis
 kubectl delete --ignore-not-found --now cronjob/cluster-utilization
 kubectl delete --ignore-not-found --now cronjob/cert-expiration-checker
 

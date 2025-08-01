@@ -64,12 +64,16 @@ class RequestUtil:
     @staticmethod
     def openpai_query(query: str, json_content: bool = True, retry: int = 5):
         """Make requests to OpenPAI REST API"""
-        base_url = os.getenv("REST_SERVER_URI", "https://auto-test.openpai.org/rest-server")
+        base_url = os.getenv("REST_SERVER_URI", "https://test/rest-server")
         query = query.replace("restserver", "api/v2")
         url = f"{base_url}/{query}"
-        if os.getenv("ENVIRONMENT") == "prod" and "log-manager" in query:
-            query = query.replace("log-manager", "/")
-            url = f"http:{query}"
+        if "log-manager" in query:
+            if os.getenv("ENVIRONMENT") == "prod":
+                query = query.replace("log-manager", "/")
+                url = f"http:{query}"
+            else:
+                base_url = base_url.replace("rest-server", "")
+                url = f"{base_url}/{query}"
         
         token = os.getenv("PAI_TOKEN")
         while retry > 0:
@@ -92,7 +96,7 @@ class PrometheusClient:
     """Client for collecting metrics from Prometheus"""
     
     def __init__(self):
-        self.base_url = os.getenv("PROMETHEUS_SERVER_URI", "https://auto-test.openpai.org/prometheus")
+        self.base_url = os.getenv("PROMETHEUS_SERVER_URI", "https://test/prometheus")
         self.token = os.getenv("PAI_TOKEN")
     
     def query_range(self, query: str, start_time: int, end_time: int, step: str = "30s", retry: int = 3) -> Optional[Dict]:
@@ -122,9 +126,8 @@ class PrometheusClient:
             Dict: Parsed response data from Prometheus
         """
         query = f"{self.base_url}/prometheus/api/v1/query?query={query}"
-        token = os.getenv("PAI_TOKEN")
         while retry > 0:
-            response = RequestUtil.get_request(query, token)
+            response = RequestUtil.get_request(query, self.token)
             if response and response.ok:
                 return json.loads(response.content)["data"]
             logger.error(
@@ -135,17 +138,15 @@ class PrometheusClient:
                 time.sleep(12)
         return None
     
-    def get_metric_sampling_interval(self, metric_name):
+    def get_metric_sampling_interval(self, metric_name, retry: int = 5):
         """Get the sampling interval for a given metric."""
-        attempt = 10
-        while True:
-            query = f"{metric_name}[10m]"
-            output = self.query(query, {})
-            if output:
-                values = output["result"][0]["values"]
-                return int(float(values[1][0]) - float(values[0][0]))
-            attempt = attempt * 10
-    
+        query = f"{metric_name}[10m]"
+        output = self.query(query, {}, retry=retry)
+        if output:
+            values = output["result"][0]["values"]
+            return int(float(values[1][0]) - float(values[0][0]))
+        return None
+  
     def query_step(
         self, query, data, end_time, time_offset, step="6h"
     ):
@@ -220,12 +221,6 @@ class JobLogsClient:
                 return None
                 
             task_role_name = list(task_roles.keys())[0]
-            task_statuses = task_roles[task_role_name]["taskStatuses"]
-            
-            # Find failed or stopped tasks
-            failed_tasks = [task for task in task_statuses if task["taskState"] == "FAILED"]
-            stopped_tasks = [task for task in task_statuses 
-                           if task.get("containerExitSpec", {}).get("type") == "USER_STOP"]
             
             # Download logs for the task
             for node, node_data in job_data.get("nodes", {}).items():
@@ -321,8 +316,8 @@ class NodeLogsClient:
     def get_token(self, node_ip: str) -> str:
         """Get authentication token for log-manager API on a specific node"""
         payload = {
-            "username": "admin",
-            "password": "admin",
+            "username": os.getenv("LOG_MANAGER_USERNAME"),
+            "password": os.getenv("LOG_MANAGER_PASSWORD"),
         }
         url = f"{self.base_url}/log-manager/{node_ip}:{self.log_manager_port}/api/v1/tokens"
         try:
@@ -389,13 +384,14 @@ class NodeLogsClient:
             log_filename = log_path.split('/')[-1]
             regex_pattern = None
             if len(patterns) == 1 and patterns[0].get('regex'):
-                regex_pattern = patterns[0].get('regex')
-            content = self._get_log_content(
-                node_ip, log_filename, tail_lines, 
-                start_time=start_time_str, end_time=end_time_str,
-                regex_pattern=regex_pattern
-            )
+                regex_pattern = patterns[0].get('regex') 
+   
             try:
+                content = self._get_log_content(
+                    node_ip, log_filename, tail_lines, 
+                    start_time=start_time_str, end_time=end_time_str,
+                    regex_pattern=regex_pattern
+                )
                 # if there is only one pattern, use the regex pattern to filter the log
                 for line_num, line in enumerate(content.split('\n')):
                     if max_entries and len(matched_lines) >= max_entries:
@@ -608,14 +604,14 @@ class JobMetadataClient:
         nodes = {}
         for task_role_name, task_role_data in attempt_data.get('taskRoles', {}).items():
             for task_status in task_role_data.get('taskStatuses', []):
-                node_name = task_status.get('containerNodeName')
-                task_state = task_status.get('taskState')
+                node_name = task_status.get('containerNodeName', None)
+                task_state = task_status.get('taskState', None)
                 exit_spec = task_status.get('containerExitSpec', {})
                 if node_name:
                     nodes[node_name] = {
                         "task_state": task_state,
                         "exit_spec": exit_spec,
-                        "task_role_index": task_role_data.get('taskIndex')
+                        "task_role_index": task_status.get('taskIndex', None)
                     }
         return nodes
     
@@ -671,8 +667,8 @@ class JobMetadataClient:
         
         filtered_attempts = []
         for attempt_key, attempt_data in all_attempts.items():
-            attempt_state = attempt_data.get("attemptState")
-            completed_time = attempt_data.get("completedTime")
+            attempt_state = attempt_data.get("attemptState", None)
+            completed_time = attempt_data.get("completedTime", None)
             
             if finished:
                 # Only include completed attempts

@@ -1,0 +1,30 @@
+spec_id: "ib_link_flapping_repeat_v1"
+request_type: "pattern"
+priority: "high"
+created_at: "2025-07-07T10:00:00Z"
+
+schedule:
+  enabled: true
+  interval: "1m"  # High priority - frequent checks
+
+target_nodes:
+  node_selector: 
+    schedulable: true
+
+metrics_requirements:
+  - name: "ib_port_physical_state"
+    source: "prometheus"
+    query: "task_ib_port_physical_state{instance=~'.*'} == 0"
+
+logs_requirements:
+  - name: "syslog_ib_lost_carrier"
+    source: "node_logs"
+    log_paths: ["syslog"]
+    patterns:
+      - regex: "(?P<timestamp>\\w{3}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}:\\d{2})\\s+(?P<node_id>\\S+)\\s+systemd-networkd\\[\\d+\\]:\\s+(?P<port_id>ib\\d+):\\s+(?P<message>Lost carrier)"
+        description: "Extract timestamp, node ID, port ID, and message for 'Lost carrier' events"
+    timestamp_format: "MMM dd HH:mm:ss"  # Syslog timestamp format
+    parsing_format: "regex"
+    output_fields: ["timestamp", "node_id", "port_id", "message"]
+
+

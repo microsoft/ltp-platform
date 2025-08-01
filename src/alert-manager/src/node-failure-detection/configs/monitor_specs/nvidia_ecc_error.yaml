@@ -1,0 +1,25 @@
+spec_id: "nvidia_ecc_error_v1"
+request_type: "pattern"
+priority: "high"
+
+schedule:
+  enabled: true
+  interval: "1m" 
+
+target_nodes:
+  node_selector: 
+    schedulable: true
+
+metrics_requirements:
+  - name: "double_ecc_count"
+    source: "prometheus"
+    query: nvidiasmi_ecc_error_count{type="single"} > 0
+
+logs_requirements:
+  - name: "dram_ecc_error"
+    source: "job_logs"
+    patterns:
+      - regex: ".*"
+        description: "DRAM ECC errors"
+    parsing_format: "regex"
+    tail: true

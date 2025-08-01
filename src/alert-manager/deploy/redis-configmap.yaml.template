@@ -1,0 +1,132 @@
+# Copyright (c) Microsoft Corporation
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+data:
+  redis.conf: |-
+    # Redis configuration for Alert Manager Node Failure Detection
+    
+    # Network configuration
+    bind 0.0.0.0
+    port 6379
+    tcp-backlog 511
+    timeout 0
+    tcp-keepalive 300
+    
+    # General configuration
+    daemonize no
+    supervised no
+    pidfile /var/run/redis.pid
+    loglevel notice
+    logfile ""
+    syslog-enabled no
+    databases 16
+    
+    # Enhanced logging for debugging
+    # Log queries slower than 10ms (helps debug performance issues)
+    slowlog-log-slower-than 10000
+    slowlog-max-len 128
+    
+    # Memory tracking and debugging
+    # Track memory usage patterns
+    maxmemory-samples 10
+    
+    # Log memory warnings early
+    syslog-facility local0
+    
+    # Memory management and monitoring
+    # Use allkeys-lru eviction policy to handle memory pressure
+    maxmemory-policy allkeys-lru
+    # Increased samples for better LRU accuracy and debugging
+    maxmemory-samples 10
+    
+    # Set a reasonable memory limit (will be overridden by K8s limits)
+    # This helps Redis log memory warnings before K8s kills the pod
+    # maxmemory 400mb  # Uncomment if you want Redis-level limits
+    
+    # Persistence configuration
+    # Enable both RDB and AOF for data durability
+    save 900 1
+    save 300 10
+    save 60 10000
+    
+    # RDB configuration
+    stop-writes-on-bgsave-error no
+    rdbcompression yes
+    rdbchecksum yes
+    dbfilename dump.rdb
+    dir /data
+    
+    # AOF configuration
+    appendonly yes
+    appendfilename "appendonly.aof"
+    appendfsync everysec
+    no-appendfsync-on-rewrite no
+    auto-aof-rewrite-percentage 100
+    aof-load-truncated yes
+    aof-use-rdb-preamble yes
+    
+    # Redis Streams configuration optimized for node failure detection
+    # Remove artificial limits to handle large monitoring payloads efficiently
+    # 
+    # Default Redis limits are too small for our use case:
+    # - Node failure detection messages can be 5-50MB (cluster-wide investigations)
+    # - Complex JSON with 1000s of log entries, metrics from 100+ nodes
+    # - Artificial limits cause excessive fragmentation and poor performance
+    #
+    # Let Redis manage internal storage optimally without arbitrary constraints
+    # 
+    # Note: Messages are deleted individually after consumption by the application
+    # to prevent unbounded growth of streams
+    
+    # Client output buffer limits for pub/sub and normal clients
+    # Set reasonable limits to prevent memory issues
+    client-output-buffer-limit normal 32mb 8mb 60
+    client-output-buffer-limit replica 256mb 64mb 60
+    client-output-buffer-limit pubsub 32mb 8mb 60
+    
+    # Performance tuning
+    hz 10
+    dynamic-hz yes
+    
+    # Security (basic settings)
+    protected-mode no
+    
+    # Disable dangerous commands in production
+    rename-command FLUSHDB ""
+    rename-command FLUSHALL ""
+    rename-command DEBUG ""
+    rename-command CONFIG ""
+    
+    # Enhanced monitoring and debugging
+    # Enable keyspace notifications for stream monitoring
+    notify-keyspace-events "Ex"
+    
+    # Latency monitoring (track operations slower than 10ms)
+    latency-monitor-threshold 10
+    
+    # Additional monitoring for streams and memory
+    # Track command latencies
+    latency-tracking yes
+    latency-tracking-info-percentiles 50 99 99.9
+    
+    # Log client connections for debugging
+    # (Useful for tracking connection leaks)
+    tcp-keepalive 60 
