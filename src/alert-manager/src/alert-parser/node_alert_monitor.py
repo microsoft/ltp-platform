@@ -167,19 +167,19 @@ class NodeAvailabilityMonitor:
             logger.info(f'{len(period_alerts)} alerts found for node {node} at time {timestamp}')
             shrinked_alerts = self.alert_fetcher.shrink_alerts((period_alerts))
             logger.info(f'{len(shrinked_alerts)} alerts after shrinking for node {node} at time {timestamp}')
-            
+
         if status == 1:  # Changed to unschedulable
             to_status = NodeStatus.CORDONED.value
             reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
             self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
-            
-        elif status == 0:  # Changed to schedulable
-            to_status = NodeStatus.AVAILABLE.value
+
+        elif status == 0:  # Changed to available nodata
+            to_status = NodeStatus.AVAILABLE_NODATA.value
             reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
             self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
-            
+
         elif status == -1:  # Continuously unschedulable
-            if from_status == NodeStatus.AVAILABLE.value:
+            if from_status in [NodeStatus.AVAILABLE.value, NodeStatus.AVAILABLE_NODATA.value]:
                 to_status = NodeStatus.CORDONED.value
                 reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
                 self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
