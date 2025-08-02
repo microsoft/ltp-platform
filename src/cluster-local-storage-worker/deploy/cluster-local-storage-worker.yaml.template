@@ -1,0 +1,43 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cluster-local-storage-worker-ds
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: cluster-local-storage-worker
+  template:
+    metadata:
+      name: cluster-local-storage-worker
+      labels:
+        app: cluster-local-storage-worker
+    spec:
+      hostNetwork: true
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+      containers:
+      - name: cluster-local-storage-worker
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}cluster-local-storage:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        imagePullPolicy: Always
+        command:
+        - /usr/local/cluster-local-storage/init.sh
+        env:
+        - name: CLUSTER_LOCAL_STORAGE_ROOT
+          value: /data
+        volumeMounts:
+        - name: local-storage
+          mountPath: /data
+      volumes:
+      - name: local-storage
+        hostPath:
+          path: '{{ cluster_cfg["cluster-local-storage"]["root-path"] }}'
+      tolerations:
+      - key: node.kubernetes.io/memory-pressure
+        operator: "Exists"
+      - key: node.kubernetes.io/disk-pressure
+        operator: "Exists"

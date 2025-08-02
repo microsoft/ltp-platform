@@ -91,6 +91,10 @@ spec:
             - name: MARKETPLACE_WEBPORTAL_PLUGIN
               value: {{ cluster_cfg['marketplace-webportal']['uri']}}
 {% endif %}
+{% if cluster_cfg['cluster']['common']['cluster-local-storage'] == 'true' %}
+            - name: CLUSTER_LOCAL_STORAGE_IP
+              value: {{ cluster_cfg['cluster-local-storage']['ip'] }}
+{% endif %}
             - name: DOCKER_CACHE_PLUGIN
               value: {{ cluster_cfg['docker-cache']['uri']}}
           ports:

@@ -149,6 +149,16 @@ location ~ ^/registry/cache/(.*)$ {
 }
 {%- endif %}
 
+{%- if CLUSTER_LOCAL_STORAGE_IP %}
+# cluster local storage
+{%- for vc in cluster_cfg['cluster-local-storage']['clusters'] %}
+{% set vcport = cluster_cfg['cluster-local-storage']['port-base'] + loop.index0 %}
+location ~ ^/cluster-local-storage/{{vc}}/(.*)$ {
+  proxy_pass http://{{CLUSTER_LOCAL_STORAGE_IP}}:{{vcport}}/$1$is_args$args;
+}
+{%- endfor %}
+{%- endif %}
+
 # PAI web portal
 location ~ ^(.*)$ {
   proxy_pass {{PAI_WEB_PORTAL_URI}}$1$is_args$args;

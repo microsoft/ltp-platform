@@ -1,0 +1,11 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
+service_type: "k8s"
+
+port-base: 17000
+root-path: /mntext
+sync-interval: 600
+clusters: []
+clusters_hostname_regex: []

@@ -1,0 +1,62 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
+{%- for vc, regex in cluster_cfg['cluster-local-storage']['clusters'] | zip(cluster_cfg['cluster-local-storage']['clusters_hostname_regex']) %}
+{% set vcport = cluster_cfg['cluster-local-storage']['port-base'] + loop.index0 %}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cluster-local-storage-sts-{{ vc }}
+  namespace: default
+spec:
+  serviceName: cluster-local-storage-sts-{{ vc }}
+  selector:
+    matchLabels:
+      app: cluster-local-storage-sts-{{ vc }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cluster-local-storage-sts-{{ vc }}
+    spec:
+      hostNetwork: true
+      serviceAccountName: cluster-local-storage-account
+      nodeSelector:
+        pai-master: "true"
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+      containers:
+      - name: cluster-local-storage
+        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}cluster-local-storage:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        imagePullPolicy: Always
+        env:
+        - name: CLUSTER_LOCAL_STORAGE_CLUSTER
+          value: {{ vc }}
+        - name: CLUSTER_LOCAL_STORAGE_CLUSTER_HOSTNAME_REGEX
+          value: {{ regex }}
+        - name: CLUSTER_LOCAL_STORAGE_PORT
+          value: {{ vcport }}
+        - name: CLUSTER_LOCAL_STORAGE_ROOT
+          value: /data
+        - name: CLUSTER_LOCAL_STORAGE_SYNC_INTERVAL
+          value: {{ cluster_cfg["cluster-local-storage"]["sync-interval"] }}
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
+        - name: LTP_KUSTO_CLUSTER_URI
+          value: {{ cluster_cfg["alert-manager"]["kusto-cluster"] }}
+        - name: LTP_KUSTO_DATABASE_NAME
+          value: {{ cluster_cfg["alert-manager"]["kusto-database"] }}
+        - name: KUSTO_NODE_STATUS_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-status-table"] | default("NodeStatusRecord") }}
+        - name: KUSTO_NODE_ACTION_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-action-table"] | default("NodeActionRecord") }}
+        ports:
+        - name: cluster-local-storage-{{ vc }}
+          containerPort: {{ vcport }}
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ vcport }}
+{%- endfor %}

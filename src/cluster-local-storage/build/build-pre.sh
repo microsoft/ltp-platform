@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+
+pushd $(dirname "$0") > /dev/null
+
+cp -arfT "../../kusto-sdk" "../src/kusto-sdk"
+
+popd > /dev/null

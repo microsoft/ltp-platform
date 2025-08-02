@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
+{% if cluster_cfg['cluster']['common']['cluster-local-storage'] == 'true' %}
+pushd $(dirname "$0") > /dev/null
+
+kubectl apply --overwrite=true -f cluster-local-storage-worker.yaml || exit $?
+
+sleep 10
+# Wait until the service is ready.
+PYTHONPATH="../../../deployment" python -m  k8sPaiLibrary.monitorTool.check_pod_ready_status -w -k app -v cluster-local-storage-worker || exit $?
+
+popd > /dev/null
+{% endif %}

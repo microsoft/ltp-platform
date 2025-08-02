@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
+{% if cluster_cfg['cluster']['common']['cluster-local-storage'] == 'true' %}
+pushd $(dirname "$0") > /dev/null
+
+if kubectl get daemonset | grep -q "cluster-local-storage-worker-ds"; then
+    kubectl delete ds cluster-local-storage-worker-ds
+fi
+
+popd > /dev/null
+{% endif %}

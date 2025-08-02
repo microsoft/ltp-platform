@@ -1,0 +1,2 @@
+./kusto-sdk
+kubernetes

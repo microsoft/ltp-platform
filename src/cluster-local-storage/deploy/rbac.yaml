@@ -1,0 +1,23 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-local-storage-account
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-local-storage-role-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: cluster-local-storage-account
+    namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin

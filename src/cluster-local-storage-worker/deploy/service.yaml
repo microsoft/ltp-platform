@@ -1,0 +1,23 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
+cluster-type:
+  - k8s
+
+prerequisite:
+  - cluster-configuration
+  - alert-manager
+  - cluster-local-storage
+
+template-list:
+  - start.sh
+  - stop.sh
+  - cluster-local-storage-worker.yaml
+
+start-script: start.sh
+stop-script: stop.sh
+delete-script: delete.sh
+
+deploy-rules:
+  - in: pai-worker
