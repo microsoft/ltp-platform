@@ -32,12 +32,14 @@ kubectl create configmap alert-templates \
 {% endif -%}
 
 # create configmap for node-recycler
-{% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
+{% if cluster_cfg["alert-manager"]["node-recycler"]["configured"] -%}
+{% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] -%}
 mkdir -p icm-certs/
 cp {{ cluster_cfg["alert-manager"]["node-recycler"]["icm"]["crt_path"] }} icm-certs/
 cp {{ cluster_cfg["alert-manager"]["node-recycler"]["icm"]["key_path"] }} icm-certs/
 kubectl create configmap icm-certs --from-file=icm-certs/ --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
-{% endif %}
+{% endif -%}
+{% endif -%}
 
 {% if cluster_cfg["alert-manager"]["cert-expiration-checker"] %}
 {% if cluster_cfg['authentication']['AAD'] and cluster_cfg['authentication']['AAD']['certificate'] %}
