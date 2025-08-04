@@ -188,6 +188,32 @@ resource storageIdentityRoleAssignment 'Microsoft.Authorization/roleAssignments@
   }
 }
 
+resource storageIdentityBlobDataReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storageIdentity.id, 'Storage Blob Data Reader')
+  scope: storageAccount
+  properties: {
+    description: 'Assign Storage Blob Data Reader role to the storage identity'
+    principalId: storageIdentity.properties.principalId
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1' // Storage Blob Data Reader
+    )
+  }
+}
+
+resource storageIdentityBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storageIdentity.id, 'Storage Blob Data Contributor')
+  scope: storageAccount
+  properties: {
+    description: 'Assign Storage Blob Data Contributor role to the storage identity'
+    principalId: storageIdentity.properties.principalId
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'ba92f5b4-2d11-453d-a403-e96b0029c9fe' // Storage Blob Data Contributor
+    )
+  }
+}
+
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
   name: 'default'
   parent: storageAccount

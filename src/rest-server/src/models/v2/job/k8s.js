@@ -507,6 +507,7 @@ const generateTaskRole = (
                 config.prerequisites.dockerimage[
                   config.taskRoles[taskRole].dockerImage
                 ].uri,
+                serviceAccountName: 'blob-access-pod-sa',
               command: ['/usr/local/pai/runtime'],
               resources: {
                 limits: {
@@ -521,6 +522,23 @@ const generateTaskRole = (
               env: [
                 ...frameworkEnvList,
                 ...taskRoleEnvList,
+                ...(('extras' in config && config.extras.allowAzCopy === true)
+                  ? [
+                      {
+                        name: 'AZCOPY_AUTO_LOGIN_TYPE',
+                        value: 'MSI',
+                      },
+                      {
+                        name: 'AZCOPY_MSI_CLIENT_ID',
+                        valueFrom: {
+                          configMapKeyRef: {
+                            name: 'blob-access-pod-identity',
+                            key: 'storageIdentityId',
+                          },
+                        },
+                      },
+                    ]
+                  : []),
                 // backward compatibility
                 {
                   name: 'PAI_TASK_INDEX',

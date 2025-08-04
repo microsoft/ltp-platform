@@ -69,7 +69,13 @@ You need to create all required resources in your cloud provider.
     bash contrib/kubespray/script/setup_k8s.sh
     ```
 
-5. Configure three yaml files in <your_config_folder>:
+5. Run
+   ```bash
+   bash contrib/kubespray/script/setup_storage_identity.sh <resourceGroup> <storageIndentityName>
+   ```
+   where `resourceGroup` is the resource group name which the AKS and the managed identity locates in, and `storageIdentityName` is the name of the managed identity which has been assigned the role of "Storage Blob Data Contributer" and "Storage Blob Data Reader" for the storage account where blob locates in.
+
+6. Configure three yaml files in <your_config_folder>:
     * config.yaml
     * layout.yaml
     * services-configuration.yaml
@@ -80,17 +86,18 @@ You need to create all required resources in your cloud provider.
     ```
     And then modify them according to your needs.
 
-6. Run the following command to deploy the services:
+7. Run the following command to deploy the services:
     ```bash
     bash contrib/kubespray/script/start-service-in-dev-box.all.sh -c <your_config_folder> -n <your_cluster_name>
     ```
 
-7. Setup the a domain name for the aks cluster. 
-    7.1 Get the public ip of pylon service by:
+8. Setup the a domain name for the aks cluster.
+    8.1 Get the public ip of pylon service by:
     ```bash
     kubectl get svc 
     ```
-    7.2 Create a domain name and point it to the public ip of pylon service.
-    7.3 Add the new domain name into `openpai-cluster` Application Registration in Azure AD.
+    8.2 Create a domain name and point it to the public ip of pylon service.
+
+    8.3 Add the new domain name into `openpai-cluster` Application Registration in Azure AD.
         * Make sure you are the owner of the `openpai-cluster` Application Registration.
         * Go to Azure portal -> Microsoft Entra iD -> App registrations -> openpai-cluster -> Authentication -> Add a platform -> Web -> Redirect URIs
