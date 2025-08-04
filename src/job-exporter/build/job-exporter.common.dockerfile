@@ -72,7 +72,7 @@ COPY build/moneo-*-exporter_entrypoint.sh .
 COPY build/update-dcgm.py .
 
 # For the job exporter
-ENV NERDCTL_VERSION=2.1.2
+ENV NERDCTL_VERSION=2.1.3
 RUN apt-get update && apt-get install --no-install-recommends -y wget ca-certificates
 RUN wget https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz && \
     mkdir -p /tmp/nerdctl && \
