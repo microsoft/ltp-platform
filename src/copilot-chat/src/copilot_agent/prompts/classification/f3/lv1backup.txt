@@ -1,0 +1,61 @@
+Your task is to understand the user's intention from the question they asked, and assign a type to it.
+
+some example types supported:
+
+1. [cluster_job_metrics]: it means the key concern of the user is to understand the current status overview of an object. Usually it requires perform root cause analysis to answer user's concerns.
+2. [job_metadata]: it means the key concern of the user is to understand the root cause of an issue or problem about an object. Usually it requires perform root cause analysis to answer user's concerns.
+3. [user_manual]: it means the key concern of the user is not clear about the specific concerns about status or root cause, but more like a general concern.
+0. [others]: it means the key concern of the user is too general to abstrct.
+
+below knowldge describes some key concepts commonly asked in the cluster_job_metrics type questions:
+knowledge #1: metrics backend is Prometheus REST API server
+knowledge #2: metrics could be cluster metrics, job metrics, filtered by specific virtual cluster (VC) or user, etc.
+
+below knowldge describes some key concepts commonly asked in the user_manual type questions:
+knowledge #1: the user manual of LTP (Lucia Training Platform) provides a detailed usage guidance to assist user better utilize the resource to perform single or distributed training task per their request.
+knowledge #2: the whole user manual consists several sections of documentation, with each focusing on explaining the detail instructions, configurations, information. Available sections are:
+- [Quick Start](./UserManual/quickstart.md): A guide to help you quickly get started with the platform and submit a "hello world" job.
+- [How to Use Docker Image](./UserManual/docker-images.md): Instructions on using Docker images in your jobs.
+- [How to Manage Data and Code](./UserManual/use-data.md): Guidance on managing data and code within your jobs.
+- [How to Write Job Configuration](./UserManual/job-config.md): Detailed instructions for configuring jobs and distributed jobs.
+- [Job Priorities](./UserManual/job-priorities.md): Explanation of job priority types and how to submit jobs with specific priorities.
+- [VC Allocation](./UserManual/vc-allocation.md): Guidelines for managing VC allocation requests and assignment change notifications.
+- [Notification and Monitoring](./UserManual/notification.md): Information on the platform's notification and monitoring features.
+- [Troubleshooting](./UserManual/troubleshooting.md): A troubleshooting guide for common issues and how to get platform support.
+- [Email Templates, UserGroup Admin](./UserManual/email-templates/email-templates-user.md): Templates for UserGroup Admins to request VC allocations, production priority job submissions and integrating private Azure storage blob.
+- [Email Templates, Lucia Training Platform Admin](./UserManual/email-templates/email-templates-ltp.md): Templates for Lucia Training Platform Admins to acknowledge, complete, and notify about VC allocation and assignment changes.
+knowledge #3: [How to Write Job Configuration] section details below topics: Parameters and Secrets, Distributed Settings, Environment Variables for Distributed Jobs, Job Exit Specifications
+
+The followings are some examples:
+[Example 1]
+User question:
+what is the idle gpu counts for virtual cluater (vc): mi300s?
+1. [cluster_job_metrics]
+
+[Example 2]
+User question:
+query allocated gpu counts, end time is now, offset is 1 day
+1. [cluster_job_metrics]
+
+[Example 3]
+User question:
+query job meta data
+2. [job_metadata]
+
+[Example 4]
+User question:
+how to submit a distributed training job?
+3. [user_manual]
+
+[Example 5]
+User question:
+write/create a new benchmark for ...
+0. [others]
+
+[Example 6]
+User question:
+query a list of running or history jobs
+1. [cluster_job_metrics]
+
+Please output  in the following format:
+Type: 0-3. [question type]

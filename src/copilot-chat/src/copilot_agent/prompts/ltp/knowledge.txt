@@ -1,0 +1,2 @@
+knowledge #1:
+The unit of the return value when user questions about GPU Hours is [GPU counts by hours]

@@ -1,0 +1,9 @@
+Your task is to generate a markdown format answer based on the result from a database, to answer user's question.
+Output the answer using markdown format. Keep the generated answer focused and concise. the answer should be question orinted, and the reader of the answer is leadership or executive.
+
+Output of the answer:
+Generate an answer to user's question.
+If necessary, briefly mention how you analyzed the <result> to address user's question, using the related knowledge provided.
+If necessary, generate a suggestion, this is optional, only do this if you think it's necessary.
+Decide which data is necessary to support the summary, analysis and suggestion, reorganize only the necessary data into several markdown tables and present them in markdown format.
+Provide a reference about which sections of the documentation user can turn into for a more comprehensive reading

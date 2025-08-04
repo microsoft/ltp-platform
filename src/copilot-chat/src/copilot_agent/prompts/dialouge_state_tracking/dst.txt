@@ -1,0 +1,30 @@
+your task is to improve the expression of this question based on its relationship with last question
+output format:
+```json
+{
+"new_question": "xxx"
+}
+```
+
+To do that, you need to understand if this question is a follow-up question from last question, if yes and there are some language concepts (intent, specific entities, and attributes.) missing in this question and can be complemented from last question, then you need to complement the this question.
+
+The followings are some examples:
+[Example 1]
+this_question: how about week 27?
+last_question: what is the failure node count for week 28
+output:
+```json
+{
+  "new_question": "what is the failure node count for week 27?"
+}
+```
+
+[Example 2]
+this_question: what can you do?
+last_question: what is the failure node count for week 28
+output:
+```json
+{
+  "new_question": "what can you do?"
+}
+```

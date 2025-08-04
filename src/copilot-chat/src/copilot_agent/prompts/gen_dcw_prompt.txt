@@ -1,0 +1,78 @@
+Your task is to interpret the input user's question, and retrive three key components via interpretation of user's question.
+
+these three key components are:
+
+1. Design:
+The design describes what testbed to evaluate. This is either provided by the user, or you can know it by understanding the design difference between the target design and the baseline design.
+the design is usually a virtual machine (VM), a virtual machine with a specific feature, or a GPU type.
+some commonly used VM SKU names are NDv4, NDmv4, NDv4_MI200, NDv5, NCv3.
+some commonly used GPU types are A100, H100, MI200, MI300x.
+2. Workload:
+The workload describes what types of benchmarks, models, algorithms, performance measurement tools user want to run on the design testbed. Usually user will provide a specific workload to run, please use this. If user does not provide a specific workload, you need to make suggestion. In the case that target design exists, baseline design does not exist, use 'default' value for workload.
+In the case that both target design and baseline design exist, you need to understand which sub system of the server is related to the difference of the two designs, and suggest a proper workload to focus benchmarking this sub system's performance.
+3. Criterion:
+Criterion is short for evaluation criterion, it describes what principle user wants to use to assess the performance, effectiveness or quality between the baseline and target design.
+In the case that target design exists, baseline design does not exist, use 'default' value for criterion.
+In the case that both target design and baseline design exist, if user provides a specific criterion, use it, otherwise use 'default'.
+some commonly used criterion includes assese both testbed's peak performance, assess both testbed's cost-effectiveness, evaluate within a time duration, etc.
+4. Customer:
+The customer describes which customer's testbed to evaluate. This is either provided by the user, or you can know it by understanding the target customer the baseline customer the user is interested in.
+the customer is usually tenant or customer name, accepted value for customer are all, 3P, OpenAI, 1P, ByteDance, AML, Inflection, nVidia.
+
+Note: These three compoenents are semantically independent.
+
+Example 1:
+User's question: is there a need or requirement for SR-IOV feature for the new design?
+Design: baseline design is without SKU with SR-IOV, target design is SKU with with SR-IOV.
+Criterion: default
+Workload: virtualization
+Customer: baseline customer is default, target customer is default
+
+Example 2:
+User's question: what is the gpu memory bandwidth performances of SKU MM?
+Design: baseline design is empty, target design is SKU MM.
+Criterion: default
+Workload: gpu memory bandwidth
+Customer: baseline customer is default, target customer is default
+
+Example 3:
+User's question: evaluate H100 gpu gpt-2 training performances in one minute using just one benchmark
+Design: baseline design is empty, target design is H100 GPU.
+Criterion: one minute, one benchmark
+Workload: gpt-2 training
+Customer: baseline customer is default, target customer is default
+
+Example 4:
+User's question: can you tell me how fast the H200 and MI300X trains an bert model?
+Design: baseline design is MI300X, target design is H200.
+Criterion: default
+Workload: bert training
+Customer: baseline customer is default, target customer is default
+
+Example 5:
+User's question: can you tell me the utilization difference between customer OpenAI's H100 cluster and customer nVidia's A100 cluster?
+Design: baseline design is A100, target design is A100.
+Criterion: default
+Workload: utilization
+Customer: baseline customer is nVidia, target customer is OpenAI
+
+Example 6:
+User's question: how many gpus are there in Microsoft?
+Design: baseline design is empty, target design is empty.
+Criterion: default
+Workload: capacity
+Customer: baseline customer is empty, target customer is empty
+
+Please output these three key components in the following format:
+{
+    "Design": {
+        "Target": "",
+        "Baseline": ""
+    },
+    "Criterion": "",
+    "Workload": "",
+    "Customer": {
+        "Target": "",
+        "Baseline": ""
+    },
+}

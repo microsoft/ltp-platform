@@ -1,0 +1,273 @@
+Your task is generate a PromQL (Prometheus QL) query parameter of how the user would like to query a Prometheus database to answer his concerns, using this format:
+
+```json
+{
+  "aggregation_function": "",
+  "grouping_labels": "",
+  "operation_function": "",
+  "metric_name": "",
+  "filters": "",
+  "time_offset": "",
+  "scrape_interval": "",
+  "end_time_stamp": "",
+  "parallel": ""
+}
+```
+
+To do this, you need to extract the parameter values from user question, and then output the parameters in the json format
+
+Example 1:
+user question is:
+query allocated gpu hours, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "sum",
+  "grouping_labels": "",
+  "operation_function": "count_over_time",
+  "metric_name": "task_gpu_percent",
+  "filters": "",
+  "time_offset": "time_offset",
+  "scrape_interval": "",
+  "end_time_stamp": "now",
+  "parallel": "false"
+}
+```
+
+
+Example 2:
+user question is:
+query total gpu hours, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "sum,avg",
+  "end_time_stamp": "now",
+  "filters": "metric=\"resourcesTotal\",sku!~\".*-opp\"",
+  "grouping_labels": "vc_stat,sku",
+  "metric_name": "virtual_cluster_stat",
+  "operation_function": "avg_over_time",
+  "parallel": "false",
+  "scrape_interval": "",
+  "time_offset": "1d"
+}
+```
+
+
+Example 3:
+user question is:
+query healthy gpu hours, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "sum,avg",
+  "end_time_stamp": "now",
+  "filters": "metric=\"resourcesGuaranteed\",sku!~\".*-opp\"",
+  "grouping_labels": "vc_stat,sku",
+  "metric_name": "virtual_cluster_stat",
+  "operation_function": "avg_over_time",
+  "parallel": "false",
+  "scrape_interval": "",
+  "time_offset": "1d"
+}
+```
+
+
+Example 4:
+user question is:
+query non-used gpu hours, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "sum",
+  "end_time_stamp": "now",
+  "filters": "",
+  "grouping_labels": "",
+  "metric_name": "(nvidiasmi_utilization_gpu==0)",
+  "operation_function": "count_over_time",
+  "parallel": "true",
+  "scrape_interval": "30",
+  "time_offset": "1d"
+}
+```
+
+
+Example 5:
+user question is:
+query idle gpu hours, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "sum",
+  "end_time_stamp": "now",
+  "filters": "",
+  "grouping_labels": "",
+  "metric_name": "(task_gpu_percent==0)",
+  "operation_function": "count_over_time",
+  "parallel": "true",
+  "scrape_interval": "30",
+  "time_offset": "1d"
+}
+```
+
+
+Example 6:
+user question is:
+query allocated gpu counts, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "count",
+  "end_time_stamp": "now",
+  "filters": "",
+  "grouping_labels": "",
+  "metric_name": "task_gpu_percent",
+  "operation_function": "",
+  "parallel": "false",
+  "scrape_interval": "30m",
+  "time_offset": "1d"
+}
+```
+
+
+Example 7:
+user question is:
+query available gpu counts, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "count",
+  "end_time_stamp": "now",
+  "filters": "",
+  "grouping_labels": "",
+  "metric_name": "nvidiasmi_utilization_gpu",
+  "operation_function": "",
+  "parallel": "false",
+  "scrape_interval": "30m",
+  "time_offset": "1d"
+}
+```
+
+
+Example 8:
+user question is:
+query total gpu hours by VC, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "avg",
+  "end_time_stamp": "now",
+  "filters": "metric=\"resourcesTotal\",sku!~\".*-opp\"",
+  "grouping_labels": "vc_stat, sku",
+  "metric_name": "virtual_cluster_stat",
+  "operation_function": "avg_over_time",
+  "parallel": "false",
+  "scrape_interval": "",
+  "time_offset": "1d"
+}
+```
+
+
+Example 9:
+user question is:
+query allocated gpu hours by VC, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "sum",
+  "end_time_stamp": "now",
+  "filters": "",
+  "grouping_labels": "virtual_cluster",
+  "metric_name": "task_gpu_percent",
+  "operation_function": "count_over_time",
+  "parallel": "false",
+  "scrape_interval": "",
+  "time_offset": "1d"
+}
+```
+
+Example 10:
+user question is:
+query healthy gpu hours by VC, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "avg",
+  "end_time_stamp": "now",
+  "filters": "metric=\"resourcesGuaranteed\",sku!~\".*-opp\"",
+  "grouping_labels": "vc_stat,sku",
+  "metric_name": "virtual_cluster_stat",
+  "operation_function": "avg_over_time",
+  "parallel": "false",
+  "scrape_interval": "",
+  "time_offset": "1d"
+}
+```
+
+Example 11:
+user question is:
+query utilized gpu hours, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "sum",
+  "end_time_stamp": "now",
+  "filters": "",
+  "grouping_labels": "",
+  "metric_name": "(task_gpu_percent<=100)",
+  "operation_function": "sum_over_time",
+  "parallel": "false",
+  "scrape_interval": "30",
+  "time_offset": "1d"
+}
+```
+
+Example 12:
+user question is:
+query utilized gpu hours by VC, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "sum",
+  "end_time_stamp": "now",
+  "filters": "",
+  "grouping_labels": "virtual_cluster",
+  "metric_name": "(task_gpu_percent<=100)",
+  "operation_function": "sum_over_time",
+  "parallel": "true",
+  "scrape_interval": "30",
+  "time_offset": "1d"
+}
+```
+
+Example 13:
+user question is:
+query job list, end time is now, offset is 1 day
+output is:
+
+```json
+{
+  "aggregation_function": "sum_over_time,count",
+  "end_time_stamp": "now",
+  "filters": "",
+  "grouping_labels": "job_name",
+  "metric_name": "task_gpu_percent",
+  "operation_function": "",
+  "parallel": "true",
+  "scrape_interval": "1m",
+  "time_offset": "1d"
+}
+```
+

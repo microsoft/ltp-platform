@@ -1,0 +1,2214 @@
+[
+  {
+    "A-t0-ClusterCapacityStatus": [
+      {
+        "A-t0-ClusterCapacityStatus[Week]": 31,
+        "A-t0-ClusterCapacityStatus[Cluster]": "CYS13PrdGPC02",
+        "A-t0-ClusterCapacityStatus[OFR]": 0.04746720638496935,
+        "A-t0-ClusterCapacityStatus[Unallocatable]": 0.04309472438088328,
+        "A-t0-ClusterCapacityStatus[Date]": "2025-07-28T00:00:00",
+        "A-t0-ClusterCapacityStatus[Others]": 0.020201248735035225,
+        "A-t0-ClusterCapacityStatus[Available VMs (Empty)]": 0.012010005155328126,
+        "A-t0-ClusterCapacityStatus[Total VM Count (Weekly Avg.)]": 523.73,
+        "A-t0-ClusterCapacityStatus[Allocated]": 0.877226815343784
+      },
+      {
+        "A-t0-ClusterCapacityStatus[Week]": 31,
+        "A-t0-ClusterCapacityStatus[Cluster]": "SJC24PrdGPC03",
+        "A-t0-ClusterCapacityStatus[OFR]": 0.052184285075294476,
+        "A-t0-ClusterCapacityStatus[Unallocatable]": 0.06493216042940213,
+        "A-t0-ClusterCapacityStatus[Date]": "2025-07-28T00:00:00",
+        "A-t0-ClusterCapacityStatus[Others]": 0.008498583569405102,
+        "A-t0-ClusterCapacityStatus[Available VMs (Empty)]": 0.12889518413597734,
+        "A-t0-ClusterCapacityStatus[Total VM Count (Weekly Avg.)]": 134.14,
+        "A-t0-ClusterCapacityStatus[Allocated]": 0.7454897867899211
+      },
+      {
+        "A-t0-ClusterCapacityStatus[Week]": 31,
+        "A-t0-ClusterCapacityStatus[Cluster]": "LON64PrdGPC01",
+        "A-t0-ClusterCapacityStatus[OFR]": 0.01117100226544801,
+        "A-t0-ClusterCapacityStatus[Unallocatable]": 0.002265448011874072,
+        "A-t0-ClusterCapacityStatus[Date]": "2025-07-28T00:00:00",
+        "A-t0-ClusterCapacityStatus[Others]": 0.00445277712678697,
+        "A-t0-ClusterCapacityStatus[Available VMs (Empty)]": 0.07257245527693147,
+        "A-t0-ClusterCapacityStatus[Total VM Count (Weekly Avg.)]": 128.01000000000002,
+        "A-t0-ClusterCapacityStatus[Allocated]": 0.9095383173189594
+      },
+      {
+        "A-t0-ClusterCapacityStatus[Week]": 31,
+        "A-t0-ClusterCapacityStatus[Cluster]": "PAR40PrdGPC02",
+        "A-t0-ClusterCapacityStatus[OFR]": 0.07887726342612254,
+        "A-t0-ClusterCapacityStatus[Unallocatable]": 0.017103586734102928,
+        "A-t0-ClusterCapacityStatus[Date]": "2025-07-28T00:00:00",
+        "A-t0-ClusterCapacityStatus[Others]": 0.005521022354349253,
+        "A-t0-ClusterCapacityStatus[Available VMs (Empty)]": 0.32211111540094983,
+        "A-t0-ClusterCapacityStatus[Total VM Count (Weekly Avg.)]": 259.01,
+        "A-t0-ClusterCapacityStatus[Allocated]": 0.5763870120844755
+      },
+      {
+        "A-t0-ClusterCapacityStatus[Week]": 32,
+        "A-t0-ClusterCapacityStatus[Cluster]": "LON64PrdGPC01",
+        "A-t0-ClusterCapacityStatus[OFR]": 0.015503875968992248,
+        "A-t0-ClusterCapacityStatus[Unallocatable]": 0.0,
+        "A-t0-ClusterCapacityStatus[Date]": "2025-08-04T00:00:00",
+        "A-t0-ClusterCapacityStatus[Others]": 0.0,
+        "A-t0-ClusterCapacityStatus[Available VMs (Empty)]": 0.07751937984496124,
+        "A-t0-ClusterCapacityStatus[Total VM Count (Weekly Avg.)]": 129.0,
+        "A-t0-ClusterCapacityStatus[Allocated]": 0.9069767441860465
+      },
+      {
+        "A-t0-ClusterCapacityStatus[Week]": 32,
+        "A-t0-ClusterCapacityStatus[Cluster]": "PAR40PrdGPC02",
+        "A-t0-ClusterCapacityStatus[OFR]": 0.07722007722007722,
+        "A-t0-ClusterCapacityStatus[Unallocatable]": 0.015444015444015444,
+        "A-t0-ClusterCapacityStatus[Date]": "2025-08-04T00:00:00",
+        "A-t0-ClusterCapacityStatus[Others]": 0.003861003861003861,
+        "A-t0-ClusterCapacityStatus[Available VMs (Empty)]": 0.3281853281853282,
+        "A-t0-ClusterCapacityStatus[Total VM Count (Weekly Avg.)]": 259.0,
+        "A-t0-ClusterCapacityStatus[Allocated]": 0.5752895752895753
+      },
+      {
+        "A-t0-ClusterCapacityStatus[Week]": 32,
+        "A-t0-ClusterCapacityStatus[Cluster]": "SJC24PrdGPC03",
+        "A-t0-ClusterCapacityStatus[OFR]": 0.036231884057971016,
+        "A-t0-ClusterCapacityStatus[Unallocatable]": 0.08695652173913043,
+        "A-t0-ClusterCapacityStatus[Date]": "2025-08-04T00:00:00",
+        "A-t0-ClusterCapacityStatus[Others]": 0.0,
+        "A-t0-ClusterCapacityStatus[Available VMs (Empty)]": 0.15942028985507245,
+        "A-t0-ClusterCapacityStatus[Total VM Count (Weekly Avg.)]": 138.0,
+        "A-t0-ClusterCapacityStatus[Allocated]": 0.717391304347826
+      },
+      {
+        "A-t0-ClusterCapacityStatus[Week]": 32,
+        "A-t0-ClusterCapacityStatus[Cluster]": "CYS13PrdGPC02",
+        "A-t0-ClusterCapacityStatus[OFR]": 0.04816955684007707,
+        "A-t0-ClusterCapacityStatus[Unallocatable]": 0.025048169556840076,
+        "A-t0-ClusterCapacityStatus[Date]": "2025-08-04T00:00:00",
+        "A-t0-ClusterCapacityStatus[Others]": 0.015414258188824663,
+        "A-t0-ClusterCapacityStatus[Available VMs (Empty)]": 0.025048169556840076,
+        "A-t0-ClusterCapacityStatus[Total VM Count (Weekly Avg.)]": 519.0,
+        "A-t0-ClusterCapacityStatus[Allocated]": 0.8863198458574181
+      }
+    ]
+  },
+  {
+    "A-t4-AvailabilityStatus": [
+      {
+        "A-t4-AvailabilityStatus[Week]": 31,
+        "A-t4-AvailabilityStatus[Average AvailabilityRatio]": 0.0,
+        "A-t4-AvailabilityStatus[Max AvailabilityRatio]": 0.0,
+        "A-t4-AvailabilityStatus[Min AvailabilityRatio]": 0.0,
+        "A-t4-AvailabilityStatus[Endpoint]": "pai-wcu",
+        "A-t4-AvailabilityStatus[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t4-AvailabilityStatus[Week]": 32,
+        "A-t4-AvailabilityStatus[Average AvailabilityRatio]": 0.0,
+        "A-t4-AvailabilityStatus[Max AvailabilityRatio]": 0.0,
+        "A-t4-AvailabilityStatus[Min AvailabilityRatio]": 0.0,
+        "A-t4-AvailabilityStatus[Endpoint]": "pai-wcu",
+        "A-t4-AvailabilityStatus[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t4-AvailabilityStatus[Week]": 31,
+        "A-t4-AvailabilityStatus[Average AvailabilityRatio]": 0.29790940766550517,
+        "A-t4-AvailabilityStatus[Max AvailabilityRatio]": 0.3333333333333333,
+        "A-t4-AvailabilityStatus[Min AvailabilityRatio]": 0.27380952380952384,
+        "A-t4-AvailabilityStatus[Endpoint]": "pai-scu",
+        "A-t4-AvailabilityStatus[ClusterName]": ""
+      },
+      {
+        "A-t4-AvailabilityStatus[Week]": 31,
+        "A-t4-AvailabilityStatus[Average AvailabilityRatio]": 0.978144989339019,
+        "A-t4-AvailabilityStatus[Max AvailabilityRatio]": 0.9888059701492538,
+        "A-t4-AvailabilityStatus[Min AvailabilityRatio]": 0.9664179104477612,
+        "A-t4-AvailabilityStatus[Endpoint]": "pai-wcu",
+        "A-t4-AvailabilityStatus[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "A-t4-AvailabilityStatus[Week]": 32,
+        "A-t4-AvailabilityStatus[Average AvailabilityRatio]": 0.27380952380952384,
+        "A-t4-AvailabilityStatus[Max AvailabilityRatio]": 0.27380952380952384,
+        "A-t4-AvailabilityStatus[Min AvailabilityRatio]": 0.27380952380952384,
+        "A-t4-AvailabilityStatus[Endpoint]": "pai-scu",
+        "A-t4-AvailabilityStatus[ClusterName]": ""
+      },
+      {
+        "A-t4-AvailabilityStatus[Week]": 32,
+        "A-t4-AvailabilityStatus[Average AvailabilityRatio]": 0.9850746268656716,
+        "A-t4-AvailabilityStatus[Max AvailabilityRatio]": 0.9850746268656716,
+        "A-t4-AvailabilityStatus[Min AvailabilityRatio]": 0.9850746268656716,
+        "A-t4-AvailabilityStatus[Endpoint]": "pai-wcu",
+        "A-t4-AvailabilityStatus[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "A-t4-AvailabilityStatus[Week]": 31,
+        "A-t4-AvailabilityStatus[Average AvailabilityRatio]": 0.586734693877551,
+        "A-t4-AvailabilityStatus[Max AvailabilityRatio]": 0.6785714285714286,
+        "A-t4-AvailabilityStatus[Min AvailabilityRatio]": 0.5,
+        "A-t4-AvailabilityStatus[Endpoint]": "pai-we",
+        "A-t4-AvailabilityStatus[ClusterName]": ""
+      },
+      {
+        "A-t4-AvailabilityStatus[Week]": 32,
+        "A-t4-AvailabilityStatus[Average AvailabilityRatio]": 0.5714285714285714,
+        "A-t4-AvailabilityStatus[Max AvailabilityRatio]": 0.5714285714285714,
+        "A-t4-AvailabilityStatus[Min AvailabilityRatio]": 0.5714285714285714,
+        "A-t4-AvailabilityStatus[Endpoint]": "pai-we",
+        "A-t4-AvailabilityStatus[ClusterName]": ""
+      }
+    ]
+  },
+  {
+    "A-t5-DetailsofWeekAppended": [
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-28T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 0,
+        "A-t5-DetailsofWeekAppended[Healthy]": 0,
+        "A-t5-DetailsofWeekAppended[Cordon]": 0,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 63,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 0,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 0,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.0,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-29T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 0,
+        "A-t5-DetailsofWeekAppended[Healthy]": 0,
+        "A-t5-DetailsofWeekAppended[Cordon]": 0,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 63,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 0,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 0,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.0,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-30T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 0,
+        "A-t5-DetailsofWeekAppended[Healthy]": 0,
+        "A-t5-DetailsofWeekAppended[Cordon]": 0,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 63,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 0,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 0,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.0,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-31T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 0,
+        "A-t5-DetailsofWeekAppended[Healthy]": 0,
+        "A-t5-DetailsofWeekAppended[Cordon]": 0,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 63,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 0,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 0,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.0,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-01T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 0,
+        "A-t5-DetailsofWeekAppended[Healthy]": 0,
+        "A-t5-DetailsofWeekAppended[Cordon]": 0,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 63,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 0,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 0,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.0,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-02T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 0,
+        "A-t5-DetailsofWeekAppended[Healthy]": 0,
+        "A-t5-DetailsofWeekAppended[Cordon]": 0,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 63,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 0,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 0,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.0,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-03T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 0,
+        "A-t5-DetailsofWeekAppended[Healthy]": 0,
+        "A-t5-DetailsofWeekAppended[Cordon]": 0,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 63,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 0,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 0,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.0,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 32,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-04T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 0,
+        "A-t5-DetailsofWeekAppended[Healthy]": 0,
+        "A-t5-DetailsofWeekAppended[Cordon]": 0,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 63,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 0,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 0,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.0,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "SJC24PrdGPC03"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-28T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-scu",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 22,
+        "A-t5-DetailsofWeekAppended[Cordon]": 36,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 5,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 19,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 66,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 528,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.3333333333333333,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-29T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-scu",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 22,
+        "A-t5-DetailsofWeekAppended[Cordon]": 36,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 5,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 19,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 66,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 528,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.3333333333333333,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-30T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-scu",
+        "A-t5-DetailsofWeekAppended[Validation]": 2,
+        "A-t5-DetailsofWeekAppended[Healthy]": 24,
+        "A-t5-DetailsofWeekAppended[Cordon]": 51,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 5,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 19,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 82,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 656,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.2926829268292683,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-31T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-scu",
+        "A-t5-DetailsofWeekAppended[Validation]": 2,
+        "A-t5-DetailsofWeekAppended[Healthy]": 24,
+        "A-t5-DetailsofWeekAppended[Cordon]": 51,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 5,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 19,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 82,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 656,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.2926829268292683,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-01T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-scu",
+        "A-t5-DetailsofWeekAppended[Validation]": 2,
+        "A-t5-DetailsofWeekAppended[Healthy]": 24,
+        "A-t5-DetailsofWeekAppended[Cordon]": 53,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 5,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 19,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 84,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 672,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.2857142857142857,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-02T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-scu",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 23,
+        "A-t5-DetailsofWeekAppended[Cordon]": 53,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 5,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 19,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 84,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 672,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.27380952380952384,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-03T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-scu",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 23,
+        "A-t5-DetailsofWeekAppended[Cordon]": 53,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 5,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 19,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 84,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 672,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.27380952380952384,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 32,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-04T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-scu",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 23,
+        "A-t5-DetailsofWeekAppended[Cordon]": 53,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 5,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 19,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 84,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 672,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.27380952380952384,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-28T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-we",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 15,
+        "A-t5-DetailsofWeekAppended[Cordon]": 10,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 28,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 224,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.5357142857142857,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-29T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-we",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 14,
+        "A-t5-DetailsofWeekAppended[Cordon]": 11,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 28,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 224,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.5,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-30T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-we",
+        "A-t5-DetailsofWeekAppended[Validation]": 2,
+        "A-t5-DetailsofWeekAppended[Healthy]": 19,
+        "A-t5-DetailsofWeekAppended[Cordon]": 7,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 28,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 224,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.6785714285714286,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-31T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-we",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 17,
+        "A-t5-DetailsofWeekAppended[Cordon]": 8,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 28,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 224,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.6071428571428571,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-01T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-we",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 17,
+        "A-t5-DetailsofWeekAppended[Cordon]": 8,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 28,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 224,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.6071428571428571,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-02T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-we",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 17,
+        "A-t5-DetailsofWeekAppended[Cordon]": 8,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 28,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 224,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.6071428571428571,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-03T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-we",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 16,
+        "A-t5-DetailsofWeekAppended[Cordon]": 9,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 28,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 224,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.5714285714285714,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 32,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-04T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-we",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 16,
+        "A-t5-DetailsofWeekAppended[Cordon]": 9,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 28,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 224,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.5714285714285714,
+        "A-t5-DetailsofWeekAppended[ClusterName]": ""
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-28T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 1,
+        "A-t5-DetailsofWeekAppended[Healthy]": 259,
+        "A-t5-DetailsofWeekAppended[Cordon]": 2,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 6,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 268,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 2144,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.9664179104477612,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-29T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 0,
+        "A-t5-DetailsofWeekAppended[Healthy]": 261,
+        "A-t5-DetailsofWeekAppended[Cordon]": 2,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 5,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 268,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 2144,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.9738805970149254,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-30T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 1,
+        "A-t5-DetailsofWeekAppended[Healthy]": 261,
+        "A-t5-DetailsofWeekAppended[Cordon]": 2,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 4,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 268,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 2144,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.9738805970149254,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-07-31T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 3,
+        "A-t5-DetailsofWeekAppended[Healthy]": 263,
+        "A-t5-DetailsofWeekAppended[Cordon]": 1,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 1,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 268,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 2144,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.9813432835820896,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-02T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 2,
+        "A-t5-DetailsofWeekAppended[Healthy]": 262,
+        "A-t5-DetailsofWeekAppended[Cordon]": 2,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 2,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 268,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 2144,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.9776119402985075,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 32,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-04T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 2,
+        "A-t5-DetailsofWeekAppended[Healthy]": 264,
+        "A-t5-DetailsofWeekAppended[Cordon]": 1,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 1,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 268,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 2144,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.9850746268656716,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-01T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 2,
+        "A-t5-DetailsofWeekAppended[Healthy]": 265,
+        "A-t5-DetailsofWeekAppended[Cordon]": 1,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 268,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 2144,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.9888059701492538,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "A-t5-DetailsofWeekAppended[Week]": 31,
+        "A-t5-DetailsofWeekAppended[Date]": "2025-08-03T00:00:00",
+        "A-t5-DetailsofWeekAppended[Endpoint]": "pai-wcu",
+        "A-t5-DetailsofWeekAppended[Validation]": 2,
+        "A-t5-DetailsofWeekAppended[Healthy]": 264,
+        "A-t5-DetailsofWeekAppended[Cordon]": 2,
+        "A-t5-DetailsofWeekAppended[HPC-UA]": 0,
+        "A-t5-DetailsofWeekAppended[New]": 0,
+        "A-t5-DetailsofWeekAppended[Deallocated]": 0,
+        "A-t5-DetailsofWeekAppended[TotalNodes]": 268,
+        "A-t5-DetailsofWeekAppended[TotalGPUs]": 2144,
+        "A-t5-DetailsofWeekAppended[AvailabilityRatio]": 0.9850746268656716,
+        "A-t5-DetailsofWeekAppended[ClusterName]": "CYS13PrdGPC02"
+      }
+    ]
+  },
+  {
+    "J-t4-JobDuration": [
+      {
+        "J-t4-JobDuration[Week]": 31,
+        "J-t4-JobDuration[Endpoint]": "pai-wcu",
+        "J-t4-JobDuration[_AvgUserStop]": 1.5456250000000002,
+        "J-t4-JobDuration[_AvgHardwareFailure]": 5.8949305555625,
+        "J-t4-JobDuration[_AvgSoftwareFailure]": 2.7548611111068984,
+        "J-t4-JobDuration[_MaxUserStop]": 8.5294444444,
+        "J-t4-JobDuration[_MaxHardwareFailure]": 23.94,
+        "J-t4-JobDuration[_MaxSoftwareFailure]": 31.2375,
+        "J-t4-JobDuration[_counts_UserStop]": 16,
+        "J-t4-JobDuration[_counts_HardwareFailure]": 8,
+        "J-t4-JobDuration[_counts_SoftwareFailure]": 58,
+        "J-t4-JobDuration[_counts_total]": 82,
+        "J-t4-JobDuration[_MaxDuration]": 31.2375,
+        "J-t4-JobDuration[_AvgDuration]": 2.825260840106098
+      }
+    ]
+  },
+  {
+    "J-t5-JobReactTime": [
+      {
+        "J-t5-JobReactTime[Week]": 31,
+        "J-t5-JobReactTime[Endpoint]": "pai-wcu",
+        "J-t5-JobReactTime[_AvgUserStop]": 2.4321895424705873,
+        "J-t5-JobReactTime[_AvgHardwareFailure]": 0.6274567901200007,
+        "J-t5-JobReactTime[_AvgSoftwareFailure]": 3.017479192683885,
+        "J-t5-JobReactTime[_MaxUserStop]": 3.6594444444,
+        "J-t5-JobReactTime[_MaxHardwareFailure]": 2.3588888889,
+        "J-t5-JobReactTime[_MaxSoftwareFailure]": 11.9697222222,
+        "J-t5-JobReactTime[_AvgReactionTime]": 2.6389646464683056,
+        "J-t5-JobReactTime[_MaxReactionTime]": 11.9697222222
+      }
+    ]
+  },
+  {
+    "M-t0-MTBFbyNode": [
+      {
+        "M-t0-MTBFbyNode[Week]": 31,
+        "M-t0-MTBFbyNode[Endpoint]": "pai-wcu",
+        "M-t0-MTBFbyNode[ClusterName]": "CYS13PrdGPC02",
+        "M-t0-MTBFbyNode[MTBFSpan]": 74.9484217171713,
+        "M-t0-MTBFbyNode[MTBFDays]": 74.9484217171717,
+        "M-t0-MTBFbyNode[MTBFHours]": 1798.762121212121,
+        "M-t0-MTBFbyNode[SampleCounts]": 11,
+        "M-t0-MTBFbyNode[_debugTotalAvailableDays]": 824.4326388888887,
+        "M-t0-MTBFbyNode[CumulativeTotalAvaiDays]": 10302.658333333335,
+        "M-t0-MTBFbyNode[CumulativeTotalAvaiHours]": 247263.8,
+        "M-t0-MTBFbyNode[CumulativeSampleCount]": 276,
+        "M-t0-MTBFbyNode[CumulativeMTBFDays]": 37.328472222222224,
+        "M-t0-MTBFbyNode[CumulativeMTBFHours]": 895.8833333333333
+      }
+    ]
+  },
+  {
+    "NR-t0-ORFNodeRecycleTime": [
+      {
+        "NR-t0-ORFNodeRecycleTime[UA Cycle]": 23.601805555555558,
+        "NR-t0-ORFNodeRecycleTime[Issue Deteted to UA]": 21.481944444444444,
+        "NR-t0-ORFNodeRecycleTime[Wait for Allocation]": 0.37069444444444444,
+        "NR-t0-ORFNodeRecycleTime[Node Return Processing]": 1.7491666666666665,
+        "NR-t0-ORFNodeRecycleTime[Node Count]": 2,
+        "NR-t0-ORFNodeRecycleTime[Node Recycle Time (Hour)]": 23.601805555555558,
+        "NR-t0-ORFNodeRecycleTime[UA Count in Single Recycle]": 1.0,
+        "NR-t0-ORFNodeRecycleTime[Week]": 31,
+        "NR-t0-ORFNodeRecycleTime[ClusterName]": "",
+        "NR-t0-ORFNodeRecycleTime[Endpoint]": "pai-scu"
+      },
+      {
+        "NR-t0-ORFNodeRecycleTime[UA Cycle]": 40.42568518518519,
+        "NR-t0-ORFNodeRecycleTime[Issue Deteted to UA]": 7.604037037037037,
+        "NR-t0-ORFNodeRecycleTime[Wait for Allocation]": 18.882407407407406,
+        "NR-t0-ORFNodeRecycleTime[Node Return Processing]": 13.939240740740745,
+        "NR-t0-ORFNodeRecycleTime[Node Count]": 12,
+        "NR-t0-ORFNodeRecycleTime[Node Recycle Time (Hour)]": 50.53210648148147,
+        "NR-t0-ORFNodeRecycleTime[UA Count in Single Recycle]": 1.25,
+        "NR-t0-ORFNodeRecycleTime[Week]": 31,
+        "NR-t0-ORFNodeRecycleTime[ClusterName]": "CYS13PrdGPC02",
+        "NR-t0-ORFNodeRecycleTime[Endpoint]": "pai-wcu"
+      },
+      {
+        "NR-t0-ORFNodeRecycleTime[UA Cycle]": 6.441635802469135,
+        "NR-t0-ORFNodeRecycleTime[Issue Deteted to UA]": 0.5557407407407408,
+        "NR-t0-ORFNodeRecycleTime[Wait for Allocation]": 0.17570987654320988,
+        "NR-t0-ORFNodeRecycleTime[Node Return Processing]": 5.710185185185185,
+        "NR-t0-ORFNodeRecycleTime[Node Count]": 4,
+        "NR-t0-ORFNodeRecycleTime[Node Recycle Time (Hour)]": 14.493680555555557,
+        "NR-t0-ORFNodeRecycleTime[UA Count in Single Recycle]": 2.25,
+        "NR-t0-ORFNodeRecycleTime[Week]": 31,
+        "NR-t0-ORFNodeRecycleTime[ClusterName]": "",
+        "NR-t0-ORFNodeRecycleTime[Endpoint]": "pai-we"
+      }
+    ]
+  },
+  {
+    "NR-t1-CordonNodeRecycleTime": [
+      {
+        "NR-t1-CordonNodeRecycleTime[Week]": 31,
+        "NR-t1-CordonNodeRecycleTime[Node Recycle Time (Hour)]": 5.01125,
+        "NR-t1-CordonNodeRecycleTime[Node Count]": 2,
+        "NR-t1-CordonNodeRecycleTime[Endpoint]": "pai-wcu",
+        "NR-t1-CordonNodeRecycleTime[ClusterName]": "CYS13PrdGPC02"
+      },
+      {
+        "NR-t1-CordonNodeRecycleTime[Week]": 31,
+        "NR-t1-CordonNodeRecycleTime[Node Recycle Time (Hour)]": 14.045555555555556,
+        "NR-t1-CordonNodeRecycleTime[Node Count]": 5,
+        "NR-t1-CordonNodeRecycleTime[Endpoint]": "pai-we",
+        "NR-t1-CordonNodeRecycleTime[ClusterName]": ""
+      },
+      {
+        "NR-t1-CordonNodeRecycleTime[Week]": 31,
+        "NR-t1-CordonNodeRecycleTime[Node Recycle Time (Hour)]": 0.7506349206349209,
+        "NR-t1-CordonNodeRecycleTime[Node Count]": 35,
+        "NR-t1-CordonNodeRecycleTime[Endpoint]": "pai-scu",
+        "NR-t1-CordonNodeRecycleTime[ClusterName]": ""
+      }
+    ]
+  },
+  {
+    "R-t1-NodeFailureCategorization": [
+      {
+        "R-t1-NodeFailureCategorization[hardware]": 12,
+        "R-t1-NodeFailureCategorization[platform]": 0,
+        "R-t1-NodeFailureCategorization[user]": 0,
+        "R-t1-NodeFailureCategorization[Week]": 31,
+        "R-t1-NodeFailureCategorization[unknown]": 1,
+        "R-t1-NodeFailureCategorization[Endpoint]": "pai-wcu",
+        "R-t1-NodeFailureCategorization[Timestamp]": "2025-07-28T00:00:00",
+        "R-t1-NodeFailureCategorization[uncategorized]": 0
+      },
+      {
+        "R-t1-NodeFailureCategorization[hardware]": 4,
+        "R-t1-NodeFailureCategorization[platform]": 0,
+        "R-t1-NodeFailureCategorization[user]": 0,
+        "R-t1-NodeFailureCategorization[Week]": 31,
+        "R-t1-NodeFailureCategorization[unknown]": 4,
+        "R-t1-NodeFailureCategorization[Endpoint]": "pai-we",
+        "R-t1-NodeFailureCategorization[Timestamp]": "2025-07-28T00:00:00",
+        "R-t1-NodeFailureCategorization[uncategorized]": 0
+      },
+      {
+        "R-t1-NodeFailureCategorization[hardware]": 18,
+        "R-t1-NodeFailureCategorization[platform]": 0,
+        "R-t1-NodeFailureCategorization[user]": 0,
+        "R-t1-NodeFailureCategorization[Week]": 31,
+        "R-t1-NodeFailureCategorization[unknown]": 12,
+        "R-t1-NodeFailureCategorization[Endpoint]": "pai-scu",
+        "R-t1-NodeFailureCategorization[Timestamp]": "2025-07-28T00:00:00",
+        "R-t1-NodeFailureCategorization[uncategorized]": 0
+      }
+    ]
+  },
+  {
+    "R-t2-NodeFailureRCABreakdown": [
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "IBLinkFlapping",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 1,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: IBLinkFlapping",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-scu"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "Unknown Reason",
+        "R-t2-NodeFailureRCABreakdown[Category]": "unknown",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 1,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "unknown: Unknown Reason",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-wcu"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "GPU Memory Not Release",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 1,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: GPU Memory Not Release",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-wcu"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "IBLinkFlapping",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 1,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: IBLinkFlapping",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-we"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "GPUHangingwithSegfault",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 1,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: GPUHangingwithSegfault",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-wcu"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "NvidiaSmiLatencyTooLarge",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 1,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: NvidiaSmiLatencyTooLarge",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-we"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "NodeCrash",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 1,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: NodeCrash",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-scu"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "UnknownIssue",
+        "R-t2-NodeFailureRCABreakdown[Category]": "unknown",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 1,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "unknown: UnknownIssue",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-scu"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "MemoryAccessFault",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 1,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: MemoryAccessFault",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-wcu"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "Unknown Reason",
+        "R-t2-NodeFailureRCABreakdown[Category]": "unknown",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 11,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "unknown: Unknown Reason",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-scu"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "Unknown Reason",
+        "R-t2-NodeFailureRCABreakdown[Category]": "unknown",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 4,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "unknown: Unknown Reason",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-we"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "NodeCrash",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 9,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: NodeCrash",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-wcu"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "NodeCrash",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 2,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: NodeCrash",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-we"
+      },
+      {
+        "R-t2-NodeFailureRCABreakdown[Reason]": "IBBandwidthProblem",
+        "R-t2-NodeFailureRCABreakdown[Category]": "hardware",
+        "R-t2-NodeFailureRCABreakdown[FailureCount]": 16,
+        "R-t2-NodeFailureRCABreakdown[CategoryReason]": "hardware: IBBandwidthProblem",
+        "R-t2-NodeFailureRCABreakdown[Week]": 31,
+        "R-t2-NodeFailureRCABreakdown[Endpoint]": "pai-scu"
+      }
+    ]
+  },
+  {
+    "R-t3-DailyOccurrenceofNodeFailuresRuntime": [
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "uncategorized"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "platform",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "platform"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "user",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "user"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-05T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 0,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 32,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 10,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 2,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-04T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "unknown",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "unknown"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 6,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-28T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-29T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-30T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 16,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-07-31T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 2,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-01T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-scu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 4,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-wcu",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      },
+      {
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[StartDate]": "2025-08-02T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[EndDate]": "2025-08-03T00:00:00",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Total]": 1,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Week]": 31,
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Endpoint]": "pai-we",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[Category]": "hardware",
+        "R-t3-DailyOccurrenceofNodeFailuresRuntime[CategoryNew]": "hardware"
+      }
+    ]
+  },
+  {
+    "R-t4-DailyNodeRuntimeAvgFailure": [
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "platform"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "uncategorized"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "user"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "hardware"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "platform"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "uncategorized"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "unknown"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "user"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "platform"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "uncategorized"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "user"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "hardware"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "platform"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "uncategorized"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "unknown"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "user"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "platform"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "uncategorized"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "user"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "hardware"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "platform"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "uncategorized"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "unknown"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 32,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-08-04T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.0,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "user"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 2.5714285714285716,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "hardware"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-scu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 1.7142857142857142,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "unknown"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 1.7142857142857142,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "hardware"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-wcu",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.14285714285714285,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "unknown"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.5714285714285714,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "hardware"
+      },
+      {
+        "R-t4-DailyNodeRuntimeAvgFailure[Week]": 31,
+        "R-t4-DailyNodeRuntimeAvgFailure[Date]": "2025-07-28T00:00:00",
+        "R-t4-DailyNodeRuntimeAvgFailure[Endpoint]": "pai-we",
+        "R-t4-DailyNodeRuntimeAvgFailure[Avg. Failure]": 0.5714285714285714,
+        "R-t4-DailyNodeRuntimeAvgFailure[Category]": "unknown"
+      }
+    ]
+  }
+]

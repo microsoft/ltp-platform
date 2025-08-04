@@ -1,0 +1,16 @@
+{
+  "roles": {
+    "developer": {
+      "users": [
+      ]
+    },
+    "admin": {
+      "users": [
+      ]
+    },
+    "slt": {
+      "users": [
+      ]
+    }
+  }
+}

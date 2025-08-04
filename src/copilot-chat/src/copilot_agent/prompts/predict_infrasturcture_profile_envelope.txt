@@ -1,0 +1,93 @@
+Your task is to predict the infrastructure profile (performance, engergy_effectiveness, cost_effectiveness, reliability) for a given time of year, and output only the json object format:
+
+```
+{
+    "year": value
+    "performance": {
+        "computing_power": value,
+        "peak_mem_bw": value
+    },
+    "energy_eff": {
+        "compute": value,
+        "communicate": value
+    },
+    "tco_eff": {
+        "capex": {
+            "compute": value,
+            "communicate": value,
+            "store": value
+        }
+    },
+    "reliability": {
+        "mtbf": value
+    }
+}
+```
+
+now is the year 2024.
+performance is meaured using peak computing power (TFLOPs) and memory load/save memory bandwidth (TB/s)
+engergy_effectiveness is meaured using computing energy effectiveness (TFLOPs/Joule) and communication energy effectiveness (TB/Joule)
+cost_effectiveness is meaured using computing capital expense effectiveness (TFLOPs/USD) and communication capital expense effectiveness (TB/USD) and storage capital expense effectiveness (TB/USD)
+reliability is meaured using (MTBF)
+if the year in the question falls in below table range, you should look up the answer from the table, if the year in the question falls out of the below table range, you should use the result from a year nearest to that in the question
+
+year    performance, peak computing power (TFLOPs)    performance, peak memory load/save bandwidth (TB/s)    energy_effectiveness, computing engergy effectiveness (TFLOPS/Joule)    energy_effectiveness, communication engergy effectiveness (TB/Joule)    cost_effectiveness, computing capital expense effectiveness (TFLOPS/USD)    cost_effectiveness, communication capital expense effectiveness (TB/USD)    cost_effectiveness, storage capital expense effectiveness (TB/USD)    reliability, MTBF (Hours)
+2010    340    2260    150    30    516.5    1555.4    646.2    98820
+2011    574    3616    205    63    503.95    1532.94    640.52    98872
+2012    808    4972    260    96    491.4    1510.48    634.84    98924
+2013    1042    6328    315    129    478.85    1488.02    629.16    98976
+2014    1276    7684    370    162    466.3    1465.56    623.48    99028
+2015    1510    9040    425    195    453.75    1443.1    617.8    99080
+2016    1744    10396    480    228    441.2    1420.64    612.12    99132
+2017    1978    11752    535    261    428.65    1398.18    606.44    99184
+2018    2212    13108    590    294    416.1    1375.72    600.76    99236
+2019    2446    14464    645    327    403.55    1353.26    595.08    99288
+2020    2680    15820    700    360    391    1330.8    589.4    99340
+2021    2914    17176    755    393    378.45    1308.34    583.72    99392
+2022    3148    18532    810    426    365.9    1285.88    578.04    99444
+2023    3382    19888    865    459    353.35    1263.42    572.36    99496
+2024    3616    21244    920    492    340.8    1240.96    566.68    99548
+2025    3850    22600    975    525    328.25    1218.5    561    99600
+2026    4084    23956    1030    558    315.7    1196.04    555.32    99652
+2027    4318    25312    1085    591    303.15    1173.58    549.64    99704
+2028    4552    26668    1140    624    290.6    1151.12    543.96    99756
+2029    4786    28024    1195    657    278.05    1128.66    538.28    99808
+2030    5020    29380    1250    690    265.5    1106.2    532.6    99860
+2031    5254    30736    1305    723    252.95    1083.74    526.92    99912
+2032    5488    32092    1360    756    240.4    1061.28    521.24    99964
+2033    5722    33448    1415    789    227.85    1038.82    515.56    100016
+2034    5956    34804    1470    822    215.3    1016.36    509.88    100068
+2035    6190    36160    1525    855    202.75    993.9    504.2    100120
+2036    6424    37516    1580    888    190.2    971.44    498.52    100172
+2037    6658    38872    1635    921    177.65    948.98    492.84    100224
+2038    6892    40228    1690    954    165.1    926.52    487.16    100276
+2039    7126    41584    1745    987    152.55    904.06    481.48    100328
+2040    7360    42940    1800    1020    140    881.6    475.8    100380
+
+Example 1:
+Input = predictive the workload's requirement for year is 2024
+Output:
+
+```
+{
+    "year": 2024
+    "performance": {
+        "computing_power": "3616 TFLOPs",
+        "peak_mem_bw": "21244 TB/s"
+    },
+    "energy_eff": {
+        "compute": "920 TFLOPs/Joule",
+        "communicate": "492 TB/Joule"
+    },
+    "tco_eff": {
+        "capex": {
+            "compute": "340.8 TFLOPs/USD",
+            "communicate": "1240.96 TB/USD",
+            "store": "566.68 TB/USE"
+        }
+    },
+    "reliability": {
+        "mtbf": "99548 Hours"
+    }
+}
+```
