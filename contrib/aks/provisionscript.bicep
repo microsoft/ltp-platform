@@ -14,11 +14,7 @@ resource aksbootstrapid 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-0
 
 var kubeconfig = base64ToString(aks.listClusterUserCredential().kubeconfigs[0].value)
 
-var currentVersion = aks.properties.kubernetesVersion
-var currentVersionArray = split(currentVersion, '.')
-
-var kubeletversion = int(currentVersionArray[1]) == 27
-  ? '1.27.9' : '1.28.5'
+var kubeletversion = aks.properties.kubernetesVersion
 
 var fqdn = aks.properties.fqdn
 var cert = split(substring(kubeconfig, indexOf(kubeconfig, 'certificate-authority-data: ') + 28), '\n')[0]

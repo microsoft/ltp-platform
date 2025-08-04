@@ -390,7 +390,8 @@ resource configAks 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
               echo $CILIUM_YAML | base64 -d > cni.yaml
               kubectl apply -f ./cni.yaml
 
-              echo $KUBE_PROXY_UNMANAGED_YAML | base64 -d > kube-proxy-unmanaged.yaml
+              echo $KUBE_PROXY_UNMANAGED_YAML | base64 -d > kube-proxy-unmanaged.yaml]
+              sed -i "s|__KUBE_VERSION__|${AKS_VERSION}|g" ./kube-proxy-unmanaged.yaml
               kubectl apply -f ./kube-proxy-unmanaged.yaml
 
               echo $WI_IMAGE_CRED_PROVIDER_YAML | base64 -d > wi-image-cred-provider.yaml
