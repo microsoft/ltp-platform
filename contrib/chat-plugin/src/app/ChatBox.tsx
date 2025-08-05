@@ -8,7 +8,7 @@ import {
   chatRequest,
   currentAbortController,
   createChatAbortController,
-  stopChatRequest
+  chatStreamRequest
 } from "../libs/api";
 import { useChatStore } from "../libs/state";
 
@@ -28,7 +28,7 @@ export default function ChatBox() {
       toast.info("Prompt cannot be empty");
       return;
     }
-    useChatStore.getState().addChat({
+    useChatStore.getState().addChatMessage({
       role: "user",
       message: prompt,
       timestamp: new Date(),
@@ -37,13 +37,7 @@ export default function ChatBox() {
     setLoading(true);
 
     createChatAbortController();
-    const newMsg = await chatRequest(currentAbortController?.signal);
-    if (!newMsg) {
-      toast.error("Failed to get response from Model");
-    }
-    else {
-      useChatStore.getState().addChat(newMsg);
-    }
+    await chatStreamRequest(currentAbortController?.signal);
     setLoading(false);
   }
 

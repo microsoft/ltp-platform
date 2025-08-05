@@ -24,6 +24,24 @@ export const api = {
     return response;
   },
 
+  postStream: async (path: string, key: string | null = null, options: Options = {}) => {
+    if (key) {
+      options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${key}`,
+      };
+    }
+    if (!path.startsWith("http")) {
+      // If the path is relative, prepend the API base URL
+      path = `${API_BASE_URL}/${path}`;
+    }
+    const response = await ky.post(path, {
+      ...options,
+      timeout: options.timeout !== undefined ? options.timeout : false, // disables timeout by default
+    });
+    return response;
+  },
+
   // You can also add other methods like GET, PUT, DELETE, etc.
   get: async (path: string, key: string | null = null, options: Options = {}) => {
     if (key) {
@@ -172,6 +190,123 @@ export async function chatRequest(abortSignal?: AbortSignal) {
     return null;
   }
 }
+
+export async function chatStreamRequest(abortSignal?: AbortSignal) {
+  const currentJob = useChatStore.getState().currentJob;
+  if (!currentJob) {
+    console.warn("No current job selected");
+    return;
+  }
+
+  const jobServerPath = useChatStore.getState().jobServerPath;
+  const jobServerToken = useChatStore.getState().jobServerToken;
+  const currentModel = useChatStore.getState().currentModel;
+  const chatMsgs = useChatStore.getState().chatMsgs;
+
+  const modelsUrl = `${jobServerPath}/${currentJob.ip}:${currentJob.port}/v1/chat/completions`;
+  const data = {
+    model: currentModel,
+    stream: true,
+    messages: chatMsgs.filter(
+      (msg) => msg.role === "user" || msg.role === "assistant"
+    ).map((msg) => ({
+      role: msg.role,
+      content: msg.message,
+    })),
+  };
+
+  const newMsg = {
+    role: "assistant" as const,
+    message: "",
+    timestamp: new Date(),
+  };
+  // Add a new message to the chat store to show loading state
+  useChatStore.getState().addChatMessage(newMsg);
+
+  try {
+    const response = await api.postStream(modelsUrl, jobServerToken, {
+      json: data,
+      signal: abortSignal,
+      timeout: false, // Disable timeout for streaming
+    });
+
+    // Process the stream response
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let fullResponse = "";
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+
+        if (done) break;
+
+        // Decode the chunk
+        buffer += decoder.decode(value, { stream: true });
+
+        // Process complete events from buffer
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ""; // Keep incomplete line in buffer
+
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          if (trimmedLine === "") continue;
+
+          // SSE format: "data: {json}"
+          if (trimmedLine.startsWith("data: ")) {
+            const data = trimmedLine.slice(6);
+            // Check for stream termination
+            if (data === "[DONE]") {
+              console.log("Stream completed");
+              break;
+            }
+
+            try {
+              const parsed = JSON.parse(data);
+
+              // Handle different response formats (e.g., chat completions vs completions)
+              const content = parsed.choices?.[0]?.delta?.content ||
+                parsed.choices?.[0]?.text ||
+                "";
+
+              if (content) {
+                fullResponse += content;
+                // Update the last message in the chat store
+                useChatStore.getState().updateLastChatMessage(fullResponse);
+                // You could emit progress here if needed
+                // onProgress?.(content, fullResponse);
+              }
+            } catch (e) {
+              toast.error("Failed to parse SSE data:" + e + " \nLine:" + data);
+              // Continue processing other lines
+            }
+          } else if (trimmedLine.startsWith("event:")) {
+            // Handle named events if the API uses them
+            console.log("SSE event:", trimmedLine);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Stream reading error:" +  error);
+      throw error;
+    } finally {
+      // Ensure reader is released
+      reader.releaseLock();
+    }
+
+    // Process any remaining data in buffer
+    if (buffer.trim()) {
+      console.warn("Incomplete data in buffer:", buffer);
+    }
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      return null;
+    }
+    toast.error("Failed to send chat request:" + error);
+    return null;
+  }
+}
+
 
 // Store the abort controller at module level
 export let currentAbortController: AbortController | null = null;
