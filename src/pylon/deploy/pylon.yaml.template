@@ -63,6 +63,10 @@ spec:
               value: {{ cluster_cfg['prometheus']['url'] }}
             - name: ALERT_MANGER_URI
               value: {{ cluster_cfg['alert-manager']['url'] }}
+{% if "copilot-chat" in cluster_cfg %}
+            - name: COPILOT_CHAT_URI
+              value: {{ cluster_cfg['copilot-chat']['url'] }}
+{% endif %}           
             - name: K8S_DASHBOARD_URI
               value: {{ cluster_cfg['layout']['kubernetes']['dashboard-url'] }}
 {% if cluster_cfg["cluster"]["common"]["cluster-type"] == "yarn" %}

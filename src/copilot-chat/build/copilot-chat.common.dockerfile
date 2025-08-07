@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY src/pyproject.toml src/requirements.lock ./
+COPY src/pyproject.toml ./
 COPY src/copilot_agent ./copilot_agent
 
 ENV RYE_HOME="/opt/rye"

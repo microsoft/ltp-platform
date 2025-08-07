@@ -15,6 +15,8 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,7 +35,7 @@ spec:
     spec:
       containers:
       - name: copilot-chat
-        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}/copilot-chat:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}copilot-chat:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         resources:
           requests:
@@ -44,9 +46,9 @@ spec:
             cpu: "500m"
         env:
         - name: AGENT_PORT
-          value: {{ cluster_cfg["copilot-chat"]["agent-port"] }}
+          value: "{{ cluster_cfg["copilot-chat"]["agent-port"] | default("50000") }}"
         - name: COPILOT_HISTORY_DEPTH
-          value: {{ cluster_cfg["copilot-chat"]["history-depth"] }}
+          value: "{{ cluster_cfg["copilot-chat"]["history-depth"] }}"
         - name: COPILOT_VERSION
           value: {{ cluster_cfg["copilot-chat"]["version"] }}
         - name: AGENT_MODE
@@ -63,9 +65,13 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["llm-model"] }}
         - name: COPILOT_LLM_VERSION
           value: {{ cluster_cfg["copilot-chat"]["llm-version"] }}
+        - name: AGENT_HOST
+          value: {{ cluster_cfg["copilot-chat"]["agent-host"] }}
         ports:
-        - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"] }}
-        - containerPort: {{ cluster_cfg["copilot-chat"]["secure-port"] }}
+        - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
+          hostPort:  {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
+          name: copilot-port
+        - containerPort: {{ cluster_cfg["copilot-chat"]["secure-port"]  | default("8443") }}
         securityContext:
           runAsUser: 0
           runAsGroup: 0

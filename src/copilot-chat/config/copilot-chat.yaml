@@ -17,19 +17,15 @@
 
 service_type: "common"
 
-port: 
-  - 50000
-  - 8443
-
-copilot-chat:
-  agent-port: 50000
-  secure-port: 8443
-  history-depth: 64
-  version: "f3"
-  agent-mode: "remote"
-  agent-mode-ca: "local"
-  azure-openai-api-key: "<your-api-key>"
-  powerbi-key: "<your-powerbi-key>"
-  llm-endpoint: "https://aimicius-southcentralus.openai.azure.com"
-  llm-model: "gpt-4o"
-  llm-version: "2025-01-01-preview"
+agent-host: "0.0.0.0"
+agent-port: "50000"
+secure-port: "8443"
+history-depth: "64"
+version: "f3"
+agent-mode: "remote"
+agent-mode-ca: "local"
+azure-openai-api-key: "<your-api-key>"
+powerbi-key: "<your-powerbi-key>"
+llm-endpoint: "https://endpoint.openai.com"
+llm-model: "gpt-4o"
+llm-version: "2025-01-01-preview"
