@@ -18,22 +18,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 set -e  # Exit on any error
-
+{% if cluster_cfg["dashboard-data-backup"]["configured"] -%}
 echo "Starting Dashboard Data Backup deployment..."
 
 pushd $(dirname "$0") > /dev/null
 
-# Apply the Kubernetes manifests
-kubectl apply --overwrite=true -f dashboard-data-backup.yaml.template || exit $?
+kubectl apply --overwrite=true -f dashboard-data-backup.yaml || exit $?
 
-sleep 10
 # Wait until the service is ready.
 PYTHONPATH="../../../deployment" python -m k8sPaiLibrary.monitorTool.check_pod_ready_status -w -k app -v dashboard-data-backup || exit $?
 
-echo "Dashboard Data Backup service started successfully!"
-echo ""
-echo "To view logs, run: kubectl logs -l app=dashboard-data-backup"
-echo "To check status, run: kubectl get pods -l app=dashboard-data-backup"
-echo "To stop the service, run: ./stop.sh"
-
 popd > /dev/null
+{% endif %}

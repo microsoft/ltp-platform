@@ -1,3 +1,3 @@
 # Run backup script at 2am, 8am, 2pm, and 8pm UTC
-0 2,8,14,20 * * * root cd /app/src && python backup_kusto_query_res.py >> /var/log/backup/backup.log 2>&1
+0 2,8,14,20 * * * root bash -c 'cd /app/src && python backup_kusto_query_res.py'
 # Empty line at end is required for cron

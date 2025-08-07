@@ -19,11 +19,8 @@ cluster-type:
   - yarn
   - k8s
 
-prerequisite:
-  - cluster-configuration
-
 template-list:
-  - dashboard-data-backup.yaml.template
+  - dashboard-data-backup.yaml
 
 start-script: start.sh
 stop-script: stop.sh

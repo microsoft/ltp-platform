@@ -21,20 +21,4 @@ set -e  # Exit on any error
 
 echo "Stopping Dashboard Data Backup service..."
 
-pushd $(dirname "$0") > /dev/null
-
-# Delete the Kubernetes resources
-INSTANCES="
-deployment/dashboard-data-backup
-service/dashboard-data-backup-service
-"
-
-for instance in ${INSTANCES}; do
-  kubectl delete --ignore-not-found --now ${instance} || exit $?
-done
-
-echo ""
-echo "Dashboard Data Backup service stopped."
-echo "To start the service again, run: ./start.sh"
-
-popd > /dev/null
+kubectl delete --ignore-not-found --now deployment/dashboard-data-backup
