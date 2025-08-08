@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from record_job import generate_metrics, generate_job_react_time, update_react_time, update_failure_reason_category
 from kusto_util import KustoUtil
+from data_sources import parse_interval
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -72,6 +73,7 @@ def process_job_data(time_offset=None):
         # update the previous empty react records within retain_time
         unknown_react_records = KustoUtil().query_unknown_react_records(
             retain_time)
+
         unknown_react_records = update_react_time(unknown_react_records,
                                                   metrics_df)
         # filterout records still in unknown category
@@ -112,7 +114,7 @@ def main():
     Main entry point: initializes scheduler and starts periodic job-data processing.
     """
     # Get configuration from environment
-    interval_minutes = int(os.getenv('RUN_INTERVAL', '60m'))
+    interval_minutes = os.getenv('RUN_INTERVAL', '180m')
 
     logger.info("Job Data Recorder starting...")
     logger.info(
@@ -125,8 +127,9 @@ def main():
     # regardless of how long each job takes to complete
     scheduler.add_job(
         process_job_data,
-        args=[interval_minutes],
-        trigger=IntervalTrigger(minutes=interval_minutes),
+        args=[None],
+        trigger=IntervalTrigger(
+            minutes=parse_interval(interval_minutes)// 60),
         id='job_data_processor',
         max_instances=1,  # Prevent overlapping runs
         coalesce=True,  # If a run is missed, don't queue multiple runs
