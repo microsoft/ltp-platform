@@ -14,9 +14,12 @@ RUN apt-get update && \
     parallel \
     pssh \
     rsync
+RUN curl -sL https://aka.ms/downloadazcopy-v10-linux | tar -xz --strip-components=1 -C /usr/local/bin
 
 ENV SSHD_PORT=23333 \
     RSYNC_PORT=8873
+RUN echo SSHD_PORT="$SSHD_PORT" >> /etc/environment && \
+    echo RSYNC_PORT="$RSYNC_PORT" >> /etc/environment
 RUN mkdir -p /root/.ssh && \
     touch /root/.ssh/authorized_keys && \
     mkdir -p /var/run/sshd && \

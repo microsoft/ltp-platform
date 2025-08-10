@@ -5,7 +5,8 @@
 service_type: "k8s"
 
 port-base: 17000
-root-path: /mntext
+host-path: /mntext/clstore
+job-path: /clstore
 sync-interval: 600
 clusters: []
 clusters_hostname_regex: []

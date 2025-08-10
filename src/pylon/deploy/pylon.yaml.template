@@ -98,6 +98,10 @@ spec:
 {% if cluster_cfg['cluster']['common']['cluster-local-storage'] == 'true' %}
             - name: CLUSTER_LOCAL_STORAGE_IP
               value: {{ cluster_cfg['cluster-local-storage']['ip'] }}
+            - name: CLUSTER_LOCAL_STORAGE_PORT_BASE
+              value: "{{ cluster_cfg['cluster-local-storage']['port-base'] }}"
+            - name: CLUSTER_LOCAL_STORAGE_CLUSTERS
+              value: {{ cluster_cfg['cluster-local-storage']['clusters'] | join(';') }}
 {% endif %}
             - name: DOCKER_CACHE_PLUGIN
               value: {{ cluster_cfg['docker-cache']['uri']}}

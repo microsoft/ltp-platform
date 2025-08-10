@@ -8,6 +8,7 @@ cluster-type:
 prerequisite:
   - cluster-configuration
   - alert-manager
+  - cluster-local-storage-worker
 
 template-list:
   - start.sh
@@ -18,5 +19,6 @@ start-script: start.sh
 stop-script: stop.sh
 delete-script: delete.sh
 
-deploy-rules:
-  - in: pai-master
+# Not work for YAML file with multiple documents
+# deploy-rules:
+#   - in: pai-master

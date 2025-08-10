@@ -72,16 +72,26 @@ sed -i "/^$source$/d" $hostfile
 
 # Settings
 num_parts=$(wc -l < $hostfile)
-mnt_path="/mntext"
+mnt_path="${CLUSTER_LOCAL_STORAGE_ROOT%/}"
+rsync_module="clstore"
 tmpdir=$(mktemp -d /tmp/datacopy.XXXXXX)
 file_list="$tmpdir/bcast_list"
 file_prefix="$tmpdir/bcast_part_"
 file_selflist="$tmpdir/bcast_selflist"
 script_list="$tmpdir/bcast_sh"
 
-rsync_args="-aO --partial --no-o --no-g"
+if [ "$num_parts" -eq "0" ]; then
+  log error "No node in hostfile"
+  exit 1
+fi
+if [ -z "$mnt_path" ]; then
+  log error "CLUSTER_LOCAL_STORAGE_ROOT is empty"
+  exit 1
+fi
+
+rsync_args="-aOS --partial --no-o --no-g"
 if [ "$verbose" -eq "1" ]; then
-  rsync_args="-avPO --no-o --no-g"
+  rsync_args="-avPOS --no-o --no-g"
 fi
 if [ -n "$RSYNC_PORT" ]; then
   rsync_args+=" --port=$RSYNC_PORT"
@@ -91,7 +101,11 @@ calc_ipoib_addr() {
   local hca_idx=$1
   local host_idx=$2
   echo "172.2$(( hca_idx % 8 )).$(( host_idx / 251 )).$(( host_idx % 251 + 4 ))"
-  # echo "172.16.$(( hca_idx % 8 )).$(( host_idx + 4 ))"
+}
+
+log_exit() {
+  log error "--- Step $1 Failed ---"
+  exit $2
 }
 
 # Step 1
@@ -129,13 +143,12 @@ if [ -z "$step" ] || [ "$step" -eq "1" ]; then
   for part in $(seq 0 $((num_parts - 1))); do
     file_part="${file_prefix}$(printf "%03d" $part)"
     if [ -f "$file_part" ]; then
-      log info "Part $part: $( (du -ch $(cat $file_part) || echo '?? total') | grep total | awk '{print $1}') bytes, $(wc -l < $file_part) files"
+      log info "Part $part: $(tr '\n' '\0' < $file_part | du -ch --files0-from=- | awk '/total/{print $1}') bytes, $(wc -l < $file_part) files"
     fi
   done
 
   # Push to each node with rsync
-  sudo apt-get update -y && sudo apt-get install -y parallel pssh
-  parallel-ssh -i -t 30 -p $num_parts -h $hostfile "sudo mkdir -p $path && sudo chown \$USER:\$USER $path"
+  parallel-ssh -i -t 30 -p $num_parts -h $hostfile "mkdir -p $path && chown \$USER:\$USER $path"
   rsync_push() {
     local part=$1
 
@@ -150,14 +163,13 @@ if [ -z "$step" ] || [ "$step" -eq "1" ]; then
 
     echo "Rsync push $file_part from $source_ipoib to $target_ipoib ..."
     if [ -f "$file_part" ]; then
-      # Hardcode path
       sed -i "s|$mnt_path/||g" $file_part
-      rsync $rsync_args --files-from=$file_part --address=$source_ipoib ${mnt_path} rsync://$target_ipoib/paidata
+      rsync $rsync_args --files-from=$file_part --address=$source_ipoib ${mnt_path} rsync://$target_ipoib/$rsync_module
     fi
   }
-  export rsync_args mnt_path file_prefix hostfile
+  export rsync_args rsync_module mnt_path file_prefix hostfile
   export -f calc_ipoib_addr rsync_push
-  parallel -j $num_parts rsync_push ::: $(seq 0 $((num_parts - 1)))
+  parallel -j $num_parts --halt-on-error now,fail=1 rsync_push ::: $(seq 0 $((num_parts - 1))) || log_exit 1 $?
 
   log timer "Finished in $((SECONDS - timer)) seconds"
   log info "--- Step 1 Completed Successfully ---"
@@ -182,17 +194,15 @@ if [ -z "$step" ] || [ "$step" -eq "2" ]; then
         source_ipoib="$(calc_ipoib_addr $no $source_idx)"
         target_ipoib="$(calc_ipoib_addr $no $target_idx)"
 
-        # Hardcode path
-        echo "${hosts[i]},${hosts[j]},rsync $rsync_args --files-from=$file_selflist --address=$source_ipoib ${mnt_path} rsync://$target_ipoib/paidata" >> $script_list
+        echo "${hosts[i]},${hosts[j]},rsync $rsync_args --files-from=$file_selflist --address=$source_ipoib ${mnt_path} rsync://$target_ipoib/$rsync_module" >> $script_list
       fi
     done
   done
   log info "Generated $script_list file."
 
-  parallel-ssh -i -t 30 -p $num_parts -h $hostfile "mkdir -p $tmpdir && find $path -type f | sed \"s|$mnt_path/||g\" > $file_selflist"
+  parallel-ssh -i -t 30 -p $num_parts -h $hostfile "mkdir -p $tmpdir && find $path -type f | sed \"s|$mnt_path/||g\" > $file_selflist"  || log_exit 2 $?
   log info "Prepared $file_selflist file."
-  parallel-ssh -i -t 30 -p $num_parts -h $hostfile "sudo apt-get install -y parallel"
-  parallel-scp -t 120 -p $num_parts -h $hostfile $script_list $script_list
+  parallel-scp -t 120 -p $num_parts -h $hostfile $script_list $script_list || log_exit 2 $?
   log info "Distributed $script_list file."
 
   # Execute via parallel
@@ -201,7 +211,7 @@ if [ -z "$step" ] || [ "$step" -eq "2" ]; then
 
   # Re-check by re-run
   log info "Rsync again to re-check ..."
-  parallel-ssh -i -t 0 -p 32 -h $hostfile "cat $script_list | grep -i ^\$(hostname) | cut -d, -f3 | parallel -j $num_parts"
+  parallel-ssh -i -t 0 -p 32 -h $hostfile "cat $script_list | grep -i ^\$(hostname) | cut -d, -f3 | parallel -j $num_parts --halt-on-error now,fail=1" || log_exit 2 $?
 
   log timer "Finished in $((SECONDS - timer)) seconds"
   log info "--- Step 2 Completed Successfully ---"
