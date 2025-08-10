@@ -247,8 +247,6 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["node-recycler"]["node-action-table"]
                     | default(cluster_cfg["alert-manager"]["node-action-table"])
                     | default("NodeActionRecord") }}
-        - name: VALIDATION_DATA_SIZE
-          value: "{{ cluster_cfg['alert-manager']['node-recycler']['validation-data-size'] | default('-1') }}"
 {% endif %}
 {% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
         - name: ICM_HOST

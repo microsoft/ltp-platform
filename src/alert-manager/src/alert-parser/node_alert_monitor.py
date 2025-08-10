@@ -168,22 +168,30 @@ class NodeAvailabilityMonitor:
             shrinked_alerts = self.alert_fetcher.shrink_alerts((period_alerts))
             logger.info(f'{len(shrinked_alerts)} alerts after shrinking for node {node} at time {timestamp}')
 
-        if status == 1:  # Changed to unschedulable
+        if status == 1:  # node was cordoned
             to_status = NodeStatus.CORDONED.value
             reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
             self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
 
-        elif status == 0:  # Changed to available nodata
-            to_status = NodeStatus.AVAILABLE_NODATA.value
-            reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
-            self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
-
-        elif status == -1:  # Continuously unschedulable
-            if from_status in [NodeStatus.AVAILABLE.value, NodeStatus.AVAILABLE_NODATA.value]:
-                to_status = NodeStatus.CORDONED.value
+        elif status == 0:  # node was uncordoned
+            if from_status == NodeStatus.AVAILABLE:
+                logger.info(f"Node {node} is already available. No action taken.")
+            elif from_status == NodeStatus.AVAILABLE_NODATA.value:
+                to_status = NodeStatus.AVAILABLE.value
+                reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
+                self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
+            else:
+                to_status = NodeStatus.AVAILABLE_NODATA.value
                 reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
                 self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
 
+        elif status == -1:  # continuously cordoned
+            if from_status == NodeStatus.AVAILABLE.value:
+                to_status = NodeStatus.CORDONED.value
+                reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
+                self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
+            elif from_status == NodeStatus.AVAILABLE_NODATA.value:
+                logger.info(f"Node {node} is already available nodata. No action taken.")
             elif from_status == NodeStatus.VALIDATING.value:
                 start_time_plus_1hour = convert_timestamp(start_time, format="timestamp") + 3600
                 period_new_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, start_time_plus_1hour)
@@ -194,6 +202,10 @@ class NodeAvailabilityMonitor:
                     to_status = NodeStatus.CORDONED.value
                     reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
                     self.node_updater.update_status_action(node, from_status, to_status, validation_time, reason, detail)
+                elif period_alerts['alertname'].str.contains('RecoverValidatedNodes').any():
+                    to_status = NodeStatus.AVAILABLE_NODATA.value
+                    reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
+                    self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
                 # TODO check validation job status
                 elif len(shrinked_new_alerts) > 0 and not period_alerts['alertname'].str.contains('NodeNotReady').any() and not period_alerts['alertname'].str.contains('RecoverValidatedNodes').any():
                     to_status = NodeStatus.CORDONED.value
