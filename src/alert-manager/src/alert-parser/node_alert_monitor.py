@@ -169,9 +169,10 @@ class NodeAvailabilityMonitor:
             logger.info(f'{len(shrinked_alerts)} alerts after shrinking for node {node} at time {timestamp}')
 
         if status == 1:  # node was cordoned
-            to_status = NodeStatus.CORDONED.value
-            reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
-            self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
+            if from_status != NodeStatus.AVAILABLE_NODATA.value:
+                to_status = NodeStatus.CORDONED.value
+                reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
+                self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
 
         elif status == 0:  # node was uncordoned
             if from_status == NodeStatus.AVAILABLE:
