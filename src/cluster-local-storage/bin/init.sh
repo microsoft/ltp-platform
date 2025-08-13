@@ -43,8 +43,8 @@ log file = /var/log/rsync.log
 [clstore]
     path = $CLUSTER_LOCAL_STORAGE_ROOT
     comment = cluster local storage
-    uid = nobody
-    gid = nogroup
+    uid = root
+    gid = root
     read only = false
     list = yes
 EOL

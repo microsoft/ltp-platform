@@ -164,6 +164,9 @@ location ~ ^/registry/cache/(.*)$ {
 {% set vcport = port_base + loop.index0 %}
 location ~ ^/cluster-local-storage/{{vc}}/(.*)$ {
   proxy_pass http://{{CLUSTER_LOCAL_STORAGE_IP}}:{{vcport}}/$1$is_args$args;
+  proxy_connect_timeout 720m;
+  proxy_read_timeout 720m;
+  proxy_send_timeout 720m;
 }
 {%- endfor %}
 {%- endif %}

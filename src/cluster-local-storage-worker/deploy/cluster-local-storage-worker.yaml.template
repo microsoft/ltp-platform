@@ -41,6 +41,14 @@ spec:
         volumeMounts:
         - name: clstore
           mountPath: '{{ cluster_cfg["cluster-local-storage"]["job-path"] }}'
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - 'pgrep -x sshd >/dev/null && pgrep -f "rsync.*--daemon" >/dev/null'
+          initialDelaySeconds: 60
+          periodSeconds: 10
       volumes:
       - name: clstore
         hostPath:
