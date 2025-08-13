@@ -247,8 +247,6 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["node-recycler"]["node-action-table"]
                     | default(cluster_cfg["alert-manager"]["node-action-table"])
                     | default("NodeActionRecord") }}
-        - name: VALIDATION_DATA_SIZE
-          value: "{{ cluster_cfg['alert-manager']['node-recycler']['validation-data-size'] | default('-1') }}"
 {% endif %}
 {% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
         - name: ICM_HOST
@@ -318,10 +316,10 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["log-manager-username"] | default("admin") }}
         - name: LOG_MANAGER_PASSWORD
           value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["log-manager-password"] | default("admin") }}
-        {% if "result-output-dir" in cluster_cfg["alert-manager"]["node-failure-detection"]["monitor""] %}
+{% if "result-output-dir" in cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"] %}
         - name: RESULT_OUTPUT_DIR
-          value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["result-output-dir"] | }}
-        {% endif %}
+          value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["result-output-dir"] }}
+{% endif %}
         volumeMounts:
         - name: monitor-specs-config
           mountPath: /app/config_specs
@@ -376,7 +374,7 @@ spec:
         - name: LOG_LEVEL
           value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["log-level"] | default(cluster_cfg["alert-manager"]["log-level"]) | default("INFO") }}
         - name: RUN_INTERVAL
-          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["run-interval"] | default("60") }}"
+          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["run-interval"] | default("3h") }}"
         - name: RECORD_RETAIN_TIME
           value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["record-retain-time"] | default("30d") }}"
         - name: KUSTO_METRICS_TABLE

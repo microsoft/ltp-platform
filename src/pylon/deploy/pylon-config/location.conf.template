@@ -52,8 +52,8 @@ location ~ ^/job-server/([^/]+):(\d+)/(.*)$ {
 }
 
 # Copilot Chat backend
-location ~ ^copilot/api/operation(.*)$ {
-  proxy_pass {{COPILOT_CHAT_URI}}/api/operation$1$is_args$args;
+location ~ ^/copilot/api/operation(.*)$ {
+  proxy_pass {{COPILOT_CHAT_URI}}/copilot/api/operation$1$is_args$args;
   proxy_connect_timeout 2m;
   proxy_read_timeout 2m;
   proxy_send_timeout 2m;
@@ -159,10 +159,14 @@ location ~ ^/registry/cache/(.*)$ {
 
 {%- if CLUSTER_LOCAL_STORAGE_IP %}
 # cluster local storage
-{%- for vc in cluster_cfg['cluster-local-storage']['clusters'] %}
-{% set vcport = cluster_cfg['cluster-local-storage']['port-base'] + loop.index0 %}
+{%- for vc in CLUSTER_LOCAL_STORAGE_CLUSTERS.split(';') %}
+{% set port_base = CLUSTER_LOCAL_STORAGE_PORT_BASE | int %}
+{% set vcport = port_base + loop.index0 %}
 location ~ ^/cluster-local-storage/{{vc}}/(.*)$ {
   proxy_pass http://{{CLUSTER_LOCAL_STORAGE_IP}}:{{vcport}}/$1$is_args$args;
+  proxy_connect_timeout 720m;
+  proxy_read_timeout 720m;
+  proxy_send_timeout 720m;
 }
 {%- endfor %}
 {%- endif %}

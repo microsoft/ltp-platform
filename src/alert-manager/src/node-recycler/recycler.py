@@ -329,7 +329,6 @@ class NodeRecycler:
                     image=cls._ltp_validation_image,
                     client_id=cls._azure_client_id,
                     instances=1,
-                    data_size=os.getenv("VALIDATION_DATA_SIZE", -1),
                     hostnames=hostname.lower(),
                 )
                 res = requests.post(

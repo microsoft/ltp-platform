@@ -7,7 +7,7 @@
 import copy
 
 
-class ClusterLocalStorage(object):
+class CopilotChat(object):
     def __init__(self, cluster_conf, service_conf, default_service_conf):
         self.cluster_conf = cluster_conf
         self.service_conf = dict(default_service_conf, **service_conf)
@@ -19,9 +19,9 @@ class ClusterLocalStorage(object):
         return None
 
     def validation_pre(self):
-        for k in ["port-base", "root-path"]:
+        for k in ["agent-port", "secure-port", "history-depth", "agent-mode", "agent-mode-ca", "azure-openai-api-key", "llm-endpoint", "llm-model", "llm-version"]:
             if k not in self.service_conf:
-                return False, f"{k} is not found in cluster local storage service configuration"
+                return False, f"{k} is not found in copilot-chat service configuration"
         if not self.get_master_ip():
             return False, f"No master ip found"
         return True, None
@@ -29,6 +29,7 @@ class ClusterLocalStorage(object):
     def run(self):
         config = copy.deepcopy(self.service_conf)
         config['ip'] = self.get_master_ip()
+        config['url'] = f"http://{config['ip']}:{config['agent-port']}"
         return config
 
     def validation_post(self, conf):

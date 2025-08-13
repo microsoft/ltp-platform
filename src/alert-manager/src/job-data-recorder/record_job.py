@@ -6,7 +6,7 @@ import traceback
 from tqdm import tqdm
 
 from data_sources import *
-from job_util import retrieve_period_job_metrics
+from job_util import retrieve_period_job_metrics, find_node_next_job_start_time
 from kusto_util import KustoUtil
 
 
@@ -214,14 +214,16 @@ def find_node_failure(task, completedTime, launchedTime, job_name, attempt,
         # use current time if completedTime is not available
         completedTime = pd.Timestamp.now().timestamp() * 1000
     node_name = task.get('containerNodeName', 'unknown')
+    ip = task.get('containerIp', 'unknown')
     if not node_name or node_name == 'unknown':
         print(
             f"Node name not found for job {job_name}, attempt {attempt}, task {task.get('taskIndex', 'N/A')}"
         )
         return '', '', ''
-
+    end_time = find_node_next_job_start_time(
+        ip, completedTime)
     error_message, category = KustoUtil().find_node_triaged_failure_in_kusto(
-        node_name, completedTime, launchedTime)
+        node_name, end_time, launchedTime)
     if len(error_message) == 0:
         logs = JobLogsClient().download_log(job_name,
                                             attempt,
@@ -396,23 +398,48 @@ def update_react_time(unknown_react_records, metrics_df):
     Returns:
         pd.DataFrame: Updated records with reactTime filled where possible.
     """
-    if unknown_react_records.empty or metrics_df.empty:
-        return pd.DataFrame()
+    try:
+        if unknown_react_records.empty or metrics_df.empty:
+            return pd.DataFrame()
 
-    # query the job summary table for the same jobId in react_df from kusto
-    # merge the queried metrics_df_old with metrics_df
-    metrics_df_old = KustoUtil().query_job_metrics_by_job_id(
-        unknown_react_records['jobId'].unique().tolist())
-    if metrics_df_old.empty:
-        return pd.DataFrame()
-    merged_df = pd.concat([metrics_df_old, metrics_df], ignore_index=True)
-    merged_df.sort_values(by=['jobId', 'completionTime'], inplace=True)
-    merged_df = merged_df.drop_duplicates(subset=['jobId'],
-                                          keep='last').reset_index(drop=True)
-    new_react_df = generate_job_react_time(merged_df)
-    new_react_df = new_react_df[new_react_df['jobId'].isin(
-        unknown_react_records['jobId'])].reset_index(drop=True)
-    if new_react_df.empty:
+        # query the job summary table for the same jobId in react_df from kusto
+        # merge the queried metrics_df_old with metrics_df
+        metrics_df_old = KustoUtil().query_job_metrics_by_job_id(
+            unknown_react_records['jobId'].unique().tolist())
+        if metrics_df_old.empty:
+            return pd.DataFrame()
+          # Fix: Ensure datetime columns have consistent timezone handling
+        datetime_columns = ['completionTime', 'launchTime', 'submissionTime', 'createdDatetime']
+        # Normalize timezone for both DataFrames before concatenation
+        for col in datetime_columns:
+            if col in metrics_df_old.columns:
+                # Convert to timezone-naive if it's timezone-aware
+                if pd.api.types.is_datetime64_any_dtype(metrics_df_old[col]):
+                    if hasattr(metrics_df_old[col].dtype, 'tz') and metrics_df_old[col].dtype.tz is not None:
+                        metrics_df_old[col] = metrics_df_old[col].dt.tz_convert('UTC').dt.tz_localize(None)
+                    # Ensure it's datetime type
+                    metrics_df_old[col] = pd.to_datetime(metrics_df_old[col], errors='coerce')
+                    
+            if col in metrics_df.columns:
+                # Convert to timezone-naive if it's timezone-aware
+                if pd.api.types.is_datetime64_any_dtype(metrics_df[col]):
+                    if hasattr(metrics_df[col].dtype, 'tz') and metrics_df[col].dtype.tz is not None:
+                        metrics_df[col] = metrics_df[col].dt.tz_convert('UTC').dt.tz_localize(None)
+                    # Ensure it's datetime type
+                    metrics_df[col] = pd.to_datetime(metrics_df[col], errors='coerce')
+        
+        merged_df = pd.concat([metrics_df_old, metrics_df], ignore_index=True)
+        merged_df.sort_values(by=['jobId', 'completionTime'], inplace=True)
+        merged_df = merged_df.drop_duplicates(subset=['jobId'],
+                                            keep='last').reset_index(drop=True)
+        new_react_df = generate_job_react_time(merged_df)
+        new_react_df = new_react_df[new_react_df['jobId'].isin(
+            unknown_react_records['jobId'])].reset_index(drop=True)
+        if new_react_df.empty:
+            return pd.DataFrame()
+    except Exception as e:
+        logger.error(f"Error updating react time: {e}")
+        traceback.print_exc()
         return pd.DataFrame()
     return new_react_df
 

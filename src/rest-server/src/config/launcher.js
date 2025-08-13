@@ -82,6 +82,8 @@ const k8sLauncherConfigSchema = Joi.object()
     jobRestrictionGitRepoBranchModel: Joi.string().required(),
     jobRestrictionGitScriptPrefix: Joi.string().required(),
     jobRestrictionGitScriptName: Joi.string().required(),
+    clstoreHostPath: Joi.string().empty(''),
+    clstoreJobPath: Joi.string().empty(''),
   })
   .required();
 
@@ -152,6 +154,8 @@ if (launcherType === 'k8s') {
     jobRestrictionGitRepoBranchModel: process.env.JOB_RESTRICTION_GIT_REPO_BRANCH_MODEL || 'unset',
     jobRestrictionGitScriptPrefix: process.env.JOB_RESTRICTION_GIT_SCRIPT_PREFIX || 'unset',
     jobRestrictionGitScriptName: process.env.JOB_RESTRICTION_GIT_SCRIPT_NAME || 'unset',
+    clstoreHostPath: process.env.CLUSTER_LOCAL_STORAGE_HOST_PATH,
+    clstoreJobPath: process.env.CLUSTER_LOCAL_STORAGE_JOB_PATH,
   };
 
   const { error, value } = k8sLauncherConfigSchema.validate(launcherConfig);

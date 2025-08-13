@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 
 
+{%- if cluster_cfg['cluster']['common']['cluster-local-storage'] == 'true' %}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -25,19 +26,36 @@ spec:
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}cluster-local-storage:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         imagePullPolicy: Always
         command:
-        - /usr/local/cluster-local-storage/init.sh
+        - /bin/bash
+        - -c
+        - /usr/local/cluster-local-storage/init.sh && sleep infinity
         env:
+        - name: CLUSTER_LOCAL_STORAGE_WORKER
+          value: TRUE
+        - name: CLUSTER_LOCAL_STORAGE_IPOIB_NUM
+          value: "8"
+        - name: CLUSTER_LOCAL_STORAGE_IPOIB_PREFIX
+          value: ib
         - name: CLUSTER_LOCAL_STORAGE_ROOT
-          value: /data
+          value: '{{ cluster_cfg["cluster-local-storage"]["job-path"] }}'
         volumeMounts:
-        - name: local-storage
-          mountPath: /data
+        - name: clstore
+          mountPath: '{{ cluster_cfg["cluster-local-storage"]["job-path"] }}'
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - 'pgrep -x sshd >/dev/null && pgrep -f "rsync.*--daemon" >/dev/null'
+          initialDelaySeconds: 60
+          periodSeconds: 10
       volumes:
-      - name: local-storage
+      - name: clstore
         hostPath:
-          path: '{{ cluster_cfg["cluster-local-storage"]["root-path"] }}'
+          path: '{{ cluster_cfg["cluster-local-storage"]["host-path"] }}'
       tolerations:
       - key: node.kubernetes.io/memory-pressure
         operator: "Exists"
       - key: node.kubernetes.io/disk-pressure
         operator: "Exists"
+{%- endif %}

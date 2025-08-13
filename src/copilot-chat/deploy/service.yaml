@@ -1,0 +1,15 @@
+cluster-type:
+  - yarn
+  - k8s
+
+template-list:
+  - copilot-chat-deployment.yaml
+  - start.sh
+
+start-script: start.sh
+stop-script: stop.sh
+delete-script: delete.sh
+refresh-script: refresh.sh
+
+deploy-rules:
+  - in: pai-master
