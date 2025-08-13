@@ -68,7 +68,7 @@ if [ -z "$path" ] || [ -z "$hostfile" ]; then
   log error "Usage: $0 -v -s <step> -p <path> -h <hostfile>"
   exit 1
 fi
-sed -i "/^$source$/d" $hostfile
+sed -i "/^$source$/Id" $hostfile
 
 # Settings
 num_parts=$(wc -l < $hostfile)

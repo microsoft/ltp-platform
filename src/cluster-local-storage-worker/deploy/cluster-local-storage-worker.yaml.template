@@ -30,6 +30,12 @@ spec:
         - -c
         - /usr/local/cluster-local-storage/init.sh && sleep infinity
         env:
+        - name: CLUSTER_LOCAL_STORAGE_WORKER
+          value: TRUE
+        - name: CLUSTER_LOCAL_STORAGE_IPOIB_NUM
+          value: "8"
+        - name: CLUSTER_LOCAL_STORAGE_IPOIB_PREFIX
+          value: ib
         - name: CLUSTER_LOCAL_STORAGE_ROOT
           value: '{{ cluster_cfg["cluster-local-storage"]["job-path"] }}'
         volumeMounts:

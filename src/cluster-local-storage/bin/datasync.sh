@@ -14,7 +14,7 @@ DIR="${1%/}/"
 SOURCE=$2
 TARGET=$3
 
-PARTS=8
+PARTS="${CLUSTER_LOCAL_STORAGE_IPOIB_NUM:-8}"
 mnt_path="${CLUSTER_LOCAL_STORAGE_ROOT%/}"
 rsync_module="clstore"
 tmpdir=$(mktemp -d /tmp/datasync.XXXXXX)
@@ -53,7 +53,7 @@ while IFS= read -r file; do
   fi
 done < "$FILELIST"
 
-for i in {0..7}; do
+for i in $(seq 0 $((PARTS - 1))); do
   PART_FILE="${FILEPREFIX}${i}"
   if [ -f "$PART_FILE" ]; then
     echo "Part $i: $(tr '\n' '\0' < $PART_FILE | du -ch --files0-from=- | awk '/total/{print $1}') bytes, $(wc -l < $PART_FILE) lines"
@@ -68,7 +68,7 @@ fi
 if [ -n "$RSYNC_PORT" ]; then
   ARGS+=" --port=$RSYNC_PORT"
 fi
-for i in {0..7}; do
+for i in $(seq 0 $((PARTS - 1))); do
   SOURCE_IDX=$((36#$(echo $SOURCE | rev | cut -c1-2 | rev)))
   TARGET_IDX=$((36#$(echo $TARGET | rev | cut -c1-2 | rev)))
   SOURCE_IPOIB="172.2$i.$(( SOURCE_IDX / 251 )).$(( SOURCE_IDX % 251 + 4 ))"
