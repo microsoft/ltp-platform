@@ -24,7 +24,8 @@ RUN apk add --no-cache --update --virtual .build-deps \
  && sudo gem install fluent-plugin-concat \
  && gem install fluent-plugin-parser-cri --no-document \
  && sudo gem install bundler -v 2.3.27 \
- && sudo gem install rake pg \
+ && sudo gem install rake  \
+ && sudo gem install pg -v 1.5.9 \
  && sudo apk add ruby-bigdecimal
 
  RUN sudo apk update && sudo apk upgrade
