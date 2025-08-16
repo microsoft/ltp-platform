@@ -215,10 +215,11 @@ export async function chatStreamRequest(abortSignal?: AbortSignal) {
     })),
   };
 
-  const newMsg = {
+  let newMsg = {
     role: "assistant" as const,
     message: "",
     timestamp: new Date(),
+    reasoning: "",
   };
   // Add a new message to the chat store to show loading state
   useChatStore.getState().addChatMessage(newMsg);
@@ -234,7 +235,6 @@ export async function chatStreamRequest(abortSignal?: AbortSignal) {
     const reader = response.body!.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-    let fullResponse = "";
     try {
       while (true) {
         const { value, done } = await reader.read();
@@ -265,16 +265,23 @@ export async function chatStreamRequest(abortSignal?: AbortSignal) {
               const parsed = JSON.parse(data);
 
               // Handle different response formats (e.g., chat completions vs completions)
-              const content = parsed.choices?.[0]?.delta?.content ||
+              const contentDelta = parsed.choices?.[0]?.delta?.content ||
                 parsed.choices?.[0]?.text ||
                 "";
+              const reasonDelta = parsed.choices?.[0]?.delta?.reasoning_content || "";
 
-              if (content) {
-                fullResponse += content;
+              if (contentDelta) {
+                if (newMsg.message.length === 0) {
+                  contentDelta.trim();
+                }
+                newMsg.message += contentDelta;
+              }
+              if (reasonDelta) {
+                newMsg.reasoning += reasonDelta;
+              }
+              if (contentDelta || reasonDelta) {
                 // Update the last message in the chat store
-                useChatStore.getState().updateLastChatMessage(fullResponse);
-                // You could emit progress here if needed
-                // onProgress?.(content, fullResponse);
+                useChatStore.getState().updateLastChatMessage(newMsg);
               }
             } catch (e) {
               toast.error("Failed to parse SSE data:" + e + " \nLine:" + data);
@@ -287,7 +294,7 @@ export async function chatStreamRequest(abortSignal?: AbortSignal) {
         }
       }
     } catch (error) {
-      console.error("Stream reading error:" +  error);
+      console.error("Stream reading error:" + error);
       throw error;
     } finally {
       // Ensure reader is released

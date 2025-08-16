@@ -105,42 +105,51 @@ const CustomMarkdown: React.FC<{ content: string }> = ({ content }) => {
 }
 
 // Message component
-const Message: React.FC<{ message: ChatMessage, expand?: boolean }> = ({ message, expand = true }) => {
-  const [expanded, setExpanded] = useState(expand);
-  const [showButton, setShowButton] = useState(true);
+const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
+  const [expanded, setExpanded] = useState(true);
   const contentRef = useRef<HTMLDivElement>(null); // Reference to the content div
 
-  useEffect(() => {
-    setExpanded(expand); // Set expanded based on prop
-  }, [expand]);
-
-  useEffect(() => {
-    // Check if the content height is less than a threshold (8 in this case)
-    const contentHeight = contentRef.current?.scrollHeight;
-    if (contentHeight && contentHeight <= 32) { // Assuming 32px is roughly equivalent to 2 lines of text
-      setShowButton(false);
-    } else {
-      setShowButton(true);
-    }
-  }, [message]); // Depend on message so it re-checks when message changes
-
-  const toggleExpanded = () => {
-    setExpanded(!expanded);
+  const handleToggle = () => {
+    setExpanded((prev) => !prev);
   };
+
+  const hasExpandedRef = useRef(false);
+  
+  useEffect(() => {
+    if (message.message.length > 0 && !hasExpandedRef.current) {
+      setExpanded(false);
+      hasExpandedRef.current = true;
+    }
+  }, [message.message.length])
 
   return (
     <div className="flex-1 container relative mb-1 bg-gray-100 px-2 py-1 rounded word-wrap"    >
-      {showButton && (
-        <button
-          onClick={toggleExpanded}
-          className="absolute top-0 right-0 mt-1 mr-1 text-blue-500 text-xs flex items-center justify-center bg-white border border-gray-300 rounded-full h-6 w-6"
-        >
-          {expanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
-        </button>
+
+      {/* Reasoning part with fold/unfold */}
+      {message.reasoning && (
+        <div className="bg-gray-50 border-l-4 border-gray-400 px-2 py-1 mb-2 rounded text-gray-700">
+          <details open={expanded}>
+            <summary
+              className="cursor-pointer font-semibold"
+              onClick={e => {
+                e.preventDefault();
+                handleToggle();
+              }}
+            >
+              Reasoning
+            </summary>
+            <div
+              className="mt-1 overflow-auto"
+              style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
+            >
+              {message.reasoning}
+            </div>
+          </details>
+        </div>
       )}
       <div
         ref={contentRef}
-        className={`flex-1 ${expanded ? 'overflow-auto' : 'overflow-hidden max-h-12 mx-auto'} ${showButton ? 'pr-10' : ''}`}
+        className={`flex-1 'pr-10'  'overflow-auto' `}
         style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
       >
         {message.message}
@@ -186,7 +195,7 @@ const MessageGroup: React.FC<{ index: number, group: MessageGroup, isLast: boole
         </div>
         {group.messages.map((message, index) => (
           // <Message key={index} message={message} expand={isLast} />
-          <Message key={index} message={message} expand={true} />
+          <Message key={index} message={message} />
         ))}
 
       </div>
