@@ -1,0 +1,133 @@
+# Copyright (c) Microsoft Corporation
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: webportal-dind-ds
+spec:
+  selector:
+    matchLabels:
+      app: webportal-dind
+  template:
+    metadata:
+      name: webportal-dind
+      labels:
+        app: webportal-dind
+    spec:
+      hostNetwork: false
+      hostPID: false
+      containers:
+      - name: webportal-dind
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}webportal-dind:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true        
+        command: ["/bin/bash", "-c", "bash /usr/local/bin/start-docker.sh && tail -f /dev/null"]
+        env:
+        - name: LAUNCHER_TYPE
+          value: {{ cluster_cfg["cluster"]["common"]["cluster-type"] }}
+        - name: LAUNCHER_SCHEDULER
+{% if cluster_cfg['hivedscheduler']['config']|length > 1 %}
+          value: hivedscheduler
+{% else %}
+          value: defaultscheduler
+{% endif %}
+        - name: REST_SERVER_URI
+          value: {{ cluster_cfg['rest-server']['uri'] }}
+        - name: MARKETPLACE_API_URI
+{%- if 'marketplace_api_uri' in cluster_cfg['marketplace-webportal'] %}
+          value: {{ cluster_cfg["marketplace-webportal"]["marketplace_api_uri"] }}
+{%- else %}
+{% if "ssl" in cluster_cfg["pylon"] and cluster_cfg["pylon"]["ssl"] %}
+          value: "{{ cluster_cfg['pylon']['uri-https']}}/marketplace/api"
+{% else %}
+          value: "{{ cluster_cfg['pylon']['uri']}}/marketplace/api"
+{% endif %}
+{%- endif %}
+        - name: SAVE_TEMPLATE
+{%- if cluster_cfg['webportal']['save-template'] and cluster_cfg['cluster']['common']['marketplace'] == "true" %}
+          value: "true"
+{%- else %}
+          value: "false"
+{%- endif %}
+        - name: PROMETHEUS_URI
+          value: {{ cluster_cfg['prometheus']['url'] }}
+{%- if cluster_cfg["cluster"]["common"]["cluster-type"] == "yarn" %}
+        - name: YARN_WEB_PORTAL_URI
+          value: http://{{ cluster_cfg['hadoop-resource-manager']['master-ip'] }}:8088
+{%- endif %}
+        - name: GRAFANA_URI
+          value: {{ cluster_cfg['grafana']['url'] }}
+        - name: K8S_DASHBOARD_URI
+          value: {{ cluster_cfg['layout']['kubernetes']['dashboard-url'] }}
+        - name: K8S_API_SERVER_URI
+          value: {{ cluster_cfg['layout']['kubernetes']['api-servers-url'] }}
+        - name: EXPORTER_PORT
+          value: "{{ cluster_cfg['node-exporter']['port'] }}"
+{% if not cluster_cfg['authentication']['OIDC'] %}
+        - name: AUTHN_METHOD
+          value: basic
+{% else %}
+        - name: AUTHN_METHOD
+          value: OIDC
+{% endif %}
+{%- if cluster_cfg['cluster']['common']['job-history'] == "true" %}
+        - name: JOB_HISTORY
+          value: "true"
+{%- endif %}
+        - name: PROM_SCRAPE_TIME
+          value: {{ cluster_cfg['prometheus']['scrape_interval'] * 10 }}s
+{% if cluster_cfg['webportal']['enable-job-transfer'] %}
+        - name: ENABLE_JOB_TRANSFER
+          value: "true"
+{% else %}
+        - name: ENABLE_JOB_TRANSFER
+          value: "false"
+{% endif %}
+        - name: WEBPORTAL_PLUGINS
+          # A raw JSON formatted value is required here.
+          value: |
+            [
+{% if cluster_cfg['cluster']['common']['marketplace'] == "true" and cluster_cfg['webportal']['marketplace'] %}
+              {
+                "id": "marketplace",
+                "title": "Marketplace",
+{% if "ssl" in cluster_cfg["pylon"] and cluster_cfg["pylon"]["ssl"] %}
+                "uri": "{{ cluster_cfg['pylon']['uri-https']}}/marketplace/plugin.js"
+{% else %}
+                "uri": "{{ cluster_cfg['pylon']['uri']}}/marketplace/plugin.js"
+{% endif %}
+              },
+{% endif %}
+{% if cluster_cfg['webportal']['plugins']|length > 0 %}
+{% for item in cluster_cfg['webportal']['plugins'] %}
+                {{item}},
+{% endfor %}
+{% endif %}
+            ]
+        ports:
+        - name: webportal
+          containerPort: 8080
+          hostPort: {{ cluster_cfg['webportal']['server-port'] }}
+        {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}
+        resources:
+          limits:
+            memory: "2Gi"
+        {%- endif %}
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
