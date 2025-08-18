@@ -19,4 +19,4 @@ service_type: "common"
 
 configured: false
 environment: "prod"
-kusto-user-assigned-client-id: "1234567890"
+kusto-user-assigned-client-id: ""
