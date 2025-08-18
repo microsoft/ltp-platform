@@ -6,19 +6,18 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY src/pyproject.toml ./
+# Copy project files
+COPY src/requirements.txt ./
 COPY src/copilot_agent ./copilot_agent
 
-ENV RYE_HOME="/opt/rye"
-ENV PATH="$RYE_HOME/shims:$PATH"
-ENV RYE_NO_AUTO_INSTALL=1
-ENV RYE_INSTALL_OPTION="--yes"
-RUN curl -sSf https://rye.astral.sh/get | bash
+# Create and activate virtual environment
+RUN python3 -m venv /app/venv
+ENV PATH="/app/venv/bin:$PATH"
 
-RUN pip install 'MarkupSafe==2.0.1'
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip && \
+    pip install 'MarkupSafe==2.0.1' && \
+    pip install -r requirements.txt
 
-# Use Rye to install dependencies
-RUN rye sync
-
-# Default command: run the agent as in development
-CMD ["rye", "run", "copilot-agent"]
+# Default command: run the agent
+CMD ["python", "-m", "copilot_agent"]
