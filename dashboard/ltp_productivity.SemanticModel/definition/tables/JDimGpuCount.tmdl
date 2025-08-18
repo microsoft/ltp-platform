@@ -1,0 +1,28 @@
+table JDimGpuCount
+	lineageTag: 2fb7d992-08ed-4843-bfad-78236d3dd790
+
+	column totalGpuCount
+		dataType: int64
+		formatString: 0
+		lineageTag: 3773be61-f5a6-4e6d-8394-a0ce2c57a08b
+		summarizeBy: none
+		sourceColumn: totalGpuCount
+
+		annotation SummarizationSetBy = User
+
+	partition JDimGpuCount = m
+		mode: import
+		queryGroup: Job
+		source =
+				let
+				    Source = #"J-r2-JobSummary",
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"totalGpuCount"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns"),
+				    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"totalGpuCount", Order.Ascending}})
+				in
+				    #"Sorted Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

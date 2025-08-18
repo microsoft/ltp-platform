@@ -19,11 +19,15 @@ queryGroup Reliability
 
 	annotation PBI_QueryGroupOrder = 2
 
-annotation PBI_QueryOrder = ["A-r0-na","A-r2-na","NR-t0-ORFNodeRecycleTime","NR-t1-CordonNodeRecycleTime","R-r0-na","R-r0-ColumnHardware","R-r0-ColumnPlatform","R-r0-ColumnUser","R-r0-ColumnEmpty","R-r0-ColumnUnknown","R-t0-DailyNodeRuntimeAvgFailure","R-t1-NodeFailureCategorization","R-t2-NodeFailureRCABreakdown","R-t3-DailyOccurrenceofNodeFailuresRuntime","J-r0-na","J-r1-na","ADimWeek","ADimWeek_stage1","ADimClustername","ADimClustername_stage1","ADimEndpoint","RDimWeek","RDimEndpoint_stage1","RDimEndpoint","RDimFailurecat","M-t0-MTBFbyNode","M-t1-MTBFbyJob","R-r1-na"]
+queryGroup Job
+
+	annotation PBI_QueryGroupOrder = 3
+
+annotation PBI_QueryOrder = ["A-r0-na","A-r2-na","NR-t0-ORFNodeRecycleTime","NR-t1-CordonNodeRecycleTime","R-r0-na","R-r0-ColumnHardware","R-r0-ColumnPlatform","R-r0-ColumnUser","R-r0-ColumnEmpty","R-r0-ColumnUnknown","R-r1-na","R-t0-DailyNodeRuntimeAvgFailure","R-t1-NodeFailureCategorization","R-t2-NodeFailureRCABreakdown","R-t3-DailyOccurrenceofNodeFailuresRuntime","ADimWeek","ADimWeek_stage1","ADimClustername","ADimClustername_stage1","ADimEndpoint","RDimWeek","RDimEndpoint_stage1","RDimEndpoint","RDimFailurecat","M-t0-MTBFbyNode","J-r2-JobSummary","J-r3-JobReact","M-r0-HWJobActions","JDimGpuCount"]
 
 annotation __PBI_TimeIntelligenceEnabled = 1
 
-annotation PBIDesktopVersion = 2.145.907.0 (25.07)+08cac3e9c99e1ac1a607ae58202057cfd59f320a
+annotation PBIDesktopVersion = 2.146.553.0 (25.08)+9ad5b085e9f009bf544eb184334212fc69e3ffae
 
 annotation PBI_ProTooling = ["DevMode"]
 
@@ -37,12 +41,6 @@ ref table R-r0-na
 ref table R-t1-NodeFailureCategorization
 ref table LocalDateTable_21e66450-2dd4-4002-b492-041131745eea
 ref table LocalDateTable_d10fffc0-c90f-45e8-95eb-b568055c2da3
-ref table J-r0-na
-ref table J-t0-JobInterruptionCountandRCA
-ref table J-t1-AverageandMaxJobDurationTime
-ref table J-r1-na
-ref table J-t2-AverageReactionTime
-ref table J-t3-MaxReactionTime
 ref table R-r0-ColumnHardware
 ref table R-r0-ColumnPlatform
 ref table R-r0-ColumnUser
@@ -57,7 +55,6 @@ ref table A-t4-AvailabilityStatus
 ref table LocalDateTable_f6af1449-a88d-4bce-a581-e4bbfc162fb5
 ref table M-t0-MTBFbyNode
 ref table R-r0-ColumnUnknown
-ref table M-t1-MTBFbyJob
 ref table LocalDateTable_87233e88-b4b1-4a8a-9ecc-b61441c00f5a
 ref table ADimWeek
 ref table ADimClustername
@@ -75,6 +72,28 @@ ref table LocalDateTable_bfd0980a-5f77-4f08-84ec-70c9249006b7
 ref table R-t4-DailyNodeRuntimeAvgFailure
 ref table LocalDateTable_4df5af18-8bd0-4a4a-a27d-e2f18cd371c6
 ref table ADimWeek_stage1
+ref table J-r2-JobSummary
+ref table LocalDateTable_5d04bbfc-5024-42f3-914e-14e117b931d6
+ref table LocalDateTable_85be020b-6527-4384-8697-bf2cad73d847
+ref table LocalDateTable_5e143f92-b0c5-4201-86e5-961728295172
+ref table LocalDateTable_3d6cba95-d750-45c5-a26e-073e4042d568
+ref table LocalDateTable_f014c0c3-56d4-4665-ae48-57955ace6a08
+ref table J-t4-JobDuration
+ref table M-r0-HWJobActions
+ref table LocalDateTable_56c1702b-3756-4027-8c84-c606008d1ab0
+ref table LocalDateTable_077a5672-db92-4532-a69d-ca6b348e2b80
+ref table LocalDateTable_7ee6f4c4-0e57-4409-a3fe-8cce142b4ee5
+ref table LocalDateTable_c1f515d7-006a-40bd-930d-3c83df748125
+ref table LocalDateTable_9c1c2e57-e40b-48f2-b88f-e05e38f42b1c
+ref table JDimGpuCount
+ref table J-r3-JobReact
+ref table LocalDateTable_95ee6485-1b8d-4c42-892c-b5da24431797
+ref table LocalDateTable_1186d06e-6f71-4af2-883f-851e82f348ef
+ref table LocalDateTable_0c9ebf7f-460d-4d02-8357-386489f6eaff
+ref table LocalDateTable_21f1bd85-0e61-4f76-9cd1-ae3649379943
+ref table LocalDateTable_840e7cff-6cb6-4e19-9f1d-d35db3a192e5
+ref table LocalDateTable_44ed86b5-a0d6-4a84-9017-c249d8155b13
+ref table J-t5-JobReactTime
 
 ref cultureInfo en-US
 

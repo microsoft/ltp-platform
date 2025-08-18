@@ -73,78 +73,6 @@
             "x": 688.68391476954048,
             "y": 0
           },
-          "nodeIndex": "J-r0-na",
-          "size": {
-            "height": 300,
-            "width": 234
-          },
-          "zIndex": 0
-        },
-        {
-          "location": {
-            "x": 688.68391476954048,
-            "y": 0
-          },
-          "nodeIndex": "J-r1-na",
-          "size": {
-            "height": 296,
-            "width": 234
-          },
-          "zIndex": 0
-        },
-        {
-          "location": {
-            "x": 688.68391476954048,
-            "y": 50
-          },
-          "nodeIndex": "J-t0-JobInterruptionCountandRCA",
-          "size": {
-            "height": 200,
-            "width": 234
-          },
-          "zIndex": 0
-        },
-        {
-          "location": {
-            "x": 688.68391476954048,
-            "y": 50
-          },
-          "nodeIndex": "J-t1-AverageandMaxJobDurationTime",
-          "size": {
-            "height": 200,
-            "width": 234
-          },
-          "zIndex": 0
-        },
-        {
-          "location": {
-            "x": 688.68391476954048,
-            "y": 0
-          },
-          "nodeIndex": "J-t2-AverageReactionTime",
-          "size": {
-            "height": 200,
-            "width": 234
-          },
-          "zIndex": 0
-        },
-        {
-          "location": {
-            "x": 688.68391476954048,
-            "y": 0
-          },
-          "nodeIndex": "J-t3-MaxReactionTime",
-          "size": {
-            "height": 200,
-            "width": 234
-          },
-          "zIndex": 0
-        },
-        {
-          "location": {
-            "x": 688.68391476954048,
-            "y": 0
-          },
           "nodeIndex": "R-r0-na",
           "size": {
             "height": 300,
@@ -300,18 +228,6 @@
         {
           "location": {
             "x": 1136,
-            "y": 86
-          },
-          "nodeIndex": "M-t1-MTBFbyJob",
-          "size": {
-            "height": 128,
-            "width": 234
-          },
-          "zIndex": 0
-        },
-        {
-          "location": {
-            "x": 1136,
             "y": 98
           },
           "nodeIndex": "ADimWeek",
@@ -442,6 +358,92 @@
             "y": 0
           },
           "nodeIndex": "R-t4-DailyNodeRuntimeAvgFailure",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "ADimWeek_stage1",
+          "nodeLineageTag": "dd1b64d0-3ca6-48a0-ad00-a2f3f28e843f",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "J-r2-JobSummary",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "J-t4-JobDuration",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "M-r0-HWJobActions",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "JDimGpuCount",
+          "nodeLineageTag": "2fb7d992-08ed-4843-bfad-78236d3dd790",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "J-r3-JobReact",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1214.0351514233494,
+            "y": 0
+          },
+          "nodeIndex": "J-t5-JobReactTime",
           "size": {
             "height": 200,
             "width": 234

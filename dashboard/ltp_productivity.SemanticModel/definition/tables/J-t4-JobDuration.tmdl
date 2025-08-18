@@ -1,0 +1,430 @@
+table J-t4-JobDuration
+	lineageTag: 86253ade-7eec-491c-af3c-e863053f4274
+
+	measure AvgHardwareFailure = ```
+			
+			AVERAGEX(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] = "Hardware Failure"
+			    ), 
+			    'J-r2-JobSummary'[jobDurationHours]
+			)
+			```
+		lineageTag: d070d22e-e9c0-4765-b990-d5b8641ab4dd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure AvgUserStop = ```
+			
+			AVERAGEX(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] = "User Stop"
+			    ), 
+			    'J-r2-JobSummary'[jobDurationHours]
+			)
+			```
+		lineageTag: 460d3806-139f-47d4-8f34-b6428304dce0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure AvgSoftwareFailure = ```
+			
+			AVERAGEX(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] = "Software Failure"
+			    ), 
+			    'J-r2-JobSummary'[jobDurationHours]
+			)
+			```
+		lineageTag: 7b197760-b39f-46dc-9857-e1f5f13d3e0f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure MaxUserStop = ```
+			
+			MAXX(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] = "User Stop"
+			    ), 
+			    'J-r2-JobSummary'[jobDurationHours]
+			)
+			```
+		lineageTag: 3a07b0ba-2ce5-481f-b392-a2c7e241b955
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure MaxHardwareFailure = ```
+			
+			MAXX(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] = "Hardware Failure"
+			    ), 
+			    'J-r2-JobSummary'[jobDurationHours]
+			)
+			```
+		lineageTag: 7039d897-af04-4c39-8ca8-800538ce7831
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure MaxSoftwareFailure = ```
+			
+			MAXX(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] = "Software Failure"
+			    ), 
+			    'J-r2-JobSummary'[jobDurationHours]
+			)
+			```
+		lineageTag: f14b1823-0db6-46ed-b142-6f6426662fa3
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure counts_UserStop = ```
+			
+			COUNTROWS(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] = "User Stop"
+			    )
+			)
+			```
+		formatString: 0
+		lineageTag: a62ee19d-5fa9-4d99-a41e-c34eac7d7e86
+
+	measure counts_HardwareFailure = ```
+			
+			COUNTROWS(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] = "Hardware Failure"
+			    )
+			)
+			```
+		formatString: 0
+		lineageTag: 0da3fd74-7e48-4694-bbab-b766a56a4236
+
+	measure counts_SoftwareFailure = ```
+			
+			COUNTROWS(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] = "Software Failure"
+			    )
+			)
+			```
+		formatString: 0
+		lineageTag: a5eab1f1-e286-4dc1-820e-3c14310c9baa
+
+	measure counts_total = ```
+			
+			COUNTROWS(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] IN {"User Stop", "Hardware Failure", "Software Failure"}
+			    )
+			)
+			```
+		formatString: 0
+		lineageTag: 10917328-f4dc-43e2-9133-6d5203249890
+
+	measure MaxDuration = ```
+			
+			MAXX(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] IN {"User Stop", "Hardware Failure", "Software Failure"}
+			    ), 
+			    'J-r2-JobSummary'[jobDurationHours]
+			)
+			```
+		lineageTag: 2feca3d4-12a4-47df-9fc6-bea9ee1d5db1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure AvgDuration = ```
+			
+			AVERAGEX(
+			    FILTER(
+			        'J-r2-JobSummary', 
+			        'J-r2-JobSummary'[exitCategory] IN {"User Stop", "Hardware Failure", "Software Failure"}
+			    ), 
+			    'J-r2-JobSummary'[jobDurationHours]
+			)
+			```
+		lineageTag: 7774b59e-7871-4cf1-8ef0-be992eb94787
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure nJDALastWeek = ```
+			
+			VAR LatestWeek = [MaxWeekR]
+			VAR Result = 
+			    CALCULATE(
+			        [AvgDuration],
+			        'J-r2-JobSummary'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result , 0)
+			```
+		lineageTag: ab071cf0-6976-4347-a576-9221e39e7276
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JDA Last Week' = ```
+			
+			VAR LatestWeek = [MaxWeekR]
+			VAR Result = 
+			    CALCULATE(
+			        [AvgDuration],
+			        'J-r2-JobSummary'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result , 0)
+			```
+		lineageTag: fd5626c2-d2a1-4e35-9faf-bbd08c64cfc0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JDA Previous' = ```
+			
+			VAR LatestWeek = [MaxWeekR] - 1
+			VAR Result = 
+			    CALCULATE(
+			        [AvgDuration],
+			        'J-r2-JobSummary'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result, 0)
+			```
+		lineageTag: 93db8431-11bd-42d8-a561-666c86714561
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JDA Change' =
+			
+			IF(
+			    [JDA Previous] > [JDA Last Week],
+			    "decreased",
+			    IF(
+			        [JDA Previous] < [JDA Last Week],
+			        "increased",
+			        "unchanged"
+			    )
+			)
+		lineageTag: a81d3293-fda6-46a7-ab8c-2c1eb96a73bd
+
+	measure 'JDX Last Week' =
+			
+			VAR LatestWeek = [MaxWeekR]
+			VAR Result =
+			    CALCULATE(
+			        [MaxDuration],
+			        'J-r2-JobSummary'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result, 0)
+		lineageTag: 8465e82b-89ad-4cdb-95d1-082369d6bbac
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JDX Previous' = ```
+			
+			VAR LatestWeek = [MaxWeekR] - 1
+			VAR Result = 
+			    CALCULATE(
+			        [MaxDuration],
+			        'J-r2-JobSummary'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result, 0)
+			```
+		lineageTag: 7d4f697e-c471-4167-a75b-2b8c6f04f8d2
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JDX Change' =
+			
+			IF(
+			    [JDX Previous] > [JDX Last Week],
+			    "decreased",
+			    IF(
+			        [JDX Previous] < [JDX Last Week],
+			        "increased",
+			        "unchanged"
+			    )
+			)
+		lineageTag: 13ee44e7-f675-4cfa-b113-5563c44e8b8f
+
+	column Week
+		formatString: 0
+		lineageTag: f1863c6d-faf3-47a3-9cad-caf90d7e68ed
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: J-r2-JobSummary[Week]
+
+		annotation SummarizationSetBy = User
+
+	column Endpoint
+		lineageTag: 3e215eb5-bb19-4f7b-a990-ca9487b12b36
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: J-r2-JobSummary[Endpoint]
+
+		annotation SummarizationSetBy = Automatic
+
+	column _AvgUserStop
+		lineageTag: 37024bce-d4a4-4810-a161-fb6900d0e5a0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_AvgUserStop]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _AvgHardwareFailure
+		lineageTag: bc1038ba-ee30-4e46-88e5-6a7f010d2a45
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_AvgHardwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _AvgSoftwareFailure
+		lineageTag: 376b81fa-cda7-4d46-8086-28942210a0ef
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_AvgSoftwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _MaxUserStop
+		lineageTag: 87658adf-15ce-47a0-a47f-fc4d232f541a
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_MaxUserStop]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _MaxHardwareFailure
+		lineageTag: f02b0b84-4986-41b3-a177-08242e1652a3
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_MaxHardwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _MaxSoftwareFailure
+		lineageTag: 82843562-2b46-4f2d-99c3-2689b17ef4c9
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_MaxSoftwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _counts_UserStop
+		formatString: 0
+		lineageTag: 26a4af7c-c59b-4858-b177-fb01955ec1bf
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_counts_UserStop]
+
+		annotation SummarizationSetBy = Automatic
+
+	column _counts_HardwareFailure
+		formatString: 0
+		lineageTag: 2f126db5-d73d-43ad-8590-d5974bf592f9
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_counts_HardwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+	column _counts_SoftwareFailure
+		formatString: 0
+		lineageTag: f21cd31d-49c6-4376-bf76-808b7d890687
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_counts_SoftwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+	column _counts_total
+		formatString: 0
+		lineageTag: 22e90932-079a-4c2c-9704-a4160fe63424
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_counts_total]
+
+		annotation SummarizationSetBy = Automatic
+
+	column _MaxDuration
+		lineageTag: e29d4424-769c-4fa9-bb6a-268f16d1bb3e
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_MaxDuration]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _AvgDuration
+		lineageTag: d6a91a0c-45a1-4fb0-a0ef-2187ce28c18d
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_AvgDuration]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition J-t4-JobDuration = calculated
+		mode: import
+		source = ```
+				
+				VAR JobSummaryData_Current = 
+				    FILTER('J-r2-JobSummary', 'J-r2-JobSummary'[totalGpuCount] >= 0)
+				VAR FailureCategories =
+				    DATATABLE(
+				        "exitCategory", STRING,
+				        {
+				            {"User Stop"},
+				            {"Hardware Failure"},
+				            {"Software Failure"}
+				        }
+				    )
+				VAR Aggregated =
+				    SUMMARIZE(
+				        JobSummaryData_Current,
+				        [Week],
+				        [Endpoint],
+				        "_AvgUserStop", AVERAGEX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "User Stop"), [jobDurationHours]),
+				        "_AvgHardwareFailure", AVERAGEX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Hardware Failure"), [jobDurationHours]),
+				        "_AvgSoftwareFailure", AVERAGEX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Software Failure"), [jobDurationHours]),
+				        "_MaxUserStop", MAXX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "User Stop"), [jobDurationHours]),
+				        "_MaxHardwareFailure", MAXX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Hardware Failure"), [jobDurationHours]),
+				        "_MaxSoftwareFailure", MAXX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Software Failure"), [jobDurationHours]),
+				        "_counts_UserStop", COUNTX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "User Stop"), [jobDurationHours]),
+				        "_counts_HardwareFailure", COUNTX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Hardware Failure"), [jobDurationHours]),
+				        "_counts_SoftwareFailure", COUNTX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Software Failure"), [jobDurationHours]),
+				        "_counts_total", COUNTX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] IN FailureCategories), [jobDurationHours]),
+				        "_MaxDuration", MAXX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] IN FailureCategories), [jobDurationHours]),
+				        "_AvgDuration", AVERAGEX(FILTER(JobSummaryData_Current, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] IN FailureCategories), [jobDurationHours])
+				    )
+				RETURN
+				    Aggregated
+				```
+
+	annotation PBI_Id = 441027e086fa4ec48d75b684ec3eeb16
+

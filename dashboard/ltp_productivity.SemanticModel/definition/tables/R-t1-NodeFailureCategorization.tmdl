@@ -125,7 +125,7 @@ table R-t1-NodeFailureCategorization
 				in
 				    Source
 
-	annotation PBI_ResultType = Table
+	annotation PBI_ResultType = Exception
 
 	annotation PBI_NavigationStepName = Navigation
 
