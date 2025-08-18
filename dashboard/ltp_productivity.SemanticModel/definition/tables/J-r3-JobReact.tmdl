@@ -1,0 +1,328 @@
+table J-r3-JobReact
+	lineageTag: a284466e-799c-4dca-b33e-892fa15f658c
+
+	column jobId
+		dataType: string
+		lineageTag: 6bb44622-70cb-4ab2-82c6-fe8f1c45a857
+		summarizeBy: none
+		sourceColumn: jobId
+
+		annotation SummarizationSetBy = Automatic
+
+	column timeGenerated
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: bd44b77b-8299-460b-aca6-3ae2af27aefa
+		summarizeBy: none
+		sourceColumn: timeGenerated
+
+		variation Variation
+			isDefault
+			relationship: 090dd454-25a7-4173-b5bd-ba3b3d9626be
+			defaultHierarchy: LocalDateTable_95ee6485-1b8d-4c42-892c-b5da24431797.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column jobHash
+		dataType: string
+		lineageTag: c3a8f751-f279-4fe1-a92e-6b9c7c411cb5
+		summarizeBy: none
+		sourceColumn: jobHash
+
+		annotation SummarizationSetBy = Automatic
+
+	column jobName
+		dataType: string
+		lineageTag: a6bdd253-f9c1-4e30-bf11-46b3d7f38558
+		summarizeBy: none
+		sourceColumn: jobName
+
+		annotation SummarizationSetBy = Automatic
+
+	column userName
+		dataType: string
+		lineageTag: 682ccbad-34de-4679-b33e-0434288edf8d
+		summarizeBy: none
+		sourceColumn: userName
+
+		annotation SummarizationSetBy = Automatic
+
+	column jobState
+		dataType: string
+		lineageTag: 0c7b219f-9e0c-4a10-b47e-3d97ce06bb4d
+		summarizeBy: none
+		sourceColumn: jobState
+
+		annotation SummarizationSetBy = Automatic
+
+	column retryCount
+		dataType: int64
+		formatString: 0
+		lineageTag: 9857e365-1002-47e3-816a-43bd686ab9c3
+		summarizeBy: sum
+		sourceColumn: retryCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column attemptId
+		dataType: int64
+		formatString: 0
+		lineageTag: 3134b539-378d-403f-a1d4-3dc50b3fc8f2
+		summarizeBy: count
+		sourceColumn: attemptId
+
+		annotation SummarizationSetBy = Automatic
+
+	column retryDetails
+		dataType: string
+		lineageTag: 6dd8aed0-fcf3-4ba4-bcac-876963806226
+		summarizeBy: none
+		sourceColumn: retryDetails
+
+		annotation SummarizationSetBy = Automatic
+
+	column virtualCluster
+		dataType: string
+		lineageTag: c0496db4-b127-4ff3-858a-967a80c97543
+		summarizeBy: none
+		sourceColumn: virtualCluster
+
+		annotation SummarizationSetBy = Automatic
+
+	column totalGpuCount
+		dataType: int64
+		formatString: 0
+		lineageTag: ccd7dfef-0678-4f42-97a2-8f429b41ea0a
+		summarizeBy: none
+		sourceColumn: totalGpuCount
+
+		annotation SummarizationSetBy = Automatic
+
+	column jobPriority
+		dataType: string
+		lineageTag: a8578ac1-d42f-4cfa-882e-cbc99e4c82fa
+		summarizeBy: none
+		sourceColumn: jobPriority
+
+		annotation SummarizationSetBy = Automatic
+
+	column jobDurationHours
+		dataType: double
+		lineageTag: e3075ab4-fb23-4050-81ff-a7ada6eb4161
+		summarizeBy: sum
+		sourceColumn: jobDurationHours
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column totalGpuHours
+		dataType: double
+		lineageTag: 84a11ee9-9142-451f-90a9-3df9a3802d87
+		summarizeBy: sum
+		sourceColumn: totalGpuHours
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column idleGpuHours
+		dataType: double
+		lineageTag: 5c95fd9b-1977-4cc6-bee3-2b11b885ee4d
+		summarizeBy: sum
+		sourceColumn: idleGpuHours
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column effectiveGpuHours
+		dataType: double
+		lineageTag: 8a55e3f7-d055-4da7-9c32-b273bf0d815f
+		summarizeBy: sum
+		sourceColumn: effectiveGpuHours
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column submissionTime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 91a1c86d-958c-471b-8867-782be219675f
+		summarizeBy: none
+		sourceColumn: submissionTime
+
+		variation Variation
+			isDefault
+			relationship: eb07ffea-286b-471d-bdda-1ec5958bd3c2
+			defaultHierarchy: LocalDateTable_1186d06e-6f71-4af2-883f-851e82f348ef.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column launchTime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 1cc2d577-3154-4adb-8d91-b5a1ab2f488b
+		summarizeBy: none
+		sourceColumn: launchTime
+
+		variation Variation
+			isDefault
+			relationship: 693ac9ca-047f-4491-9247-a41d0bf3dec4
+			defaultHierarchy: LocalDateTable_0c9ebf7f-460d-4d02-8357-386489f6eaff.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column completionTime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 5c51d657-19ab-43c0-868d-54325fb4fe50
+		summarizeBy: none
+		sourceColumn: completionTime
+
+		variation Variation
+			isDefault
+			relationship: 322c24c0-e038-41e4-bb21-90e85544ba22
+			defaultHierarchy: LocalDateTable_21f1bd85-0e61-4f76-9cd1-ae3649379943.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column createdDatetime
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 4412f29a-9a25-4284-b560-8fa3d4a5e614
+		summarizeBy: none
+		sourceColumn: createdDatetime
+
+		variation Variation
+			isDefault
+			relationship: c2098b50-45a9-4b75-9e9d-321426720262
+			defaultHierarchy: LocalDateTable_840e7cff-6cb6-4e19-9f1d-d35db3a192e5.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column idleGpuPercentage
+		dataType: double
+		lineageTag: d8c88ef3-fd07-4bf5-9b54-abcaf341b611
+		summarizeBy: sum
+		sourceColumn: idleGpuPercentage
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column assignedGpuUtilization
+		dataType: double
+		lineageTag: 396ee6a4-65e0-492e-b7c7-0b2ba1f9240a
+		summarizeBy: sum
+		sourceColumn: assignedGpuUtilization
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column effectiveGpuUtilization
+		dataType: double
+		lineageTag: 0526a167-13e6-484c-bc20-c4ac4ee88aaf
+		summarizeBy: sum
+		sourceColumn: effectiveGpuUtilization
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column exitReason
+		dataType: string
+		lineageTag: 2e304b0f-0f10-43e2-a556-2133c31c65d0
+		summarizeBy: none
+		sourceColumn: exitReason
+
+		annotation SummarizationSetBy = Automatic
+
+	column exitCategory
+		dataType: string
+		lineageTag: ce66404e-7b27-4528-9d87-ee83ccafbb7e
+		summarizeBy: none
+		sourceColumn: exitCategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column Endpoint
+		dataType: string
+		lineageTag: 8a6ea801-b2bd-4616-aa70-7e0e8b44b6a3
+		summarizeBy: none
+		sourceColumn: Endpoint
+
+		annotation SummarizationSetBy = Automatic
+
+	column jobId1
+		dataType: string
+		lineageTag: e5577fcb-341e-465e-8736-c1bc66fcfff6
+		summarizeBy: none
+		sourceColumn: jobId1
+
+		annotation SummarizationSetBy = Automatic
+
+	column reactTime
+		dataType: double
+		lineageTag: 35446d95-f41c-490b-9c68-cf823b7a516b
+		summarizeBy: sum
+		sourceColumn: reactTime
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column jobHash1
+		dataType: string
+		lineageTag: 4387367e-5a57-423e-90fa-58a0b1d3cc63
+		summarizeBy: none
+		sourceColumn: jobHash1
+
+		annotation SummarizationSetBy = Automatic
+
+	column timeGenerated1
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 1b23189f-e8db-4029-b73d-90a4c9988c8f
+		summarizeBy: none
+		sourceColumn: timeGenerated1
+
+		variation Variation
+			isDefault
+			relationship: fe01a8fb-2453-4a74-a7c3-84277450f6c9
+			defaultHierarchy: LocalDateTable_44ed86b5-a0d6-4a84-9017-c249d8155b13.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Endpoint1
+		dataType: string
+		lineageTag: 1427df16-4c75-40c1-8123-7edc52d0e478
+		summarizeBy: none
+		sourceColumn: Endpoint1
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: int64
+		formatString: 0
+		lineageTag: c4e84323-c9c7-4a54-9836-4c8dc17f7bd9
+		summarizeBy: none
+		sourceColumn: Week
+
+		annotation SummarizationSetBy = User
+
+	partition J-r3-JobReact = m
+		mode: import
+		queryGroup: Job
+		source =
+				let
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "let ReactTime_table = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').JobReactTime;#(lf)let Summary_table = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').JobSummary;#(lf)let ReactTime =#(lf)Summary_table#(lf)| summarize arg_max(timeGenerated, *) by jobId#(lf)| join kind=inner ReactTime_table on jobId#(lf)| extend Week = weekofyear(startofweek(launchTime - 1d, 0)); // Monday as the start of the week#(lf)ReactTime", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+
