@@ -39,6 +39,12 @@ spec:
           privileged: true        
         command: ["/bin/bash", "-c", "bash /usr/local/bin/start-docker.sh && tail -f /dev/null"]
         env:
+        - name: DOCKER_USER
+          value: {{ cluster_cfg['cluster']['docker-registry']['username'] }}
+        - name: DOCKER_PASS
+          value: {{ cluster_cfg['cluster']['docker-registry']['password'] }}
+        - name: DOCKER_TAG
+          value: {{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         - name: LAUNCHER_TYPE
           value: {{ cluster_cfg["cluster"]["common"]["cluster-type"] }}
         - name: LAUNCHER_SCHEDULER
