@@ -787,6 +787,7 @@ const generateFrameworkDescription = (
     virtualCluster,
     logPathInfix: `${encodeName(frameworkName)}`,
   };
+  const gracefulRetryPolicyEnabled = config.extras.gracefulRetryPolicy.enabled;
   const frameworkDescription = {
     apiVersion: launcherConfig.apiVersion,
     kind: 'Framework',
@@ -808,6 +809,15 @@ const generateFrameworkDescription = (
         fancyRetryPolicy: config.jobRetryCount !== -2,
         maxRetryCount: config.jobRetryCount || 0,
       },
+      ...(gracefulRetryPolicyEnabled ? {
+        gracefulRetryPolicy: {
+          enabled: gracefulRetryPolicyEnabled,
+          gracePeriodSec: config.extras.gracefulRetryPolicy.gracePeriodTimeoutSec,
+          signalData: {
+            signal_dir: "/etc/frameworkcontroller/FC_GRACEFUL_RETRY_SIGNAL",
+          },
+        },
+      } : {}),
       taskRoles: [],
     },
   };
