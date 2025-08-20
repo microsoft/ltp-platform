@@ -59,6 +59,10 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["azure-openai-api-key"] }}
         - name: POWERBI_KEY
           value: {{ cluster_cfg["copilot-chat"]["powerbi-key"] }}
+        - name: OPENAI_API_KEY
+          value: {{ cluster_cfg["copilot-chat"]["openai-api-key"] }}
+        - name: COPILOT_LLM_PROVIDER
+          value: {{ cluster_cfg["copilot-chat"]["llm-provider"] }}
         - name: COPILOT_LLM_ENDPOINT
           value: {{ cluster_cfg["copilot-chat"]["llm-endpoint"] }}
         - name: COPILOT_LLM_MODEL
