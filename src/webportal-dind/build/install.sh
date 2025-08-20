@@ -2,9 +2,9 @@
 set -eux
 
 DOCKER_CHANNEL="stable"
-DOCKER_VERSION="28.2.2"
-DOCKER_COMPOSE_VERSION="v2.37.1"
-BUILDX_VERSION="v0.24.0"
+DOCKER_VERSION="28.3.3"
+DOCKER_COMPOSE_VERSION="v2.39.2"
+BUILDX_VERSION="v0.27.0-rc1"
 
 # Logging functions
 function log_info() {
