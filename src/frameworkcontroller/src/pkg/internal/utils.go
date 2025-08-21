@@ -1,0 +1,227 @@
+// MIT License
+//
+// Copyright (c) Microsoft Corporation. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE
+
+package internal
+
+import (
+	"context"
+	"fmt"
+	"reflect"
+	"time"
+
+	ci "github.com/microsoft/frameworkcontroller/pkg/apis/frameworkcontroller/v1"
+	frameworkClient "github.com/microsoft/frameworkcontroller/pkg/client/clientset/versioned"
+	"github.com/microsoft/frameworkcontroller/pkg/common"
+	core "k8s.io/api/core/v1"
+	apiExtensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	apiClient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	kubeClient "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/klog"
+)
+
+func CreateClients(kConfig *rest.Config) (
+	kubeClient.Interface, frameworkClient.Interface) {
+	kClient, err := kubeClient.NewForConfig(kConfig)
+	if err != nil {
+		panic(fmt.Errorf("Failed to create KubeClient: %v", err))
+	}
+
+	fClient, err := frameworkClient.NewForConfig(kConfig)
+	if err != nil {
+		panic(fmt.Errorf("Failed to create FrameworkClient: %v", err))
+	}
+
+	return kClient, fClient
+}
+
+func PutCRD(
+	ctx context.Context,
+	config *rest.Config, crd *apiExtensions.CustomResourceDefinition,
+	establishedCheckIntervalSec *int64, establishedCheckTimeoutSec *int64) {
+	client := createCRDClient(config)
+
+	err := putCRDInternal(ctx, client, crd, establishedCheckIntervalSec, establishedCheckTimeoutSec)
+	if err != nil {
+		panic(fmt.Errorf("Failed to put CRD: %v", err))
+	} else {
+		klog.Infof("Succeeded to put CRD")
+	}
+}
+
+func DeleteCRD(ctx context.Context, config *rest.Config, name string) {
+	client := createCRDClient(config)
+
+	err := client.ApiextensionsV1().CustomResourceDefinitions().Delete(ctx, name, *meta.NewDeleteOptions(0))
+	if err != nil && !apiErrors.IsNotFound(err) {
+		panic(fmt.Errorf("Failed to delete CRD: %v", err))
+	} else {
+		klog.Infof("Succeeded to delete CRD")
+	}
+}
+
+func createCRDClient(config *rest.Config) apiClient.Interface {
+	client, err := apiClient.NewForConfig(config)
+	if err != nil {
+		panic(fmt.Errorf("Failed to create CRDClient: %v", err))
+	}
+
+	return client
+}
+
+func putCRDInternal(
+	ctx context.Context,
+	client apiClient.Interface, newCRD *apiExtensions.CustomResourceDefinition,
+	establishedCheckIntervalSec *int64, establishedCheckTimeoutSec *int64) error {
+
+	remoteCRD, err := client.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, newCRD.Name, meta.GetOptions{})
+	if err == nil {
+		klog.Infof("Update CRD %v", newCRD.Name)
+		if !reflect.DeepEqual(remoteCRD.Spec, newCRD.Spec) {
+			updateCRD := remoteCRD
+			updateCRD.Spec = newCRD.Spec
+			remoteCRD, err = client.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, updateCRD, meta.UpdateOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	} else if apiErrors.IsNotFound(err) {
+		klog.Infof("Create CRD %v", newCRD.Name)
+		remoteCRD, err = client.ApiextensionsV1().CustomResourceDefinitions().Create(ctx, newCRD, meta.CreateOptions{})
+		if err != nil {
+			return err
+		}
+	} else {
+		return err
+	}
+
+	if isCRDEstablished(remoteCRD) {
+		return nil
+	}
+	return wait.Poll(
+		common.SecToDuration(establishedCheckIntervalSec),
+		common.SecToDuration(establishedCheckTimeoutSec),
+		func() (bool, error) {
+			remoteCRD, err = client.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, newCRD.Name, meta.GetOptions{})
+			if err != nil {
+				return false, err
+			}
+			return isCRDEstablished(remoteCRD), nil
+		})
+}
+
+func isCRDEstablished(crd *apiExtensions.CustomResourceDefinition) bool {
+	for _, cond := range crd.Status.Conditions {
+		if cond.Status == apiExtensions.ConditionTrue &&
+			cond.Type == apiExtensions.Established {
+			return true
+		}
+	}
+	return false
+}
+
+// obj should come from Framework SharedIndexInformer, otherwise may panic.
+func ToFramework(obj interface{}) *ci.Framework {
+	f, ok := obj.(*ci.Framework)
+
+	if !ok {
+		deletedFinalStateUnknown, ok := obj.(cache.DeletedFinalStateUnknown)
+		if !ok {
+			panic(fmt.Errorf(
+				"Failed to convert obj to Framework or DeletedFinalStateUnknown: %#v",
+				obj))
+		}
+
+		f, ok = deletedFinalStateUnknown.Obj.(*ci.Framework)
+		if !ok {
+			panic(fmt.Errorf(
+				"Failed to convert DeletedFinalStateUnknown.Obj to Framework: %#v",
+				deletedFinalStateUnknown))
+		}
+	}
+
+	return f
+}
+
+// obj should come from ConfigMap SharedIndexInformer, otherwise may panic.
+func ToConfigMap(obj interface{}) *core.ConfigMap {
+	cm, ok := obj.(*core.ConfigMap)
+
+	if !ok {
+		deletedFinalStateUnknown, ok := obj.(cache.DeletedFinalStateUnknown)
+		if !ok {
+			panic(fmt.Errorf(
+				"Failed to convert obj to ConfigMap or DeletedFinalStateUnknown: %#v",
+				obj))
+		}
+
+		cm, ok = deletedFinalStateUnknown.Obj.(*core.ConfigMap)
+		if !ok {
+			panic(fmt.Errorf(
+				"Failed to convert DeletedFinalStateUnknown.Obj to ConfigMap: %#v",
+				deletedFinalStateUnknown))
+		}
+	}
+
+	return cm
+}
+
+// obj should come from Pod SharedIndexInformer, otherwise may panic.
+func ToPod(obj interface{}) *core.Pod {
+	pod, ok := obj.(*core.Pod)
+
+	if !ok {
+		deletedFinalStateUnknown, ok := obj.(cache.DeletedFinalStateUnknown)
+		if !ok {
+			panic(fmt.Errorf(
+				"Failed to convert obj to Pod or DeletedFinalStateUnknown: %#v",
+				obj))
+		}
+
+		pod, ok = deletedFinalStateUnknown.Obj.(*core.Pod)
+		if !ok {
+			panic(fmt.Errorf(
+				"Failed to convert DeletedFinalStateUnknown.Obj to Pod: %#v",
+				deletedFinalStateUnknown))
+		}
+	}
+
+	return pod
+}
+
+func GetPodDeletionStartTime(pod *core.Pod) *meta.Time {
+	if pod.DeletionTimestamp == nil {
+		return nil
+	}
+
+	var gracePeriod time.Duration
+	if pod.DeletionGracePeriodSeconds == nil {
+		gracePeriod = time.Duration(0)
+	} else {
+		gracePeriod = common.SecToDuration(pod.DeletionGracePeriodSeconds)
+	}
+	return common.PtrTime(meta.NewTime(pod.DeletionTimestamp.Add(-gracePeriod)))
+}
