@@ -20,12 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 
-FROM mcr.microsoft.com/oss/go/microsoft/golang:1.24.3 AS builder
+FROM golang:1.24.3-alpine3.21 as builder
 
 ARG TEST=false
+ENV GOPATH=/go
 ENV PROJECT_DIR=/src
 ENV INSTALL_DIR=/opt/hivedscheduler/hivedscheduler
 
+RUN apk update && apk add --no-cache bash
 RUN mkdir -p ${PROJECT_DIR} ${INSTALL_DIR}
 COPY src ${PROJECT_DIR}
 RUN if [ ${TEST} == "true" ]; \
@@ -34,10 +36,11 @@ RUN if [ ${TEST} == "true" ]; \
   mv ${PROJECT_DIR}/dist/hivedscheduler/* ${INSTALL_DIR}
 
 
-FROM mcr.microsoft.com/cbl-mariner/base/core:2.0
+FROM alpine:3.21
 
 ENV INSTALL_DIR=/opt/hivedscheduler/hivedscheduler
 
+RUN apk update && apk add --no-cache bash
 COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
 WORKDIR ${INSTALL_DIR}
 

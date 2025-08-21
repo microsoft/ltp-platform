@@ -37,7 +37,7 @@ cd ${PROJECT_DIR}
 rm -rf ${DIST_DIR}
 mkdir -p ${DIST_DIR}
 
-go build -v -o ${DIST_DIR}/hivedscheduler cmd/hivedscheduler/*
+go build -o ${DIST_DIR}/hivedscheduler cmd/hivedscheduler/*
 if [ ! -z ${TEST_FLAG} ] && [ ${TEST_FLAG} == "test" ]; then
   go test ./...
 fi
