@@ -573,6 +573,13 @@ const generateTaskRole = (
                   }/${convertName(taskRole)}`,
                   mountPath: '/usr/local/pai/logs',
                 },
+                ...(launcherConfig.clstoreHostPath && launcherConfig.clstoreJobPath
+                  ? [{
+                      name: 'clstore',
+                      mountPath: launcherConfig.clstoreJobPath,
+                      readOnly: true,
+                    }]
+                  : []),
                 ...(enableLocalStorage && enableLocalStorage.enabled
                   ? enableLocalStorage.mntpath.map((mntPath, index) => ({
                       name: `local-storage-${index}`,
@@ -606,6 +613,14 @@ const generateTaskRole = (
                 path: `/mnt`,
               },
             },
+            ...(launcherConfig.clstoreHostPath && launcherConfig.clstoreJobPath
+              ? [{
+                  name: 'clstore',
+                  hostPath: {
+                    path: launcherConfig.clstoreHostPath,
+                  },
+                }]
+              : []),
             ...(enableLocalStorage && enableLocalStorage.enabled
               ? enableLocalStorage.hostpath.map((hostPath, index) => ({
                   name: `local-storage-${index}`,
@@ -752,7 +767,7 @@ const generateTaskRole = (
       enableForceRunNodes.gpu
     ] = enableForceRunNodes.count;
   }
-  
+
   return frameworkTaskRole;
 };
 

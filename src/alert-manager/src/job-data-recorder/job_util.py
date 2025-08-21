@@ -348,3 +348,41 @@ def retrieve_period_job_metrics(end_time_stamp, time_offset, job_metadata_list, 
     )
 
     return all_df
+
+def find_node_next_job_start_time(node_ip, completedTime):
+    """Find the next job start time for a node after it has completed a job."""
+    if not node_ip or not isinstance(completedTime, (int, float)):
+        print(f"Invalid input: node_ip={node_ip}, completedTime={completedTime}")
+        return int(completedTime + 60 * 60 * 1000) if completedTime else int(time.time() * 1000)
+    
+    default_end_time = (completedTime +  60 * 60 * 1000)  # 1 hour after completedTime
+    try:
+        prometheus_client = PrometheusClient()
+        node_filter = f'instance=~"{node_ip}:[0-9]*"'
+        query = "task_cpu_percent{" + node_filter + "}>0"
+        result = prometheus_client.query_range(
+            query,
+            start_time=completedTime // 1000 + 1,  # Start just after completedTime
+            end_time=default_end_time // 1000)
+        if not result or not result.get("result"):
+            return default_end_time
+        # Find the first timestamp after completedTime
+        earliest_timestamp = None
+        for item in result["result"]:
+            values = item.get("values", [])
+            if not values:
+                continue    
+            for timestamp_str, value in values:
+                try:
+                    timestamp_ms = int(float(timestamp_str)) * 1000
+                    if (earliest_timestamp is None or timestamp_ms < earliest_timestamp) and timestamp_ms > completedTime:
+                        earliest_timestamp = timestamp_ms
+                        break
+                except (ValueError, TypeError) as parse_error:
+                    print(f"Error parsing timestamp/value: {parse_error}")
+                    break
+        return earliest_timestamp if earliest_timestamp is not None else default_end_time
+    except Exception as e:
+        print(f"Error finding next job start time for node {node_ip}: {e}")
+        return default_end_time
+        

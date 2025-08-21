@@ -90,10 +90,6 @@ data:
           alertname: DmesgGPUFault
         continue: true
 
-      - receiver: pai-uncordon-nodes
-        match:
-          alertname: RecoverValidatedNodes
-
       - receiver: pai-unvalidate-nodes
         match:
           alertname: NotifyUnvalidatedNodes

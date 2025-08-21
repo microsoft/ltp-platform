@@ -42,6 +42,24 @@ export const api = {
     return response;
   },
 
+  postStream: async (path: string, key: string | null = null, options: Options = {}) => {
+    if (key) {
+      options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${key}`,
+      };
+    }
+    if (!path.startsWith("http")) {
+      // If the path is relative, prepend the API base URL
+      path = `${API_BASE_URL}/${path}`;
+    }
+    const response = await ky.post(path, {
+      ...options,
+      timeout: options.timeout !== undefined ? options.timeout : false, // disables timeout by default
+    });
+    return response;
+  },
+
   // You can also add other methods like GET, PUT, DELETE, etc.
   get: async (path: string, key: string | null = null, options: Options = {}) => {
     if (key) {

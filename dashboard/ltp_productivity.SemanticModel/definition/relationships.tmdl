@@ -92,22 +92,6 @@ relationship 1217dc7c-670c-ca62-14b4-8f0aa43dedae
 	fromColumn: R-t2-NodeFailureRCABreakdown.Week
 	toColumn: RDimWeek.Week
 
-relationship 71171aa7-3d57-ecf7-12b2-6fc08e160643
-	fromColumn: J-t0-JobInterruptionCountandRCA.Week
-	toColumn: RDimWeek.Week
-
-relationship 0a76996a-4464-712a-0875-68036bcb65d7
-	fromColumn: J-t1-AverageandMaxJobDurationTime.Week
-	toColumn: RDimWeek.Week
-
-relationship b7c40f3b-0ee1-1b65-2ca7-466c7dc12563
-	fromColumn: J-t2-AverageReactionTime.Week
-	toColumn: RDimWeek.Week
-
-relationship 78398273-b2f4-8f5d-5543-072dc7815831
-	fromColumn: J-t3-MaxReactionTime.Week
-	toColumn: RDimWeek.Week
-
 relationship 1aa4a5d4-33cb-4922-b748-fc99512c4d75
 	joinOnDateBehavior: datePartOnly
 	fromColumn: R-t0-DailyNodeRuntimeAvgFailure.Date
@@ -184,13 +168,123 @@ relationship 4a9484f3-109c-e0ea-b8e0-17489ad538b1
 	fromColumn: M-t0-MTBFbyNode.Week
 	toColumn: RDimWeek.Week
 
-relationship faa6601e-85dc-bd4b-650c-0d64d6d96d26
-	crossFilteringBehavior: bothDirections
-	fromCardinality: one
-	fromColumn: RDimWeek.Week
-	toColumn: M-t1-MTBFbyJob.Week
-
 relationship 3e1425f7-cad0-7d4d-375f-90719f3d66fd
 	fromColumn: M-t0-MTBFbyNode.Endpoint
+	toColumn: RDimEndpoint.Endpoint
+
+relationship 57bb6819-2c69-4bb7-972a-c2afca207288
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r2-JobSummary.submissionTime
+	toColumn: LocalDateTable_5d04bbfc-5024-42f3-914e-14e117b931d6.Date
+
+relationship d1c0e9d8-4b09-431c-8e67-aa695bd02a80
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r2-JobSummary.launchTime
+	toColumn: LocalDateTable_85be020b-6527-4384-8697-bf2cad73d847.Date
+
+relationship 7e96b0d2-d710-4e91-8b66-662e8a6bc3fd
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r2-JobSummary.completionTime
+	toColumn: LocalDateTable_5e143f92-b0c5-4201-86e5-961728295172.Date
+
+relationship f591382a-2569-42e9-9d75-2988ed6937c5
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r2-JobSummary.createdDatetime
+	toColumn: LocalDateTable_3d6cba95-d750-45c5-a26e-073e4042d568.Date
+
+relationship 8fab82dd-1bdd-4eaa-98ee-f992b83f57d9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r2-JobSummary.timeGenerated
+	toColumn: LocalDateTable_f014c0c3-56d4-4665-ae48-57955ace6a08.Date
+
+relationship 50a3ae48-03a1-4735-8110-0edc449e608d
+	joinOnDateBehavior: datePartOnly
+	fromColumn: M-r0-HWJobActions.timeGenerated
+	toColumn: LocalDateTable_56c1702b-3756-4027-8c84-c606008d1ab0.Date
+
+relationship 30965413-2dd6-44d2-9033-3ce3e4bd90d0
+	joinOnDateBehavior: datePartOnly
+	fromColumn: M-r0-HWJobActions.submissionTime
+	toColumn: LocalDateTable_077a5672-db92-4532-a69d-ca6b348e2b80.Date
+
+relationship 35b172ea-e583-482b-a913-447b29452192
+	joinOnDateBehavior: datePartOnly
+	fromColumn: M-r0-HWJobActions.launchTime
+	toColumn: LocalDateTable_7ee6f4c4-0e57-4409-a3fe-8cce142b4ee5.Date
+
+relationship cb2664b9-d91a-49d1-80a9-cc2261a559a9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: M-r0-HWJobActions.completionTime
+	toColumn: LocalDateTable_c1f515d7-006a-40bd-930d-3c83df748125.Date
+
+relationship ba81a630-9c60-4341-b950-a943b0ced26f
+	joinOnDateBehavior: datePartOnly
+	fromColumn: M-r0-HWJobActions.createdDatetime
+	toColumn: LocalDateTable_9c1c2e57-e40b-48f2-b88f-e05e38f42b1c.Date
+
+relationship 507be5ac-92ad-9a69-aa8e-f5b70005d217
+	fromColumn: J-r2-JobSummary.totalGpuCount
+	toColumn: JDimGpuCount.totalGpuCount
+
+relationship 2be73cce-0992-f19c-2fb5-14cbfa28edb0
+	fromColumn: M-r0-HWJobActions.totalGpuCount
+	toColumn: JDimGpuCount.totalGpuCount
+
+relationship 090dd454-25a7-4173-b5bd-ba3b3d9626be
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r3-JobReact.timeGenerated
+	toColumn: LocalDateTable_95ee6485-1b8d-4c42-892c-b5da24431797.Date
+
+relationship eb07ffea-286b-471d-bdda-1ec5958bd3c2
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r3-JobReact.submissionTime
+	toColumn: LocalDateTable_1186d06e-6f71-4af2-883f-851e82f348ef.Date
+
+relationship 693ac9ca-047f-4491-9247-a41d0bf3dec4
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r3-JobReact.launchTime
+	toColumn: LocalDateTable_0c9ebf7f-460d-4d02-8357-386489f6eaff.Date
+
+relationship 322c24c0-e038-41e4-bb21-90e85544ba22
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r3-JobReact.completionTime
+	toColumn: LocalDateTable_21f1bd85-0e61-4f76-9cd1-ae3649379943.Date
+
+relationship c2098b50-45a9-4b75-9e9d-321426720262
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r3-JobReact.createdDatetime
+	toColumn: LocalDateTable_840e7cff-6cb6-4e19-9f1d-d35db3a192e5.Date
+
+relationship fe01a8fb-2453-4a74-a7c3-84277450f6c9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: J-r3-JobReact.timeGenerated1
+	toColumn: LocalDateTable_44ed86b5-a0d6-4a84-9017-c249d8155b13.Date
+
+relationship abe77c0a-8bc2-e5bf-c10a-c7301a89f1ac
+	fromColumn: J-r3-JobReact.totalGpuCount
+	toColumn: JDimGpuCount.totalGpuCount
+
+relationship ba3feae2-7257-a360-c5a6-5073e84bb456
+	fromColumn: J-r2-JobSummary.Week
+	toColumn: RDimWeek.Week
+
+relationship a416f6bb-f943-5e55-08e0-4a80c563ab5a
+	fromColumn: J-r2-JobSummary.Endpoint
+	toColumn: RDimEndpoint.Endpoint
+
+relationship 5903edc3-3fa3-e437-d273-9bc1b0aabf89
+	fromColumn: M-r0-HWJobActions.Week
+	toColumn: RDimWeek.Week
+
+relationship 7ca6364e-e2b0-273f-fe7c-c43cb986986e
+	fromColumn: M-r0-HWJobActions.Endpoint
+	toColumn: RDimEndpoint.Endpoint
+
+relationship 3e0de387-0f85-1de3-beee-557110a9bd53
+	fromColumn: J-r3-JobReact.Week
+	toColumn: RDimWeek.Week
+
+relationship 127ef8a9-a38c-9845-eb83-a2c729b61aad
+	fromColumn: J-r3-JobReact.Endpoint
 	toColumn: RDimEndpoint.Endpoint
 

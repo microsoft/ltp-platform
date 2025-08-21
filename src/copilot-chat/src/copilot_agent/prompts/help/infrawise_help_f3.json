@@ -1,0 +1,8 @@
+{
+    "welcome": "Thank you for trying **Lucia Training Platform CoPilot**",
+    "feature": "Provides assistance to users on how to utilize the Lucia Trainig Platform for training machine learning models.\nOffers step-by-step instructions or documentation for setting up and executing training jobs.\nAllows users to query and retrieve detailed logs related to already launched training jobs.\nProvides debugging information to help users analyze and resolve issues during the training process.\nProvides detailed information about the performance, availability, failures, and resource utilization of a model training platform.",
+    "empty_data": "The query was executed, and the returned data is empty.",
+    "corrupted_data": "The returned data is too long, which does not address user's question.",
+    "unsupported_question": "We cannot answer your question at the moment.",
+    "unauthorized": "You are not authorized to access this information."
+}

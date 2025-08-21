@@ -19,7 +19,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dashboard-data-backup
-  namespace: {{ cluster_cfg['kubernetes']['dashboard']['namespace'] }}
   labels:
     app: dashboard-data-backup
 spec:
@@ -34,7 +33,7 @@ spec:
     spec:
       containers:
       - name: dashboard-data-backup
-        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}/dashboard-data-backup:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}dashboard-data-backup:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         imagePullPolicy: Always
         resources:
           requests:
@@ -60,6 +59,10 @@ spec:
           value: "production"
         - name: DST_TABLE_TABLES
           value: "PBICacheClusterCapacityStatus"
+        - name: ENVIRONMENT
+          value: {{ cluster_cfg["dashboard-data-backup"]["environment"] | default("prod") }}
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["dashboard-data-backup"]["kusto-user-assigned-client-id"] | cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
         volumeMounts:
         - name: backup-logs
           mountPath: /var/log/backup
@@ -70,19 +73,3 @@ spec:
       - name: backup-logs
         emptyDir: {}
       restartPolicy: Always
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: dashboard-data-backup-service
-  namespace: {{ cluster_cfg['kubernetes']['dashboard']['namespace'] }}
-  labels:
-    app: dashboard-data-backup
-spec:
-  selector:
-    app: dashboard-data-backup
-  ports:
-  - port: 80
-    targetPort: 80
-    protocol: TCP
-  type: ClusterIP

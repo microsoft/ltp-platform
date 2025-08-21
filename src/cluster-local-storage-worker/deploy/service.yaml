@@ -7,8 +7,6 @@ cluster-type:
 
 prerequisite:
   - cluster-configuration
-  - alert-manager
-  - cluster-local-storage
 
 template-list:
   - start.sh

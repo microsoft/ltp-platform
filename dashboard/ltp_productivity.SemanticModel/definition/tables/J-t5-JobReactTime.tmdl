@@ -1,0 +1,317 @@
+table J-t5-JobReactTime
+	lineageTag: a2515c20-0a5a-4ad3-9456-979a7f45e17f
+
+	measure ReAvgUserStop =
+			
+			AVERAGEX(
+			    FILTER(
+			        'J-r3-JobReact',
+			        'J-r3-JobReact'[exitCategory] = "User Stop" && 'J-r3-JobReact'[totalGpuCount] >= 0
+			    ),
+			    'J-r3-JobReact'[reactTime]
+			)
+		lineageTag: 29d623a1-80e9-4d6e-b080-537b4da1c4a2
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure ReAvgHardwareFailure =
+			
+			AVERAGEX(
+			    FILTER(
+			        'J-r3-JobReact',
+			        'J-r3-JobReact'[exitCategory] = "Hardware Failure" && 'J-r3-JobReact'[totalGpuCount] >= 0
+			    ),
+			    'J-r3-JobReact'[reactTime]
+			)
+		lineageTag: a0182edc-ccf3-4dec-9a83-06366da33d2e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure ReAvgSoftwareFailure =
+			
+			AVERAGEX(
+			    FILTER(
+			        'J-r3-JobReact',
+			        'J-r3-JobReact'[exitCategory] = "Software Failure" && 'J-r3-JobReact'[totalGpuCount] >= 0
+			    ),
+			    'J-r3-JobReact'[reactTime]
+			)
+		lineageTag: 33cf7228-3ec2-49a5-bea5-026e75196a2f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure ReAvgReactionTime =
+			
+			AVERAGEX(
+			    FILTER(
+			        'J-r3-JobReact',
+			        'J-r3-JobReact'[exitCategory] IN {"User Stop", "Hardware Failure", "Software Failure"} && 'J-r3-JobReact'[totalGpuCount] >= 0
+			    ),
+			    'J-r3-JobReact'[reactTime]
+			)
+		lineageTag: 5242f36c-0676-4c8c-af76-fc5487ff43c5
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure ReMaxUserStop =
+			
+			MAXX(
+			    FILTER(
+			        'J-r3-JobReact',
+			        'J-r3-JobReact'[exitCategory] = "User Stop" && 'J-r3-JobReact'[totalGpuCount] >= 0
+			    ),
+			    'J-r3-JobReact'[reactTime]
+			)
+		lineageTag: aa85179f-7eaf-4b31-962d-7a89f3d49e98
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure ReMaxHardwareFailure =
+			
+			MAXX(
+			    FILTER(
+			        'J-r3-JobReact',
+			        'J-r3-JobReact'[exitCategory] = "Hardware Failure" && 'J-r3-JobReact'[totalGpuCount] >= 0
+			    ),
+			    'J-r3-JobReact'[reactTime]
+			)
+		lineageTag: 0cf100b5-76fc-410e-a8dd-0c302cc097d8
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure ReMaxSoftwareFailure =
+			
+			MAXX(
+			    FILTER(
+			        'J-r3-JobReact',
+			        'J-r3-JobReact'[exitCategory] = "Software Failure" && 'J-r3-JobReact'[totalGpuCount] >= 0
+			    ),
+			    'J-r3-JobReact'[reactTime]
+			)
+		lineageTag: 2ba2075f-feb1-482c-975d-72148ed31e76
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure ReMaxReactionTime =
+			
+			MAXX(
+			    FILTER(
+			        'J-r3-JobReact',
+			        'J-r3-JobReact'[exitCategory] IN {"User Stop", "Hardware Failure", "Software Failure"} && 'J-r3-JobReact'[totalGpuCount] >= 0
+			    ),
+			    'J-r3-JobReact'[reactTime]
+			)
+		lineageTag: 48489b45-0380-49c0-8e8b-6287421bb322
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JRA Last Week' =
+			
+			VAR LatestWeek = [MaxWeekR]
+			VAR Result =
+			    CALCULATE(
+			        [ReAvgReactionTime],
+			        'J-r3-JobReact'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result, 0)
+		lineageTag: 3ed7e3c3-5f54-4cb9-afe0-ae223e66fbdd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JRA Previous' =
+			
+			VAR LatestWeek = [MaxWeekR] - 1
+			VAR Result =
+			    CALCULATE(
+			        [ReAvgReactionTime],
+			        'J-r3-JobReact'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result, 0)
+		lineageTag: a15af3ea-b25f-4d24-8717-38fa3a7e2f8b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JRA Change' =
+			
+			IF(
+			    [JRA Previous] > [JRA Last Week],
+			    "decreased",
+			    IF(
+			        [JRA Previous] < [JRA Last Week],
+			        "increased",
+			        "unchanged"
+			    )
+			)
+		lineageTag: 1729112e-0bf9-4e22-9f63-c7ee9c3c7f1d
+
+	measure 'JRX Last Week' =
+			
+			VAR LatestWeek = [MaxWeekR]
+			VAR Result =
+			    CALCULATE(
+			        [ReMaxReactionTime],
+			        'J-r3-JobReact'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result, 0)
+		lineageTag: b3527799-1f79-4d72-811b-9b2c6273cc3c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JRX Previous' =
+			
+			VAR LatestWeek = [MaxWeekR] - 1
+			VAR Result =
+			    CALCULATE(
+			        [ReMaxReactionTime],
+			        'J-r3-JobReact'[Week] = LatestWeek
+			    )
+			RETURN COALESCE(Result, 0)
+		lineageTag: 4d6c4133-aca0-4638-9318-f5117a7e1820
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'JRX Change' =
+			
+			IF(
+			    [JRX Previous] > [JRX Last Week],
+			    "decreased",
+			    IF(
+			        [JRX Previous] < [JRX Last Week],
+			        "increased",
+			        "unchanged"
+			    )
+			)
+		lineageTag: 1c167ee2-4d5e-466e-8358-8f1a74d602a3
+
+	column Week
+		formatString: 0
+		lineageTag: 10037fc7-52f1-4a0d-89c8-64dcb0222164
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: J-r3-JobReact[Week]
+
+		annotation SummarizationSetBy = User
+
+	column Endpoint
+		lineageTag: 5881d326-17c9-4aae-a90a-5a7e554a971a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: J-r3-JobReact[Endpoint]
+
+		annotation SummarizationSetBy = Automatic
+
+	column _AvgUserStop
+		lineageTag: 67cd63a9-725a-489c-ae96-c747c7dfe36d
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_AvgUserStop]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _AvgHardwareFailure
+		lineageTag: 947a9649-a587-4caa-9dfb-2f68a16f1601
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_AvgHardwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _AvgSoftwareFailure
+		lineageTag: 7637f4a6-f792-4ff4-b8f2-f36e4f80bf1b
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_AvgSoftwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _MaxUserStop
+		lineageTag: fdfc291c-4709-4474-950e-7203f9e601bc
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_MaxUserStop]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _MaxHardwareFailure
+		lineageTag: d6793592-37cd-40ac-b5d0-0b7a7fde6859
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_MaxHardwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _MaxSoftwareFailure
+		lineageTag: 21d97231-1c08-40f4-8917-d1e33e953898
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_MaxSoftwareFailure]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _AvgReactionTime
+		lineageTag: 622364e9-c01b-4625-b61b-b637ae2181f6
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_AvgReactionTime]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column _MaxReactionTime
+		lineageTag: be0f96c5-49ec-4f7d-8ed5-07b76eec6c75
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [_MaxReactionTime]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition J-t5-JobReactTime = calculated
+		mode: import
+		source = ```
+				
+				VAR JobReact = 
+				    FILTER('J-r3-JobReact', 'J-r3-JobReact'[totalGpuCount] >= 0)
+				VAR FailureCategories =
+				    DATATABLE(
+				        "exitCategory", STRING,
+				        {
+				            {"User Stop"},
+				            {"Hardware Failure"},
+				            {"Software Failure"}
+				        }
+				    )
+				VAR Aggregated =
+				    SUMMARIZE(
+				        JobReact,
+				        [Week],
+				        [Endpoint],
+				        "_AvgUserStop", AVERAGEX(FILTER(JobReact, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "User Stop"), [reactTime]),
+				        "_AvgHardwareFailure", AVERAGEX(FILTER(JobReact, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Hardware Failure"), [reactTime]),
+				        "_AvgSoftwareFailure", AVERAGEX(FILTER(JobReact, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Software Failure"), [reactTime]),
+				        "_AvgReactionTime", AVERAGEX(FILTER(JobReact, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] IN FailureCategories), [reactTime]),
+				        "_MaxUserStop", MAXX(FILTER(JobReact, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "User Stop"), [reactTime]),
+				        "_MaxHardwareFailure", MAXX(FILTER(JobReact, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Hardware Failure"), [reactTime]),
+				        "_MaxSoftwareFailure", MAXX(FILTER(JobReact, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] = "Software Failure"), [reactTime]),
+				        "_MaxReactionTime", MAXX(FILTER(JobReact, [Week] = EARLIER([Week]) && [Endpoint] = EARLIER([Endpoint]) && [exitCategory] IN FailureCategories), [reactTime])
+				    )
+				RETURN
+				    Aggregated
+				```
+
+	annotation PBI_Id = d9e583f3b543436a890d05f7e033adb8
+

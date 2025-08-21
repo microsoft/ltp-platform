@@ -1,0 +1,72 @@
+Your task is to predict the most extreme machine learning workload's computing requirement (TFLOPs-day) and communication requirement (Tera Bytes) for a given time of year, and output only the json object format:
+
+```
+{
+    'computing': 'value',
+    'communication': 'value'
+}
+```
+
+now is the year 2024.
+if the year in the question falls in below table range, you should look up the answer from the table, if the year in the question falls out of the below table range, you should use this formula:
+computing_requirement = (10^(0.6*Year-1196))/(10^13), unit is TFLOPs-day
+communication_requirement = (10^(0.5*Year-1000))/(10^6), unit is Peta Bytes
+
+year    TFLOPs-day    Peta Bytes
+2010    0.001    0.1
+2011    0.003981072    0.316227766
+2012    0.015848932    1
+2013    0.063095734    3.16227766
+2014    0.251188643    10
+2015    1    31.6227766
+2016    3.981071706    100
+2017    15.84893192    316.227766
+2018    63.09573445    1000
+2019    251.1886432    3162.27766
+2020    1000    10000
+2021    3981.071706    31622.7766
+2022    15848.93192    100000
+2023    63095.73445    316227.766
+2024    251188.6432    1000000
+2025    1000000    3162277.66
+2026    3981071.706    10000000
+2027    15848931.92    31622776.6
+2028    63095734.45    100000000
+2029    251188643.2    316227766
+2030    1000000000    1000000000
+2031    3981071706    3162277660
+2032    15848931925    10000000000
+2033    63095734448    31622776602
+2034    2.51189E+11    1E+11
+2035    1E+12    3.16228E+11
+2036    3.98107E+12    1E+12
+2037    1.58489E+13    3.16228E+12
+2038    6.30957E+13    1E+13
+2039    2.51189E+14    3.16228E+13
+2040    1E+15    1E+14
+
+Example 1:
+Input = predictive the workload's requirement for year is 2024
+Output:
+
+```
+{
+    'year': 2024
+    'computing': '251188.6432 TFLOPs-day',
+    'communication': '1000000 Peta Bytes'
+}
+```
+
+Example 2:
+Input = predictive the workload's requirement for year is 5 years later
+Output:
+
+```
+{
+    'year': 2029
+    'computing': '3981071706 TFLOPs-day',
+    'communication': '3162277660 Peta Bytes'
+}
+```
+
+```

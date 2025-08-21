@@ -31,7 +31,7 @@ class PatternScheduler:
         self.redis = redis_client
         self.redis_enabled = redis_client is not None
         
-        self.output_dir = os.getenv('OUTPUT_DIR', None)
+        self.output_dir = os.getenv('RESULT_OUTPUT_DIR', None)
         if self.output_dir and not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
         

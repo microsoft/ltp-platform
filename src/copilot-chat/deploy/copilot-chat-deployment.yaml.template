@@ -1,0 +1,85 @@
+# Copyright (c) Microsoft Corporation
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: copilot-chat
+  labels:
+    app: copilot-chat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: copilot-chat
+  template:
+    metadata:
+      labels:
+        app: copilot-chat
+    spec:
+      containers:
+      - name: copilot-chat
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}copilot-chat:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        env:
+        - name: AGENT_PORT
+          value: "{{ cluster_cfg["copilot-chat"]["agent-port"] | default("50000") }}"
+        - name: COPILOT_HISTORY_DEPTH
+          value: "{{ cluster_cfg["copilot-chat"]["history-depth"] }}"
+        - name: COPILOT_VERSION
+          value: {{ cluster_cfg["copilot-chat"]["version"] }}
+        - name: AGENT_MODE
+          value: {{ cluster_cfg["copilot-chat"]["agent-mode"] }}
+        - name: AGENT_MODE_CA
+          value: {{ cluster_cfg["copilot-chat"]["agent-mode-ca"] }}
+        - name: AZURE_OPENAI_API_KEY
+          value: {{ cluster_cfg["copilot-chat"]["azure-openai-api-key"] }}
+        - name: POWERBI_KEY
+          value: {{ cluster_cfg["copilot-chat"]["powerbi-key"] }}
+        - name: OPENAI_API_KEY
+          value: {{ cluster_cfg["copilot-chat"]["openai-api-key"] }}
+        - name: COPILOT_LLM_PROVIDER
+          value: {{ cluster_cfg["copilot-chat"]["llm-provider"] }}
+        - name: COPILOT_LLM_ENDPOINT
+          value: {{ cluster_cfg["copilot-chat"]["llm-endpoint"] }}
+        - name: COPILOT_LLM_MODEL
+          value: {{ cluster_cfg["copilot-chat"]["llm-model"] }}
+        - name: COPILOT_LLM_VERSION
+          value: {{ cluster_cfg["copilot-chat"]["llm-version"] }}
+        - name: AGENT_HOST
+          value: {{ cluster_cfg["copilot-chat"]["agent-host"] }}
+        ports:
+        - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
+          hostPort:  {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
+          name: copilot-port
+        - containerPort: {{ cluster_cfg["copilot-chat"]["secure-port"]  | default("8443") }}
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+      volumes:
+      - name: copilot-chat-logs
+        emptyDir: {}
+      restartPolicy: Always

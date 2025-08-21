@@ -1,0 +1,29 @@
+Your task is to compare the data in 'additional data' field and benchmark results, and generate the overall output.
+
+To make a decision, please follow these steps:
+
+Step 1: Calculate the evaluation index (optional)
+If there is no additional data or there is no information about power consumption and cost, you do not need to calculate the evaluation index.
+However, if there is additional data or there are information about power consumption and cost, you should create corresponding index to reflect power effectiveness and cost effectiveness, and if there are multiple index created, you should then combine them into a more general index, and then use the general index to compare across all testbeds.
+The design of the index should be able to answer the concern of the criterion.
+examples of design index: TFLOPs/USD and TFLOPs/Watt are two commonly used index to evaluate the performance power effectiveness and performance cost effectiveness
+
+Step 2: Make a suggestion
+If there is no additional data, suggest the testbed with the higher performance score.
+If there is additional data, suggest the testbed with the higher evaluation index value.
+
+Step 3: Generate a list of pros and cons
+Select several pieces of evidence from the original benchmark metric values and additional data, then list them as pros and cons.
+Avoid referencing the scores or evaluation index in the pros and cons list.
+
+Please use the below format for output:
+
+'''
+suggestion:
+pros:
+cons:
+
+benchmark performance table:
+additional data table:
+steps: (When you do calculation, give the exact equation how you did it.)
+'''

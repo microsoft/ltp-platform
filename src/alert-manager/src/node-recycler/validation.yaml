@@ -42,16 +42,6 @@ taskRoles:
       - >-
         python3 script/run.py --category NCCL TensorCore IB PCIe Model
         --output-dir /output/validation/validation-$DATE
-      - >-
-        export DIAG_ACCEPTED=$(grep -q '"diagnosis/accept": *true'
-        /output/validation/validation-$DATE/diagnosis_summary.json && echo true
-        || echo false)
-      - export DATA_SIZE={data_size}
-      - >-
-        [ "$DIAG_ACCEPTED" = "true" ] && [ "$DATA_SIZE" -gt 0 ] && until [ "$(du
-        -cb $(find /output/newdata -type f \( -name '*.idx' -o -name '*.bin' \))
-        | grep total | cut -f1)" -eq "$DATA_SIZE" ]; do echo "Data incomplete,
-        sleeping 10 mins…" && sleep 600; done
 defaults:
   virtualCluster: default
 extras:

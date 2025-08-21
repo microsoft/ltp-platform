@@ -1,0 +1,231 @@
+Your task is to understand the user's intention from the question they asked, and assign a type to it.
+
+some example types supported:
+
+1. [cluster_job_metrics]: it means the key concern of the user is to understand the current status overview of an object. Usually it requires perform root cause analysis to answer user's concerns.
+2. [job_metadata]: it means the key concern of the user is to understand the root cause of an issue or problem about an object. Usually it requires perform root cause analysis to answer user's concerns.
+3. [user_manual]: it means the key concern of the user is to understand a general concept on what is Lucia Training Platform, or LTP, or training platform, usually the question embedded with a intention to understand how to use the platform.
+4. [dashboard]: it means the key concern of the user is to get detailed information about the performance, availability, failures, and resource utilization of a model training platform.
+5. [auto_rejection]: it means the key concern of the user is not supported by the design of the trainig platform, the examples below provides some unsupported feature for you to compare with.
+6. [human_intervention]: it means the key concern of the user is: not straightforward and may involve multiple potential causes, requiring human judgment to diagnose and resolve, or highlights failures or malfunctions in systems, resources, or infrastructure that cannot be automatically diagnose (e.g, ssh connection issue, GPU failure, node failure, job failure, portal crash, etc.), or explicitly or implicitly requests human assistance to investigate, diagnose, or fix the problem.
+0. [others]: it means the key concern of the user is too general to abstrct.
+
+below knowldge describes some key concepts commonly asked in the cluster_job_metrics type questions:
+knowledge #1: metrics backend is Prometheus REST API server
+knowledge #2: metrics could be cluster metrics, job metrics, filtered by specific virtual cluster (VC) or user, etc.
+
+below knowldge describes some key concepts commonly asked in the user_manual type questions:
+knowledge #1: the user manual of LTP (Lucia Training Platform) provides a detailed usage guidance to assist user better utilize the resource to perform single or distributed training task per their request.
+knowledge #2: the whole user manual consists several sections of documentation, with each focusing on explaining the detail instructions, configurations, information. Available sections are:
+- [Quick Start](./UserManual/quickstart.md): A guide to help you quickly get started with the platform and submit a "hello world" job.
+- [How to Use Docker Image](./UserManual/docker-images.md): Instructions on using Docker images in your jobs.
+- [How to Manage Data and Code](./UserManual/use-data.md): Guidance on managing data and code within your jobs.
+- [How to Write Job Configuration](./UserManual/job-config.md): Detailed instructions for configuring jobs and distributed jobs.
+- [Job Priorities](./UserManual/job-priorities.md): Explanation of job priority types and how to submit jobs with specific priorities.
+- [VC Allocation](./UserManual/vc-allocation.md): Guidelines for managing VC allocation requests and assignment change notifications.
+- [Notification and Monitoring](./UserManual/notification.md): Information on the platform's notification and monitoring features.
+- [Troubleshooting](./UserManual/troubleshooting.md): A troubleshooting guide for common issues and how to get platform support.
+- [Email Templates, UserGroup Admin](./UserManual/email-templates/email-templates-user.md): Templates for UserGroup Admins to request VC allocations, production priority job submissions and integrating private Azure storage blob.
+- [Email Templates, Lucia Training Platform Admin](./UserManual/email-templates/email-templates-ltp.md): Templates for Lucia Training Platform Admins to acknowledge, complete, and notify about VC allocation and assignment changes.
+knowledge #3: [How to Write Job Configuration] section details below topics: Parameters and Secrets, Distributed Settings, Environment Variables for Distributed Jobs, Job Exit Specifications
+
+below knowledge describes what dashboard data provides:
+knowledge #4: there is a Lucia Training Platform Dashboard which includes data to let platform administrators and platform users to get detailed information about the performance, availability, failures, and resource utilization:
+- Cluster Capacity Status
+- Availability Status
+- Node Health and Failures
+- Job Interruption Analysis
+- Node Recycle Times
+- Mean Time Between Failures (MTBF)
+- Daily Node Runtime Failures
+- Failure Categorization and Reasons
+- Daily Node Failure Occurrences
+
+The followings are some examples:
+[Example 1]
+User question:
+what is the idle gpu counts for virtual cluater (vc): mi300s?
+1. [cluster_job_metrics]
+
+[Example 2]
+User question:
+query allocated gpu counts, end time is now, offset is 1 day
+1. [cluster_job_metrics]
+
+[Example 3]
+User question:
+query job meta data
+2. [job_metadata]
+
+[Example 4]
+User question:
+how to submit a distributed training job?
+3. [user_manual]
+
+[Example 5]
+User question:
+write/create a new benchmark for ...
+0. [others]
+
+[Example 6]
+User question:
+query a list of running or history jobs
+1. [cluster_job_metrics]
+
+[Example 7]
+User question:
+What is the average availability ratio for the cluster CYS13PrdGPC02 in Week 27?
+4. [dashboard]
+
+[Example 8]
+User question:
+Which cluster had the highest percentage of allocated VMs in Week 22?
+4. [dashboard]
+
+[Example 9]
+User question:
+What was the most common reason for node failures?
+4. [dashboard]
+
+[Example 10]
+User question:
+What is the Mean Time Between Failures (MTBF) for the cluster CYS13PrdGPC02 in Week 27?
+4. [dashboard]
+
+[Example 11]
+User question:
+What is the average reaction time for hardware failures in Week 27?
+4. [dashboard]
+
+[Example 12]
+User question:
+How many job interruptions occurred due to hardware failures, and what was the average duration of these interruptions?
+4. [dashboard]
+
+[Example 13]
+User question:
+Which cluster had the highest percentage of unallocatable VMs in Week 27?
+4. [dashboard]
+
+[Example 14]
+User question:
+What was the total number of hardware-related node failures in Week 27 across all endpoints?
+4. [dashboard]
+
+[Example 15]
+User question:
+What was the node recycle time for cordon nodes in the CYS13PrdGPC02 cluster in Week 25?
+4. [dashboard]
+
+[Example 16]
+User question:
+What was the average availability ratio for the cluster CYS13PrdGPC02 in Week 27?
+4. [dashboard]
+
+[Example 17]
+User question:
+How many deallocated nodes were reported for the cluster SJC24PrdGPC03?
+4. [dashboard]
+
+[Example 18]
+User question:
+There is no mechanism to prevent Virtual Cluster (VC) resource abuse, such as requesting an excessive number of GPUs.
+5. [auto_rejection]
+
+[Example 19]
+User question:
+Users may be duplicating efforts by building Docker images that have already been created by others.
+5. [auto_rejection]
+
+[Example 20]
+User question:
+I have been trying to get 4 nodes and successfully been allocated. However, it gets stuck three nodes are running and one keeps waiting -- blocking the whole process. Can you please take a look at it?
+6. [human_intervention]
+
+[Example 21]
+User question:
+seems that we meet some network issue today, some nodes can connect to archive.ubuntu.com but some cannot, could you help to check? Err:12 jammy InRelease  Could not connect to archive.ubuntu.com:80 (185.125.190.81), connection timed out Could not connect to archive.ubuntu.com:80 (91.189.91.82), connection timed out Could not connect to archive.ubuntu.com:80 (185.125.190.83), connection timed out Could not connect to archive.ubuntu.com:80 (185.125.190.82), connection timed out Could not connect to archive.ubuntu.com:80 (91.189.91.83), connection timed out
+6. [human_intervention]
+
+[Example 22]
+User question:
+We meet this issue, seems the portal is crashed.
+6. [human_intervention]
+
+[Example 23]
+User question:
+We have a 16 node job failed and we have try to resume several times, each time failed seems because of communication, could you help to find if there are some bad nodes in it? These are job links:
+6. [human_intervention]
+
+[Example 24]
+User question:
+When I try to submit job this afternoon, the portal says Error
+6. [human_intervention]
+
+[Example 25]
+User question:
+we have a 16-node job that seems to be hanging during startup ‚Äî the GPU utilization stays at 0. We've retried multiple times on the same 16 nodes, but the issue persists each time. Could you please help check if there might be any issues with these nodes? here is the job link
+6. [human_intervention]
+
+[Example 26]
+User question:
+Thanks to the powerful Lucia platform, we have successfully started several 16-node experiments. However, when some experiments are stopped, it seems that the portal does not show that these nodes have been released. This may also cause the jobs submitted later to be waiting all the time. And is it possible to replace the 3 bad nodes in the cluster so that we can start an additional experiment or scale up the current experiment, which will speed up our experiment progress.
+6. [human_intervention]
+
+[Example 27]
+User question:
+It seems that there are some potentially faulty nodes on the <code>rstar</code> VC. When we submit multi-node jobs, they may randomly land on these problematic nodes, causing job failures‚Äîeven though the codebase remains unchanged. Here are two job links that may help illustrate the issue: Would it be possible to detect these potentially bad nodes and report them for maintenance? Thanks for your help!
+6. [human_intervention]
+
+[Example 28]
+User question:
+sigma-s-mi300 shows it has been fully used (100%, so no more jobs can be submitted), but just half of the GPUs and CPUs shown been occupied. See the attached screenshot.
+6. [human_intervention]
+
+[Example 29]
+User question:
+This job encountered "No CUDA GPUs are available".
+6. [human_intervention]
+
+[Example 30]
+User question:
+As far as we know, there are three ways for us to communicate with blob storage: Using storage configs for read and write a public blob container. Using blobfuse2 to manually mount our private blob containers for rw. Using azcopy to pre-download necessary files and post-upload results to some specific blob containers. When we are training small models like less than 2B model, the problem may not so obvious and may not cause timeout. But recently, we are trying 7B and 10B models, whose ckpt will be 110G+ (together with the sliced states of each GPU), we may need to continually start with a previously trained ckpt and save the updated ckpts periodically. This demand may require not slow IO speed with blob. We try to save a ckpt after the second step in a training experiment. The current results are: Saving 7B model with method 1 will be timeout:  Saving 7B model with method 2 is okay, Method 3 require too much labour for saving ckpts periodically. what is the Best Practice of Using Blob Storage?"
+6. [human_intervention]
+
+[Example 31]
+User question:
+I'm new to openpai, it would be nice if I could access the job via ssh for debugging, currently I can only modify the yaml file and rerun the job for debugging, which is a bit cumbersome.
+3. [user_manual]
+
+[Example 32]
+User question:
+Is there any jump machine that can be used to ssh to the MI300x machine?
+3. [user_manual]
+
+[Example 33]
+User question:
+I conducted experiments using the same environment and dataset on both a single node and multiple nodes. From the experiments, I observed the following:</p>\n<ol>\n<li>The total training steps for a single node are 8,638, with an estimated training time of around 52 hours.<a href=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-1n-ts-speed-2\" rel=\"noreferrer noopener\" title=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-1n-ts-speed-2\" target=\"_blank\">Platform for AI</a></li><li>The total training steps for 4 nodes are 2,159, with an estimated training time of around 77 hours. <a href=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-4n-ts-2159\" rel=\"noreferrer noopener\" title=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-4n-ts-2159\" target=\"_blank\">Platform for AI</a></li></ol>\n<p>I am wondering whether there might be some communication overhead causing the training time on multiple nodes to be higher than on a single node. Thank you!
+1. [cluster_job_metrics]
+
+[Example 34]
+User question:
+Users may not be familiar with certain types of GPUs (especially AMD GPUs). Launching jobs on these GPUs often results in a higher failure rate due to lack of familiarity.
+3. [user_manual]
+
+[Example 35]
+User question:
+The behavior of different job priorities is not transparent to users, making it difficult for them to make informed decisions.
+3. [user_manual]
+
+[Example 36]
+User question:
+Can I setup a SSH connection to the node?
+3. [user_manual]
+
+[Example 37]
+User question:
+Users are unable to manage their expectations regarding job completion times due to a lack of visibility into job progress or estimated end times.
+5. [auto_rejection]
+
+Please output  in the following format:
+Type: 0-6. [question type]

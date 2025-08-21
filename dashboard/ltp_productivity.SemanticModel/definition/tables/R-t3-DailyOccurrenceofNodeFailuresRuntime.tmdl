@@ -163,7 +163,7 @@ table R-t3-DailyOccurrenceofNodeFailuresRuntime
 				in
 				    Source
 
-	annotation PBI_ResultType = Exception
+	annotation PBI_ResultType = Table
 
 	annotation PBI_NavigationStepName = Navigation
 

@@ -1,0 +1,194 @@
+Your task is to understand the user's intention from the question they asked, and assign a type to it.
+
+Four question types are supported:
+
+8. [training_platform]: it means the user wants to ask for guidance of how to use a model training platform, specifically the Lucia Training Platform, or ask for detailed information about an already launched training job, usually such questions can be answered by searching or querying the detailed logs, debugging informations provided by the training platform.
+3. [general]: it means user's can be answered fully using public information or general knowledge, without the need to ask for more context input from user.
+9. [persona]: it means the user wants to understand the persona of you, what features you can provide, what capabilities you can serve.
+4. [others]: it means user's prompt is not [training_platform] nor [general] nor [persona]. Note that the above types have specific definition. If user question is not belong to [training_platform] nor [general] nor [persona], it should be [others].
+
+below knowldge describes some key concepts commonly asked in the training_platform type questions:
+knowledge #1:
+single node trainig, distributed training, how to config a job, how to submit an issue related to the training platform, etc.
+
+knowledge #2:
+the user manual of LTP (Lucia Training Platform) provides a detailed usage guidance to assist user better utilize the resource to perform single or distributed training task per their request.
+
+knowledge #3: the whole user manual consists several sections of documentation, with each focusing on explaining the detail instructions, configurations, information. Available sections are:
+- [Quick Start](./UserManual/quickstart.md): A guide to help you quickly get started with the platform and submit a "hello world" job.
+- [How to Use Docker Image](./UserManual/docker-images.md): Instructions on using Docker images in your jobs.
+- [How to Manage Data and Code](./UserManual/use-data.md): Guidance on managing data and code within your jobs.
+- [How to Write Job Configuration](./UserManual/job-config.md): Detailed instructions for configuring jobs and distributed jobs.
+- [Job Priorities](./UserManual/job-priorities.md): Explanation of job priority types and how to submit jobs with specific priorities.
+- [VC Allocation](./UserManual/vc-allocation.md): Guidelines for managing VC allocation requests and assignment change notifications.
+- [Notification and Monitoring](./UserManual/notification.md): Information on the platform's notification and monitoring features.
+- [Troubleshooting](./UserManual/troubleshooting.md): A troubleshooting guide for common issues and how to get platform support.
+- [Email Templates, UserGroup Admin](./UserManual/email-templates/email-templates-user.md): Templates for UserGroup Admins to request VC allocations, production priority job submissions and integrating private Azure storage blob.
+- [Email Templates, Lucia Training Platform Admin](./UserManual/email-templates/email-templates-ltp.md): Templates for Lucia Training Platform Admins to acknowledge, complete, and notify about VC allocation and assignment changes.
+
+
+knowledge #4: there is a Lucia Training Platform Dashboard which includes data to let platform administrators and platform users to get detailed information about the performance, availability, failures, and resource utilization:
+- Cluster Capacity Status
+- Availability Status
+- Node Health and Failures
+- Job Interruption Analysis
+- Node Recycle Times
+- Mean Time Between Failures (MTBF)
+- Daily Node Runtime Failures
+- Failure Categorization and Reasons
+- Daily Node Failure Occurrences
+
+
+The followings are some examples:
+[Example 1]
+User question:
+Is distributed training supported?
+8. [training_platform]
+
+[Example 3]
+User question:
+what is the weather
+4. [others]
+
+[Example 7]
+User question:
+What is Chrismax
+3. [general]
+
+[Example 8]
+User question:
+Hi!
+3. [general]
+
+[Example 9]
+User question:
+What can you do?
+9. [persona]
+
+[Example 10]
+User question:
+What is the average availability ratio for the cluster CYS13PrdGPC02 in Week 27?
+8. [training_platform]
+
+[Example 11]
+User question:
+Which cluster had the highest percentage of allocated VMs in Week 22?
+8. [training_platform]
+
+[Example 12]
+User question:
+What was the most common reason for node failures?
+8. [training_platform]
+
+[Example 13]
+User question:
+What is the Mean Time Between Failures (MTBF) for the cluster CYS13PrdGPC02 in Week 27?
+8. [training_platform]
+
+[Example 14]
+User question:
+What is the average reaction time for hardware failures in Week 27?
+8. [training_platform]
+
+[Example 15]
+User question:
+How many job interruptions occurred due to hardware failures, and what was the average duration of these interruptions?
+8. [training_platform]
+
+[Example 16]
+User question:
+Which cluster had the highest percentage of unallocatable VMs in Week 27?
+8. [training_platform]
+
+[Example 17]
+User question:
+What was the total number of hardware-related node failures in Week 27 across all endpoints?
+8. [training_platform]
+
+[Example 18]
+User question:
+What was the node recycle time for cordon nodes in the CYS13PrdGPC02 cluster in Week 25?
+8. [training_platform]
+
+[Example 19]
+User question:
+What was the average availability ratio for the cluster CYS13PrdGPC02 in Week 27?
+8. [training_platform]
+
+[Example 20]
+User question:
+How many deallocated nodes were reported for the cluster SJC24PrdGPC03?
+8. [training_platform]
+
+[Example 21]
+User question:
+introduce yourself
+9. [persona]
+
+[Example 22]
+User question:
+There is no mechanism to prevent Virtual Cluster (VC) resource abuse, such as requesting an excessive number of GPUs.
+8. [training_platform]
+
+[Example 23]
+User question:
+Users may be duplicating efforts by building Docker images that have already been created by others.
+8. [training_platform]
+
+[Example 24]
+User question:
+I have been trying to get 4 nodes and successfully been allocated. However, it gets stuck three nodes are running and one keeps waiting -- blocking the whole process. Can you please take a look at it?
+8. [training_platform]
+
+[Example 25]
+User question:
+seems that we meet some network issue today, some nodes can connect to archive.ubuntu.com but some cannot, could you help to check? Err:12 jammy InRelease  Could not connect to archive.ubuntu.com:80 (185.125.190.81), connection timed out Could not connect to archive.ubuntu.com:80 (91.189.91.82), connection timed out Could not connect to archive.ubuntu.com:80 (185.125.190.83), connection timed out Could not connect to archive.ubuntu.com:80 (185.125.190.82), connection timed out Could not connect to archive.ubuntu.com:80 (91.189.91.83), connection timed out
+8. [training_platform]
+
+[Example 26]
+User question:
+We meet this issue, seems the portal is crashed.
+8. [training_platform]
+
+[Example 27]
+User question:
+We have a 16 node job failed and we have try to resume several times, each time failed seems because of communication, could you help to find if there are some bad nodes in it? These are job links:
+8. [training_platform]
+
+[Example 28]
+User question:
+When I try to submit job this afternoon, the portal says Error
+8. [training_platform]
+
+[Example 29]
+User question:
+we have a 16-node job that seems to be hanging during startup ‚Äî the GPU utilization stays at 0. We've retried multiple times on the same 16 nodes, but the issue persists each time. Could you please help check if there might be any issues with these nodes? here is the job link
+8. [training_platform]
+
+[Example 30]
+User question:
+Thanks to the powerful Lucia platform, we have successfully started several 16-node experiments. However, when some experiments are stopped, it seems that the portal does not show that these nodes have been released. This may also cause the jobs submitted later to be waiting all the time. And is it possible to replace the 3 bad nodes in the cluster so that we can start an additional experiment or scale up the current experiment, which will speed up our experiment progress.
+8. [training_platform]
+
+[Example 31]
+User question:
+It seems that there are some potentially faulty nodes on the <code>rstar</code> VC. When we submit multi-node jobs, they may randomly land on these problematic nodes, causing job failures‚Äîeven though the codebase remains unchanged. Here are two job links that may help illustrate the issue: Would it be possible to detect these potentially bad nodes and report them for maintenance? Thanks for your help!
+8. [training_platform]
+
+[Example 32]
+User question:
+sigma-s-mi300 shows it has been fully used (100%, so no more jobs can be submitted), but just half of the GPUs and CPUs shown been occupied. See the attached screenshot.
+8. [training_platform]
+
+[Example 33]
+User question:
+This job encountered "No CUDA GPUs are available".
+8. [training_platform]
+
+[Example 34]
+User question:
+As far as we know, there are three ways for us to communicate with blob storage: Using storage configs for read and write a public blob container. Using blobfuse2 to manually mount our private blob containers for rw. Using azcopy to pre-download necessary files and post-upload results to some specific blob containers. When we are training small models like less than 2B model, the problem may not so obvious and may not cause timeout. But recently, we are trying 7B and 10B models, whose ckpt will be 110G+ (together with the sliced states of each GPU), we may need to continually start with a previously trained ckpt and save the updated ckpts periodically. This demand may require not slow IO speed with blob. We try to save a ckpt after the second step in a training experiment. The current results are: Saving 7B model with method 1 will be timeout:  Saving 7B model with method 2 is okay, Method 3 require too much labour for saving ckpts periodically. what is the Best Practice of Using Blob Storage?"
+8. [training_platform]
+
+Please output  in the following format:
+Type: 3,4,8,9. [question type]

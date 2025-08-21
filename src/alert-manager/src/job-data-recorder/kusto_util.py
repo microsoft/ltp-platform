@@ -47,8 +47,7 @@ class KustoUtil:
             (str, str): error_message, category
         """
         node_action_client = NodeActionClient()
-        end_time = completedTime + 1000 * 60 * 60  # 1 hour after completedTime
-        # TODO: changed the end time to next job start time
+        end_time = completedTime
         error_message = ''
         category = ''
         try:
@@ -63,6 +62,8 @@ class KustoUtil:
                 if action.Action == 'available-cordoned':
                     timestamp = action.Timestamp
                     cordoned = True
+                    print(
+                        f"Node {node_name} is cordoned at {timestamp}, checking for triaged actions.")
             if cordoned:
                 # check if there's cordoned-triaged_hardware action after available-cordoned but before the xxx-available action
                 query = f"""
@@ -77,7 +78,8 @@ class KustoUtil:
                 );
                 {node_action_client.table_name}
                 | where HostName == node_name
-                | where Timestamp between (cordoned_ts .. next_available_ts)
+                | where Timestamp >= cordoned_ts
+                | where isnull(next_available_ts) or Timestamp <= next_available_ts
                 | where Action in ('cordoned-triaged_platform', 'cordoned-triaged_hardware')
                 | project Timestamp, Action, Reason, Detail
                 """
@@ -97,6 +99,9 @@ class KustoUtil:
                         break
                     elif result['Action'] == 'cordoned-triaged_unknown':
                         error_message = result['Reason']
+                        category = 'Unknown'
+                    else:
+                        error_message = 'Unknown'
                         category = 'Unknown'
 
         except Exception as e:
@@ -138,6 +143,7 @@ class KustoUtil:
         query_result = KustoManageClient(
             cluster=self.cluster,
             database=self.database).execute_command(query)
+        print(f"Querying unknown category records: {query}, result count: {len(query_result)}")
         return pd.DataFrame(query_result)
 
     def query_unknown_react_records(self, retain_time):
@@ -158,6 +164,7 @@ class KustoUtil:
         query_result = KustoManageClient(
             cluster=self.cluster,
             database=self.database).execute_command(query)
+        print(f"Querying unknown react records: {query}, result count: {len(query_result)}")
         return pd.DataFrame(query_result)
 
     def query_job_metrics_by_job_id(self, job_ids):

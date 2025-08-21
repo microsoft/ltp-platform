@@ -128,7 +128,7 @@ spec:
       - name: prometheus-data
         {% if cluster_cfg["prometheus"]["disk"] %}
         persistentVolumeClaim:
-          claimName: pvc-prometheus-disk
+          claimName: {{ cluster_cfg["prometheus"]["disk"] }}
         {% else %}
         hostPath:
           path: {{ cluster_cfg["cluster"]["common"]["data-path"] }}/prometheus/data
@@ -136,7 +136,7 @@ spec:
       {% if cluster_cfg["prometheus"]["blob"] %}
       - name: prometheus-blob
         persistentVolumeClaim:
-          claimName: pvc-prometheus-blob
+          claimName: {{ cluster_cfg["prometheus"]["blob"] }}
         hostPath:
           path: {{ cluster_cfg["cluster"]["common"]["data-path"] }}/prometheus/blob
       {% endif %}

@@ -59,15 +59,6 @@ table R-r0-na
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'hardware-GPU Driver Hanging'
-		dataType: int64
-		formatString: 0
-		lineageTag: 3448301b-dcf4-4166-932f-0f56e231b369
-		summarizeBy: sum
-		sourceColumn: hardware-GPU Driver Hanging
-
-		annotation SummarizationSetBy = Automatic
-
 	column 'hardware-GPU Memory Not Release'
 		dataType: int64
 		formatString: 0
@@ -101,15 +92,6 @@ table R-r0-na
 		lineageTag: cec541a6-405a-4261-af79-01e141948e0b
 		summarizeBy: sum
 		sourceColumn: hardware-IB Reregistration
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'hardware-Loss NaN'
-		dataType: int64
-		formatString: 0
-		lineageTag: f87d1c34-dde3-4d9b-92d7-520976647a2f
-		summarizeBy: sum
-		sourceColumn: hardware-Loss NaN
 
 		annotation SummarizationSetBy = Automatic
 
@@ -257,15 +239,6 @@ table R-r0-na
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'unknown-Blob Mount Failure'
-		dataType: int64
-		formatString: 0
-		lineageTag: 45058ad5-8a30-43f4-b512-bf3d7ba19172
-		summarizeBy: sum
-		sourceColumn: unknown-Blob Mount Failure
-
-		annotation SummarizationSetBy = Automatic
-
 	column user-MemoryAccessFault
 		dataType: int64
 		formatString: 0
@@ -275,16 +248,70 @@ table R-r0-na
 
 		annotation SummarizationSetBy = Automatic
 
+	column hardware-LossNaN
+		dataType: int64
+		formatString: 0
+		lineageTag: 38e8503c-bdd5-4526-9d4a-52ea7464a455
+		summarizeBy: sum
+		sourceColumn: hardware-LossNaN
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-GPUDriverHanging
+		dataType: int64
+		formatString: 0
+		lineageTag: e31b8074-98ac-47ce-ad79-84fdfb427e6d
+		summarizeBy: sum
+		sourceColumn: hardware-GPUDriverHanging
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-IBBandwidthProblem
+		dataType: int64
+		formatString: 0
+		lineageTag: b63bd4b8-371c-4527-887f-f39f6ab2cf29
+		summarizeBy: sum
+		sourceColumn: hardware-IBBandwidthProblem
+
+		annotation SummarizationSetBy = Automatic
+
+	column hardware-NvidiaSmiLatencyTooLarge
+		dataType: int64
+		formatString: 0
+		lineageTag: 171b948b-01e6-41cb-ae98-9d9dc29aa846
+		summarizeBy: sum
+		sourceColumn: hardware-NvidiaSmiLatencyTooLarge
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'platform-Blob Mount Failure'
+		dataType: int64
+		formatString: 0
+		lineageTag: 5c00cb7e-aee1-4b7e-8cc9-b525f113852b
+		summarizeBy: sum
+		sourceColumn: platform-Blob Mount Failure
+
+		annotation SummarizationSetBy = Automatic
+
+	column platform-Investigation
+		dataType: int64
+		formatString: 0
+		lineageTag: 665d952a-e78f-4632-8b73-7854b41ab5f9
+		summarizeBy: sum
+		sourceColumn: platform-Investigation
+
+		annotation SummarizationSetBy = Automatic
+
 	partition R-r0-na = m
 		mode: import
 		queryGroup: Reliability
 		source =
 				let
-				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "//1.for the runtime failures, the source data will change into NodeActionRecord in production cluster:#(lf)//here is an example runtime failure query#(lf)let record =#(lf)cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')#(lf)| join kind=leftouter (#(lf)    NodeActionAttributes#(lf)) on Action#(lf)| sort by HostName asc , Timestamp asc, Action asc#(lf)| extend PrevHostName = prev(HostName, 1)#(lf)| extend PrevPhase = prev(Phase, 1)#(lf)| extend IsNewNode = HostName != PrevHostName or isnull(PrevHostName)#(lf)| serialize#(lf)| extend LastPhase = iff(#(lf)    IsNewNode,#(lf)    Phase,  // First record for this node#(lf)    iff(#(lf)        isnotempty(Phase),#(lf)        Phase,  // Current action has phase#(lf)        iff(#(lf)            isnotempty(PrevPhase),#(lf)            PrevPhase,  // Use previous phase#(lf)            """"  // Default to empty#(lf)        )#(lf)    )#(lf))#(lf)| project-away PrevHostName, PrevPhase, IsNewNode, Action1#(lf)| sort by Timestamp asc#(lf)| where Action contains ""cordoned-triaged"" and LastPhase contains ""routine""#(lf)| extend CategoryReason = strcat(Category, ""-"", Reason);#(lf)let startDate = datetime(2025-03-17);#(lf)let endDate = now();#(lf)// Step 1: Extract unique reasons in the 'routine' phase#(lf)let uniqueReasonsRoutine = record#(lf)| distinct CategoryReason;#(lf)// Step 2: Summarize count by reason within weekly intervals#(lf)let summarizedData = record#(lf)| summarize Count = count() by CategoryReason, bin(Timestamp, 7d);#(lf)// Step 3: Pivot the data to create a column for each unique reason#(lf)summarizedData#(lf)| evaluate pivot(CategoryReason, sum(Count))#(lf)| extend Week = weekofyear(startofweek(Timestamp - 1d, 0)) // Monday as the start of the week#(lf)| extend Date = format_datetime(Timestamp, ""yyyy-MM-dd"")#(lf)| order by Week asc#(lf)", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
+				    Source = AzureDataExplorer.Contents("luciatrainingplatform.westcentralus", "production", "let record =#(lf)cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')#(lf)| join kind=leftouter (#(lf)    NodeActionAttributes#(lf)) on Action#(lf)| sort by HostName asc , Timestamp asc, Action asc#(lf)| extend PrevHostName = prev(HostName, 1)#(lf)| extend PrevPhase = prev(Phase, 1)#(lf)| extend IsNewNode = HostName != PrevHostName or isnull(PrevHostName)#(lf)| serialize#(lf)| extend LastPhase = iff(#(lf)    IsNewNode,#(lf)    Phase,  // First record for this node#(lf)    iff(#(lf)        isnotempty(Phase),#(lf)        Phase,  // Current action has phase#(lf)        iff(#(lf)            isnotempty(PrevPhase),#(lf)            PrevPhase,  // Use previous phase#(lf)            """"  // Default to empty#(lf)        )#(lf)    )#(lf))#(lf)| project-away PrevHostName, PrevPhase, IsNewNode, Action1#(lf)| sort by Timestamp asc#(lf)| where Action contains ""cordoned-triaged"" and LastPhase contains ""routine""#(lf)| extend CategoryReason = strcat(Category, ""-"", Reason);#(lf)let startDate = datetime(2025-03-17);#(lf)let endDate = now();#(lf)// Step 1: Extract unique reasons in the 'routine' phase#(lf)let uniqueReasonsRoutine = record#(lf)| distinct CategoryReason;#(lf)// Step 2: Summarize count by reason within weekly intervals#(lf)let summarizedData = record#(lf)| summarize Count = count() by CategoryReason, bin(Timestamp, 7d);#(lf)// Step 3: Pivot the data to create a column for each unique reason#(lf)summarizedData#(lf)| evaluate pivot(CategoryReason, sum(Count))#(lf)| extend Week = weekofyear(startofweek(Timestamp - 1d, 0)) // Monday as the start of the week#(lf)| extend Date = format_datetime(Timestamp, ""yyyy-MM-dd"")#(lf)| order by Week asc#(lf)", [MaxRows=null, MaxSize=null, NoTruncate=null, AdditionalSetStatements=null])
 				in
 				    Source
 
-	annotation PBI_ResultType = Exception
+	annotation PBI_ResultType = Table
 
 	annotation PBI_NavigationStepName = Navigation
 

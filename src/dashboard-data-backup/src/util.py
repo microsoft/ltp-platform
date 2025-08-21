@@ -75,6 +75,7 @@ class KustoTable:
         """Append data from source query to existing table."""
         query = f".append {self.table} <| <<src_table>>"
         query = query.replace('<<src_table>>', src_query)
+        print(f'Debug: update_table_append query: {query}')
         response = self.execute_query(query)
         print(f'Debug: response: {response}')
         if response is not None:
