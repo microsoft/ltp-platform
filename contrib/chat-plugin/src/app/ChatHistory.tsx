@@ -140,7 +140,7 @@ const Message: React.FC<{ message: ChatMessage, expand?: boolean }> = ({ message
       )}
       <div
         ref={contentRef}
-        className={`flex-1 ${expanded ? 'overflow-auto' : 'overflow-hidden max-h-12 mx-auto'} ${showButton ? 'pr-6' : ''}`}
+        className={`flex-1 ${expanded ? 'overflow-auto' : 'overflow-hidden max-h-12 mx-auto'} ${showButton ? 'pr-10' : ''}`}
         style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
       >
         {message.message}
