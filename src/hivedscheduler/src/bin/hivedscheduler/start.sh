@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # MIT License
 #
 # Copyright (c) Microsoft Corporation. All rights reserved.
@@ -20,25 +22,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 
-FROM mcr.microsoft.com/oss/go/microsoft/golang:1.24.3 AS builder
+set -o errexit
+set -o nounset
+set -o pipefail
 
-ARG TEST=false
-ENV PROJECT_DIR=/src
-ENV INSTALL_DIR=/opt/hivedscheduler/hivedscheduler
+BASH_DIR=$(cd $(dirname ${BASH_SOURCE}) && pwd)
 
-RUN mkdir -p ${PROJECT_DIR} ${INSTALL_DIR}
-COPY src ${PROJECT_DIR}
-RUN if [ ${TEST} == "true" ]; \
-  then ${PROJECT_DIR}/build/hivedscheduler/go-build.sh test; \
-  else ${PROJECT_DIR}/build/hivedscheduler/go-build.sh; fi && \
-  mv ${PROJECT_DIR}/dist/hivedscheduler/* ${INSTALL_DIR}
+cd ${BASH_DIR}
 
-
-FROM mcr.microsoft.com/cbl-mariner/base/core:2.0
-
-ENV INSTALL_DIR=/opt/hivedscheduler/hivedscheduler
-
-COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
-WORKDIR ${INSTALL_DIR}
-
-ENTRYPOINT ["./start.sh"]
+./hivedscheduler "$@"
