@@ -42,7 +42,8 @@ interface State {
   setCurrentJob: (job: Job | null) => void;
   setAllModelsInCurrentJob: (models: string[]) => void;
   setCurrentModel: (model: string | null) => void;
-  addChat: (chat: ChatMessage) => void;
+  addChatMessage: (chat: ChatMessage) => void;
+  updateLastChatMessage: (lastMessageContent: string) => void;
   cleanChat: () => void;
 }
 
@@ -70,6 +71,14 @@ export const useChatStore = create<State>((set) => ({
   setAllModelsInCurrentJob: (models) => set({ allModelsInCurrentJob: models }),
   setCurrentModel: (model) => set({ currentModel: model }),
 
-  addChat: (log) => set((state) => ({ chatMsgs: [...state.chatMsgs, log] })),
+  addChatMessage: (log) => set((state) => ({ chatMsgs: [...state.chatMsgs, log] })),
+  updateLastChatMessage: (lastMessageContent) => set((state) => {
+    const chatMsgs = [...state.chatMsgs];
+    if (chatMsgs.length > 0) {
+      chatMsgs[chatMsgs.length - 1].message = lastMessageContent;
+      chatMsgs[chatMsgs.length - 1].timestamp = new Date();
+    }
+    return { chatMsgs };
+  }),
   cleanChat: () => set({ chatMsgs: [] })
 }));
