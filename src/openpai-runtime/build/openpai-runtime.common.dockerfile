@@ -20,7 +20,7 @@
 FROM ubuntu:20.04 AS ubuntu_20_04_cache
 
 WORKDIR /src
-COPY src/package_cache ./
+COPY src/src/package_cache ./
 RUN chmod -R +x ./
 RUN /bin/bash ubuntu_build.sh package_cache_info ubuntu20.04
 
@@ -28,7 +28,7 @@ RUN /bin/bash ubuntu_build.sh package_cache_info ubuntu20.04
 FROM ubuntu:22.04 AS ubuntu_22_04_cache
 
 WORKDIR /src
-COPY src/package_cache ./
+COPY src/src/package_cache ./
 RUN chmod -R +x ./
 RUN /bin/bash ubuntu_build.sh package_cache_info ubuntu22.04
 
@@ -41,7 +41,7 @@ ENV INSTALL_DIR=/opt/kube-runtime
 
 RUN apt update -y && apt install musl musl-tools -y && \
   mkdir -p ${PROJECT_DIR} ${INSTALL_DIR}
-COPY go/ ${PROJECT_DIR}
+COPY src/go/ ${PROJECT_DIR}
 RUN ${PROJECT_DIR}/build/runtime/go-build.sh && \
   mv ${PROJECT_DIR}/dist/runtime/ ${INSTALL_DIR}
 
@@ -61,8 +61,8 @@ ARG BARRIER_DIR=/opt/frameworkcontroller/frameworkbarrier
 
 WORKDIR /kube-runtime/src
 
-COPY src/ ./
-COPY requirements.txt ./
+COPY src/src ./
+COPY src/requirements.txt ./
 
 COPY --from=frameworkcontroller/frameworkbarrier:v1.0.0 $BARRIER_DIR/frameworkbarrier ./init.d
 COPY --from=builder ${INSTALL_DIR}/* ./runtime.d/
