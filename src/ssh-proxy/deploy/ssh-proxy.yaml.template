@@ -1,0 +1,84 @@
+# Copyright (c) Microsoft Corporation
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssh-proxy-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ssh-proxy
+  template:
+    metadata:
+      name: ssh-proxy
+      labels:
+        app: ssh-proxy
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: pai-master
+                operator: In
+                values:
+                - "true"
+      containers:
+      - image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}ssh-proxy:{{cluster_cfg["cluster"]["docker-registry"]["tag"]}}
+        imagePullPolicy: Always
+        name: ssh-proxy
+        ports:
+        - containerPort: 22
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /home/azureuser/.ssh/authorized_keys
+          name: ssh-key-volume
+          readOnly: true
+          subPath: id_rsa.pub
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: ssh-public-key
+        name: ssh-key-volume
+ 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ssh-proxy-service
+spec:
+  ports:
+  - port: 22
+    protocol: TCP
+    targetPort: 22
+  selector:
+    app: ssh-proxy
+  sessionAffinity: None
+  type: LoadBalancer
