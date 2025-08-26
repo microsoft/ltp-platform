@@ -19,4 +19,5 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-kubectl delete --ignore-not-found --now -f ssh-proxy.yaml
+kubectl delete --ignore-not-found --now service/ssh-proxy-service
+kubectl delete --ignore-not-found --now deployment/ssh-proxy-deployment
