@@ -1,6 +1,4 @@
-FROM python:3.12
-
-RUN apt update && apt upgrade -y && apt clean && rm -rf /var/lib/apt/lists/*
+FROM mcr.microsoft.com/cbl-mariner/base/python:3
 
 WORKDIR /utilization-reporter
 

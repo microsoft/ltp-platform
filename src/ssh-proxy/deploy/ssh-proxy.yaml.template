@@ -31,16 +31,6 @@ spec:
       name: ssh-proxy
       labels:
         app: ssh-proxy
-    spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: pai-master
-                operator: In
-                values:
-                - "true"
       containers:
       - image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}ssh-proxy:{{cluster_cfg["cluster"]["docker-registry"]["tag"]}}
         imagePullPolicy: Always

@@ -31,15 +31,6 @@ spec:
         app: utilization-reporter
     spec:
       hostNetwork: false
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: pai-master
-                operator: In
-                values:
-                - "true"
       containers:
       - name: prometheus
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}utilization-reporter:{{cluster_cfg["cluster"]["docker-registry"]["tag"]}}
