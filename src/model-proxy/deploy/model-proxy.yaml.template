@@ -1,0 +1,62 @@
+# Copyright (c) Microsoft Corporation
+# All rights reserved.
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+# documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+# to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+# BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+# DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: model-proxy-ds
+spec:
+  selector:
+    matchLabels:
+      app: model-proxy
+  template:
+    metadata:
+      labels:
+        app: model-proxy
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+      containers:
+      - name: model-proxy
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}model-proxy:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        command: ["/app/bin/modelproxy"]
+        args:
+          - "--port={{ cluster_cfg['model-proxy']['port'] }}"
+          - "--retry={{ cluster_cfg['model-proxy']['retry'] }}"
+          - "--modelkey={{ cluster_cfg['model-proxy']['modelkey'] }}"
+          - "--logdir=/usr/local/ltp/model-proxy/logs"
+        volumeMounts:
+        {%- if cluster_cfg['model-proxy']['log_pvc'] %}
+        - name: model-proxy-log-storage
+          mountPath: /usr/local/ltp/model-proxy
+        {%- else %}
+        - name: model-proxy-log
+          mountPath: /usr/local/ltp/model-proxy
+        {%- endif %}
+      volumes:
+      - name: model-proxy-log
+        hostPath:
+          path: /var/log/model-proxy
+      {%- if cluster_cfg['model-proxy']['log_pvc'] %}
+      - name: model-proxy-log-storage
+        persistentVolumeClaim:
+          claimName: {{ cluster_cfg['model-proxy']['log_pvc'] }}
+      {%- endif %}
