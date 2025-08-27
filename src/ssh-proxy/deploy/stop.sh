@@ -19,5 +19,6 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+kubectl delete --ignore-not-found --now configmap/ssh-public-key
 kubectl delete --ignore-not-found --now service/ssh-proxy-service
 kubectl delete --ignore-not-found --now deployment/ssh-proxy-deployment

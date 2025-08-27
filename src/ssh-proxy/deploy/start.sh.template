@@ -21,6 +21,9 @@
 
 pushd $(dirname "$0") > /dev/null
 
+kubectl create configmap ssh-public-key --from-file={{ cluster_cfg['ssh-proxy']['public-key'] }} \
+        --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
+
 kubectl apply --overwrite=true -f ssh-proxy.yaml || exit $?
 
 # Wait until the service is ready.
