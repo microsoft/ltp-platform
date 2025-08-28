@@ -14,7 +14,7 @@ if [ -n "$CLUSTER_LOCAL_STORAGE_WORKER" ]; then
     if ! ifconfig $iface >/dev/null 2>&1; then
       echo "Interface $iface does not exist"
       exit 255
-    else
+    fi
     ifconfig $iface $ip netmask 255.255.255.0 || exit $?
     echo $iface $ip SUCCEED
   done

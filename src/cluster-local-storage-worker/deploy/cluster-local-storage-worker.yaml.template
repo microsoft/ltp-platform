@@ -25,17 +25,22 @@ spec:
       - name: cluster-local-storage-worker
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}cluster-local-storage:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         imagePullPolicy: Always
+        securityContext:
+          runAsUser: 0
+          allowPrivilegeEscalation: false
+          capabilities:
+            add: ["NET_ADMIN"]
         command:
         - /bin/bash
         - -c
         - /usr/local/cluster-local-storage/init.sh && sleep infinity
         env:
         - name: CLUSTER_LOCAL_STORAGE_WORKER
-          value: TRUE
+          value: "TRUE"
         - name: CLUSTER_LOCAL_STORAGE_IPOIB_NUM
           value: "8"
         - name: CLUSTER_LOCAL_STORAGE_IPOIB_PREFIX
-          value: ib
+          value: "ib"
         - name: CLUSTER_LOCAL_STORAGE_ROOT
           value: '{{ cluster_cfg["cluster-local-storage"]["job-path"] }}'
         volumeMounts:
