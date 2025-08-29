@@ -71,6 +71,10 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["llm-version"] }}
         - name: AGENT_HOST
           value: {{ cluster_cfg["copilot-chat"]["agent-host"] }}
+        - name: RESTSERVER_URL
+          value: {{ cluster_cfg["copilot-chat"]["restserve-url"] }}
+        - name: COPILOT_VALID_GROUPS
+          value: {{ cluster_cfg["copilot-chat"]["valid-groups"] }}
         ports:
         - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
           hostPort:  {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
