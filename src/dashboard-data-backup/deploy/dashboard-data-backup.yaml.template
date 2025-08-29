@@ -62,7 +62,7 @@ spec:
         - name: ENVIRONMENT
           value: {{ cluster_cfg["dashboard-data-backup"]["environment"] | default("prod") }}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
-          value: {{ cluster_cfg["dashboard-data-backup"]["kusto-user-assigned-client-id"] | default(cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"]) }}
+          value: {{ cluster_cfg["dashboard-data-backup"]["kusto-user-assigned-client-id"] | default(cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"], true) }}
         volumeMounts:
         - name: backup-logs
           mountPath: /var/log/backup
