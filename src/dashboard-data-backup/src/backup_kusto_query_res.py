@@ -91,6 +91,7 @@ def main():
             configs.append(config)
 
     for config in configs:
+        print(f'config is {config}')
         backup_append_table(config)
 
 if __name__ == "__main__":

@@ -29,5 +29,4 @@ RUN crontab /etc/cron.d/backup-cron
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Run the command on container startup
-CMD ["cron", "-f"]
+ENTRYPOINT ["/bin/bash", "-c", "printenv > /etc/container_environment && exec cron -f"]

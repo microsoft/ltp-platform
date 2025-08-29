@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 set -e  # Exit on any error
-{% if cluster_cfg["dashboard-data-backup"]["configured"] -%}
+
 echo "Starting Dashboard Data Backup deployment..."
 
 pushd $(dirname "$0") > /dev/null
@@ -29,4 +29,3 @@ kubectl apply --overwrite=true -f dashboard-data-backup.yaml || exit $?
 PYTHONPATH="../../../deployment" python -m k8sPaiLibrary.monitorTool.check_pod_ready_status -w -k app -v dashboard-data-backup || exit $?
 
 popd > /dev/null
-{% endif %}
