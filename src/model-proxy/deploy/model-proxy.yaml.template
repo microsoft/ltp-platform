@@ -1,0 +1,46 @@
+
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: model-proxy-ds
+spec:
+  selector:
+    matchLabels:
+      app: model-proxy
+  template:
+    metadata:
+      labels:
+        app: model-proxy
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+      containers:
+      - name: model-proxy
+        image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}model-proxy:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
+        command:
+        - "/app/bin/modelproxy"
+        - "--port {{ cluster_cfg['model-proxy']['port'] }}"
+        - "--retry {{ cluster_cfg['model-proxy']['retries'] }}"
+        - "--modelkey {{ cluster_cfg['model-proxy']['modelkey'] }}"
+        - "--logdir /usr/local/ltp/model-proxy/logs"
+        volumeMounts:
+        {%- if cluster_cfg['model-proxy']['log_pvc'] %}
+        - name: model-proxy-log-storage
+          mountPath: /usr/local/ltp/model-proxy
+        {%- else %}
+        - namel: model-proxy-log
+          mountPath: /usr/local/ltp/model-proxy
+        {%- endif %}
+      volumes:
+      - name: model-proxy-log
+        hostPath:
+        path: /var/log/model-proxy
+      {%- if cluster_cfg['model-proxy']['log_pvc'] %}
+      - name: model-proxy-log-storage
+        persistentVolumeClaim:
+          claimName: {{ cluster_cfg['model-proxy']['log_pvc'] }}
+      {%- endif %}

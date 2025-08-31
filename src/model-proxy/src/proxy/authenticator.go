@@ -1,100 +1,63 @@
 package proxy
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"time"
+	"strings"
 )
 
-// Authenticator is a interface for authenticator
-type Authenticator interface {
-	// Authenticate authenticates the request
-	AuthenticateReq(req *http.Request) bool
+type RestServerAuthenticator struct {
+	// rest-server token => model names => model urls
+	tokenToModels map[string]map[string][]string
+	modelKey      string
 }
 
-type FreeAuthenticator struct{}
-
-func (fa *FreeAuthenticator) AuthenticateReq(req *http.Request) bool {
-	return true
-}
-
-// DefaultAuthenticator is a default implementation of Authenticator
-type DefaultAuthenticator struct {
-	AvaliableKeys map[string]struct{}
-}
-
-// Authenticate authenticates the request
-func (da *DefaultAuthenticator) AuthenticateReq(req *http.Request) bool {
-	key := GetKeyFromRequest(req)
-	return da.AuthenticateKey(key)
-}
-
-// Authenticate authenticates the request
-func (da *DefaultAuthenticator) AuthenticateKey(key string) bool {
-	_, ok := da.AvaliableKeys[key]
-	return ok
-}
-
-func (da *DefaultAuthenticator) AddKey(key string) {
-	da.AvaliableKeys[key] = struct{}{}
-}
-
-// NewDefaultAuthenticator creates a new DefaultAuthenticator
-func NewDefaultAuthenticator() *DefaultAuthenticator {
-	return &DefaultAuthenticator{AvaliableKeys: make(map[string]struct{})}
-}
-
-// NewDefaultAuthenticatorWithKeys creates a new DefaultAuthenticator according to the keys
-func NewDefaultAuthenticatorWithKeys(keys []string) *DefaultAuthenticator {
-	au := NewDefaultAuthenticator()
-	for _, key := range keys {
-		au.AddKey(key)
+func NewRestServerAuthenticator(tokenToModels map[string]map[string][]string, modelKey string) *RestServerAuthenticator {
+	if tokenToModels == nil {
+		tokenToModels = make(map[string]map[string][]string)
 	}
-	return au
-}
-
-// TimelimitAuthenticator is an implementation of Authenticator which supports time limit for each key
-type TimelimitAuthenticator struct {
-	AvaliableKeys map[string]time.Time
-}
-
-func (ta *TimelimitAuthenticator) AuthenticateReq(req *http.Request) bool {
-	key := GetKeyFromRequest(req)
-	return ta.AuthenticateKey(key)
-}
-
-func (ta *TimelimitAuthenticator) AuthenticateKey(key string) bool {
-	if _, ok := ta.AvaliableKeys[key]; !ok {
-		return false
+	return &RestServerAuthenticator{
+		tokenToModels: tokenToModels,
+		modelKey:      modelKey,
 	}
-	if ta.AvaliableKeys[key].After(time.Now()) {
-		return true
+}
+
+func (ra *RestServerAuthenticator) UpdateTokenModels(token string, model2Url map[string][]string) {
+	if ra.tokenToModels == nil {
+		ra.tokenToModels = make(map[string]map[string][]string)
 	}
-	delete(ta.AvaliableKeys, key)
-	return false
+	ra.tokenToModels[token] = model2Url
 }
 
-func (ta *TimelimitAuthenticator) AddKey(key string, deadline time.Time) {
-	ta.AvaliableKeys[key] = deadline
-}
-
-func NewTimelimitAuthenticator() *TimelimitAuthenticator {
-	return &TimelimitAuthenticator{AvaliableKeys: make(map[string]time.Time)}
-}
-
-// NewTimelimitAuthenticatorWithKeys creates a new TimelimitAuthenticator according to the keys
-func NewTimelimitAuthenticatorWithKeys(key2deadline map[string]interface{}) *TimelimitAuthenticator {
-	ta := NewTimelimitAuthenticator()
-
-	for key, deadline := range key2deadline {
-		t, err := time.Parse("2006-01-02", deadline.(string))
+// Check if the request is authenticated and return the available model urls
+func (ra *RestServerAuthenticator) AuthenticateReq(req *http.Request, reqBody map[string]interface{}) (bool, []string) {
+	token := req.Header.Get("Authorization")
+	token = strings.Replace(token, "Bearer ", "", 1)
+	//  read request body
+	model := reqBody["model"].(string)
+	availableModels, ok := ra.tokenToModels[token]
+	if !ok {
+		// request to RestServer to get the models
+		log.Printf("[-] Error: token %s not found in the authenticator\n", token)
+		availableModels, err := GetJobModelsMapping(req, ra.modelKey)
 		if err != nil {
-			fmt.Print("error when parsing time: ", deadline.(string), err)
-			continue
+			log.Printf("[-] Error: failed to get models for token %s: %v\n", token, err)
+			return false, []string{}
 		}
-		log.Printf("key: %s, deadline: %s\n", key, t)
-		ta.AddKey(key, t)
+		ra.tokenToModels[token] = availableModels
 	}
-	return ta
+	if len(availableModels) == 0 {
+		log.Printf("[-] Error: no models found")
+		return false, []string{}
+	}
+	if model == "" {
+		log.Printf("[-] Error: model is empty")
+		return false, []string{}
+	}
+	for m, v := range availableModels {
+		if m == model {
+			return true, v
+		}
+	}
+	return false, []string{}
 }

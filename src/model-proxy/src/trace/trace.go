@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"AIMiciusModelProxy/types"
+	"modelproxy/types"
 )
 
 // TraceLogger is the interface for trace logger
@@ -23,17 +23,16 @@ type TraceLogger interface {
 type JsonFileLogger struct {
 	localFolderPath string
 	currentDay      string
-	uploader        *BlobUploader
 	lock            sync.Mutex
 }
 
 // NewJsonFileLogger create a new JsonFileLogger
-func NewJsonFileLogger(folderPath string, uploader *BlobUploader) *JsonFileLogger {
+func NewJsonFileLogger(folderPath string) *JsonFileLogger {
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
 		os.Mkdir(folderPath, os.ModePerm)
 	}
 	date := time.Now().Format("2006-01-02")
-	return &JsonFileLogger{localFolderPath: folderPath, uploader: uploader, currentDay: date}
+	return &JsonFileLogger{localFolderPath: folderPath, currentDay: date}
 }
 
 func (j *JsonFileLogger) Record(req string, resp []string) {
@@ -115,16 +114,7 @@ func (j *JsonFileLogger) record(req string, resp []string) {
 	defer j.lock.Unlock()
 
 	date := time.Now().Format("2006-01-02")
-	if date != j.currentDay {
-		if j.uploader != nil {
-			// upload the past data file
-			pastDataFile := path.Join(j.localFolderPath, j.currentDay+".jsonl")
-			j.uploader.Upload(pastDataFile)
-			// rename local file to mark it as uploaded
-			os.Rename(pastDataFile, pastDataFile+".uploaded")
-		}
-		j.currentDay = date
-	}
+	j.currentDay = date
 
 	filePath := path.Join(j.localFolderPath, date+".jsonl")
 	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0664)

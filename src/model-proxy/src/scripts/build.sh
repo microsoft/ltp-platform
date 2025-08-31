@@ -1,1 +1,1 @@
-go build -o ./bin/AIMiciusModelProxy
+go build -o ./bin/modelproxy

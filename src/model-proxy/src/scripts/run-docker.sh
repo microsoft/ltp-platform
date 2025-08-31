@@ -46,4 +46,4 @@ docker run -d \
     -p $PORT \
     --mount type=bind,source=$CONFIG,target=/config.json \
     modelproxy:latest \
-    ./bin/AIMiciusModelProxy --config /config.json
+    ./bin/modelproxy --config /config.json

@@ -7,9 +7,8 @@ import (
 
 // Config is the struct for config.json
 type Config struct {
-	Server    *Server    `json:"server"`
-	Log       *Log       `json:"log"`
-	Endpoints *Endpoints `json:"endpoints"`
+	Server *Server `json:"server"`
+	Log    *Log    `json:"log"`
 }
 
 // Server is the struct for proxy server config
@@ -20,8 +19,8 @@ type Server struct {
 	Port int `json:"port"`
 	// MaxRetries is the max retries for the request
 	MaxRetries int `json:"retry"`
-	// Access keys  for the server, it can be empty, a list (["key1", "key2"]), or a map with the key and the deadline (like {"key1": "2023-08-01"}, the time shoud be in this format: "2006-01-02")
-	AccessKeys interface{} `json:"access_keys,omitempty"`
+	// ModelKey is the model key for the proxy server to access the model server
+	ModelKey string `json:"model_key"`
 }
 
 // Log is the config for log
@@ -46,22 +45,11 @@ type AzureStorage struct {
 	Path      string `json:"path"`
 }
 
-type Endpoints struct {
-	AzureSpec  []*EndpointsSpec `json:"azure_spec,omitempty"`
-	OpenAISpec []*EndpointsSpec `json:"openai_spec,omitempty"`
-}
-
 // BaseSpec is the base spec for azure and openai
 type BaseSpec struct {
 	URL     string `json:"url"`
 	Key     string `json:"key"`
 	Version string `json:"version,omitempty"`
-}
-
-type EndpointsSpec struct {
-	*BaseSpec
-	ChatModels      []string `json:"chat,omitempty"`
-	EmbeddingModels []string `json:"embeddings,omitempty"`
 }
 
 // ParseConfig parse the config file into Config struct
@@ -85,7 +73,7 @@ type BaseSpecStatistic struct {
 	*BaseSpec
 	ValidRequestCount int
 	SuccessCount      int
-	SuceessRate       float64
+	SuccessRate       float64
 }
 
 type BaseSpecList []*BaseSpecStatistic
@@ -103,57 +91,4 @@ type ReverseMap struct {
 type AllReverseMap struct {
 	Azure  *ReverseMap
 	OpenAI *ReverseMap
-}
-
-// According to the struct Endpoints, convert it into the two ReverseMap from deploy_name to to BaseSpec for AzureSpec and OpenAISpec
-func (e *Endpoints) ToReverseMap() *AllReverseMap {
-	azureChat := make(ModelToBase)
-	azureEmbedding := make(ModelToBase)
-	openAIChat := make(ModelToBase)
-	openAIEmbedding := make(ModelToBase)
-
-	for _, spec := range e.AzureSpec {
-		for _, model := range spec.ChatModels {
-			if _, ok := azureChat[model]; !ok {
-				azureChat[model] = make(BaseSpecList, 0, 1)
-			}
-			azureChat[model] = append(azureChat[model],
-				&BaseSpecStatistic{BaseSpec: spec.BaseSpec})
-		}
-		for _, model := range spec.EmbeddingModels {
-			if _, ok := azureEmbedding[model]; !ok {
-				azureEmbedding[model] = make(BaseSpecList, 0, 1)
-			}
-			azureEmbedding[model] = append(azureEmbedding[model],
-				&BaseSpecStatistic{BaseSpec: spec.BaseSpec})
-		}
-	}
-
-	for _, spec := range e.OpenAISpec {
-		for _, model := range spec.ChatModels {
-			if _, ok := openAIChat[model]; !ok {
-				openAIChat[model] = make(BaseSpecList, 0, 1)
-			}
-			openAIChat[model] = append(openAIChat[model],
-				&BaseSpecStatistic{BaseSpec: spec.BaseSpec})
-		}
-		for _, model := range spec.EmbeddingModels {
-			if _, ok := openAIEmbedding[model]; !ok {
-				openAIEmbedding[model] = make(BaseSpecList, 0, 1)
-			}
-			openAIEmbedding[model] = append(openAIEmbedding[model],
-				&BaseSpecStatistic{BaseSpec: spec.BaseSpec})
-		}
-	}
-
-	return &AllReverseMap{
-		Azure: &ReverseMap{
-			Chat:      azureChat,
-			Embedding: azureEmbedding,
-		},
-		OpenAI: &ReverseMap{
-			Chat:      openAIChat,
-			Embedding: openAIEmbedding,
-		},
-	}
 }

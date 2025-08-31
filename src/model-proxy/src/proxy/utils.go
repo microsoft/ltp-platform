@@ -7,7 +7,7 @@ import (
 	"path"
 	"strings"
 
-	"AIMiciusModelProxy/types"
+	"modelproxy/types"
 )
 
 // parse the RESTFul-style url and get the value of the given key

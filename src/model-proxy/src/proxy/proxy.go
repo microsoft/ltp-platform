@@ -8,12 +8,13 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"AIMiciusModelProxy/trace"
-	"AIMiciusModelProxy/types"
+	"modelproxy/trace"
+	"modelproxy/types"
 )
 
 // hookWriter is a wrapper of http.ResponseWriter, which can get the response body and status code, and does not dis
@@ -47,8 +48,7 @@ func (w *hookWriter) WriteHeader(statusCode int) {
 
 // ProxyHandler is the key struct for proxy server
 type ProxyHandler struct {
-	loadBalancer  *LoadBalancer
-	authenticator Authenticator
+	authenticator *RestServerAuthenticator
 	port          int
 	maxRetries    int
 	// traceRelatedKeys is the keys that will be logged in trace, but will be filtered in the api request
@@ -61,25 +61,9 @@ func NewProxyHandler(config *types.Config) *ProxyHandler {
 	for _, key := range config.Log.TraceRelatedKeys {
 		traceRelatedKeys[key] = struct{}{}
 	}
-	var authenticator Authenticator
-	// If AccessKeys is nil, use FreeAuthenticator, which means no authentication
-	if config.Server.AccessKeys == nil {
-		authenticator = &FreeAuthenticator{}
-	} else {
-		switch ktype := config.Server.AccessKeys.(type) {
-		case []string:
-			authenticator = NewDefaultAuthenticatorWithKeys(config.Server.AccessKeys.([]string))
-		case map[string]interface{}:
-			authenticator = NewTimelimitAuthenticatorWithKeys(config.Server.AccessKeys.(map[string]interface{}))
-		default:
-
-			log.Fatal("[-] Error in parsing setting ProxyHandlerfile: \nUnexcepted type of AccessKeys: ", ktype)
-		}
-	}
 
 	return &ProxyHandler{
-		loadBalancer:     NewLoadBalancer(config.Endpoints),
-		authenticator:    authenticator,
+		authenticator:    NewRestServerAuthenticator(nil, config.Server.ModelKey),
 		port:             config.Server.Port,
 		maxRetries:       config.Server.MaxRetries,
 		traceRelatedKeys: traceRelatedKeys,
@@ -88,22 +72,70 @@ func NewProxyHandler(config *types.Config) *ProxyHandler {
 
 // ReverseProxyHandler act as a reverse proxy, it will redirect the request to the destination website and return the response
 func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Request) (string, []string, bool) {
-	// I want to show the detail class name of w
+	// handle /v1/models
+	if r.URL.Path == "/v1/models" {
+		model2Url, err := GetJobModelsMapping(r, ph.authenticator.modelKey)
+		if err != nil {
+			log.Printf("[-] Error: failed to get models mapping: %v\n", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return "", nil, false
+		}
+		// Update the ph.authenticator
+		token := r.Header.Get("Authorization")
+		token = strings.Replace(token, "Bearer ", "", 1)
+		ph.authenticator.UpdateTokenModels(token, model2Url)
+
+		// convert models list to OpenAI style list and write it to w
+		ids := make([]string, 0, len(model2Url))
+		for id := range model2Url {
+			ids = append(ids, id)
+		}
+		sort.Strings(ids)
+
+		list := map[string]interface{}{
+			"object": "list",
+			"data":   make([]map[string]interface{}, 0, len(ids)),
+		}
+		for _, id := range ids {
+			item := map[string]interface{}{
+				"id":     id,
+				"object": "model",
+				// intentionally not including created or owned_by
+			}
+			list["data"] = append(list["data"].([]map[string]interface{}), item)
+		}
+
+		out, err := json.Marshal(list)
+		if err != nil {
+			log.Printf("[-] Error: failed to marshal models list: %v\n", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return "", nil, false
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if _, err := w.Write(out); err != nil {
+			log.Printf("[-] Error: failed to write response: %v\n", err)
+		}
+		// We've handled the response, do not continue proxying this request
+		return "", nil, false
+	}
+	log.Printf("[*] receive a request from %s\n", r.RemoteAddr)
+
+	// filter the request body and check whether the request should be traced
+	rawReqBody, newReqBody, data, shouldTraced := ph.requestBodyFilter(r)
 
 	// check the key of the request
-	if !ph.authenticator.AuthenticateReq(r) {
+	ok, modelUrls := ph.authenticator.AuthenticateReq(r, data)
+
+	if !ok {
 		log.Printf("[-] Error: unauthorized request from %s\n", r.RemoteAddr)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return "", nil, false
 	}
 
-	// filter the request body and check whether the request should be traced
-	rawReqBody, newReqBody, data, shouldTraced := ph.requestBodyFilter(r)
-
-	log.Printf("[*] receive a request from %s\n", r.RemoteAddr)
-
 	// get the url poller to generate and poll the destination url
-	urlPoller := ph.loadBalancer.GetUrlPoller(r.URL.String(), data)
+	urlPoller := NewUrlPollerWithKey(r.URL.String(), modelUrls, ph.authenticator.modelKey)
 	if urlPoller == nil {
 		log.Printf("[-] Error: cannot get the url poller: \n\trawReqBody: %s\n\tURL: %s\n", rawReqBody, r.URL.String())
 		proxy := &httputil.ReverseProxy{Director: func(req *http.Request) {}}
