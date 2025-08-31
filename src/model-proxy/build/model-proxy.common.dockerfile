@@ -1,8 +1,9 @@
 FROM golang:1.25.0
 WORKDIR /app
 
-COPY . .
+COPY ./src /app/model-proxy
 
-RUN go mod tidy && \
+RUN cd /app/model-proxy && go mod tidy && \
     go build -o /app/bin/modelproxy
+
 
