@@ -171,6 +171,8 @@ class AlertFetcher:
         end_time = convert_timestamp(end_time_stamp, format="datetime")
         if isinstance(alerts, list):
             alerts = pd.DataFrame(alerts)
+        if start_time >= end_time:
+            return pd.DataFrame()
         logger.info(f"Finding alerts for node {node} between {start_time} and {end_time}"
                     )
         logger.info(alerts.head())

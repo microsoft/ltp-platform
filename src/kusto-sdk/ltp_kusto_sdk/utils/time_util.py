@@ -7,15 +7,15 @@ import pandas as pd
 def parse_duration(duration_str):
     """Convert a Prometheus-style duration (e.g., '6h') to a timedelta object."""
     if duration_str.endswith("h") or duration_str.endswith("hours"):
-        return timedelta(hours=int(duration_str.strip("h").strip("hours")))
+        return timedelta(hours=int(float(duration_str.strip("h").strip("hours"))))
     elif duration_str.endswith("m") or duration_str.endswith("minutes"):
-        return timedelta(minutes=int(duration_str.strip("m").strip("minutes")))
+        return timedelta(minutes=int(float(duration_str.strip("m").strip("minutes"))))
     elif duration_str.endswith("s") or duration_str.endswith("seconds"):
-        return timedelta(seconds=int(duration_str.strip("s").strip("seconds")))
+        return timedelta(seconds=int(float(duration_str.strip("s").strip("seconds"))))
     elif duration_str.endswith("d") or duration_str.endswith("days"):
-        return timedelta(days=int(duration_str.strip("d").strip("days")))
+        return timedelta(days=int(float(duration_str.strip("d").strip("days"))))
     elif duration_str.endswith("w") or duration_str.endswith("weeks"):
-        return timedelta(weeks=int(duration_str.strip("w").strip("weeks")))
+        return timedelta(weeks=int(float(duration_str.strip("w").strip("weeks"))))
     else:
         raise ValueError(
             f"Unsupported duration format: {duration_str}. The duration must end with 'h', 'm', 's', 'd', or 'w'."
