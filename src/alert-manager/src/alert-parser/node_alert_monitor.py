@@ -34,6 +34,7 @@ class NodeAvailabilityMonitor:
         self.rest_server_uri = os.getenv("REST_SERVER_URI", "http://localhost:8080")
         self.is_running = False
         self.last_update_time = None
+        self.tolerance_time = int(os.getenv("TOLERANCE_TIME", 300))
         
         # Initialize handlers
         self.alert_fetcher = AlertFetcher()
@@ -44,6 +45,7 @@ class NodeAvailabilityMonitor:
         """Query nodes that had availability status changes"""
         nodes_changed = []
         nodes_continuous_unschedulable = []
+        node_schedulable = []
         
         query = (
             'query?query=(avg_over_time(avg by (node_name) (pai_node_count{unschedulable="true",node_name!~"aks-.*"} or pai_node_count{unschedulable="false",node_name!~"aks-.*"}*0)'
@@ -60,8 +62,16 @@ class NodeAvailabilityMonitor:
                     nodes_changed.append(node_name)
                 else:
                     nodes_continuous_unschedulable.append(node_name)
-                    
-        return nodes_changed, nodes_continuous_unschedulable
+        
+        query = ('query?query=avg by (node_name) (pai_node_count{unschedulable="false",node_name!~"aks-.*"})'
+                + f"[{time_offset}:{interval}] @ {end_time}")
+        result = RequestUtil.prometheus_query(query=query, data={}, uri=self.rest_server_uri)
+        if result is not None:
+            result = result["result"]
+            for node_result in result:
+                node_name = node_result["metric"]["node_name"]
+                node_schedulable.append(node_name)
+        return nodes_changed, nodes_continuous_unschedulable, node_schedulable
 
     def get_node_status_changes(self, node: str, end_time: int, time_offset: str, interval: str = "30s") -> Dict[float, float]:
         """Get detailed status changes for a specific node"""
@@ -119,9 +129,11 @@ class NodeAvailabilityMonitor:
 
     def get_all_status_changes(self, end_time: int, time_offset: str) -> Dict[str, Dict[float, float]]:
         """Get status changes for all nodes"""
-        nodes_changed, nodes_unschedulable = self.query_availability_changes(end_time, time_offset)
+        nodes_changed, nodes_unschedulable, node_schedulable = self.query_availability_changes(end_time, time_offset)
         nodes_validating = self.node_updater.get_nodes_by_status(NodeStatus.VALIDATING.value, end_time)
-        
+        nodes_available = self.node_updater.get_nodes_by_status(NodeStatus.AVAILABLE.value, end_time)
+        nodes_available = [node['HostName'] for node in nodes_available if node['HostName'] not in nodes_changed and node['HostName'] not in nodes_unschedulable]
+        nodes_scheduable_but_not_in_available = [node for node in node_schedulable if node not in nodes_available]
         node_status_changes = {}
         # Handle changed nodes in update interval
         for node in nodes_changed:
@@ -146,12 +158,17 @@ class NodeAvailabilityMonitor:
         # Handle validating nodes changed from validating to available during service down
         for node_stauts in nodes_validating:
             node = node_stauts['HostName']
-            if node not in nodes_changed and node not in nodes_unschedulable:
+            if node not in node_status_changes and node not in nodes_unschedulable:
                 time_offset = int(end_time - convert_timestamp(node_stauts['Timestamp'], format="timestamp"))
                 changes, raw_values = self.get_node_status_changes(node, end_time, f'{time_offset}s')
                 if changes:
                     node_status_changes[node] = changes
-
+        
+        # Handle schedulable nodes but not in available, changed, unschedulable, or validating
+        for node in nodes_scheduable_but_not_in_available:
+            node_status_changes[node] = {}
+            node_status_changes[node][end_time] = 0 # mark as uncordoned
+            logger.info(f"Node {node} is schedulable but not in available, changed, unschedulable, or validating. Marking as uncordoned.")
         return node_status_changes
 
     def handle_node_status_change(self, node: str, timestamp: float, status: float, 
@@ -169,6 +186,9 @@ class NodeAvailabilityMonitor:
             logger.info(f'{len(shrinked_alerts)} alerts after shrinking for node {node} at time {timestamp}')
 
         if status == 1:  # node was cordoned
+            if alerts is not None:
+                period_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, start_time)
+                shrinked_alerts = self.alert_fetcher.shrink_alerts((period_alerts))
             if from_status != NodeStatus.AVAILABLE_NODATA.value:
                 to_status = NodeStatus.CORDONED.value
                 reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
@@ -177,26 +197,27 @@ class NodeAvailabilityMonitor:
         elif status == 0:  # node was uncordoned
             if from_status == NodeStatus.AVAILABLE:
                 logger.info(f"Node {node} is already available. No action taken.")
-            elif from_status == NodeStatus.AVAILABLE_NODATA.value:
-                to_status = NodeStatus.AVAILABLE.value
-                reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
-                self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
             else:
-                to_status = NodeStatus.AVAILABLE_NODATA.value
+                to_status = NodeStatus.AVAILABLE.value
                 reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
                 self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
 
         elif status == -1:  # continuously cordoned
             if from_status == NodeStatus.AVAILABLE.value:
-                to_status = NodeStatus.CORDONED.value
-                reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
-                self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
-            elif from_status == NodeStatus.AVAILABLE_NODATA.value:
-                logger.info(f"Node {node} is already available nodata. No action taken.")
-            elif from_status == NodeStatus.VALIDATING.value:
-                start_time_plus_1hour = convert_timestamp(start_time, format="timestamp") + 3600
-                period_new_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, start_time_plus_1hour)
-                shrinked_new_alerts = self.alert_fetcher.shrink_alerts((period_new_alerts))
+                # avoid the case that the node is available state but prometheus is not updated yet due to watchdog delay
+                # Convert start_time string back to timestamp for comparison
+                start_time_timestamp = convert_timestamp(start_time, format="timestamp")
+                if timestamp - start_time_timestamp > self.tolerance_time:
+                    to_status = NodeStatus.CORDONED.value
+                    reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
+                    self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
+            elif from_status == NodeStatus.VALIDATING.value or from_status == NodeStatus.AVAILABLE_NODATA.value:
+                start_time_validation_timeout = convert_timestamp(start_time, format="timestamp") + 3600
+                period_new_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, start_time_validation_timeout)
+                shrinked_new_alerts = self.alert_fetcher.shrink_alerts(period_new_alerts)
+                period_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, convert_timestamp(start_time, format="timestamp") + self.tolerance_time)
+                shrinked_alerts = self.alert_fetcher.shrink_alerts((period_alerts))
+                logger.info(f'{len(shrinked_alerts)} alerts after shrinking for node {node} at time {timestamp} due to tolerance time')
                 if period_alerts['alertname'].str.contains('CordonValidationFailedNodes').any():
                     validation_alerts = period_alerts[period_alerts['alertname'].str.contains('CordonValidationFailedNodes')]
                     validation_time = validation_alerts['timestamp'].max()
@@ -212,6 +233,12 @@ class NodeAvailabilityMonitor:
                     to_status = NodeStatus.CORDONED.value
                     reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_new_alerts)
                     self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
+                elif from_status == NodeStatus.AVAILABLE_NODATA.value and len(shrinked_alerts) > 0:
+                    to_status = NodeStatus.CORDONED.value
+                    reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
+                    self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
+                else:
+                    logger.info(f"Node {node} is continuously unschedulable but in {from_status}. No action taken.")
             else:
                 logger.info(f"Node {node} is continuously unschedulable but in {from_status}. No action taken.")
  
@@ -268,7 +295,9 @@ class NodeAvailabilityMonitor:
         if not self.last_update_time:
             last_action_time = self.node_updater.get_last_actions_update_time()
             if last_action_time:
-                time_offset = f'{end_time - convert_timestamp(last_action_time, format="timestamp")}s'
+                time_offset = f'{int(float(end_time) - convert_timestamp(last_action_time, format="timestamp"))}s'
+        else:
+            time_offset = f'{int(float(end_time) - convert_timestamp(self.last_update_time, format="timestamp"))}s'
         if not time_offset or parse_duration(time_offset).total_seconds() <= 0:
             logger.warning("Invalid time offset provided. Skipping monitoring.")
             return
@@ -303,7 +332,7 @@ class NodeAvailabilityMonitor:
         try:
             current_time = datetime.now()
             logger.info(f"Checking node availability status at {current_time}")
-            self.monitor_status_changes(current_time.timestamp(), f"{self.update_interval}m")
+            self.monitor_status_changes(current_time.timestamp(), f'{self.update_interval}m')
             self.last_update_time = current_time
         finally:
             self.is_running = False
