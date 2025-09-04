@@ -35,6 +35,7 @@ spec:
       containers:
       - name: redis
         image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}redis-monitoring:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
         # Alternative: use standard image (requires setup-redis-monitoring.sh)
         # image: redis:7-alpine
         ports:
