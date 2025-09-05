@@ -1,0 +1,7 @@
+kubernetes==28.1.0
+pyyaml
+requests
+jinja2
+pystache
+gitpython
+backoff

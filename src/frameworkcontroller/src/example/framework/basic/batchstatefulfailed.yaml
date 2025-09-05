@@ -1,0 +1,56 @@
+# For the full spec setting and usage, see ./pkg/apis/frameworkcontroller/v1/types.go
+apiVersion: frameworkcontroller.microsoft.com/v1
+kind: Framework
+metadata:
+  name: batchstatefulfailed
+spec:
+  executionType: Start
+  retryPolicy:
+    fancyRetryPolicy: true
+    maxRetryCount: 1
+  taskRoles:
+  - name: worker
+    taskNumber: 3
+    frameworkAttemptCompletionPolicy:
+      minFailedTaskCount: 1
+      minSucceededTaskCount: -1
+    task:
+      retryPolicy:
+        fancyRetryPolicy: true
+        maxRetryCount: 1
+      # Large timeout to force delete Pod as it may break the stateful batch.
+      podGracefulDeletionTimeoutSec: 1800
+      pod:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: ubuntu
+            image: ubuntu:trusty
+            # To locate a specific Task during its whole lifecycle regardless of
+            # any retry and rescale:
+            # Consistent Identity:
+            #   PodNamespace = {FrameworkNamespace}
+            #   PodName = {FrameworkName}-{TaskRoleName}-{TaskIndex}
+            # Consistent Environment Variable Value:
+            #   ${FC_FRAMEWORK_NAMESPACE}
+            #   ${FC_FRAMEWORK_NAME}
+            #   ${FC_TASKROLE_NAME}
+            #   ${FC_TASK_INDEX}
+            #
+            # To locate a specific Task instance, in case the Task is deleted then
+            # added by rescale with a different Task instance:
+            # Environment Variable Value:
+            #   ${FC_TASK_UID}
+            #
+            # To locate a specific execution attempt of a specific Task instance:
+            # Environment Variable Value:
+            #   ${FC_TASK_UID}
+            #   ${FC_TASK_ATTEMPT_ID}
+            #
+            # To locate a specific execution attempt instance of a specific Task
+            # instance, in case the attempt instance, i.e. the Pod instance is
+            # created but not observed by FrameworkController, then it is deleted
+            # and created later with a different attempt instance:
+            # Environment Variable Value:
+            #   ${FC_TASK_ATTEMPT_INSTANCE_UID}
+            command: ["sh", "-c", "printenv && sleep 60 && exit 1"]
