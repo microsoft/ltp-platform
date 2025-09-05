@@ -69,6 +69,8 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["llm-model"] }}
         - name: COPILOT_LLM_VERSION
           value: {{ cluster_cfg["copilot-chat"]["llm-version"] }}
+        - name: COPILOT_EMBEDDING_MODEL
+          value: {{ cluster_cfg["copilot-chat"]["embedding-model"] }}
         - name: AGENT_HOST
           value: {{ cluster_cfg["copilot-chat"]["agent-host"] }}
         - name: RESTSERVER_URL
