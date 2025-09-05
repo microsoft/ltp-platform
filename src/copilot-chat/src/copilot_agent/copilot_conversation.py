@@ -74,7 +74,7 @@ class CoPilotConversation:
             self.msg_dict[user_id] = deque(maxlen=HISTORY_DEPTH)
         self.msg_dict[user_id].append(message)
 
-    def audit_msg_dict(self) -> None:
+    def _log_message_history(self) -> None:
         """Log the length of each user's message history for auditing."""
         for user_id, messages in self.msg_dict.items():
             logger.info(f'[internal control word] [msg_dict audit]: user "{user_id}" msg_list length is {len(messages)}')
@@ -90,7 +90,7 @@ class CoPilotConversation:
         logger.info(f'skip_summary is {skip_summary}')
         username = in_parameters.username
         rest_token = in_parameters.rest_token
-        self.collect_data('in', in_parameters)
+        self._log_message_data('in', in_parameters)
 
         user_id, conv_id = self._extract_user_and_conv_id(question_msg_info)
 
@@ -177,9 +177,9 @@ class CoPilotConversation:
         self.manage_conv_history(user_id, msg_assistance)
         logger.info('[CoPilot]: Chat Round Finished')
         logger.info(f'[internal control word] [per user check] user "{user_id}" msg_list length is {len(self.msg_dict[user_id])}')
-        self.audit_msg_dict()
+        self._log_message_history()
         out_parameters = OutParameters(resp)
-        self.collect_data('out', out_parameters)
+        self._log_message_data('out', out_parameters)
         return out_parameters
 
     def build_in_parameters(self, data: dict) -> InParameters:
@@ -187,7 +187,7 @@ class CoPilotConversation:
         in_parameters = InParameters(data)
         return in_parameters
 
-    def collect_data(self, inout: str, parameters: Union[InParameters, OutParameters]) -> None:
+    def _log_message_data(self, inout: str, parameters: Union[InParameters, OutParameters]) -> None:
         """Log and collect data from the request or response for analytics/debugging."""
         if inout == 'in':
             user = parameters.user
@@ -236,7 +236,7 @@ class CoPilotConversation:
             'debug': None
         }
         out_parameters = OutParameters(error_resp)
-        self.collect_data('out', out_parameters)
+        self._log_message_data('out', out_parameters)
         return out_parameters
 
 
