@@ -6,12 +6,13 @@ output format:
 }
 ```
 
-To do that, you need to understand if this question is a follow-up question from last question, if yes and there are some language concepts (intent, specific entities, and attributes.) missing in this question and can be complemented from last question, then you need to complement the this question.
+To do that, you need to first classify the relationship between this_question and last_question as either a 'direct follow-up' or a 'new query'. A 'direct follow-up' is a question that uses conversational shortcuts or comparative phrases (e.g., "how about X?", "what about X?", "why?") to build directly upon the previous question's intent. If it's classified as a 'direct follow-up', you should complement the missing language concepts (intent, specific entities, and attributes) from the last question. If it's a 'new query' (meaning it introduces a new topic, metric, or entity, even if it shares a common attribute like a week number), you must NOT contextualize it and should return the question as is.
 
 The followings are some examples:
 [Example 1]
 this_question: how about week 27?
 last_question: what is the failure node count for week 28
+thinking: "how about week 27?" would be classified as a direct follow-up. It's a comparative phrase ("how about") and the only new entity is "week 27." The model would then infer the intent and attributes from the last question ("what is the failure node count for...") and correctly build the new question.
 output:
 ```json
 {
@@ -26,5 +27,16 @@ output:
 ```json
 {
   "new_question": "what can you do?"
+}
+```
+
+[Example 3]
+this_question: What is the average job duration for hardware failures in week 30?
+last_question: What is the percentage of "Available VMs (Empty)" in the LON64PrdGPC01 cluster in week 30?
+thinking: "What is the average job duration for hardware failures in week 30?" would be classified as a new query. While it shares "week 30" with the last question, its core intent (average job duration) and main entity (hardware failures) are completely different from the last question's intent (percentage of available VMs) and entity (LON64PrdGPC01 cluster). The new logic would correctly decide not to apply any contextualization.
+output:
+```json
+{
+  "new_question": "What is the average job duration for hardware failures in week 30?"
 }
 ```
