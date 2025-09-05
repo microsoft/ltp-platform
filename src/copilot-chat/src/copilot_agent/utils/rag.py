@@ -43,7 +43,7 @@ class MyEmbedding(BaseEmbedding):
         return self._get_text_embeddings(texts)
 
 
-class QueryGeneratingChatLLM(LLM): # Renamed for clarity and reusability
+class QueryGeneratingChatLLM(LLM):
     """
     Adapts LLMSession's 'chat' method to LlamaIndex's 'LLM' interface for chat responses.
     This version is parameterized to accept a specific system prompt for query generation.
