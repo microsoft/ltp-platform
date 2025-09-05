@@ -88,17 +88,20 @@ class QueryGeneratingChatLLM(LLM):
     async def acomplete(self, prompt: str, **kwargs) -> str:
         return self.complete(prompt, **kwargs)
 
+    def _raise_streaming_not_supported(self, operation: str):
+        raise NotImplementedError(f"{operation} not supported with this implementation.")
+
     def stream_chat(self, messages: List[ChatMessage], **kwargs):
-        raise NotImplementedError("Streaming chat not supported with this implementation.")
+        self._raise_streaming_not_supported("Streaming chat")
     
     async def astream_chat(self, messages: List[ChatMessage], **kwargs):
-        raise NotImplementedError("Asynchronous streaming chat not supported with this implementation.")
+        self._raise_streaming_not_supported("Asynchronous streaming chat")
 
     def stream_complete(self, prompt: str, **kwargs):
-        raise NotImplementedError("Streaming complete not supported with this implementation.")
+        self._raise_streaming_not_supported("Streaming complete")
 
     async def astream_complete(self, prompt: str, **kwargs):
-        raise NotImplementedError("Asynchronous streaming complete not supported with this implementation.")
+        self._raise_streaming_not_supported("Asynchronous streaming complete")
 
 
 # --- 3. The QueryGeneratorRAG Class ---
