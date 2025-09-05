@@ -20,7 +20,7 @@ FROM fluent/fluentd:v1.17.1-1.0
 USER root
 RUN apk add --no-cache --update --virtual .build-deps \
         sudo build-base ruby-dev make gcc libc-dev postgresql-dev git \
- && apk add --no-cache --update libpq \
+ && apk add --no-cache libpq=16.10-r0 \
  && sudo gem install fluent-plugin-concat \
  && gem install fluent-plugin-parser-cri --no-document \
  && sudo gem install bundler -v 2.3.27 \
