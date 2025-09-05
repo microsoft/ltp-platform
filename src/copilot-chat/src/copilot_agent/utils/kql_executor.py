@@ -78,16 +78,16 @@ class KustoExecutor:
         """Check if the table exists in the database."""
         query = f".show tables | where TableName == '{self.table}' | count"
         response = self.execute_query(query)
-        print(f'response: {response}')
+        logger.info(f'response: {response}')
         data = response.get('data', [])
         if not data or len(data) == 0:
             return None
         count = data[0].get('Count', None)
         if count is not None and count > 0:
-            print(f'Table {self.table} exists with {count} entries.')
+            logger.info(f'Table {self.table} exists with {count} entries.')
             return True
         else:
-            print(f'Table {self.table} does not exist or could not be queried.')
+            logger.info(f'Table {self.table} does not exist or could not be queried.')
             return False
 
     def create_and_set_table(self, src_query):
@@ -95,23 +95,23 @@ class KustoExecutor:
         query = f".set {self.table} <| <<src_table>>"
         query = query.replace('<<src_table>>', src_query)
         response = self.execute_query(query)
-        print(f'Debug: response: {response}')
+        logger.info(f'Debug: response: {response}')
         if response is not None:
-            print(f'Cache table {self.table} initialized successfully.')
+            logger.info(f'Cache table {self.table} initialized successfully.')
         else:
-            print(f'Failed to initialize cache table {self.table}.')
+            logger.error(f'Failed to initialize cache table {self.table}.')
 
     def update_table_append(self, src_query):
         """Append data from source query to existing table."""
         query = f".append {self.table} <| <<src_table>>"
         query = query.replace('<<src_table>>', src_query)
-        print(f'Debug: update_table_append query: {query}')
+        logger.info(f'Debug: update_table_append query: {query}')
         response = self.execute_query(query)
-        print(f'Debug: response: {response}')
+        logger.info(f'Debug: response: {response}')
         if response is not None:
-            print(f'Data appended successfully to cache table {self.table}.')
+            logger.info(f'Data appended successfully to cache table {self.table}.')
         else:
-            print(f'Failed to append data to cache table {self.table}.')
+            logger.error(f'Failed to append data to cache table {self.table}.')
 
     def ingest_new_row(self, row_data):
         """
@@ -119,7 +119,7 @@ class KustoExecutor:
         """
         # 1. Check if the table exists
         if not self.check_table_existence():
-            print(f"Table {self.table} does not exist. Creating it.")
+            logger.info(f"Table {self.table} does not exist. Creating it.")
 
             # 2. Define the schema based on the input row data
             schema_parts = [f"{key}: {self.get_kusto_type(value)}" for key, value in row_data.items()]
@@ -127,23 +127,23 @@ class KustoExecutor:
             create_table_query = f".create table {self.table} ({schema_query})"
 
             # 3. Execute the table creation query
-            print(f"Debug: Creating table with query: {create_table_query}")
+            logger.info(f"Debug: Creating table with query: {create_table_query}")
             response = self.execute_query(create_table_query)
             if response is None:
-                print(f"Failed to create table {self.table}. Ingestion aborted.")
+                logger.error(f"Failed to create table {self.table}. Ingestion aborted.")
                 return
 
         # 4. Construct and execute the ingestion query
         values_str = ','.join(f'"{str(v)}"' for v in row_data.values())
         ingestion_query = f".ingest inline into table {self.table} <|\n{values_str}"
 
-        print(f"Debug: Ingesting row with query: {ingestion_query}")
+        logger.info(f"Debug: Ingesting row with query: {ingestion_query}")
         response = self.execute_query(ingestion_query)
 
         if response is not None:
-            print("Successfully ingested new row.")
+            logger.info("Successfully ingested new row.")
         else:
-            print("Failed to ingest new row.")
+            logger.error("Failed to ingest new row.")
 
     def get_kusto_type(self, value):
         """A helper function to infer Kusto data types from Python types."""
