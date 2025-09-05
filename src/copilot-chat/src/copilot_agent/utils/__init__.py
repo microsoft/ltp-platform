@@ -1,6 +1,7 @@
 """Init file for utils module."""
 
-from .authentication import authenticate_user
+from .authentication import AuthenticationManager
+from .classify import QuestionClassifier
 from .conversation_manager import contextualize_question
 from .dcw import dcw_parser, extract_dcw_from_history, gen_dcw, parse_and_align_dcw
 from .logger import (
@@ -54,6 +55,7 @@ from .utils import (
 
 __all__ = [
     'DCW',
+    'AuthenticationManager',
     'AdditionalData',
     'BList',
     'Benchmark',
@@ -61,12 +63,12 @@ __all__ = [
     'Design',
     'HardwareSpec',
     'LLMSession',
-    'LTPReportProcessor'
+    'LTPReportProcessor',
     'PowerBIClient',
+    'QuestionClassifier',
     'SQLManager',
     'SystemData',
     'RestAPIClient',
-    'authenticate_user',
     'contextualize_question',
     'dcw_parser',
     'execute_openpai_query',

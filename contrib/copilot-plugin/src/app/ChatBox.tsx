@@ -62,12 +62,14 @@ export default function ChatBox() {
       });
       if (!response.ok) throw new Error("Remote server error");
       const data = await response.json();
-      useChatStore.getState().addChat({
-        role: "assistant",
-        message: data?.data?.answer ?? "No answer found",
-        timestamp: new Date(),
-        messageInfo: data?.data?.message_info, // Store the message_info from response
-      });
+      if (data?.data?.answer !== "skip") {
+        useChatStore.getState().addChat({
+          role: "assistant",
+          message: data?.data?.answer ?? "No answer found",
+          timestamp: new Date(),
+          messageInfo: data?.data?.message_info, // Store the message_info from response
+        });
+      }
     } catch (err) {
       toast.error("Failed to get response from remote server");
     }

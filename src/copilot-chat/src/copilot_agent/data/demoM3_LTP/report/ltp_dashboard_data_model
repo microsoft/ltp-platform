@@ -1,5 +1,5 @@
 Report collection status: Success
-Collected at 2025-08-04T11:02:26.415983
+Collected at 2025-08-29T17:00:08.708797
 Processed tables: A-t0-ClusterCapacityStatus, A-t4-AvailabilityStatus, A-t5-DetailsofWeekAppended, J-t4-JobDuration, J-t5-JobReactTime, M-t0-MTBFbyNode, NR-t0-ORFNodeRecycleTime, NR-t1-CordonNodeRecycleTime, R-t1-NodeFailureCategorization, R-t2-NodeFailureRCABreakdown, R-t3-DailyOccurrenceofNodeFailuresRuntime, R-t4-DailyNodeRuntimeAvgFailure
-Current week number: 32
+Current week number: 35
 Table data count: 12
