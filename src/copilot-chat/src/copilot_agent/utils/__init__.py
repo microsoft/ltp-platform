@@ -4,6 +4,7 @@ from .authentication import AuthenticationManager
 from .classify import QuestionClassifier
 from .conversation_manager import contextualize_question
 from .dcw import dcw_parser, extract_dcw_from_history, gen_dcw, parse_and_align_dcw
+from .kql_executor import KustoExecutor
 from .logger import (
     logger,
 )
@@ -31,6 +32,9 @@ from .query import (
     gen_kusto_query_fallback_pseudo,
     gen_kusto_query_pseudo,
     gen_sql_query,
+)
+from .rag import (
+    QueryGeneratorRAG,
 )
 from .restapi import (
     RestAPIClient,
@@ -62,10 +66,12 @@ __all__ = [
     'Default_dcw_parser',
     'Design',
     'HardwareSpec',
+    'KustoExecutor',
     'LLMSession',
     'LTPReportProcessor',
     'PowerBIClient',
     'QuestionClassifier',
+    'QueryGeneratorRAG',
     'SQLManager',
     'SystemData',
     'RestAPIClient',
