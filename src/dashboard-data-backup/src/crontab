@@ -1,3 +1,9 @@
+
+# Use bash for all cron jobs
+SHELL=/bin/bash
+# Save environment variables at each scheduled run
+0 1,7,13,19 * * * set -a; . /etc/container_environment; printenv > /var/log/backup/cron_env.log
+# * * * * * set -a; . /etc/container_environment; printenv > /var/log/backup/cron_env.log
 # Run backup script at 2am, 8am, 2pm, and 8pm UTC
-0 2,8,14,20 * * * root bash -c 'cd /app/src && python backup_kusto_query_res.py'
-# Empty line at end is required for cron
+0 2,8,14,20 * * * set -a; . /etc/container_environment; cd /app/src && /usr/local/bin/python3 backup_kusto_query_res.py 2>&1 | tee -a /var/log/backup/backup.log
+# * * * * * set -a; . /etc/container_environment; cd /app/src && /usr/local/bin/python3 backup_kusto_query_res.py 2>&1 | tee -a /var/log/backup/backup.log
