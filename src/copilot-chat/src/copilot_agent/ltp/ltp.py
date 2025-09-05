@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import os
+import datetime
 
 from ..utils.logger import logger
 
 from ..config import PROMPT_DIR
+from ..utils.kql_executor import KustoExecutor
 from ..utils.llmsession import LLMSession
 from ..utils.openpai import execute_openpai_query
 from ..utils.powerbi import LTPReportProcessor
@@ -16,6 +18,7 @@ from ..utils.summary import gen_summary
 from ..utils.time import get_current_unix_timestamp
 from ..utils.types import DCW
 from ..utils.utils import get_prompt_from
+from .ltp_dashboard import example_query_generation_kql
 
 model = LLMSession()
 
@@ -159,14 +162,29 @@ def get_brief_job_metadata(resp):
     return job_metadatas
 
 
-def query_powerbi(question: str, dashboard_short: dict, dashboard_long: dict, help_msg):
+def query_powerbi(question: str, help_msg):
     """Query PowerBI data."""
+
+    query_gen_res, query_gen_status = example_query_generation_kql(question)
+    logger.info(f'KQL Query generation result: {query_gen_res}, status: {query_gen_status}')
+    k_cluster = 'https://luciatrainingplatform.westcentralus.kusto.windows.net/'
+    k_db = 'production'
+    k_table = ''
+    if query_gen_status == 0:
+        KQL = KustoExecutor(k_cluster, k_db, k_table)
+        response, response_status = KQL.execute_return_data(query_gen_res)
+        response_long = {"query_generated": query_gen_res, "response_from_query_execution": response}
+        logger.info(f'Kusto Query execution result: {response}')
+    else:
+        response = {"result": "query generation failed, please perform manual investigation"}
+        response_long = response
+        response_status = -1
 
     logger.info('Generating Answer: LTP, Dashboard')
     summary = gen_summary(
         SUB_FEATURE,
-        dashboard_long,
-        dashboard_short,
+        response_long,
+        response,
         question,
         'gen_result_summary_dashboard.txt',
         None,
@@ -174,7 +192,13 @@ def query_powerbi(question: str, dashboard_short: dict, dashboard_long: dict, he
         False,
     )
 
+    if response_status == 0:
+        reference = f'\n\n >Reference: the generated KQL query used to get the data:\n\n```\n{query_gen_res}\n```'
+        summary += reference
+
     info_dict = {}
+    info_dict["s0_query_gen"] = {"res": query_gen_res, "status": query_gen_status}
+    info_dict["s1_query_exe"] = {"res": make_json_serializable(response), "status": response_status}
     return summary, info_dict
 
 
@@ -214,3 +238,18 @@ def ltp_human_intervention(question: str, help_msg):
 
     info_dict = {}
     return summary, info_dict
+
+def make_json_serializable(data):
+    """
+    Recursively converts non-JSON serializable objects within a data structure.
+    """
+    if isinstance(data, (list, tuple)):
+        return [make_json_serializable(item) for item in data]
+    elif isinstance(data, dict):
+        return {key: make_json_serializable(value) for key, value in data.items()}
+    elif isinstance(data, datetime.timedelta):
+        # Convert timedelta to total seconds (a float)
+        return data.total_seconds()
+    else:
+        # Return the object as is if it's already serializable
+        return data

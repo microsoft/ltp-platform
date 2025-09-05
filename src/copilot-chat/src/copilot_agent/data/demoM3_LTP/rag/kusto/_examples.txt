@@ -1,0 +1,743 @@
+# Few-shot Examples for Generating KQL Queries in a RAG System
+Below are few-shot examples derived from the provided KQL samples. These examples are designed to help a Retrieval-Augmented Generation (RAG) system generate new KQL queries based on user questions.
+
+## Example 1: Weekly Cluster Node Health Summary
+Question: "Can you provide a weekly summary of node health states (average availability ratio, allocated VMs, empty VMs, unallocatable VMs...) for specific Cluster (ClusterName)?"
+
+Generated KQL:
+```kql
+cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('PBICacheClusterCapacityStatus')
+| summarize arg_max(BackupTimeStamp, *) by WeekNum, Cluster
+| project-away BackupTimeStamp
+```
+
+## Example 2: Daily Node Status Count
+Question: "How can I calculate the daily count of node statuses grouped by their attributes?"
+- Alias: "What is minimum, average and maximum daily availability ratio for endpoint pai-wcu, in week 30?"
+
+Generated KQL:
+```kql
+// Step 0: get source data
+let NodeStatusRecord = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeStatusRecord');
+let NodeStatusAttributes = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeStatusAttributes');
+let VMInfo = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('VMInfo');
+let ClusterVMSSInfo = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('ClusterVMSSInfo');
+let min_day = toscalar(NodeStatusRecord | summarize startofday(min(Timestamp)));
+let max_day = toscalar(NodeStatusRecord | summarize startofday(max(Timestamp)));
+let AllDays = range Day from min_day to max_day step 1d;
+// Step 1: Get all Groups from StatusAttributes
+let AllGroups = NodeStatusAttributes | summarize by Group;
+// Step 2: Build all (Day, Group) combinations
+let AllCombos =
+AllGroups
+| extend dummy = 1
+| join kind=inner (
+AllDays | extend dummy = 1
+) on dummy
+| project Day, Group;
+// Step 3: Get latest status per node per day
+let LatestPerNodePerDay =
+NodeStatusRecord
+| join kind=leftouter(
+VMInfo
+) on HostName
+| extend VMSS_clean = trim(" ", tolower(VMSS))
+| join kind=leftouter(
+ClusterVMSSInfo
+| extend VMSS_clean = trim(" ", tolower(VMSSName))
+) on VMSS_clean
+| extend DayList = range(min_day, max_day, 1d)
+| mv-expand Day = DayList to typeof(datetime)
+| where startofday(Timestamp) <= Day
+| summarize arg_max(Timestamp, Status) by HostName, Day, Endpoint, ClusterName;
+// Step 4: Map statuses to groups
+let NodeStatusWithGroup =
+LatestPerNodePerDay
+| extend Status_clean = trim(" ", tolower(Status))
+| join kind=leftouter (
+NodeStatusAttributes
+| extend Status_clean = trim_start(@"[^\w]+",Status)
+) on Status_clean;
+// Step 5: Count nodes per group per day
+let DailyGroupCounts =
+NodeStatusWithGroup
+| summarize NodeCount = count() by Day, Group, Endpoint, ClusterName;
+// Step 6: Merge with full (Day, Group) grid to include 0s
+let DailyGroupNodeCounts =
+AllCombos
+| join kind=leftouter (DailyGroupCounts) on Day, Group
+| extend NodeCount = coalesce(NodeCount, 0)
+| sort by Day asc, Group asc
+| project-away Day1, Group1;
+// Step 7: calculate daily availability ratio
+let DailyAvailabilityRatio = DailyGroupNodeCounts
+| summarize arg_max(NodeCount, *) by Day, Group, Endpoint // Ensure all columns are available for pivoting
+| evaluate pivot(Group, sum(NodeCount))
+| where isnotempty(Endpoint) // Add this line to filter out empty Endpoints
+| order by Day asc, Endpoint asc
+| extend Week = weekofyear(startofweek(Day - 1d, 0)) // Monday as the start of the week
+| extend HealthyCount = Healthy
+| extend TotalCount = Cordon + Healthy + New + UA + Validation
+| extend DailyAvailablityRatio = iff(TotalCount > 0, toreal(HealthyCount) / toreal(TotalCount), 0.0);
+// Step 8: summarize weekly availability ratio
+let Res = DailyAvailabilityRatio
+| summarize 
+AverageDailyAvailabilityRatio = avg(DailyAvailablityRatio),
+MinimumDailyAvailabilityRatio = min(DailyAvailablityRatio),
+MaximumDailyAvailabilityRatio = max(DailyAvailablityRatio)
+by Week, Endpoint, ClusterName;
+Res
+```
+
+## Example 3: Weekly Job Summary
+Question: "How can I summarize the latest job details on a weekly basis?"
+
+Generated KQL:
+```kql
+let JobSummary = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').JobSummary;
+JobSummary
+| summarize arg_max(timeGenerated, *) by jobId
+| extend Week = weekofyear(startofweek(launchTime - 1d, 0)) // Monday as the start of the week
+
+## Example 4: Weekly Job Reaction Time
+Question: "How can I calculate the weekly reaction time for jobs based on their exit categories?"
+Aliases:
+- "What is the maximum reaction time recorded for a job failure in week 30?"
+- "What is the average reaction time for hardware failures in Week 27?"
+
+Generated KQL:
+```kql
+let ReactTime_table = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').JobReactTime;
+let Summary_table = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').JobSummary;
+let jobExitFailure = dynamic(["Software Failure", "Hardware Failure", "Platform Failure"]);
+let jobExitSuccess = dynamic(["Succeed", "User Stop"]);
+let ReactTime =
+Summary_table
+| summarize arg_max(timeGenerated, *) by jobId
+| join kind=inner ReactTime_table on jobId
+| extend Week = weekofyear(startofweek(launchTime - 1d, 0)); // Monday as the start of the week
+| extend ReactionTime = reactTime // Directly use the reactTime column which is pre-stored into the table
+ReactTime
+```
+
+## Example 5: Hardware Failure Analysis
+Question: "How can I filter and analyze jobs that failed due to hardware issues?"
+
+Generated KQL:
+```kql
+let JobActions = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('JobSummary')
+| summarize arg_max(timeGenerated, *) by jobId
+| where exitCategory in ("Hardware Failure")
+| project-away userName, jobState, retryCount, attemptId, retryDetails, jobPriority, totalGpuHours, idleGpuHours, effectiveGpuHours, exitReason, jobHash
+| extend Week = weekofyear(startofweek(launchTime - 1d, 0)) // Monday as the start of the week
+| sort by launchTime asc;
+JobActions
+```
+
+## Example 6: Node Action Flow and Node MTBF Analysis
+Question: "How can I analyze the sequence of node actions related to hardware failures and calculate the mean time between failures (MTBF)?"
+
+Generated KQL:
+```kql
+// preserve the actions to filter, no reference
+let States = datatable (State:string)
+[
+    "new-validating", "validating-available", "available-cordoned", "cordoned-triaged_hardware"
+];
+// step 1, filter the actions related to Hardware failure, assign an action seq, join to extend the Endpoint and ClusterName column
+let AllRelevantActions = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')
+| where Action in ("new-validating", "validating-available", "available-cordoned", "cordoned-triaged_hardware") // Filter for relevant actions to optimize performance
+| extend ActionSeq = case(
+    Action == "new-validating", "S00",
+    Action == "validating-available", "S01",
+    Action == "available-cordoned", "S02",
+    Action == "cordoned-triaged_hardware", "S03",
+    "S99"
+)
+| join kind=leftouter 
+    (VMInfo 
+    | distinct HostName, VMSS)
+on HostName
+    | extend VMSS_clean = trim(" ", tolower(VMSS))
+    | join kind=leftouter(
+        ClusterVMSSInfo
+        | extend VMSS_clean = trim(" ", tolower(VMSSName))
+    ) on VMSS_clean
+| project-away Reason, Detail, Category
+| project HostName, Timestamp, Action, ActionSeq, Endpoint, ClusterName
+| sort by HostName asc, Timestamp asc, ActionSeq asc; // Sort by HostName and Timestamp for correct sequence matching; Sort by ActionSeq is necessary as some actions could be registered to the same timestamp
+// step 2, create a action flow pattern
+let TransactionTable = AllRelevantActions
+| sort by HostName asc, Timestamp asc, ActionSeq asc
+| serialize
+| extend preAction = prev(Action, 1)
+| extend nextAction = next(Action, 1)
+| extend preHostName = prev(HostName, 1)
+| extend nextHostName = next(HostName, 1)
+| extend isBackVA = iff(Action == "validating-available" and (HostName == preHostName and (preAction == "new-validating" or preAction == "cordoned-triaged_hardware")), 1, 0)
+| extend isNewAC = iff(Action == "available-cordoned" and (HostName == nextHostName and nextAction == "cordoned-triaged_hardware"), 1, 0)
+| extend isNewCTH = iff(Action == "cordoned-triaged_hardware" and (HostName == preHostName and preAction == "available-cordoned"), 1, 0);
+// step 3, filter out the actions using above pattern
+let FocusedTransaction = TransactionTable
+| where isNewAC == 1 or isNewCTH == 1 or isBackVA == 1; // keep only entries with state transactions we desire
+// step 4, calculate duration between failures for the same hostname
+let FaiureDuration = FocusedTransaction
+| serialize // This operator is required to use row-level functions like 'next()'
+| extend
+    LastAction = prev(Action, 1), // Get the action of the next record
+    LastTimestamp = prev(Timestamp, 1), // Get the timestamp of the next record
+    LastHostName = prev(HostName, 1) // Get the HostName of the next record
+| where
+    Action == "available-cordoned" // The current action must be 'available-cordoned'
+    and LastAction == "validating-available" // The next action must be 'cordoned-triaged_hardware'
+    and HostName == LastHostName // Both actions must belong to the same HostName
+| project
+    HostName,
+    Endpoint,
+    ClusterName,
+    AvailableCordonedTimestamp = Timestamp, // Rename for clarity
+    ValidatingAvailableTimestamp = LastTimestamp // Rename for clarity
+| extend DurationBetweenFailureSpan = AvailableCordonedTimestamp - ValidatingAvailableTimestamp
+| order by HostName asc, AvailableCordonedTimestamp asc // Order the final results for better readability
+| extend Week = weekofyear(startofweek(AvailableCordonedTimestamp - 1d, 0)) // Monday as the start of the week
+| extend DurationBetweenFailureDay = toreal(DurationBetweenFailureSpan) / 36000000000 /24
+| extend DurationBetweenFailureHour = toreal(DurationBetweenFailureSpan) / 36000000000;
+// step 5, average aggregate
+let Res = FaiureDuration
+| order by Week asc
+| summarize 
+    MTBFSpan = avg(DurationBetweenFailureSpan),
+    MTBFDays = avg(DurationBetweenFailureDay),
+    MTBFHours = avg(DurationBetweenFailureHour),
+    _debugTotalAvailableDays = sum(DurationBetweenFailureDay),
+    SampleCounts = count()
+by Week, Endpoint, ClusterName
+| order by Endpoint asc, ClusterName asc, Week asc;
+let CumulativeRes = Res
+| extend CumulativeTotalAvaiDays = row_cumsum(SampleCounts * MTBFDays, Endpoint != prev(Endpoint) or ClusterName != prev(ClusterName))
+| extend CumulativeTotalAvaiHours = row_cumsum(SampleCounts * MTBFHours, Endpoint != prev(Endpoint) or ClusterName != prev(ClusterName))
+| extend CumulativeSampleCount = row_cumsum(SampleCounts, Endpoint != prev(Endpoint) or ClusterName != prev(ClusterName))
+| extend CumulativeMTBFDays = iff(CumulativeSampleCount > 0, todouble(CumulativeTotalAvaiDays) / CumulativeSampleCount, 0.0)
+| extend CumulativeMTBFHours = iff(CumulativeSampleCount > 0, todouble(CumulativeTotalAvaiHours) / CumulativeSampleCount, 0.0);
+CumulativeRes
+```
+
+## Example 7: OFR (out for repair) Node Recycle Time Analysis
+Question: "How can I calculate the weekly node recycle time for OFR (out for repair) nodes?"
+
+Generated KQL:
+```kql
+// Step 1: Prepares the Data and Adds Flags to Categorize Each Row's Status
+let start_actions = dynamic(["cordoned", "new"]);
+let ua = "ua";
+let ua_dealloc = "deallocated_ua";
+let ua_alloc = "allocated_ua";
+let end_actions = dynamic(["available", "deallocated_capacity"]);
+let data_with_flags = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').NodeStatusRecord
+| distinct Timestamp, HostName, Status, Endpoint
+| join kind=leftouter 
+    (VMInfo 
+    | distinct HostName, VMSS)
+on HostName
+    | extend VMSS_clean = trim(" ", tolower(VMSS))
+    | join kind=leftouter(
+        ClusterVMSSInfo
+        | extend VMSS_clean = trim(" ", tolower(VMSSName))
+    ) on VMSS_clean
+| extend Timestamp = todatetime(['Timestamp'])
+| where isnotempty(HostName) and isnotempty(Status)
+| sort by HostName  asc, Timestamp  asc, Status asc
+| serialize
+| extend
+    is_start = iif(Status in (start_actions), 1, 0),
+    is_end = iif(Status in (end_actions), 1, 0),
+    is_ua = iif(Status == ua, 1, 0),
+    is_ua_dealloc = iif(Status == ua_dealloc, 1, 0),
+    is_ua_alloc = iif(Status == ua_alloc, 1, 0)
+| extend is_big_start = iff(Status in (start_actions) and prev(Status) in (end_actions), 1 ,0)
+| extend big_group_id = row_cumsum(is_big_start)
+| extend group_key = strcat(HostName, "_", tostring(big_group_id))
+| serialize
+| extend sub_group_id = row_cumsum(is_start, group_key != prev(group_key))
+| project-away HostName1;
+// Step 2: Handles Duplicates and Finalizes Data
+let duplicated_rows =
+    data_with_flags
+    | where is_start == 1 and sub_group_id >1
+    | extend sub_group_id = sub_group_id - 1;
+let events_by_subgroup =
+    data_with_flags
+    | union duplicated_rows
+    | sort by HostName, Timestamp, sub_group_id;
+// Step 3: Summarizes and Calculates Time Metrics per Sub-Group
+let subgroup_metrics =
+events_by_subgroup
+| summarize
+    StartTime = minif(Timestamp, is_start == 1),
+    UAedTime = minif(Timestamp, is_ua == 1),
+    UADeallocTime = minif(Timestamp, is_ua_dealloc == 1),
+    UAAllocTime = minif(Timestamp, is_ua_alloc == 1),
+    EndTime = max(Timestamp)
+  by HostName, big_group_id, sub_group_id, Endpoint, ClusterName
+| where isnotnull(StartTime) and isnotnull(UADeallocTime)
+| extend
+    UA_Time = todouble(UADeallocTime - StartTime)/todouble(1h),
+    Allocation_Time = todouble(UAAllocTime - UADeallocTime)/todouble(1h),
+    Validation_Time = todouble(EndTime - UAAllocTime)/todouble(1h),
+    UA_cycle_Time = todouble(EndTime - StartTime)/todouble(1h)
+| sort by StartTime
+| extend NodeRecycleEventID = strcat(HostName, '_', big_group_id)
+| project-away UADeallocTime, UAAllocTime;
+//Step 4: Aggregates Metrics Per UA Event
+let event_summary_metrics =
+subgroup_metrics
+| summarize
+    EventStartTime = min(StartTime),
+    EventEndTime = max(EndTime),
+    NodeRecycleTime_event = sum(UA_cycle_Time),
+    CountUAAction = countif(isnotnull(UA_cycle_Time))
+by NodeRecycleEventID
+| extend Week = weekofyear(startofweek(EventStartTime - 1d, 0));// Monday as the start of the week
+//Step 5: Joins and Summarizes Data to Create Weekly Metrics of UACycleTime, UATime, AllocationTime, ValidationTime for each ClusterName and Endpoint
+let metrics_with_event_summary =
+subgroup_metrics
+| join kind=leftouter (
+    event_summary_metrics
+) on NodeRecycleEventID;
+let WeeklySubGroupMetrics =
+metrics_with_event_summary
+| summarize
+    UACycleTime_weekly = avg(UA_cycle_Time),
+    UATime_weekly = avg(UA_Time),
+    AllocationTime_weekly = avg(Allocation_Time),
+    ValidationTime_weekly = avg(Validation_Time)
+by Week, ClusterName, Endpoint;
+//Step 6: Joins and Summarizes Data to Create Weekly Metrics of OFR NodeCount, OFR NodeRecycleTime, Single Recycel UA Time for each ClusterName and Endpoint
+//This step is necessary to calculate the Node Recycle Time, as each node may experience
+let WeeklyNodeRecycleEventMetrics =
+metrics_with_event_summary
+| summarize take_any(NodeRecycleTime_event), take_any(CountUAAction) by NodeRecycleEventID, Week, ClusterName, Endpoint
+| summarize
+    NodeCount = dcount(NodeRecycleEventID), // correct
+    NodeRecycleTime_weekly = avg(NodeRecycleTime_event),
+    UATimeinSingleRecycel_weekly = avg(CountUAAction)
+by Week, ClusterName, Endpoint;
+//Step 7: Join to Get Final Result
+let Res =
+WeeklySubGroupMetrics
+| join kind=inner WeeklyNodeRecycleEventMetrics on Week, ClusterName, Endpoint
+| order by Week asc;
+Res
+```
+
+## Example 8: Cordon Node Recycle Time Without UA (short for unassigned, it's a state of node lifecycle)
+Question: "How can I calculate the node recycle time for cordon nodes?"
+
+Generated KQL:
+```kql
+// step 1: prepares the data and adds flags to categorize each row's status.
+let start_actions = dynamic(["cordoned", "new"]);
+let ua = "ua"; // 'ua' is a specific status indicating the node is unassigned. all Cordon nodes should be unassigned
+let ua_dealloc = "deallocated_ua";
+let ua_alloc = "allocated_ua";
+let end_actions = dynamic(["available", "deallocated_capacity"]);
+let data_with_flags = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').NodeStatusRecord
+| distinct Timestamp, HostName, Status, Endpoint
+| join kind=leftouter 
+    (VMInfo 
+    | distinct HostName, VMSS)
+on HostName
+    | extend VMSS_clean = trim(" ", tolower(VMSS))
+    | join kind=leftouter(
+        ClusterVMSSInfo
+        | extend VMSS_clean = trim(" ", tolower(VMSSName))
+    ) on VMSS_clean
+| extend Timestamp = todatetime(['Timestamp'])
+| where isnotempty(HostName) and isnotempty(Status)
+| sort by HostName  asc, Timestamp  asc, Status asc
+| serialize
+| extend
+    is_start = iif(Status in (start_actions), 1, 0),
+    is_end = iif(Status in (end_actions), 1, 0),
+    is_ua = iif(Status == ua, 1, 0) // Flags to identify the start, end, and 'ua' states of a node's lifecycle event, 'is_ua' specifically checks for the 'ua' status. This flag is crucial.
+| extend is_big_start = iff(Status in (start_actions) and prev(Status) in (end_actions), 1 ,0)
+| extend big_group_id = row_cumsum(is_big_start)
+| extend group_key = strcat(HostName, "_", tostring(big_group_id))
+| serialize
+| extend sub_group_id = row_cumsum(is_start, group_key != prev(group_key))
+| project-away HostName1;
+let duplicated_rows =
+    data_with_flags
+    | where is_start == 1 and sub_group_id >1
+    | extend sub_group_id = sub_group_id - 1;
+let final_data =
+    data_with_flags
+    | union duplicated_rows
+    | sort by HostName, Timestamp, sub_group_id;
+let sum_final_data =
+    final_data
+    | summarize
+        StartTime = minif(Timestamp, is_start == 1),
+        EndTime = max(Timestamp),
+        UAedTime = minif(Timestamp, is_ua == 1)
+    by HostName, big_group_id, sub_group_id, Endpoint, ClusterName
+    | where isnotnull(StartTime) and isnotnull(EndTime)  and isnull(UAedTime)
+    | extend
+        Node_Recycle_Time = todouble(EndTime - StartTime)/todouble(1h)
+    | sort by StartTime
+    | extend WeekNumber = weekofyear(startofweek(StartTime - 1d, 0)); // Monday as the start of the week
+let grouped_by_week =
+sum_final_data
+| summarize
+    sum_Node_Recycle_Time = avg(Node_Recycle_Time),
+    sum_Node = countif(isnotnull(Node_Recycle_Time))
+  by WeekNumber, Endpoint, ClusterName
+| sort by WeekNumber asc;
+grouped_by_week
+```
+
+## Example 10: Weekly Failure Rate, for each Endpoint and Failure Category
+Question: "What is the weekly failure ratio grouped by each failure category and endpoint?"
+
+Generated KQL:
+```kql
+// Step 0, take the original data from source
+let src =
+cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')
+    .database('production')
+    .table('NodeActionRecord')
+| join kind=leftouter NodeActionAttributes on Action
+| sort by HostName asc, Timestamp asc, Action asc
+| serialize;
+// Step 1, Mark every row that has a non-empty Phase
+let withMark =
+    src
+    | extend NonEmptyFlag = iff(isnotempty(Phase), 1, 0);
+// Step 2, Build a running total of NonEmptyFlag per HostName
+let running =
+    withMark
+    | extend PhaseGroup =
+        row_cumsum(NonEmptyFlag)   // needs `serialize` earlier
+        ;   // PhaseGroup increments each time we see a non-empty Phase
+// Step 3, Look up the _latest_ non-empty Phase in each PhaseGroup
+let phaseLookup =
+    running
+    | where NonEmptyFlag == 1
+    | summarize LastPhase = arg_max(Timestamp, Phase) by HostName, PhaseGroup
+    | project HostName, PhaseGroup, LastPhase = Phase;
+// Step 4, Join back to fill down the LastPhase
+let enriched = running
+| join kind=inner (phaseLookup) on HostName, PhaseGroup
+| project-away NonEmptyFlag, Action1, HostName1, PhaseGroup1
+| sort by HostName asc, Timestamp asc;
+// Step 5: Earliest timestamp per HostName + PhaseGroup
+let groupStart =
+    enriched
+    | summarize StartTime = min(Timestamp) by HostName, PhaseGroup;
+// Step 6: Stitch them together and filter for relevant records
+let record = enriched
+| join kind=inner groupStart on HostName, PhaseGroup
+| project-reorder StartTime, Timestamp, HostName, PhaseGroup
+| sort by Timestamp asc
+| where Action contains "cordoned-triaged" and LastPhase contains "routine"
+| summarize arg_max(Timestamp, *) by HostName, PhaseGroup // Get the latest record per HostName, PhaseGroup
+| project-away HostName1, PhaseGroup1, Phase // Clean up redundant columns
+| extend CategoryReason = strcat(Category, "-", Reason); // Create CategoryReason
+// Step 7, Define date range
+let startDate = datetime(2025-03-17);
+let endDate = now();
+let allDates = range StartDate from startDate to endDate step 7d;
+// Step 8, Get all distinct Endpoints from the 'record' table
+let allEndpoints = record | distinct Endpoint;
+// Step 9, Get all distinct Categories from the 'record' table
+let allCategories = record | distinct Category;
+// Step 10, Create a Cartesian product of all dates, endpoints, and categories, this ensures every combination exists as a row
+let allCombinations =
+    allDates
+    | extend dummy = 1 // Add a dummy column for cross-joining
+    | join kind=inner (allEndpoints | extend dummy = 1) on dummy
+    | join kind=inner (allCategories | extend dummy = 1) on dummy
+    | project StartDate, Endpoint, Category; // Select the desired combination columns
+// Step 11, Summarize the actual data from 'record' for joining
+let summarizedRecord =
+    record
+    | summarize Total = count() by bin(StartTime, 7d), Endpoint, Category;
+// Step 12, Left outer join the full combinations with the summarized data, this will keep all combinations and fill 'Total' with 0 where no match is found
+let full = allCombinations
+| join kind=leftouter summarizedRecord on $left.StartDate == $right.StartTime, Endpoint, Category
+| project StartDate,
+          Endpoint,
+          Category,
+          WeeklyTotal = coalesce(Total, 0) // Replace null Total with 0
+| extend CurrentWeekStart = startofweek(now(), 0) + 1d // Calculate the start of the current week (Monday)
+| extend DaysInCurrentWeek = datetime_diff('day', now(), CurrentWeekStart) + 1 // Calculate days passed in current week
+| extend DaysinWeek = iff(StartDate == CurrentWeekStart, DaysInCurrentWeek, 7)
+| extend Date = StartDate
+| extend Week = weekofyear(startofweek(StartDate - 1d, 0)) // Monday as the start of the week
+| extend Category = iff(isempty(Category), "uncategorized", Category) // Handle potentially empty categories
+| order by StartDate asc, Endpoint asc, Category asc
+| project-away StartDate, CurrentWeekStart, DaysInCurrentWeek;
+// Step 13, Calculate the weekly ratio
+let result = full
+| extend AvgFailureRatio = iff(DaysinWeek == 0, 0.0, todouble(WeeklyTotal) / DaysinWeek)
+| project Week, Date, Endpoint, Category, AvgFailureRatio;
+result
+```
+
+## Example 12: Weekly Failure Count, for each Endpoint and Failure Category
+Question: "What is the weekly failure count grouped by failure category and endpoint?"
+Aliases:
+- "How many hardware-related node failures occurred in the pai-wcu endpoint in week 30?"
+- "What is the breakdown of node failure categories (hardware, platform, user, unknown) for the pai-wcu endpoint in week 30?"
+
+Generated KQL:
+```kql
+// Step 0, take the original data from source
+let src =
+cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')
+    .database('production')
+    .table('NodeActionRecord')
+| join kind=leftouter NodeActionAttributes on Action
+| sort by HostName asc, Timestamp asc, Action asc
+| serialize;
+// Step 1, Mark every row that has a non-empty Phase
+let withMark =
+    src
+    | extend NonEmptyFlag = iff(isnotempty(Phase), 1, 0);
+// Step 2, Build a running total of NonEmptyFlag per HostName
+let running =
+    withMark
+    | extend PhaseGroup =
+        row_cumsum(NonEmptyFlag)   // needs `serialize` earlier
+        ;   // PhaseGroup increments each time we see a non‑empty Phase
+// Step 3, Look up the _latest_ non-empty Phase in each PhaseGroup
+let phaseLookup =
+    running
+    | where NonEmptyFlag == 1
+    | summarize LastPhase = arg_max(Timestamp, Phase) by HostName, PhaseGroup
+    | project HostName, PhaseGroup, LastPhase = Phase;
+// Step 4, Join back to fill down the LastPhase
+let enriched = running
+| join kind=inner (phaseLookup) on HostName, PhaseGroup
+| project-away NonEmptyFlag, Action1, HostName1, PhaseGroup1
+| sort by HostName asc, Timestamp asc ;
+// Step 5: Earliest timestamp per HostName + PhaseGroup
+let groupStart =
+    enriched
+    | summarize StartTime = min(Timestamp) by HostName, PhaseGroup;
+// Step 6: Stitch them together and filter for relevant records
+let record=enriched
+| join kind=inner groupStart on HostName, PhaseGroup
+| project-reorder StartTime, Timestamp, HostName, PhaseGroup
+| sort by Timestamp asc
+| where Action contains "cordoned-triaged" and LastPhase contains "routine"
+| summarize arg_max(Timestamp, *) by HostName, PhaseGroup
+| project-away HostName1, PhaseGroup1, Phase
+| extend CategoryReason = strcat(Category, "-", Reason);
+// Step 7: Summarize count by reason within weekly intervals
+let summarizedData = record
+| summarize Count = count() by Category, bin(StartTime, 7d), Endpoint;
+// Step 8: Pivot the data to create a column for each unique reason
+summarizedData
+| evaluate pivot(Category, sum(Count))
+| extend Week = weekofyear(startofweek(StartTime - 1d, 0)) // Monday as the start of the week
+| project-rename uncategorized = _Empty, Timestamp = StartTime
+| order by Week asc
+```
+
+## Example 13: Weekly Failure Count, for each Endpoint and Failure Reason
+Question: "How many node failures were attributed to each Failure Reason for each endpoint?"
+Aliases:
+- "What is the most common reason for hardware failures in the pai-wcu endpoint in week 30?"
+- "How many node failures were attributed to "NodeCrash" in the pai-scu endpoint in week 30?"
+- "What was the most common reason for node failures?"
+
+Generated KQL:
+```kql
+// Step 0, take the original data from source
+let src =
+cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')
+    .database('production')
+    .table('NodeActionRecord')
+| join kind=leftouter NodeActionAttributes on Action
+| sort by HostName asc, Timestamp asc, Action asc
+| serialize;
+// Step 1, Mark every row that has a non-empty Phase
+let withMark =
+    src
+    | extend NonEmptyFlag = iff(isnotempty(Phase), 1, 0);
+// Step 2, Build a running total of NonEmptyFlag per HostName
+let running =
+    withMark
+    | extend PhaseGroup =
+        row_cumsum(NonEmptyFlag)   // needs `serialize` earlier
+        ;   // PhaseGroup increments each time we see a non‑empty Phase
+// Step 3, Look up the _latest_ non-empty Phase in each PhaseGroup
+let phaseLookup =
+    running
+    | where NonEmptyFlag == 1
+    | summarize LastPhase = arg_max(Timestamp, Phase) by HostName, PhaseGroup
+    | project HostName, PhaseGroup, LastPhase = Phase;
+// Step 4, Join back to fill down the LastPhase
+let enriched = running
+| join kind=inner (phaseLookup) on HostName, PhaseGroup
+| project-away NonEmptyFlag, Action1, HostName1, PhaseGroup1
+| sort by HostName asc, Timestamp asc ;
+// Step 5: Earliest timestamp per HostName + PhaseGroup
+let groupStart =
+    enriched
+    | summarize StartTime = min(Timestamp) by HostName, PhaseGroup;
+// Step 6: Stitch them together and filter for relevant records
+let record=enriched
+| join kind=inner groupStart on HostName, PhaseGroup
+| project-reorder StartTime, Timestamp, HostName, PhaseGroup
+| sort by Timestamp asc
+| where Action contains "cordoned-triaged" and LastPhase contains "routine"
+| summarize arg_max(Timestamp, *) by HostName, PhaseGroup
+| project-away HostName1, PhaseGroup1, Phase
+| extend CategoryReason = strcat(Category, "-", Reason);
+//Step 7, Calculate the failure count for each failure Reason
+record
+| extend Week = weekofyear(startofweek(StartTime - 1d, 0)) // Monday as the start of the week
+| summarize FailureCount = count() by Week, Reason, Category, Endpoint
+| extend Reason = iif(isempty(Reason), 'Unknown Reason', Reason)
+| extend Category = iif(isempty(Category), 'uncategorized', Category)
+| order by Week asc
+```
+
+## Example 14: Daily Failure Count for each Endpoint and Failure Category
+Question: "How can I calculate the daily failure count for each endpoint and failure category?"
+
+Generated KQL:
+```kql
+// step 1, Original source and initial processing
+let src =
+cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')
+    .database('production')
+    .table('NodeActionRecord')
+| join kind=leftouter NodeActionAttributes on Action
+| sort by HostName asc, Timestamp asc, Action asc
+| serialize;
+// step 2, Mark every row that has a non-empty Phase
+let withMark =
+    src
+    | extend NonEmptyFlag = iff(isnotempty(Phase), 1, 0);
+// step 3, Build a running total of NonEmptyFlag per HostName
+let running =
+    withMark
+    | extend PhaseGroup =
+        row_cumsum(NonEmptyFlag)   // needs `serialize` earlier
+        ;   // PhaseGroup increments each time we see a non-empty Phase
+// step 4, Look up the _latest_ non-empty Phase in each PhaseGroup
+let phaseLookup =
+    running
+    | where NonEmptyFlag == 1
+    | summarize LastPhase = arg_max(Timestamp, Phase) by HostName, PhaseGroup
+    | project HostName, PhaseGroup, LastPhase = Phase;
+// step 5, Join back to fill down the LastPhase
+let enriched = running
+| join kind=inner (phaseLookup) on HostName, PhaseGroup
+| project-away NonEmptyFlag, Action1, HostName1, PhaseGroup1
+| sort by HostName asc, Timestamp asc;
+// Step 6, Earliest timestamp per HostName + PhaseGroup
+let groupStart =
+    enriched
+    | summarize StartTime = min(Timestamp) by HostName, PhaseGroup;
+// Step 7, Stitch them together and filter for relevant records
+let record = enriched
+| join kind=inner groupStart on HostName, PhaseGroup
+| project-reorder StartTime, Timestamp, HostName, PhaseGroup
+| sort by Timestamp asc
+| where Action contains "cordoned-triaged" and LastPhase contains "routine"
+| summarize arg_max(Timestamp, *) by HostName, PhaseGroup // Get the latest record per HostName, PhaseGroup
+| project-away HostName1, PhaseGroup1, Phase // Clean up redundant columns
+| extend CategoryReason = strcat(Category, "-", Reason); // Create CategoryReason
+// Step 8, Create a Cartesian product of all dates, endpoints, and categories
+let startDate = datetime(2025-03-20);
+let endDate = now();
+let allDates = range StartDate from startDate to endDate step 1d;
+let allEndpoints = record | distinct Endpoint;
+let allCategories = record | distinct Category;
+// Step 9, This ensures every combination exists as a row
+let allCombinations =
+    allDates
+    | extend dummy = 1 // Add a dummy column for cross-joining
+    | join kind=inner (allEndpoints | extend dummy = 1) on dummy
+    | join kind=inner (allCategories | extend dummy = 1) on dummy
+    | project StartDate, Endpoint, Category; // Select the desired combination columns
+// Step 10, Summarize the actual data from 'record' for joining
+let summarizedRecord =
+    record
+    | summarize Total = count() by bin(StartTime, 1d), Endpoint, Category;
+// Step 11, Left outer join the full combinations with the summarized data. This will keep all combinations and fill 'Total' with 0 where no match is found
+allCombinations
+| join kind=leftouter summarizedRecord on $left.StartDate == $right.StartTime, Endpoint, Category
+| project StartDate,
+          Endpoint,
+          Category,
+          Total = coalesce(Total, 0) // Replace null Total with 0
+| extend EndDate = StartDate + 1d
+| extend Week = weekofyear(startofweek(StartDate - 1d, 0)) // Monday as the start of the week
+| extend CategoryNew = iff(isempty(Category), "uncategorized", Category) // Handle potentially empty categories
+| order by StartDate asc, Endpoint asc, Category asc;
+```
+
+## Example 15: Generate a unique mapping of Endpoint to ClusterName
+Question: "Can you let me know which ClusterName maps to which Endpoint?"
+
+Generated KQL:
+```kql
+let ClusterName_Endpoint = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')
+| join kind=leftouter 
+    (VMInfo 
+    | distinct HostName, VMSS)
+on HostName
+    | extend VMSS_clean = trim(" ", tolower(VMSS))
+    | join kind=leftouter(
+        ClusterVMSSInfo
+        | extend VMSS_clean = trim(" ", tolower(VMSSName))
+    ) on VMSS_clean
+| project Endpoint, ClusterName
+| distinct Endpoint, ClusterName;
+ClusterName_Endpoint
+```
+
+## Example 16: Query the availability ratio
+Question: "What is the average availability ratio for the pai-wcu endpoint in week 30?"
+
+Generated KQL:
+```kql
+// Step 1: Define the endpoint you are looking for.
+let targetEndpoint = "pai-wcu";
+// Step 2: Use the mapping table to find the ClusterName for the specified endpoint.
+let targetCluster = (
+    cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')
+    | join kind=leftouter 
+        (cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('VMInfo')
+        | distinct HostName, VMSS)
+    on HostName
+    | extend VMSS_clean = trim(" ", tolower(VMSS))
+    | join kind=leftouter (
+        cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('ClusterVMSSInfo')
+        | extend VMSS_clean = trim(" ", tolower(VMSSName))
+    ) on VMSS_clean
+    | where Endpoint == targetEndpoint
+    | project ClusterName
+    | distinct ClusterName
+);
+// Step 3: Use the found ClusterName(s) to filter the availability ratio table.
+let healthStatus = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('PBICacheClusterCapacityStatus')
+| where Cluster in (targetCluster)
+| where WeekNum == 30;
+// Step 4: Make sure to get the latest results among multiple backup data rows.
+let latestHealthStatus = healthStatus
+| summarize arg_max(BackupTimeStamp, *) by WeekNum, Cluster
+| project-away BackupTimeStamp;
+// Step 5: calculate the required ratio based on the requirement
+let availabilityRatio = latestHealthStatus
+| extend AvgSum = AvgReadyEmpty + AvgReadyUsed + AvgOFR + AvgUnallocatable + AvgHumanInvestigate + AvgExcluded + AvgProbation + AvgSuspected
+| extend AvailabilityRatio = iif(AvgSum == 0, 0.0, AvgReadyEmpty / AvgSum);
+// Step 4: Calculate the average among ClusterName(s)
+availabilityRatio
+| summarize Ratio = avg(AvailabilityRatio)
+```

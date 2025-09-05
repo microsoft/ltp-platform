@@ -1,0 +1,10 @@
+"The meaning of 'Available Node Count' is the collection of all nodes in AvgReadyEmpty column, not AvgReadyEmpty+AvgReadyUsed",
+"The meaning of 'Allocated Node Count' is the collection of all nodes in AvgReadyUsed",
+"The meaning of 'OFR' is our for repair, a state in a node's lifecycle, nodes in OFR are the nodes are out for repair",
+"The meaning of 'UA' is unassigned, a state in a node's lifecycle, nodes in UA are the nodes are not assigned",
+"Node Failure are categorized into five categories: 'hardware', 'platform', 'user', 'unknowm', 'uncategorized'",
+"Failure Reasons for Node Failure Category 'hardware' are: 'Reasons in Category: Hardware', 'AMDGPUSMIHanging', 'Disk Error', 'Frontend Network Issue', 'GPU Memory Not Release', 'GPUDriverHanging', 'GPUHangingwithFenceFallbackTimerExpired', 'GPUHangingwithSegfault', 'IB Bandwidth Regression', 'IB Nic Failure', 'IB Reregistration', 'IBBandwidthProblem', 'IBLinkFlapping', 'IBPortDown', 'LossNaN', 'MemoryAccessFault', 'NodeCrash', 'NvidiaSmiDoubleEccError', 'NvidiaSmiLatencyTooLarge', 'PCIe bandwidth Regression'",
+"Failure Reasons for Node Failure Category 'platform' are: 'Blob Mount Failure', 'DatasetPreCheckFailure', 'Disk Full', 'Investigation', 'NodeCrash', 'Platform Service Issue'",
+"Failure Reasons for Node Failure Category 'user' are: 'MemoryAccessFault', 'UnreliableNetworkRequest'",
+"Failure Reasons for Node Failure Category 'unknown' are: 'Unknownissue', 'Unkonwn Reason'",
+"Failure Reasons for Node Failure Category 'uncategorized' are: 'Unknown Reason'"

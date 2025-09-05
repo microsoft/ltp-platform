@@ -1,0 +1,27 @@
+{
+  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeStatusAttributes')",
+  "description": "This table contains attributes related to the status, group, and description of nodes in the production cluster.",
+  "schema": [
+    {
+      "ColumnName": "Status",
+      "ColumnOrdinal": 0,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The status of the node."
+    },
+    {
+      "ColumnName": "Group",
+      "ColumnOrdinal": 1,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The group of the node."
+    },
+    {
+      "ColumnName": "Description",
+      "ColumnOrdinal": 2,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The description of the node."
+    }
+  ]
+}

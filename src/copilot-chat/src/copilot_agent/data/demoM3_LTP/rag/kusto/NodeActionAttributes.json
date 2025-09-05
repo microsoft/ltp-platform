@@ -1,0 +1,20 @@
+{
+  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionAttributes')",
+  "description": "Attributes related to actions performed on nodes.",
+  "schema": [
+    {
+      "ColumnName": "Action",
+      "ColumnOrdinal": 0,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The action performed on the node."
+    },
+    {
+      "ColumnName": "Phase",
+      "ColumnOrdinal": 1,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The phase of the action."
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('ClusterVMSSInfo')",
+  "description": "Information about the VMSS instances in the cluster",
+  "schema": [
+    {
+      "ColumnName": "ClusterName",
+      "ColumnOrdinal": 0,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the cluster"
+    },
+    {
+      "ColumnName": "ClusterRegion",
+      "ColumnOrdinal": 1,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The region of the cluster"
+    },
+    {
+      "ColumnName": "VMSSName",
+      "ColumnOrdinal": 2,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the VMSS"
+    },
+    {
+      "ColumnName": "SubscriptionId",
+      "ColumnOrdinal": 3,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The subscription ID"
+    },
+    {
+      "ColumnName": "ResourceGroupName",
+      "ColumnOrdinal": 4,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the resource group"
+    },
+    {
+      "ColumnName": "VMSize",
+      "ColumnOrdinal": 5,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The size of the VM"
+    }
+  ]
+}

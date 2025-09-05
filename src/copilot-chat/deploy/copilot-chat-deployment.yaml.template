@@ -75,6 +75,10 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["rest-server"]["url"] }}
         - name: COPILOT_VALID_GROUPS
           value: {{ cluster_cfg["copilot-chat"]["valid-groups"] }}
+        - name: ENVIRONMENT
+          value: {{ cluster_cfg["dashboard-data-backup"]["environment"] | default("prod") }}
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["dashboard-data-backup"]["kusto-user-assigned-client-id"] | default(cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"], true) }}
         ports:
         - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
           hostPort:  {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
