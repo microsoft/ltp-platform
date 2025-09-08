@@ -6,6 +6,7 @@ import requests
 from datetime import datetime, timezone
 
 from ..config import AGENT_MODE_LOCAL
+from ..utils.logger import logger
 
 class AuthenticationManager:
     """Manages authentication state, expiration, and revocation for users."""
@@ -33,6 +34,8 @@ class AuthenticationManager:
                 return ["admin"]
             if username == "baduser":
                 return ["temp"]
+            # For any other username in local mode, return empty list
+            return []
         else:
             # This function should implement the logic to verify the user's token against the REST server (self.restserver_url).
             try:
@@ -47,12 +50,11 @@ class AuthenticationManager:
                     groups = user_data.get('grouplist', [])
                     return groups
                 else:
-                    print(f"Authentication failed for user {username}: {response.status_code}")
+                    logger.error(f"Authentication failed for user {username}: {response.status_code}")
                     return []
             except Exception as e:
-                print(f"Error during authentication for user {username}: {e}")
+                logger.error(f"Error during authentication for user {username}: {e}")
                 return []
-            return []
 
     def set_authenticate_state(self, username: str, token: str) -> None:
         """Set the authentication state for a user."""
