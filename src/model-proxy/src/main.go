@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"os"
 
 	"modelproxy/proxy"
 	"modelproxy/trace"
@@ -22,11 +20,6 @@ func init() {
 	flag.IntVar(&maxRetries, "retry", 5, "max retries for the request to the model server")
 	flag.StringVar(&logFileDir, "logdir", "./logs", "path to the log file directory")
 	flag.StringVar(&modelKey, "modelkey", "", "comma-separated model keys for the proxy server")
-
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage of modelproxy:\n")
-		flag.PrintDefaults()
-	}
 }
 
 func main() {

@@ -238,7 +238,7 @@ func (ph *ProxyHandler) ProxyHandlerWithLogger(logger trace.TraceLogger) http.Ha
 
 // StartProxy start the proxy server
 func (ph *ProxyHandler) StartProxy(logger trace.TraceLogger) {
-	log.Printf("[*] Start proxy at port \n")
+	log.Printf("[*] Start proxy at port %d\n", ph.port)
 	handler := ph.ProxyHandlerWithLogger(logger)
 	if err := http.ListenAndServe(":"+strconv.Itoa(ph.port), handler); err != nil {
 		log.Fatal("[*] Server error: " + err.Error())

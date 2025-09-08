@@ -119,7 +119,7 @@ func (t *Trace) Marshal() ([]byte, error) {
 	return json.Marshal(t)
 }
 
-// convert a request and reqponse to a trace
+// convert a request and response to a trace
 func ConvertReqResp2Trace(req *Request, response []string) *Trace {
 	conversactions := make([]*TraceMessage, 0, len(req.Messages)+len(response))
 	for i, msg := range req.Messages {

@@ -47,13 +47,13 @@ func (j *JsonFileLogger) record(req string, resp []string) {
 		return
 	}
 
-	reqSturct := &types.Request{}
-	if err := reqSturct.Unmarshal([]byte(req)); err != nil {
+	reqStruct := &types.Request{}
+	if err := reqStruct.Unmarshal([]byte(req)); err != nil {
 		log.Printf("[-] Error: %s\nrequest: %s\nresponse: %s\n", err, req, resp)
 		return
 	}
 
-	numChoice := reqSturct.Choices
+	numChoice := reqStruct.Choices
 	if numChoice <= 0 {
 		numChoice = 1
 	}
@@ -77,16 +77,16 @@ func (j *JsonFileLogger) record(req string, resp []string) {
 				if line == "[DONE]" {
 					continue
 				}
-				responseChunc := types.ResponseChunk{}
-				if err := responseChunc.Unmarshal([]byte(line)); err != nil {
+				responseChunk := types.ResponseChunk{}
+				if err := responseChunk.Unmarshal([]byte(line)); err != nil {
 					log.Printf("[-] Error: %s\nrequest: %s\nresponse: %s\n", err, req, resp)
 					return
 				}
 				if modelName == "" {
-					modelName = responseChunc.Model
+					modelName = responseChunk.Model
 				}
-				for choice := range responseChunc.Choices {
-					respConcat[choice].WriteString(responseChunc.Choices[choice].Delta.Content)
+				for choice := range responseChunk.Choices {
+					respConcat[choice].WriteString(responseChunk.Choices[choice].Delta.Content)
 				}
 			}
 		}
@@ -106,9 +106,9 @@ func (j *JsonFileLogger) record(req string, resp []string) {
 		}
 	}
 	if modelName != "" {
-		reqSturct.Model = modelName
+		reqStruct.Model = modelName
 	}
-	trace := types.ConvertReqResp2Trace(reqSturct, respStr)
+	trace := types.ConvertReqResp2Trace(reqStruct, respStr)
 	traceStr, err := trace.Marshal()
 	if err != nil {
 		log.Printf("[-] Error: %s\nrequest: %s\nresponse: %s\n", err, req, resp)
