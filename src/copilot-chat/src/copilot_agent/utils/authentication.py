@@ -2,6 +2,7 @@
 
 import os
 import requests
+import urllib.parse
 
 from datetime import datetime, timezone
 
@@ -16,6 +17,10 @@ class AuthenticationManager:
         self.restserver_url = os.getenv('RESTSERVER_URL', '')
         valid_groups_env = os.getenv('COPILOT_VALID_GROUPS', 'admin,superuser')
         self.valid_groups = [g.strip() for g in valid_groups_env.split(',') if g.strip()]
+
+    def sanitize_username(self, username: str) -> str:
+        """Sanitize the username by URL-encoding it to prevent path traversal or injection attacks."""
+        return urllib.parse.quote(username, safe='')
 
     def authenticate(self, username: str, token: str) -> list:
         """
@@ -42,7 +47,8 @@ class AuthenticationManager:
                 headers = {
                     'Authorization': f'Bearer {token}'
                 }
-                response = requests.get(f'{self.restserver_url}/api/v2/users/{username}', headers=headers, timeout=5)
+                username_sanitized = self.sanitize_username(username)
+                response = requests.get(f'{self.restserver_url}/api/v2/users/{username_sanitized}', headers=headers, timeout=5)
                 
                 if response.status_code == 200:
                     user_data = response.json()
