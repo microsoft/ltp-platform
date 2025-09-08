@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+// obfuscateToken returns a truncated identifier for safely logging tokens.
+func obfuscateToken(token string) string {
+	if len(token) <= 6 {
+		return "<redacted>"
+	}
+	return token[:3] + "***" + token[len(token)-3:]
+}
+
 type RestServerAuthenticator struct {
 	// rest-server token => model names => model urls
 	tokenToModels map[string]map[string][]string
@@ -38,10 +46,10 @@ func (ra *RestServerAuthenticator) AuthenticateReq(req *http.Request, reqBody ma
 	availableModels, ok := ra.tokenToModels[token]
 	if !ok {
 		// request to RestServer to get the models
-		log.Printf("[-] Error: token %s not found in the authenticator\n", token)
+		log.Printf("[-] Error: token %s not found in the authenticator\n", obfuscateToken(token))
 		availableModels, err := GetJobModelsMapping(req, ra.modelKey)
 		if err != nil {
-			log.Printf("[-] Error: failed to get models for token %s: %v\n", token, err)
+			log.Printf("[-] Error: failed to get models for token %s: %v\n", obfuscateToken(token), err)
 			return false, []string{}
 		}
 		ra.tokenToModels[token] = availableModels

@@ -12,6 +12,8 @@ import (
 	"modelproxy/types"
 )
 
+const maxNumChoice = 10 // Reasonable upper limit for number of choices per request. Adjust as needed.
+
 // TraceLogger is the interface for trace logger
 type TraceLogger interface {
 	// Record the trace
@@ -52,8 +54,11 @@ func (j *JsonFileLogger) record(req string, resp []string) {
 	}
 
 	numChoice := reqSturct.Choices
-	if numChoice == 0 {
+	if numChoice <= 0 {
 		numChoice = 1
+	}
+	if numChoice > maxNumChoice {
+		numChoice = maxNumChoice
 	}
 
 	respStr := make([]string, numChoice)
