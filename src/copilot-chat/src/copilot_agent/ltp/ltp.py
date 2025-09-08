@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """LTP module for CoPilot Agent."""
 
 from __future__ import annotations

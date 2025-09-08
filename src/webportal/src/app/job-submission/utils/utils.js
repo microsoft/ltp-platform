@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { isObject, isEmpty, isNil, isArrayLike, get } from 'lodash';
 import { basename } from 'path';
 

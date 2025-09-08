@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """Configuration for the Copilot Agent."""
 
 import importlib.resources as pkg_resources

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 module.exports = {
   PAI_VERSION: window.PAI_VERSION,
   PAI_COMMIT_VERSION: window.PAI_COMMIT_VERSION,

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 ######################################################
 # This exporter file can be modified or used as
 # an example of how to create a custom exporter.

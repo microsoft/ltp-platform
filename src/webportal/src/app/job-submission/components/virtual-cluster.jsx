@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import React, { useMemo, useCallback, useContext } from 'react';
 import { BasicSection } from './basic-section';
 import { Dropdown } from 'office-ui-fabric-react';

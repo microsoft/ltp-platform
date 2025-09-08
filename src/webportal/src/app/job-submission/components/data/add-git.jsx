@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import React, { useState } from 'react';
 import { IconButton, Stack, TextField } from 'office-ui-fabric-react';
 import { cloneDeep } from 'lodash';

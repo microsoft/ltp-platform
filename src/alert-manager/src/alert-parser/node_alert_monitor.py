@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from concurrent.futures import ThreadPoolExecutor
 import os
 import concurrent
