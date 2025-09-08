@@ -87,7 +87,7 @@ class KQLRAGSingleton:
 # Eagerly initialize the singleton instance at module load
 KQLRAGSingleton._instance = KQLRAGSingleton._init_instance()
 
-def example_query_generation_kql(question):
+def query_generation_kql(question):
     logger.info("Setting up KQL Query Generator...")
     kql_generator = KQLRAGSingleton.get_instance()
     output = kql_generator.generate_query(question)

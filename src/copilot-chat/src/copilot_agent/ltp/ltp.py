@@ -18,7 +18,7 @@ from ..utils.summary import gen_summary
 from ..utils.time import get_current_unix_timestamp
 from ..utils.types import DCW
 from ..utils.utils import get_prompt_from
-from .ltp_dashboard import example_query_generation_kql
+from .ltp_dashboard import query_generation_kql
 
 model = LLMSession()
 
@@ -165,7 +165,7 @@ def get_brief_job_metadata(resp):
 def query_powerbi(question: str, help_msg):
     """Query PowerBI data."""
 
-    query_gen_res, query_gen_status = example_query_generation_kql(question)
+    query_gen_res, query_gen_status = query_generation_kql(question)
     logger.info(f'KQL Query generation result: {query_gen_res}, status: {query_gen_status}')
     k_cluster = 'https://luciatrainingplatform.westcentralus.kusto.windows.net/'
     k_db = 'production'
