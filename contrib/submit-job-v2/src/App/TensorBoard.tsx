@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import React from "react";
 import { ComboBox, IComboBox, IComboBoxOption, Toggle, Stack, TextField } from "office-ui-fabric-react";
 import update from "immutability-helper";

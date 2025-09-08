@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 
 cat > /etc/systemd/system/update-tls-scan.service << EOL
 [Unit]

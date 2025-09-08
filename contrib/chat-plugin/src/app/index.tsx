@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 "use client";
 import Logs from "./ChatHistory";
 import JobBar from "./JobBar";

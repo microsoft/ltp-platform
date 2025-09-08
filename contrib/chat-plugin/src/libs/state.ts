@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { create } from "zustand";
 import { cn } from "./utils";
 

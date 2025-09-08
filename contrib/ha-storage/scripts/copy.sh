@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 
 source ../.env
 envsubst < ../conf/drbdha.res.template > ../conf/drbdha.res

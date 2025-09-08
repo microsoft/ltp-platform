@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 
 echo "setup k8s cluster"
 cd ${HOME}/pai-deploy/kubespray

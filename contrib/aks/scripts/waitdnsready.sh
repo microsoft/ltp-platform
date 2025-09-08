@@ -1,4 +1,7 @@
 #!/bin/bash
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 set -x
 counter=0
 while ! nslookup nexusstaticsa.blob.core.windows.net &> /dev/null

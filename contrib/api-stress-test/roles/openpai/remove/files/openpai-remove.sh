@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
 
 sudo docker exec -i stress-dev-box /bin/bash << EOF_DEV_BOX
 
