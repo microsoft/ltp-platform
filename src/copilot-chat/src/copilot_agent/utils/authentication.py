@@ -1,6 +1,7 @@
 """Authentication Manager."""
 
 import os
+import requests
 
 from datetime import datetime, timezone
 
@@ -33,8 +34,24 @@ class AuthenticationManager:
             if username == "baduser":
                 return ["temp"]
         else:
-            # TBD
             # This function should implement the logic to verify the user's token against the REST server (self.restserver_url).
+            try:
+                headers = {
+                    'Authorization': f'Bearer {token}'
+                }
+                response = requests.get(f'{self.restserver_url}/api/v2/users/{username}', headers=headers)
+                
+                if response.status_code == 200:
+                    user_data = response.json()
+                    # Extract groups from the response - adjust based on actual API response structure
+                    groups = user_data.get('grouplist', [])
+                    return groups
+                else:
+                    print(f"Authentication failed for user {username}: {response.status_code}")
+                    return []
+            except Exception as e:
+                print(f"Error during authentication for user {username}: {e}")
+                return []
             return []
 
     def set_authenticate_state(self, username: str, token: str) -> None:
