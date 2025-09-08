@@ -1,19 +1,4 @@
-"""CoPilot.
-
-version: f0f1
-    feature:
-    - query cluster capacity
-    - perform RCA for sub-optimal capacity
-    - query new cluster buildout status
-    - perform RCA for cluster buildout delay.
-version: f2
-    feature:
-    - query sku benchmark
-    - perform RCA benchmark perf. bottleneck
-version: f3
-    feature:
-    - Lucia Training Platform (LTP) admin/user support
-"""
+"""CoPilot Service (Flask app and endpoints)"""
 
 import os
 from flask import Flask, jsonify, request
