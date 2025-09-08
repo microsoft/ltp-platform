@@ -42,7 +42,7 @@ class AuthenticationManager:
                 headers = {
                     'Authorization': f'Bearer {token}'
                 }
-                response = requests.get(f'{self.restserver_url}/api/v2/users/{username}', headers=headers)
+                response = requests.get(f'{self.restserver_url}/api/v2/users/{username}', headers=headers, timeout=5)
                 
                 if response.status_code == 200:
                     user_data = response.json()
