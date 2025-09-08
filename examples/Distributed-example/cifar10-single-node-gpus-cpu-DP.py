@@ -1,4 +1,7 @@
 #!/bin/env python
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 import os
 import re
 import sys
