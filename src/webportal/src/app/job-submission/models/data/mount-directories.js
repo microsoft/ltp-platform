@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { isNil, isEmpty } from 'lodash';
 
 import { InputData } from './input-data';

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 # TODO: modify the deployment scripts to include below ENV VAR
 # COPILOT_LLM_PROVIDER
 # OPENAI_API_KEY

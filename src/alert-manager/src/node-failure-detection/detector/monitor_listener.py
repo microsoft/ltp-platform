@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """
 Monitor Listener - Handles consuming monitor results and triggering analysis
 

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import {
   CUSTOM_STORAGE_START,
   CUSTOM_STORAGE_END,

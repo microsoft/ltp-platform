@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 

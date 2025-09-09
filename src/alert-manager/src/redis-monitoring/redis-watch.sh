@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 INTERVAL=5
 
 while true; do

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from .features.node_status.client import NodeStatusClient
 from .features.node_status.models import NodeStatusRecord, NodeStatus
 from .features.node_action.client import NodeActionClient

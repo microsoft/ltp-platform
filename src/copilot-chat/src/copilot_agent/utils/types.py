@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """Defines the data types used in the Copilot Agent."""
 
 from __future__ import annotations
