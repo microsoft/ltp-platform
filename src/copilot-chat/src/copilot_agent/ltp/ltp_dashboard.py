@@ -1,3 +1,8 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+"""LTP Dashboard module for LTP component, handling dashboard related inquiries."""
+
 from __future__ import annotations
 
 import os

@@ -1,4 +1,8 @@
- 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+"""A generic RAG system for query generation (e.g., KQL, DAX) using LlamaIndex and a custom LLM."""
+
 from llama_index.core.embeddings import BaseEmbedding
 from llama_index.core.llms import LLM
 from llama_index.core.llms.llm import ChatMessage, MessageRole 
