@@ -80,7 +80,7 @@ These metrics provide a comprehensive view of both correctness and efficiency ac
 | Category             | Count | Support Level    | Classification Accuracy | Query Generation Accuracy | Answer Generation Accuracy | Mean Duration (s) | Max Duration (s) | Words per Second |
 |----------------------|-------|------------------|-------------------------|---------------------------|----------------------------|-------------------|------------------|------------------|
 | Human Intervention   | 17    | Full             | 0.76                    | NA                        | TBD                        | 13.83             | 17.74            | 8.33             |
-| User Manual          | 28    | Full             | 0.96                    | NA                        | TBD                        | 13.72             | 23.73            | 21.00            |
+| User Manual          | 28    | Limited (link unavailable)   | 0.96                    | NA                        | TBD                        | 13.72             | 23.73            | 21.00            |
 | Auto Rejection       | 3     | Full             | 1                       | NA                        | TBD                        | 8.84              | 10.70            | 13.15            |
 | Cluster Job Metrics  | 19    | Not supported    | (0.89)                  | TBD                       | TBD                        | (16.34)           | (26.95)          | (12.42)          |
 | Job Metadata         | 1     | Full             | 1                       | TBD                       | TBD                        | 19.91             | 19.91            | 13.25            |
