@@ -106,6 +106,9 @@ const (
 	PlaceholderConfigMapName      = AnnotationKeyConfigMapName
 	PlaceholderPodName            = AnnotationKeyPodName
 
+	// For ConfigMap Data Keys
+	ConfigMapDataKeyGracefulRetrySignal = "FC_GRACEFUL_RETRY_SIGNAL"
+
 	// For LogObjectSnapshot
 	// All snapshots are logged in format:
 	// {AnyLogMessage}{ObjectSnapshotTrigger}{LogMarkerObjectSnapshot}{JsonObjectSnapshot}

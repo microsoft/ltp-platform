@@ -24,6 +24,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"sync"
@@ -181,6 +182,9 @@ type FrameworkController struct {
 	// Using sync.Map instead of RWMutex + map[string]*ExpectedFrameworkStatusInfo,
 	// because we can ensure the same item will not be processed concurrently.
 	fExpectedStatusInfos *sync.Map
+
+	// Graceful retry manager for centralized graceful retry logic
+	gracefulRetryManager *GracefulRetryManager
 }
 
 type ExpectedFrameworkStatusInfo struct {
@@ -245,6 +249,9 @@ func NewFrameworkController() *FrameworkController {
 		fQueue:               fQueue,
 		fExpectedStatusInfos: &sync.Map{},
 	}
+
+	// Initialize graceful retry manager
+	c.gracefulRetryManager = c.NewGracefulRetryManager()
 
 	fInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    c.addFrameworkObj,
@@ -670,6 +677,25 @@ func (c *FrameworkController) enqueuePodGracefulDeletionTimeoutCheck(
 		failIfTimeout, "PodGracefulDeletionTimeoutCheck")
 }
 
+func (c *FrameworkController) enqueueGracefulRetryTimeoutCheck(
+	f *ci.Framework, failIfTimeout bool) bool {
+	// Check if graceful retry is active
+	if f.Status.GracefulRetryStatus == nil || 
+	   f.Status.GracefulRetryStatus.ExpectedCompletionTime == nil {
+		return false
+	}
+
+	// Use the grace period from the policy
+	gracePeriodSec := f.Spec.GracefulRetryPolicy.GracePeriodSec
+	// Calculate start time by subtracting grace period from expected completion time
+	startTime := f.Status.GracefulRetryStatus.ExpectedCompletionTime.Time.Add(-time.Duration(gracePeriodSec) * time.Second)
+	
+	// Convert back to meta.Time for the timeout check
+	return c.enqueueFrameworkTimeoutCheck(
+		f, meta.Time{Time: startTime}, &gracePeriodSec,
+		failIfTimeout, "GracefulRetryTimeoutCheck")
+}
+
 func (c *FrameworkController) enqueueFrameworkTimeoutCheck(
 	f *ci.Framework, startTime meta.Time, timeoutSec *int64,
 	failIfTimeout bool, logSfx string) bool {
@@ -1012,6 +1038,22 @@ func (c *FrameworkController) syncFrameworkState(ctx context.Context, f *ci.Fram
 		return c.deleteFramework(ctx, f, true)
 	}
 
+
+	// ADD THIS NEW LOGIC HERE:
+	// Check if graceful retry grace period has expired
+	if f.Status.GracefulRetryStatus != nil && 
+	f.Status.GracefulRetryStatus.ExpectedCompletionTime != nil &&
+	time.Now().After(f.Status.GracefulRetryStatus.ExpectedCompletionTime.Time) {
+		
+		klog.Infof("%s Grace period expired, forcing framework completion", logPfx)
+		// Force complete the framework attempt
+		c.completeFrameworkAttempt(f, true, f.Status.AttemptStatus.CompletionStatus)
+		f.Status.GracefulRetryStatus.ExpectedCompletionTime = nil
+		
+		klog.Infof("%s Framework attempt completed after grace period expiry", logPfx)
+		return nil
+	}
+
 	var cm *core.ConfigMap
 	if f.Status.State != ci.FrameworkAttemptCompleted {
 		// ConfigMap may have been creation requested successfully and may exist in
@@ -1130,12 +1172,45 @@ func (c *FrameworkController) syncFrameworkState(ctx context.Context, f *ci.Fram
 		if f.Status.RetryPolicyStatus.RetryDelaySec == nil {
 			// RetryFramework is not yet scheduled, so need to be decided.
 			if retryDecision.ShouldRetry {
-				// scheduleToRetryFramework
-				klog.Infof(logPfx+
-					"Will retry Framework with new FrameworkAttempt: RetryDecision: %v",
-					retryDecision)
+				// Check if automatic graceful retry is enabled
+				if c.isGracefulRetryEnabled(f) {
+					// Use graceful retry instead of immediate retry
+					klog.Infof(logPfx+
+						"Will use graceful retry for Framework: RetryDecision: %v",
+						retryDecision)
 
-				f.Status.RetryPolicyStatus.RetryDelaySec = &retryDecision.DelaySec
+					// Use centralized graceful retry manager for framework retry
+					req := &CompletionRequest{
+						Framework:        f,
+						CompletionStatus: f.Status.AttemptStatus.CompletionStatus,
+						Force:           false,
+						TriggerReason:   CompletionTriggerFrameworkPolicy,
+						Context:         ctx,
+						LogPrefix:       logPfx,
+					}
+					
+					completed := c.gracefulRetryManager.TryCompleteFrameworkAttempt(req)
+					if !completed {
+						// Check if graceful retry was attempted but failed
+						if c.isGracefulRetryEnabled(f) && !f.IsAnyTaskRunning(true) {
+							// Graceful retry failed due to no running tasks, set normal retry delay
+							f.Status.RetryPolicyStatus.RetryDelaySec = &retryDecision.DelaySec
+							klog.Infof("%s Graceful retry failed, setting normal retry delay: %ds", logPfx, retryDecision.DelaySec)
+						}
+						// Graceful retry is in progress
+						klog.Infof("%s Framework retry initiated graceful retry", logPfx)
+					} else {
+						// Framework attempt was completed, not retried
+						return nil
+					}
+				} else {
+					// scheduleToRetryFramework (original behavior)
+					klog.Infof(logPfx+
+						"Will retry Framework with new FrameworkAttempt: RetryDecision: %v",
+						retryDecision)
+
+					f.Status.RetryPolicyStatus.RetryDelaySec = &retryDecision.DelaySec
+				}
 			} else {
 				// completeFramework
 				klog.Infof(logPfx+
@@ -1255,9 +1330,24 @@ func (c *FrameworkController) syncFrameworkState(ctx context.Context, f *ci.Fram
 			if f.Spec.ExecutionType == ci.ExecutionStop {
 				diag := "User has requested to stop the Framework"
 				klog.Info(logPfx + diag)
-				c.completeFrameworkAttempt(f, false,
-					ci.CompletionCodeStopFrameworkRequested.
-						NewFrameworkAttemptCompletionStatus(diag, nil))
+				
+				completionStatus := ci.CompletionCodeStopFrameworkRequested.
+					NewFrameworkAttemptCompletionStatus(diag, nil)
+				
+				// Try graceful completion for user stop request
+				req := &CompletionRequest{
+					Framework:        f,
+					CompletionStatus: completionStatus,
+					Force:           false,
+					TriggerReason:   CompletionTriggerUserRequest,
+					Context:         ctx,
+					LogPrefix:       logPfx,
+				}
+				
+				completed := c.gracefulRetryManager.TryCompleteFrameworkAttempt(req)
+				if !completed {
+					klog.Infof("%s User stop request initiated graceful retry", logPfx)
+				}
 			}
 		}
 
@@ -1515,7 +1605,23 @@ func (c *FrameworkController) syncFrameworkAttemptCompletionPolicy(
 			firstTriggerCompletionStatus.Trigger.TaskRoleName,
 			firstTriggerCompletionStatus.Trigger.TaskIndex,
 			firstTriggerCompletionStatus.Trigger.Message)
-		c.completeFrameworkAttempt(f, false, firstTriggerCompletionStatus)
+		
+		// Try graceful completion using centralized manager
+		req := &CompletionRequest{
+			Framework:        f,
+			CompletionStatus: firstTriggerCompletionStatus,
+			Force:           false,
+			TriggerReason:   CompletionTriggerFrameworkPolicy,
+			Context:         context.Background(),
+			LogPrefix:       fmt.Sprintf("[%v]: syncFrameworkAttemptCompletionPolicy:", f.Key()),
+		}
+		
+		completed := c.gracefulRetryManager.TryCompleteFrameworkAttempt(req)
+		if !completed {
+			klog.Infof(logPfx + "Graceful retry is in progress, wait for grace period")
+			return false
+		}
+		// Framework attempt completed normally
 		return true
 	}
 
@@ -1567,7 +1673,23 @@ func (c *FrameworkController) syncFrameworkAttemptCompletionPolicy(
 					firstTriggerCompletionStatus.Trigger.TaskIndex,
 					firstTriggerCompletionStatus.Trigger.Message)
 			}
-			c.completeFrameworkAttempt(f, false, firstTriggerCompletionStatus)
+			
+			// Try graceful completion using centralized manager
+			req := &CompletionRequest{
+				Framework:        f,
+				CompletionStatus: firstTriggerCompletionStatus,
+				Force:           false,
+				TriggerReason:   CompletionTriggerAllTasksCompleted,
+				Context:         context.Background(),
+				LogPrefix:       fmt.Sprintf("[%v]: syncFrameworkAttemptCompletionPolicy:", f.Key()),
+			}
+			
+			completed := c.gracefulRetryManager.TryCompleteFrameworkAttempt(req)
+			if !completed {
+				klog.Infof(logPfx + "Graceful retry is in progress, wait for grace period")
+				return false
+			}
+			// Framework attempt completed normally
 			return true
 		}
 	}
@@ -1810,7 +1932,6 @@ func (c *FrameworkController) syncTaskState(
 		if taskStatus.RetryPolicyStatus.RetryDelaySec == nil {
 			// RetryTask is not yet scheduled, so need to be decided.
 			if retryDecision.ShouldRetry {
-				// scheduleToRetryTask
 				klog.Infof(logPfx+
 					"Will retry Task with new TaskAttempt: RetryDecision: %v",
 					retryDecision)
@@ -1980,8 +2101,25 @@ func (c *FrameworkController) syncTaskState(
 
 		if triggerCompletionStatus != nil {
 			klog.Info(logPfx + triggerCompletionStatus.Trigger.Message)
-			c.completeFrameworkAttempt(f, false, triggerCompletionStatus)
-			return nil
+			
+			// Try graceful completion using centralized manager
+			req := &CompletionRequest{
+				Framework:        f,
+				CompletionStatus: triggerCompletionStatus,
+				Force:           false,
+				TriggerReason:   CompletionTriggerTaskCompletion,
+				Context:         context.Background(),
+				LogPrefix:       logPfx,
+			}
+			
+			completed := c.gracefulRetryManager.TryCompleteFrameworkAttempt(req)
+			if !completed {
+				klog.Infof(logPfx + "Graceful retry is in progress, wait for grace period")
+				return nil
+			}else {
+				// Framework attempt completed normally
+				return nil
+			}
 		}
 
 		totalTaskCount := f.GetTotalTaskCountSpec()
@@ -1997,8 +2135,25 @@ func (c *FrameworkController) syncTaskState(
 					taskStatus, taskRoleName, completedTaskCount, totalTaskCount)
 
 				klog.Info(logPfx + triggerCompletionStatus.Trigger.Message)
-				c.completeFrameworkAttempt(f, false, triggerCompletionStatus)
-				return nil
+				
+				// Try graceful completion using centralized manager
+				req := &CompletionRequest{
+					Framework:        f,
+					CompletionStatus: triggerCompletionStatus,
+					Force:           false,
+					TriggerReason:   CompletionTriggerAllTasksCompleted,
+					Context:         context.Background(),
+					LogPrefix:       logPfx,
+				}
+				
+				completed := c.gracefulRetryManager.TryCompleteFrameworkAttempt(req)
+				if !completed {
+					klog.Infof(logPfx + "Graceful retry is in progress, wait for grace period")
+					return nil
+				}else {
+					// Framework attempt completed normally
+					return nil
+				}
 			}
 		}
 
@@ -2396,3 +2551,211 @@ func (c *FrameworkController) updateExpectedFrameworkStatusInfo(key string,
 		remoteSynced: remoteSynced,
 	})
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+// Graceful Retry Manager
+///////////////////////////////////////////////////////////////////////////////////////
+
+// GracefulRetryManager encapsulates all graceful retry logic and state
+type GracefulRetryManager struct {
+	controller *FrameworkController
+}
+
+// NewGracefulRetryManager creates a new graceful retry manager
+func (c *FrameworkController) NewGracefulRetryManager() *GracefulRetryManager {
+	return &GracefulRetryManager{
+		controller: c,
+	}
+}
+
+// CompletionTriggerReason represents why a framework completion was triggered
+type CompletionTriggerReason string
+
+const (
+	CompletionTriggerFrameworkPolicy CompletionTriggerReason = "framework_completion_policy"
+	CompletionTriggerAllTasksCompleted CompletionTriggerReason = "all_tasks_completed"
+	CompletionTriggerTaskCompletion CompletionTriggerReason = "task_completion"
+	CompletionTriggerUserRequest CompletionTriggerReason = "user_request"
+	CompletionTriggerTimeout CompletionTriggerReason = "timeout"
+)
+
+// CompletionRequest represents a request to complete a framework attempt
+type CompletionRequest struct {
+	Framework        *ci.Framework
+	CompletionStatus *ci.FrameworkAttemptCompletionStatus
+	Force           bool
+	TriggerReason   CompletionTriggerReason
+	Context         context.Context
+	LogPrefix       string
+}
+
+// TryCompleteFrameworkAttempt attempts to complete a framework attempt with graceful retry support
+// Returns true if completion was successful, false if graceful retry is in progress
+func (grm *GracefulRetryManager) TryCompleteFrameworkAttempt(req *CompletionRequest) bool {
+	// If force completion, skip graceful retry
+	if req.Force {
+		grm.controller.completeFrameworkAttempt(req.Framework, true, req.CompletionStatus)
+		return true
+	}
+
+	if req.Framework.Status != nil && req.Framework.Status.GracefulRetryStatus != nil && req.Framework.Status.GracefulRetryStatus.ExpectedCompletionTime != nil {
+		klog.Infof("%s Graceful retry is in progress and expected completion time is not nil, skipping graceful retry", req.LogPrefix)
+		return false
+	}
+
+	// Check if graceful retry should be attempted
+	if grm.shouldAttemptGracefulRetry(req) {
+		success := grm.attemptGracefulRetry(req)
+		if success {
+			klog.Infof("%s Graceful retry initiated successfully, delaying completion", req.LogPrefix)
+			return false // Completion delayed due to graceful retry
+		}
+		// If graceful retry failed, fall back to normal completion
+		klog.Warningf("%s Graceful retry failed, proceeding with normal completion", req.LogPrefix)
+	}
+	// Proceed with normal completion
+	grm.controller.completeFrameworkAttempt(req.Framework, false, req.CompletionStatus)
+	return true
+}
+
+// shouldAttemptGracefulRetry determines if graceful retry should be attempted
+func (grm *GracefulRetryManager) shouldAttemptGracefulRetry(req *CompletionRequest) bool {
+	f := req.Framework
+	
+	// Must have graceful retry policy enabled
+	if !grm.controller.isGracefulRetryEnabled(f) {
+		return false
+	}
+
+	// Must have running tasks to signal
+	if !f.IsAnyTaskRunning(true) {
+		klog.Infof("%s No running tasks to signal for graceful retry", req.LogPrefix)
+		return false
+	}
+
+	// Must be eligible for retry
+	if req.CompletionStatus == nil {
+		klog.Infof("%s Completion status is nil, skipping graceful retry", req.LogPrefix)
+		return false
+	}
+
+	retryDecision := f.Spec.RetryPolicy.ShouldRetry(
+		f.Status.RetryPolicyStatus,
+		req.CompletionStatus.CompletionStatus,
+		*grm.controller.cConfig.FrameworkMinRetryDelaySecForTransientConflictFailed,
+		*grm.controller.cConfig.FrameworkMaxRetryDelaySecForTransientConflictFailed)
+
+	if !retryDecision.ShouldRetry {
+		klog.Infof("%s Framework will not retry, skipping graceful retry: %v", req.LogPrefix, retryDecision)
+		return false
+	}
+
+	
+	if retryDecision.ShouldRetry {
+        // Set appropriate delay based on graceful retry status
+        if f.Status.GracefulRetryStatus != nil {
+            // Graceful retry in progress - use total delay
+            gracePeriodSec := f.Spec.GracefulRetryPolicy.GracePeriodSec
+            totalDelaySec := gracePeriodSec + retryDecision.DelaySec
+            f.Status.RetryPolicyStatus.RetryDelaySec = &totalDelaySec
+        } else {
+            // No graceful retry - use normal delay
+            f.Status.RetryPolicyStatus.RetryDelaySec = &retryDecision.DelaySec
+        }
+    }
+
+	klog.Infof("%s Framework is eligible for graceful retry: %v", req.LogPrefix, retryDecision)
+	return true
+}
+
+// attemptGracefulRetry attempts to initiate graceful retry
+func (grm *GracefulRetryManager) attemptGracefulRetry(req *CompletionRequest) bool {
+	f := req.Framework
+	
+	// Set completion status for framework attempt
+	f.Status.AttemptStatus.CompletionStatus = req.CompletionStatus
+	
+	// Get ConfigMap for signaling
+	cm, err := grm.controller.getOrCleanupConfigMap(req.Context, f, false)
+	if err != nil {
+		klog.Warningf("%s Failed to get ConfigMap for graceful retry: %v", req.LogPrefix, err)
+		return false
+	}
+	if cm == nil {
+		klog.Warningf("%s ConfigMap not found for graceful retry", req.LogPrefix)
+		return false
+	}
+
+	// Generate signal reason based on trigger
+	signalReason := grm.generateSignalReason(req.TriggerReason)
+
+	// Send graceful retry signal
+	err = grm.controller.sendGracefulRetrySignal(req.Context, f, cm, signalReason)
+	if err != nil {
+		klog.Warningf("%s Failed to send graceful retry signal: %v", req.LogPrefix, err)
+		return false
+	}
+
+	// Track graceful retry status
+	grm.setGracefulRetryStatus(f, signalReason)
+	
+	klog.Infof("%s Graceful retry signal sent successfully: reason=%s, gracePeriod=%ds", 
+		req.LogPrefix, signalReason, f.Spec.GracefulRetryPolicy.GracePeriodSec)
+	
+	return true
+}
+
+// generateSignalReason generates an appropriate signal reason based on the trigger
+func (grm *GracefulRetryManager) generateSignalReason(trigger CompletionTriggerReason) string {
+	switch trigger {
+	case CompletionTriggerFrameworkPolicy:
+		return "framework_completion_policy_retry"
+	case CompletionTriggerAllTasksCompleted:
+		return "all_tasks_completed_retry"
+	case CompletionTriggerTaskCompletion:
+		return "task_completion_retry"
+	case CompletionTriggerUserRequest:
+		return "user_requested_retry"
+	case CompletionTriggerTimeout:
+		return "timeout_triggered_retry"
+	default:
+		return "framework_completion_retry"
+	}
+}
+
+// setGracefulRetryStatus sets the graceful retry status on the framework
+func (grm *GracefulRetryManager) setGracefulRetryStatus(f *ci.Framework, reason string) {
+	now := meta.Now()
+	gracePeriodSec := f.Spec.GracefulRetryPolicy.GracePeriodSec
+	
+	gracefulRetryStatus := &ci.GracefulRetryStatus{
+		StartTime:     now,
+		SignalTime:    &now,
+		SignalData:    f.Spec.GracefulRetryPolicy.SignalData,
+		TriggerReason: reason,
+	}
+	
+	// Calculate expected completion time
+	gracefulRetryStatus.ExpectedCompletionTime = &meta.Time{Time: now.Add(time.Duration(gracePeriodSec) * time.Second)}
+	f.Status.GracefulRetryStatus = gracefulRetryStatus
+	
+	grm.controller.enqueueGracefulRetryTimeoutCheck(f, false)
+	klog.Infof("%s Enqueued graceful retry timeout check for %d seconds", f.Key(), gracePeriodSec)
+}
+
+
+// isGracefulRetryEnabled checks if graceful retry policy is enabled
+func (c *FrameworkController) isGracefulRetryEnabled(f *ci.Framework) bool {
+	logPfx := fmt.Sprintf("[%v]: isGracefulRetryEnabled: ", f.Key())
+	
+	if f.Spec.GracefulRetryPolicy == nil {
+		klog.Infof(logPfx + "GracefulRetryPolicy is nil")
+		return false
+	}
+	
+	klog.Infof(logPfx + "GracefulRetryPolicy found - Enabled: %v, GracePeriodSec: %d", 
+		f.Spec.GracefulRetryPolicy.Enabled, f.Spec.GracefulRetryPolicy.GracePeriodSec)
+		
+	return f.Spec.GracefulRetryPolicy.Enabled && f.Spec.GracefulRetryPolicy.GracePeriodSec > 0
+}
+

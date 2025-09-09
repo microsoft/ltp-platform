@@ -62,10 +62,11 @@ type Framework struct {
 // Framework.Spec
 //////////////////////////////////////////////////////////////////////////////////////////////////
 type FrameworkSpec struct {
-	Description   string          `json:"description"`
-	ExecutionType ExecutionType   `json:"executionType"`
-	RetryPolicy   RetryPolicySpec `json:"retryPolicy"`
-	TaskRoles     []*TaskRoleSpec `json:"taskRoles"`
+	Description         string                        `json:"description"`
+	ExecutionType       ExecutionType                 `json:"executionType"`
+	RetryPolicy         RetryPolicySpec               `json:"retryPolicy"`
+	TaskRoles           []*TaskRoleSpec               `json:"taskRoles"`
+	GracefulRetryPolicy *GracefulRetryPolicySpec      `json:"gracefulRetryPolicy,omitempty"`
 }
 
 type TaskRoleSpec struct {
@@ -220,6 +221,33 @@ type CompletionPolicySpec struct {
 	MinSucceededTaskCount int32 `json:"minSucceededTaskCount"`
 }
 
+// GracefulRetryPolicySpec controls whether automatic retries should use graceful signaling.
+// When enabled, automatic retries (pod failures, external deletes, etc.) will signal
+// running pods via ConfigMap and wait for a grace period before completing the current attempt.
+type GracefulRetryPolicySpec struct {
+	// Enable graceful signaling for automatic retries (pod failures, external deletes, etc.).
+	// When true, automatic retries will signal running pods via ConfigMap and wait for grace period
+	// before completing the current attempt. Default: false.
+	Enabled bool `json:"enabled"`
+	
+	// Grace period in seconds for automatic graceful retries.
+	// Only used when Enabled is true.
+	GracePeriodSec int64 `json:"gracePeriodSec"`
+	
+	// Optional: Custom signal data for automatic retries.
+	// This data will be included in the ConfigMap signal file.
+	SignalData map[string]string `json:"signalData,omitempty"`
+}
+
+type GracefulRetrySignalMethod string
+
+const (
+	// Update the Framework's ConfigMap with graceful retry signal.
+	// The ConfigMap is mounted as a volume in pods, making the signal
+	// accessible as a file at /etc/frameworkcontroller/FC_GRACEFUL_RETRY_SIGNAL
+	SignalMethodConfigMap GracefulRetrySignalMethod = "configmap"
+)
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Framework.Status
 // It is used to:
@@ -247,13 +275,14 @@ type CompletionPolicySpec struct {
 //    such as labels and selectors.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 type FrameworkStatus struct {
-	StartTime         meta.Time              `json:"startTime"`
-	RunTime           *meta.Time             `json:"runTime"`
-	CompletionTime    *meta.Time             `json:"completionTime"`
-	State             FrameworkState         `json:"state"`
-	TransitionTime    meta.Time              `json:"transitionTime"`
-	RetryPolicyStatus RetryPolicyStatus      `json:"retryPolicyStatus"`
-	AttemptStatus     FrameworkAttemptStatus `json:"attemptStatus"`
+	StartTime              meta.Time                    `json:"startTime"`
+	RunTime                *meta.Time                   `json:"runTime"`
+	CompletionTime         *meta.Time                   `json:"completionTime"`
+	State                  FrameworkState               `json:"state"`
+	TransitionTime         meta.Time                    `json:"transitionTime"`
+	RetryPolicyStatus      RetryPolicyStatus            `json:"retryPolicyStatus"`
+	AttemptStatus          FrameworkAttemptStatus       `json:"attemptStatus"`
+	GracefulRetryStatus    *GracefulRetryStatus         `json:"gracefulRetryStatus,omitempty"`
 }
 
 type FrameworkAttemptStatus struct {
@@ -339,6 +368,10 @@ type TaskStatus struct {
 	DeletionPending   bool              `json:"deletionPending"`
 	RetryPolicyStatus RetryPolicyStatus `json:"retryPolicyStatus"`
 	AttemptStatus     TaskAttemptStatus `json:"attemptStatus"`
+	
+	// GracefulRetryStatus tracks the state of an active graceful retry operation for this specific task.
+	// This allows multiple tasks in the same framework to have independent graceful retry states.
+	GracefulRetryStatus *GracefulRetryStatus `json:"gracefulRetryStatus,omitempty"`
 }
 
 type TaskAttemptStatus struct {
@@ -391,6 +424,24 @@ type RetryPolicyStatus struct {
 	// It is not nil only if the retry has been scheduled but not yet executed, i.e.
 	// current attempt is in AttemptCompleted state and is not the last attempt.
 	RetryDelaySec *int64 `json:"retryDelaySec"`
+}
+
+// GracefulRetryStatus tracks the state of an active graceful retry operation.
+type GracefulRetryStatus struct {
+	// Timestamp when graceful retry was triggered.
+	StartTime meta.Time `json:"startTime"`
+	
+	// Timestamp when signal was sent to pods via ConfigMap.
+	SignalTime *meta.Time `json:"signalTime,omitempty"`
+	
+	// Expected completion time when grace period expires.
+	ExpectedCompletionTime *meta.Time `json:"expectedCompletionTime,omitempty"`
+	
+	// Custom signal data sent to pods via ConfigMap.
+	SignalData map[string]string `json:"signalData,omitempty"`
+	
+	// Reason for triggering graceful retry.
+	TriggerReason string `json:"triggerReason"`
 }
 
 // It is generated from Predefined CompletionCodes or PodPattern matching.

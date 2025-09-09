@@ -100,6 +100,28 @@ func buildFrameworkSchema() *apiExtensions.CustomResourceValidation {
 								},
 							},
 						},
+						"gracefulRetryPolicy": {
+							Type:     "object",
+							Nullable: true,
+							Properties: map[string]apiExtensions.JSONSchemaProps{
+								"enabled": {
+									Type: "boolean",
+								},
+								"gracePeriodSec": {
+									Type:    "integer",
+									Minimum: common.PtrFloat64(0),
+								},
+								"signalData": {
+									Type:     "object",
+									Nullable: true,
+									AdditionalProperties: &apiExtensions.JSONSchemaPropsOrBool{
+										Schema: &apiExtensions.JSONSchemaProps{
+											Type: "string",
+										},
+									},
+								},
+							},
+						},
 						"taskRoles": {
 							// TODO: names in array should not duplicate
 							Type: "array",
