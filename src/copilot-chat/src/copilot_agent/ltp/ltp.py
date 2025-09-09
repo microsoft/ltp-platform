@@ -184,7 +184,7 @@ def query_powerbi(question: str, help_msg):
         response_long = {"query_generated": query_gen_res, "response_from_query_execution": response}
         logger.info(f'Kusto Query execution result: {response}')
     else:
-        response = {"result": "query generation failed, please perform manual investigation"}
+        response = {"query_generated": "query generation failed, please perform manual investigation", "response_from_query_execution": {}}
         response_long = response
         response_status = -1
 
