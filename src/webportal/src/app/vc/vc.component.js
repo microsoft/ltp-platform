@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 require('bootstrap');
 require('admin-lte/dist/css/AdminLTE.min.css');
 require('bootstrap/dist/css/bootstrap.css');

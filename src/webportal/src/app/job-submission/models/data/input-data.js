@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 export class InputData {
   constructor(mountPath, dataSource, sourceType, uploadFiles = null) {
     this.mountPath = mountPath;

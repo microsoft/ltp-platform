@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 module.exports = {
   semi: true,
   // Trailing commas help with git merging and conflict resolution

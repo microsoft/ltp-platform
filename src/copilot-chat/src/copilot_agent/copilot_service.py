@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """CoPilot Service (Flask app and endpoints)"""
 
 import os

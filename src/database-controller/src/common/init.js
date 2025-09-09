@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 const logger = require('@dbc/common/logger');
 
 // We doesn't allow unhandled promise rejection.

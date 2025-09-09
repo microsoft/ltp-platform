@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """
 Job Data Recorder - This script processes finished job metrics and react times, then ingests them into Kusto.
 """

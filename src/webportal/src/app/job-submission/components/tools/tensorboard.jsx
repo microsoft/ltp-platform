@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, isNil, get } from 'lodash';

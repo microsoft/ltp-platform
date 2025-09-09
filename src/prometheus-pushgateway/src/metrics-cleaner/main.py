@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from datetime import timezone, datetime, timedelta
 import os
 import logging

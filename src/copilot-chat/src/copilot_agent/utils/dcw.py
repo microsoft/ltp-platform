@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """This module contains functions for generating, parsing, and aligning DCW objects."""
 
 from __future__ import annotations

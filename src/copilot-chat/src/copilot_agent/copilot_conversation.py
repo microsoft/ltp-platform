@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """CoPilot Conversation class, manages the inquiry/response turns for each user."""
 
 import os

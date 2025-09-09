@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """Init file for utils module."""
 
 from .authentication import AuthenticationManager

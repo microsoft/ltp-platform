@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import React, { useLayoutEffect } from 'react';
 import c from 'classnames';
 import {

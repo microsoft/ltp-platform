@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """Dashboard Data Backup Service - Automated backup of PowerBI dashboard data to Kusto tables via cron."""
 
 import os
