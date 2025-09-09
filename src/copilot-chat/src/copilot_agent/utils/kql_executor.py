@@ -21,6 +21,12 @@ class KustoExecutor:
     Handles authentication, query execution, and table management operations.
     """
     def __init__(self, cluster, db, table):
+        if not cluster or not isinstance(cluster, str):
+            raise ValueError("Kusto cluster URL must be a non-empty string.")
+        if not db or not isinstance(db, str):
+            raise ValueError("Kusto database name must be a non-empty string.")
+        if not isinstance(table, str):
+            raise ValueError("Kusto table name must be a string (can be empty).")
         self.cluster = cluster  # Kusto cluster URL
         self.db = db  # Kusto database name
         self.table = table  # Kusto table name
