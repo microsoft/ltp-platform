@@ -51,7 +51,7 @@ class KustoExecutor:
         logger.debug(f'self.cluster is {self.cluster}')
         logger.debug(f'self.db is {self.db}')
         logger.debug(f'query is {query}')
-        if not self.cluster or not self.db or not self.token:
+        if not self.cluster or not self.db:
             logger.error("Missing cluster, database, or token information, end here")
             return {"result": "query not found, please perform manual investigation"}, -2
 
