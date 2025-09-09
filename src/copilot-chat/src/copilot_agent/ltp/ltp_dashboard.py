@@ -22,33 +22,67 @@ model = LLMSession()
 class DocPrepare:
     @staticmethod
     def get_txt_as_string(filepath):
-        with open(filepath, 'r') as file:
-            return file.read()
+        try:
+            with open(filepath, 'r') as file:
+                return file.read()
+        except FileNotFoundError:
+            logger.error(f"File not found: {filepath}")
+            return ''
+        except Exception as e:
+            logger.error(f"Error reading file {filepath}: {e}")
+            return ''
 
     @staticmethod
     def get_txt_as_list_hashtag(filepath):
-        with open(filepath, 'r', encoding='utf-8') as f:
-            content = f.read()
-        sections = content.split('##')
-        # Keep only sections not starting with '#' (do not strip whitespace)
-        result = [s for s in sections if s and not s.startswith('#')]
-        return result
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                content = f.read()
+            sections = content.split('##')
+            # Keep only sections not starting with '#' (do not strip whitespace)
+            result = [s for s in sections if s and not s.startswith('#')]
+            return result
+        except FileNotFoundError:
+            logger.error(f"File not found: {filepath}")
+            return []
+        except Exception as e:
+            logger.error(f"Error reading file {filepath}: {e}")
+            return []
 
     @staticmethod
     def get_json_as_list(folder):
-        json_files = [f for f in os.listdir(folder) if f.endswith('.json')]
+        try:
+            json_files = [f for f in os.listdir(folder) if f.endswith('.json')]
+        except FileNotFoundError:
+            logger.error(f"Folder not found: {folder}")
+            return []
+        except Exception as e:
+            logger.error(f"Error listing folder {folder}: {e}")
+            return []
         json_data = []
         for json_file in json_files:
-            with open(os.path.join(folder, json_file), 'r') as file:
-                # Read the file as a string
-                content = file.read()
-                json_data.append(content)
+            json_path = os.path.join(folder, json_file)
+            try:
+                with open(json_path, 'r') as file:
+                    # Read the file as a string
+                    content = file.read()
+                    json_data.append(content)
+            except FileNotFoundError:
+                logger.error(f"File not found: {json_path}")
+            except Exception as e:
+                logger.error(f"Error reading file {json_path}: {e}")
         return json_data
 
     @staticmethod
     def get_txt_as_list(filepath):
-        with open(filepath, 'r') as file:
-            return file.readlines()
+        try:
+            with open(filepath, 'r') as file:
+                return file.readlines()
+        except FileNotFoundError:
+            logger.error(f"File not found: {filepath}")
+            return []
+        except Exception as e:
+            logger.error(f"Error reading file {filepath}: {e}")
+            return []
 
 # Singleton class for KQL RAG instance
 class KQLRAGSingleton:
