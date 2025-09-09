@@ -170,11 +170,16 @@ def query_powerbi(question: str, help_msg):
 
     query_gen_res, query_gen_status = query_generation_kql(question)
     logger.info(f'KQL Query generation result: {query_gen_res}, status: {query_gen_status}')
-    k_cluster = 'https://luciatrainingplatform.westcentralus.kusto.windows.net/'
-    k_db = 'production'
+    k_cluster = os.environ.get('DATA_SRC_KUSTO_CLUSTER_URL', '')
+    k_db = os.environ.get('DATA_SRC_KUSTO_DATABASE_NAME', '')
     k_table = ''
     if query_gen_status == 0:
         KQL = KustoExecutor(k_cluster, k_db, k_table)
+        # Replace placeholders
+        query_gen_res = query_gen_res.format(
+            cluster_url=k_cluster,
+            database_name=k_db
+        )
         response, response_status = KQL.execute_return_data(query_gen_res)
         response_long = {"query_generated": query_gen_res, "response_from_query_execution": response}
         logger.info(f'Kusto Query execution result: {response}')

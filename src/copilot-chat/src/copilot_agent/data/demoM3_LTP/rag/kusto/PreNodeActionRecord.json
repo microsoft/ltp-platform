@@ -1,5 +1,5 @@
 {
-  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('PreNodeActionRecord')",
+  "name": "cluster('{cluster_url}').database('{database_name}').table('PreNodeActionRecord')",
   "description": "This table records actions performed on nodes, including timestamps, host and node identifiers, action details, reasons, categories, and endpoints.",
   "schema": [
     {

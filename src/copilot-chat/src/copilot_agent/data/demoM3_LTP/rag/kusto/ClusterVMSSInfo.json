@@ -1,5 +1,5 @@
 {
-  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('ClusterVMSSInfo')",
+  "name": "cluster('{cluster_url}').database('{database_name}').table('ClusterVMSSInfo')",
   "description": "Information about the VMSS instances in the cluster",
   "schema": [
     {

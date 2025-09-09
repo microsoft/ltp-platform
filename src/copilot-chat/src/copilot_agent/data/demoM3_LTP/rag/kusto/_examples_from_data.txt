@@ -3,7 +3,7 @@ Question: "What is the average percentage of allocated VMs across all clusters i
 
 Generated KQL:
 ```kql
-let healthStatus = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('PBICacheClusterCapacityStatus')
+let healthStatus = cluster('{cluster_url}').database('{database_name}').table('PBICacheClusterCapacityStatus')
 | where WeekNum == 30;
 // Step 1: Get the latest results among multiple backup data rows
 let latestHealthStatus = healthStatus
@@ -20,7 +20,7 @@ Question: "How many total VMs were available in the CYS13PrdGPC02 cluster in wee
 
 Generated KQL:
 ```kql
-cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('PBICacheClusterCapacityStatus')
+cluster('{cluster_url}').database('{database_name}').table('PBICacheClusterCapacityStatus')
 | where WeekNum == 31 and Cluster == "CYS13PrdGPC02"
 | summarize arg_max(BackupTimeStamp, *) by WeekNum, Cluster
 | project TotalAvailableVMs = AvgReadyEmpty
@@ -31,7 +31,7 @@ Question: "What is the average job duration for hardware failures in week 30?"
 
 Generated KQL:
 ```kql
-let JobActions = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('JobSummary')
+let JobActions = cluster('{cluster_url}').database('{database_name}').table('JobSummary')
 | summarize arg_max(timeGenerated, *) by jobId
 | where exitCategory == "Hardware Failure" // accepted values are: "Software Failure", "Platform Failure", "Succeed", "Hardware Failure", "User Stop"
 | extend Week = weekofyear(startofweek(launchTime - 1d, 0)) // Monday as the start of the week
@@ -52,7 +52,7 @@ let ua = "ua"; // 'ua' is a specific status indicating the node is unassigned. a
 let ua_dealloc = "deallocated_ua";
 let ua_alloc = "allocated_ua";
 let end_actions = dynamic(["available", "deallocated_capacity"]);
-let data_with_flags = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').NodeStatusRecord
+let data_with_flags = cluster('{cluster_url}').database('{database_name}').NodeStatusRecord
 | distinct Timestamp, HostName, Status, Endpoint
 | join kind=leftouter 
     (VMInfo 
@@ -120,7 +120,7 @@ let ua = "ua";
 let ua_dealloc = "deallocated_ua";
 let ua_alloc = "allocated_ua";
 let end_actions = dynamic(["available", "deallocated_capacity"]);
-let data_with_flags = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').NodeStatusRecord
+let data_with_flags = cluster('{cluster_url}').database('{database_name}').NodeStatusRecord
 | distinct Timestamp, HostName, Status, Endpoint
 | join kind=leftouter 
     (VMInfo 

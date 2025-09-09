@@ -6,7 +6,7 @@ Question: "Can you provide a weekly summary of node health states (average avail
 
 Generated KQL:
 ```kql
-cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('PBICacheClusterCapacityStatus')
+cluster('{cluster_url}').database('{database_name}').table('PBICacheClusterCapacityStatus')
 | summarize arg_max(BackupTimeStamp, *) by WeekNum, Cluster
 | project-away BackupTimeStamp
 ```
@@ -18,10 +18,10 @@ Question: "How can I calculate the daily count of node statuses grouped by their
 Generated KQL:
 ```kql
 // Step 0: get source data
-let NodeStatusRecord = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeStatusRecord');
-let NodeStatusAttributes = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeStatusAttributes');
-let VMInfo = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('VMInfo');
-let ClusterVMSSInfo = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('ClusterVMSSInfo');
+let NodeStatusRecord = cluster('{cluster_url}').database('{database_name}').table('NodeStatusRecord');
+let NodeStatusAttributes = cluster('{cluster_url}').database('{database_name}').table('NodeStatusAttributes');
+let VMInfo = cluster('{cluster_url}').database('{database_name}').table('VMInfo');
+let ClusterVMSSInfo = cluster('{cluster_url}').database('{database_name}').table('ClusterVMSSInfo');
 let min_day = toscalar(NodeStatusRecord | summarize startofday(min(Timestamp)));
 let max_day = toscalar(NodeStatusRecord | summarize startofday(max(Timestamp)));
 let AllDays = range Day from min_day to max_day step 1d;
@@ -94,7 +94,7 @@ Question: "How can I summarize the latest job details on a weekly basis?"
 
 Generated KQL:
 ```kql
-let JobSummary = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').JobSummary;
+let JobSummary = cluster('{cluster_url}').database('{database_name}').JobSummary;
 JobSummary
 | summarize arg_max(timeGenerated, *) by jobId
 | extend Week = weekofyear(startofweek(launchTime - 1d, 0)) // Monday as the start of the week
@@ -107,8 +107,8 @@ Aliases:
 
 Generated KQL:
 ```kql
-let ReactTime_table = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').JobReactTime;
-let Summary_table = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').JobSummary;
+let ReactTime_table = cluster('{cluster_url}').database('{database_name}').JobReactTime;
+let Summary_table = cluster('{cluster_url}').database('{database_name}').JobSummary;
 let jobExitFailure = dynamic(["Software Failure", "Hardware Failure", "Platform Failure"]);
 let jobExitSuccess = dynamic(["Succeed", "User Stop"]);
 let ReactTime =
@@ -125,7 +125,7 @@ Question: "How can I filter and analyze jobs that failed due to hardware issues?
 
 Generated KQL:
 ```kql
-let JobActions = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('JobSummary')
+let JobActions = cluster('{cluster_url}').database('{database_name}').table('JobSummary')
 | summarize arg_max(timeGenerated, *) by jobId
 | where exitCategory in ("Hardware Failure")
 | project-away userName, jobState, retryCount, attemptId, retryDetails, jobPriority, totalGpuHours, idleGpuHours, effectiveGpuHours, exitReason, jobHash
@@ -145,7 +145,7 @@ let States = datatable (State:string)
     "new-validating", "validating-available", "available-cordoned", "cordoned-triaged_hardware"
 ];
 // step 1, filter the actions related to Hardware failure, assign an action seq, join to extend the Endpoint and ClusterName column
-let AllRelevantActions = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')
+let AllRelevantActions = cluster('{cluster_url}').database('{database_name}').table('NodeActionRecord')
 | where Action in ("new-validating", "validating-available", "available-cordoned", "cordoned-triaged_hardware") // Filter for relevant actions to optimize performance
 | extend ActionSeq = case(
     Action == "new-validating", "S00",
@@ -233,7 +233,7 @@ let ua = "ua";
 let ua_dealloc = "deallocated_ua";
 let ua_alloc = "allocated_ua";
 let end_actions = dynamic(["available", "deallocated_capacity"]);
-let data_with_flags = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').NodeStatusRecord
+let data_with_flags = cluster('{cluster_url}').database('{database_name}').NodeStatusRecord
 | distinct Timestamp, HostName, Status, Endpoint
 | join kind=leftouter 
     (VMInfo 
@@ -341,7 +341,7 @@ let ua = "ua"; // 'ua' is a specific status indicating the node is unassigned. a
 let ua_dealloc = "deallocated_ua";
 let ua_alloc = "allocated_ua";
 let end_actions = dynamic(["available", "deallocated_capacity"]);
-let data_with_flags = cluster('luciatrainingplatform.westcentralus.kusto.windows.net').database('production').NodeStatusRecord
+let data_with_flags = cluster('{cluster_url}').database('{database_name}').NodeStatusRecord
 | distinct Timestamp, HostName, Status, Endpoint
 | join kind=leftouter 
     (VMInfo 
@@ -403,8 +403,8 @@ Generated KQL:
 ```kql
 // Step 0, take the original data from source
 let src =
-cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')
-    .database('production')
+cluster('{cluster_url}')
+    .database('{database_name}')
     .table('NodeActionRecord')
 | join kind=leftouter NodeActionAttributes on Action
 | sort by HostName asc, Timestamp asc, Action asc
@@ -494,8 +494,8 @@ Generated KQL:
 ```kql
 // Step 0, take the original data from source
 let src =
-cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')
-    .database('production')
+cluster('{cluster_url}')
+    .database('{database_name}')
     .table('NodeActionRecord')
 | join kind=leftouter NodeActionAttributes on Action
 | sort by HostName asc, Timestamp asc, Action asc
@@ -556,8 +556,8 @@ Generated KQL:
 ```kql
 // Step 0, take the original data from source
 let src =
-cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')
-    .database('production')
+cluster('{cluster_url}')
+    .database('{database_name}')
     .table('NodeActionRecord')
 | join kind=leftouter NodeActionAttributes on Action
 | sort by HostName asc, Timestamp asc, Action asc
@@ -612,8 +612,8 @@ Generated KQL:
 ```kql
 // step 1, Original source and initial processing
 let src =
-cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/')
-    .database('production')
+cluster('{cluster_url}')
+    .database('{database_name}')
     .table('NodeActionRecord')
 | join kind=leftouter NodeActionAttributes on Action
 | sort by HostName asc, Timestamp asc, Action asc
@@ -687,7 +687,7 @@ Question: "Can you let me know which ClusterName maps to which Endpoint?"
 
 Generated KQL:
 ```kql
-let ClusterName_Endpoint = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')
+let ClusterName_Endpoint = cluster('{cluster_url}').database('{database_name}').table('NodeActionRecord')
 | join kind=leftouter 
     (VMInfo 
     | distinct HostName, VMSS)
@@ -711,14 +711,14 @@ Generated KQL:
 let targetEndpoint = "pai-wcu";
 // Step 2: Use the mapping table to find the ClusterName for the specified endpoint.
 let targetCluster = (
-    cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeActionRecord')
+    cluster('{cluster_url}').database('{database_name}').table('NodeActionRecord')
     | join kind=leftouter 
-        (cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('VMInfo')
+        (cluster('{cluster_url}').database('{database_name}').table('VMInfo')
         | distinct HostName, VMSS)
     on HostName
     | extend VMSS_clean = trim(" ", tolower(VMSS))
     | join kind=leftouter (
-        cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('ClusterVMSSInfo')
+        cluster('{cluster_url}').database('{database_name}').table('ClusterVMSSInfo')
         | extend VMSS_clean = trim(" ", tolower(VMSSName))
     ) on VMSS_clean
     | where Endpoint == targetEndpoint
@@ -726,7 +726,7 @@ let targetCluster = (
     | distinct ClusterName
 );
 // Step 3: Use the found ClusterName(s) to filter the availability ratio table.
-let healthStatus = cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('PBICacheClusterCapacityStatus')
+let healthStatus = cluster('{cluster_url}').database('{database_name}').table('PBICacheClusterCapacityStatus')
 | where Cluster in (targetCluster)
 | where WeekNum == 30;
 // Step 4: Make sure to get the latest results among multiple backup data rows.

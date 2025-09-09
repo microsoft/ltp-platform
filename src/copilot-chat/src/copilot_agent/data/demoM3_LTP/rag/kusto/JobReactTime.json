@@ -1,5 +1,5 @@
 {
-  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('JobReactTime')",
+  "name": "cluster('{cluster_url}').database('{database_name}').table('JobReactTime')",
   "description": "This table stores job reaction times and related metadata for monitoring and analysis.",
   "schema": [
     {

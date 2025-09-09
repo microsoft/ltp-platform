@@ -1,5 +1,5 @@
 {
-  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('VMInfo')",
+  "name": "cluster('{cluster_url}').database('{database_name}').table('VMInfo')",
   "description": "Contains information about virtual machines in the specified cluster, including VMSS, host name, instance details, subscription, resource group, and VM size.",
   "schema": [
     {

@@ -1,6 +1,6 @@
 {
-  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeStatusRecord')",
-  "description": "Represents the status record of nodes in the production cluster.",
+  "name": "cluster('{cluster_url}').database('{database_name}').table('NodeStatusRecord')",
+  "description": "Represents the status record of nodes in the {database_name} cluster.",
   "schema": [
     {
       "ColumnName": "Timestamp",

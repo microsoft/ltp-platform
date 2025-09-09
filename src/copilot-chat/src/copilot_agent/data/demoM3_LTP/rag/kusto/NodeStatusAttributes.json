@@ -1,6 +1,6 @@
 {
-  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('NodeStatusAttributes')",
-  "description": "This table contains attributes related to the status, group, and description of nodes in the production cluster.",
+  "name": "cluster('{cluster_url}').database('{database_name}').table('NodeStatusAttributes')",
+  "description": "This table contains attributes related to the status, group, and description of nodes in the {database_name} cluster.",
   "schema": [
     {
       "ColumnName": "Status",

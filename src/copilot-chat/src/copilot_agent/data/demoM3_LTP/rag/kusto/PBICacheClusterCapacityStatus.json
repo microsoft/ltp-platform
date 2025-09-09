@@ -1,5 +1,5 @@
 {
-  "name": "cluster('https://luciatrainingplatform.westcentralus.kusto.windows.net/').database('production').table('PBICacheClusterCapacityStatus')",
+  "name": "cluster('{cluster_url}').database('{database_name}').table('PBICacheClusterCapacityStatus')",
   "description": "This table contains the capacity status of the clusters.",
   "schema": [
     {
