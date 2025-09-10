@@ -10,11 +10,14 @@ import (
 	"time"
 )
 
+// target job tag to identify model serving jobs
 const TARGET_JOB_TAG = "model-serving"
+
+// REST server and Job server path segments in the URL
 const REST_SERVER_PATH = "rest-server"
 const JOB_SERVER_PATH = "job-server"
 
-var httpClient = &http.Client{Timeout: 10 * time.Second}
+var httpClient = &http.Client{Timeout: 120 * time.Second}
 
 // ListModelServingJobs returns a list of model serving jobs with the given request
 func ListModelServingJobs(restServerUrl string, restServerToken string) ([]string, error) {
