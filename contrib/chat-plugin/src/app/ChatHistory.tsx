@@ -165,11 +165,16 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
         {isHovered ? (
           <div>
             <button
-              onClick={() => {
+              onClick={async () => {
                 const textToCopy = message.reasoning
                   ? `<think>\n${message.reasoning}\n</think>\n\n${message.message}`
                   : message.message;
-                navigator.clipboard.writeText(textToCopy);
+                try {
+                  await navigator.clipboard.writeText(textToCopy);
+                } catch (err) {
+                  // Optionally, provide user feedback here
+                  console.error("Failed to copy to clipboard:", err);
+                }
               }}
               className="text-gray-500 hover:text-gray-700 transition-opacity"
               title="Copy message"
@@ -177,7 +182,7 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
               <ClipboardCopy size={16} />
             </button>
           </div>) :
-          (<div style={{ height: '24px' }}></div>)
+          ((<div className="h-6"></div>))
         }
       </div>
     </div>
