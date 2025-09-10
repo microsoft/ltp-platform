@@ -227,5 +227,15 @@ User question:
 Users are unable to manage their expectations regarding job completion times due to a lack of visibility into job progress or estimated end times.
 5. [auto_rejection]
 
+[Example 38]
+User question:
+Which job had the longest duration in week 30, and what was its exit reason?
+4. [dashboard]
+
+[Example 39]
+User question:
+What are the cluster names in pai-wcu endpoint?
+4. [dashboard]
+
 Please output  in the following format:
 Type: 0-6. [question type]

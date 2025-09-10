@@ -1,0 +1,62 @@
+{
+  "name": "cluster('{cluster_url}').database('{database_name}').table('VMInfo')",
+  "description": "Contains information about virtual machines in the specified cluster, including VMSS, host name, instance details, subscription, resource group, and VM size.",
+  "schema": [
+    {
+      "ColumnName": "VMSS",
+      "ColumnOrdinal": 0,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the Virtual Machine Scale Set (VMSS) to which the VM belongs."
+    },
+    {
+      "ColumnName": "HostName",
+      "ColumnOrdinal": 1,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the virtual machine."
+    },
+    {
+      "ColumnName": "RoleInstanceName",
+      "ColumnOrdinal": 2,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the role instance."
+    },
+    {
+      "ColumnName": "InstanceId",
+      "ColumnOrdinal": 3,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The ID of the instance."
+    },
+    {
+      "ColumnName": "VMId",
+      "ColumnOrdinal": 4,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The ID of the virtual machine."
+    },
+    {
+      "ColumnName": "SubscriptionId",
+      "ColumnOrdinal": 5,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The ID of the subscription."
+    },
+    {
+      "ColumnName": "ResourceGroupName",
+      "ColumnOrdinal": 6,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the resource group."
+    },
+    {
+      "ColumnName": "VMSize",
+      "ColumnOrdinal": 7,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The size of the virtual machine."
+    }
+  ]
+}

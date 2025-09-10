@@ -1,15 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-"""CoPilot.
-version: f2
-    feature:
-    - query sku benchmark
-    - perform RCA benchmark perf. bottleneck
-version: f3
-    feature:
-    - Lucia Training Platform (LTP) admin/user support
-"""
+"""CoPilot Conversation class, manages the inquiry/response turns for each user."""
 
 import os
 from collections import deque

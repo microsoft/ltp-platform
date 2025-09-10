@@ -9,6 +9,7 @@ This document describes the configuration and deployment structure for the Copil
 - [Deployment](#deployment)
 - [Directory Structure](#directory-structure)
 - [Troubleshooting](#troubleshooting)
+- [Sample Questions](#sample-questions)
 
 ## Overview
 
@@ -79,11 +80,11 @@ These metrics provide a comprehensive view of both correctness and efficiency ac
 | Category             | Count | Support Level    | Classification Accuracy | Query Generation Accuracy | Answer Generation Accuracy | Mean Duration (s) | Max Duration (s) | Words per Second |
 |----------------------|-------|------------------|-------------------------|---------------------------|----------------------------|-------------------|------------------|------------------|
 | Human Intervention   | 17    | Full             | 0.76                    | NA                        | TBD                        | 13.83             | 17.74            | 8.33             |
-| User Manual          | 28    | Full             | 0.96                    | NA                        | TBD                        | 13.72             | 23.73            | 21.00            |
+| User Manual          | 28    | Limited (link unavailable)   | 0.96                    | NA                        | TBD                        | 13.72             | 23.73            | 21.00            |
 | Auto Rejection       | 3     | Full             | 1                       | NA                        | TBD                        | 8.84              | 10.70            | 13.15            |
 | Cluster Job Metrics  | 19    | Not supported    | (0.89)                  | TBD                       | TBD                        | (16.34)           | (26.95)          | (12.42)          |
 | Job Metadata         | 1     | Full             | 1                       | TBD                       | TBD                        | 19.91             | 19.91            | 13.25            |
-| Dashboard            | 30    | Limited, Cached  | 0.97                    | TBD                       | TBD                        | 13.08             | 18.70            | 11.77            |
+| Dashboard           | 36    | Full          | 1                       | 0.84                      | TBD                        | 16.9              | 30.2             | 17.6             |
 
 ### Questions to Tryout
 
@@ -227,3 +228,9 @@ These questions focus on evaluating and monitoring cluster availability and reli
 | f3c4idx27 | What was the total number of hardware-related node failures in Week 27 across all endpoints? | dashboard |
 | f3c4idx28 | What was the node recycle time for cordon nodes in the CYS13PrdGPC02 cluster in Week 25? | dashboard |
 | f3c4idx29 | What was the average availability ratio for the cluster CYS13PrdGPC02 in Week 27? | dashboard |
+| f3c4idx30 | What was the node recycle time for cordon nodes in the CYS13PrdGPC02 cluster in Week 32? | dashboard |
+| f3c4idx31 | What is minimum, average and maximum daily availability ratio for endpoint pai-wcu, in week 30? | dashboard |
+| f3c4idx32 | What was the node recycle time and node count for ofr nodes in the CYS13PrdGPC02 cluster in Week 31? | dashboard |
+| f3c4idx33 | What is the weekly failure ratio in week 30? | dashboard |
+| f3c4idx34 | How many failures are attribute to hardware for endpoint pai-scu on July 30th? | dashboard |
+| f3c4idx35 | What are the cluster names in pai-wcu endpoint? | dashboard |

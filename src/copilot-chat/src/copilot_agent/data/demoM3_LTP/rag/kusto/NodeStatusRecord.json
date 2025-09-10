@@ -1,0 +1,41 @@
+{
+  "name": "cluster('{cluster_url}').database('{database_name}').table('NodeStatusRecord')",
+  "description": "Represents the status record of nodes in the {database_name} cluster.",
+  "schema": [
+    {
+      "ColumnName": "Timestamp",
+      "ColumnOrdinal": 0,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp of the node status record."
+    },
+    {
+      "ColumnName": "HostName",
+      "ColumnOrdinal": 1,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the host."
+    },
+    {
+      "ColumnName": "Status",
+      "ColumnOrdinal": 2,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The status of the node."
+    },
+    {
+      "ColumnName": "NodeId",
+      "ColumnOrdinal": 3,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The ID of the node."
+    },
+    {
+      "ColumnName": "Endpoint",
+      "ColumnOrdinal": 4,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The endpoint of the node."
+    }
+  ]
+}
