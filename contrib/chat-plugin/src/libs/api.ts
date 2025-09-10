@@ -265,14 +265,14 @@ export async function chatStreamRequest(abortSignal?: AbortSignal) {
               const parsed = JSON.parse(data);
 
               // Handle different response formats (e.g., chat completions vs completions)
-              const contentDelta = parsed.choices?.[0]?.delta?.content ||
+              let contentDelta = parsed.choices?.[0]?.delta?.content ||
                 parsed.choices?.[0]?.text ||
                 "";
               const reasonDelta = parsed.choices?.[0]?.delta?.reasoning_content || "";
 
               if (contentDelta) {
                 if (newMsg.message.length === 0) {
-                  contentDelta.trim();
+                  contentDelta = contentDelta.trim();
                 }
                 newMsg.message += contentDelta;
               }

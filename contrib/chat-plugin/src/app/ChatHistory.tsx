@@ -114,13 +114,13 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
   };
 
   const hasExpandedRef = useRef(false);
-  
+
   useEffect(() => {
     if (message.message.length > 0 && !hasExpandedRef.current) {
       setExpanded(false);
       hasExpandedRef.current = true;
     }
-  }, [message.message.length])
+  }, [message.message.length]);
 
   return (
     <div className="flex-1 container relative mb-1 bg-gray-100 px-2 py-1 rounded word-wrap"    >
@@ -149,7 +149,7 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
       )}
       <div
         ref={contentRef}
-        className={`flex-1 'pr-10'  'overflow-auto' `}
+        className={`flex-1 pr-10 overflow-auto`}
         style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
       >
         {message.message}

@@ -76,7 +76,7 @@ export const useChatStore = create<State>((set) => ({
     const chatMsgs = [...state.chatMsgs];
     if (chatMsgs.length > 0) {
       chatMsgs[chatMsgs.length - 1] = lastChat;
-    }else {
+    } else {
       chatMsgs.push(lastChat);
     }
     return { chatMsgs };
