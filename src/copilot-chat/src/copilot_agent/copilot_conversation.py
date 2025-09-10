@@ -120,7 +120,10 @@ class CoPilotConversation:
                 self._log_message_data('feedback', in_parameters)
             elif _is_question:
                 self._log_message_data('in', in_parameters)
-            self._log_message_data('out', result)
+            if isinstance(result, OutParameters):
+                self._log_message_data('out', result)
+            else:
+                logger.warning(f"[CoPilot]: Skipping 'out' log; result is of type {type(result).__name__} and may not have expected attributes.")
         threading.Thread(target=log_message, daemon=True).start()
     
         return result
