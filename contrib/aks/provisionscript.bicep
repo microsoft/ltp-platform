@@ -88,6 +88,18 @@ var bootstrapscripts = {
     blobproxyscript
   ]
 
+  Standard_ND96isr_H200_v5: [
+    waitdnsready
+    installfusescript
+    vmssraidsetupscript
+    '${nvidianvswitch} 3201 1980'
+    '${containerdscript} nvidia'
+    kubeletmsiscript
+    '${kubeletscript} Standard_ND96isr_H200_v5 gpu'
+    tlsscanscript
+    blobproxyscript
+  ]
+
   Standard_E16bs_v5: [
     waitdnsready
     '${containerdscript} runc'
