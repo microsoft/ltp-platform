@@ -224,7 +224,7 @@ class CoPilotConversation:
                 content = feedback
             else:
                 content = 'na'
-            meta = 'na'
+            meta = msg_info
             debug = 'na'
         elif inout == 'out':
             content = parameters.answer
