@@ -95,7 +95,8 @@ class CoPilotConversation:
 
         # process
         if _is_feedback:
-            result = self._handle_feedback_only()
+            user_id, conv_id = self._extract_user_and_conv_id(question_msg_info)
+            result = self._handle_feedback_only(user_id, conv_id)
         elif _is_question:
             user_id, conv_id = self._extract_user_and_conv_id(question_msg_info)
             # Authenticate only for user question
@@ -104,7 +105,7 @@ class CoPilotConversation:
                 self.auth_manager.set_authenticate_state(username, rest_token)
                 if not self.auth_manager.is_authenticated(username):
                     logger.error(f'User {username} failed authentication twice. Aborting operation.')
-                    result = self._handle_authenticate_failure()
+                    result = self._handle_authenticate_failure(user_id, conv_id)
                 else:
                     logger.info(f'User {username} authenticated successfully.')
                     result = self._handle_user_question(user_id, conv_id, user_prompt, skip_summary, debugging, question_msg_info)
@@ -146,10 +147,20 @@ class CoPilotConversation:
         """Return True if only a user question is provided, not feedback."""
         return not user_feedback and user_prompt
 
-    def _handle_feedback_only(self):
+    def _handle_feedback_only(self, user_id, conv_id):
         """Handle the case where only feedback is provided."""
         logger.info('User feedback provided without a user question. No operation is required.')
-        resp = {'answer': 'skip'}
+        resp = {
+            'answer': 'skip',
+            'messageInfo': {
+                'userId': user_id,
+                'convId': conv_id,
+                'turnId': str(uuid.uuid4()),
+                'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
+                'type': 'error',
+                'timestampUnit': 'ms',
+            }
+        }
         out_parameters = OutParameters(resp)
         return out_parameters
 
@@ -160,10 +171,20 @@ class CoPilotConversation:
         out_parameters = OutParameters(resp)
         return out_parameters
 
-    def _handle_authenticate_failure(self):
+    def _handle_authenticate_failure(self, user_id, conv_id):
         """Handle authentication failure case."""
         logger.info('User authentication failed. Aborting operation.')
-        resp = {'answer': 'skip'}
+        resp = {
+            'answer': 'skip',
+            'messageInfo': {
+                'userId': user_id,
+                'convId': conv_id,
+                'turnId': str(uuid.uuid4()),
+                'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
+                'type': 'error',
+                'timestampUnit': 'ms',
+            }
+        }
         out_parameters = OutParameters(resp)
         return out_parameters
 
