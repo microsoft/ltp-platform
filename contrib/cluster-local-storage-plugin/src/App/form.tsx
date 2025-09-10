@@ -444,7 +444,7 @@ export default class Form extends React.Component<IFormProps, IFormState> {
       return;
     }
     if (!this.state.blobDir || !this.state.blobToken) {
-      alert(`Error: Blob direcotyr or token is empty.`);
+      alert(`Error: Blob directory or token is empty.`);
       return;
     }
     return fetch(`${this.state.endpoint}/${this.state.cluster}/storage`, {
