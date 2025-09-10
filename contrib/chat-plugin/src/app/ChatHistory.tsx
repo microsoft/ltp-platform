@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 import moment from "moment";
-import { Bot, User, Trash2, SigmaIcon } from "lucide-react";
+import { Bot, User, Trash2, ClipboardCopy } from "lucide-react";
 import Markdown, { Components } from "react-markdown";
 
 import remarkGfm from "remark-gfm";
@@ -107,6 +106,7 @@ const CustomMarkdown: React.FC<{ content: string }> = ({ content }) => {
 // Message component
 const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
   const [expanded, setExpanded] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null); // Reference to the content div
 
   const handleToggle = () => {
@@ -123,36 +123,67 @@ const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
   }, [message.message.length]);
 
   return (
-    <div className="flex-1 container relative mb-1 bg-gray-100 px-2 py-1 rounded word-wrap"    >
-
-      {/* Reasoning part with fold/unfold */}
-      {message.reasoning && (
-        <div className="bg-gray-50 border-l-4 border-gray-400 px-2 py-1 mb-2 rounded text-gray-700">
-          <details open={expanded}>
-            <summary
-              className="cursor-pointer font-semibold"
-              onClick={e => {
-                e.preventDefault();
-                handleToggle();
-              }}
-            >
-              Reasoning
-            </summary>
-            <div
-              className="mt-1 overflow-auto"
-              style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
-            >
-              {message.reasoning}
-            </div>
-          </details>
-        </div>
-      )}
+    <div
+      className="flex-1 container relative overflow-hidden"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div
-        ref={contentRef}
-        className={`flex-1 pr-10 overflow-auto`}
-        style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
+        className="flex-1 container relative mb-1 bg-gray-100 px-2 py-1 rounded word-wrap overflow-hidden"
       >
-        {message.message}
+        {/* Reasoning part with fold/unfold */}
+        {message.reasoning && (
+          <div className="bg-gray-50 border-l-4 border-gray-400 px-2 py-1 mb-2 rounded text-gray-700 overflow-hidden">
+            <details open={expanded}>
+              <summary
+                className="cursor-pointer font-semibold"
+                onClick={e => {
+                  e.preventDefault();
+                  handleToggle();
+                }}
+              >
+                Reasoning
+              </summary>
+              <div
+                className="mt-1 overflow-auto max-w-full"
+                style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
+              >
+                <CustomMarkdown content={message.reasoning} />
+              </div>
+            </details>
+          </div>
+        )}
+        <div
+          ref={contentRef}
+          className="flex-1 overflow-auto max-w-full"
+          style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
+        >
+          <CustomMarkdown content={message.message} />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        {isHovered ? (
+          <div>
+            <button
+              onClick={async () => {
+                const textToCopy = message.reasoning
+                  ? `<think>\n${message.reasoning}\n</think>\n\n${message.message}`
+                  : message.message;
+                try {
+                  await navigator.clipboard.writeText(textToCopy);
+                } catch (err) {
+                  // Optionally, provide user feedback here
+                  console.error("Failed to copy to clipboard:", err);
+                }
+              }}
+              className="text-gray-500 hover:text-gray-700 transition-opacity"
+              title="Copy message"
+            >
+              <ClipboardCopy size={16} />
+            </button>
+          </div>) :
+          ((<div className="h-6"></div>))
+        }
       </div>
     </div>
   );
