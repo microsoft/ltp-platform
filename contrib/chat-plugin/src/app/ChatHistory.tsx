@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 import moment from "moment";
-import { Bot, User, Trash2, SigmaIcon } from "lucide-react";
+import { Bot, User, Trash2, ClipboardCopy } from "lucide-react";
 import Markdown, { Components } from "react-markdown";
 
 import remarkGfm from "remark-gfm";
@@ -105,45 +104,86 @@ const CustomMarkdown: React.FC<{ content: string }> = ({ content }) => {
 }
 
 // Message component
-const Message: React.FC<{ message: ChatMessage, expand?: boolean }> = ({ message, expand = true }) => {
-  const [expanded, setExpanded] = useState(expand);
-  const [showButton, setShowButton] = useState(true);
+const Message: React.FC<{ message: ChatMessage }> = ({ message }) => {
+  const [expanded, setExpanded] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null); // Reference to the content div
 
-  useEffect(() => {
-    setExpanded(expand); // Set expanded based on prop
-  }, [expand]);
-
-  useEffect(() => {
-    // Check if the content height is less than a threshold (8 in this case)
-    const contentHeight = contentRef.current?.scrollHeight;
-    if (contentHeight && contentHeight <= 32) { // Assuming 32px is roughly equivalent to 2 lines of text
-      setShowButton(false);
-    } else {
-      setShowButton(true);
-    }
-  }, [message]); // Depend on message so it re-checks when message changes
-
-  const toggleExpanded = () => {
-    setExpanded(!expanded);
+  const handleToggle = () => {
+    setExpanded((prev) => !prev);
   };
 
+  const hasExpandedRef = useRef(false);
+
+  useEffect(() => {
+    if (message.message.length > 0 && !hasExpandedRef.current) {
+      setExpanded(false);
+      hasExpandedRef.current = true;
+    }
+  }, [message.message.length]);
+
   return (
-    <div className="flex-1 container relative mb-1 bg-gray-100 px-2 py-1 rounded word-wrap"    >
-      {showButton && (
-        <button
-          onClick={toggleExpanded}
-          className="absolute top-0 right-0 mt-1 mr-1 text-blue-500 text-xs flex items-center justify-center bg-white border border-gray-300 rounded-full h-6 w-6"
-        >
-          {expanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
-        </button>
-      )}
+    <div
+      className="flex-1 container relative overflow-hidden"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div
-        ref={contentRef}
-        className={`flex-1 ${expanded ? 'overflow-auto' : 'overflow-hidden max-h-12 mx-auto'} ${showButton ? 'pr-10' : ''}`}
-        style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
+        className="flex-1 container relative mb-1 bg-gray-100 px-2 py-1 rounded word-wrap overflow-hidden"
       >
-        {message.message}
+        {/* Reasoning part with fold/unfold */}
+        {message.reasoning && (
+          <div className="bg-gray-50 border-l-4 border-gray-400 px-2 py-1 mb-2 rounded text-gray-700 overflow-hidden">
+            <details open={expanded}>
+              <summary
+                className="cursor-pointer font-semibold"
+                onClick={e => {
+                  e.preventDefault();
+                  handleToggle();
+                }}
+              >
+                Reasoning
+              </summary>
+              <div
+                className="mt-1 overflow-auto max-w-full"
+                style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
+              >
+                <CustomMarkdown content={message.reasoning} />
+              </div>
+            </details>
+          </div>
+        )}
+        <div
+          ref={contentRef}
+          className="flex-1 overflow-auto max-w-full"
+          style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit' }}
+        >
+          <CustomMarkdown content={message.message} />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        {isHovered ? (
+          <div>
+            <button
+              onClick={async () => {
+                const textToCopy = message.reasoning
+                  ? `<think>\n${message.reasoning}\n</think>\n\n${message.message}`
+                  : message.message;
+                try {
+                  await navigator.clipboard.writeText(textToCopy);
+                } catch (err) {
+                  // Optionally, provide user feedback here
+                  console.error("Failed to copy to clipboard:", err);
+                }
+              }}
+              className="text-gray-500 hover:text-gray-700 transition-opacity"
+              title="Copy message"
+            >
+              <ClipboardCopy size={16} />
+            </button>
+          </div>) :
+          ((<div className="h-6"></div>))
+        }
       </div>
     </div>
   );
@@ -186,7 +226,7 @@ const MessageGroup: React.FC<{ index: number, group: MessageGroup, isLast: boole
         </div>
         {group.messages.map((message, index) => (
           // <Message key={index} message={message} expand={isLast} />
-          <Message key={index} message={message} expand={true} />
+          <Message key={index} message={message} />
         ))}
 
       </div>
