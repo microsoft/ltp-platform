@@ -272,7 +272,7 @@ export default class Form extends React.Component<IFormProps, IFormState> {
       alert(`Failed to get virtual clusters: ${err.message}`);
     }
 
-    const endpoint = new URL("cluster-local-storage", this.props.api).href;
+    const endpoint = new URL("cluster-local-storage", window.location.href).href;
     try {
       const res = await fetch(`${endpoint}/${this.state.cluster}/health`);
       if (res.status !== 200) {
