@@ -1,0 +1,11 @@
+"Table 'ClusterVMSSInfo' contains information about VMSS instances in the cluster, Key relationships: 'VMSSName' can be joined with 'VMSS' in 'VMInfo' and 'ClusterVMSSInfo' tables.",
+"Table 'JobReactTime' stores job reaction times and related metadata, Key relationships: 'jobId' can be joined with 'jobId' in 'JobSummary' table.",
+"Table 'JobSummary' provides a summary of job execution details, Key relationships: 'jobId' can be joined with 'jobId' in 'JobReactTime' table.",
+"Table 'NodeActionAttributes' contains attributes related to actions performed on nodes, Key relationships: 'Action' can be joined with 'Action' in 'NodeActionRecord' table.",
+"Table 'NodeActionRecord' records actions performed on nodes, Key relationships: 'Action' can be joined with 'Action' in 'NodeActionAttributes' table, 'HostName' can be joined with 'HostName' in 'VMInfo' table.",
+"Table 'NodeStatusAttributes' contains attributes related to the status, group, and description of nodes, Key relationships: 'Status' can be joined with 'Status' in 'NodeStatusRecord' table.",
+"Table 'NodeStatusRecord' represents the status record of nodes, Key relationships: 'Status' can be joined with 'Status' in 'NodeStatusAttributes' table, 'HostName' can be joined with 'HostName' in 'VMInfo' table.",
+"Table 'PBICacheClusterCapacityStatus' contains the capacity status of clusters, Key relationships: 'Cluster' can be used for filtering or grouping with other cluster-related tables.",
+"Table 'PreNodeActionRecord' records actions performed on nodes before specific events, Key relationships: 'Action' can be joined with 'Action' in 'NodeActionAttributes' table, 'HostName' can be joined with 'HostName' in 'VMInfo' table.",
+"Table 'PreNodeStatusRecord' contains records of node statuses captured before specific events, Key relationships: 'Status' can be joined with 'Status' in 'NodeStatusAttributes' table, 'HostName' can be joined with 'HostName' in 'VMInfo' table.",
+"Table 'VMInfo' contains information about virtual machines in the cluster, Key relationships: 'VMSS' can be joined with 'VMSSName' in 'ClusterVMSSInfo' table, 'HostName' can be joined with 'HostName' in 'NodeActionRecord' and 'NodeStatusRecord' tables."

@@ -1,0 +1,41 @@
+{
+  "name": "cluster('{cluster_url}').database('{database_name}').table('JobReactTime')",
+  "description": "This table stores job reaction times and related metadata for monitoring and analysis.",
+  "schema": [
+    {
+      "ColumnName": "jobId",
+      "ColumnOrdinal": 0,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "A unique identifier for the job."
+    },
+    {
+      "ColumnName": "reactTime",
+      "ColumnOrdinal": 1,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "Pre-stored job reaction time."
+    },
+    {
+      "ColumnName": "jobHash",
+      "ColumnOrdinal": 2,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "A hash value representing the job, used for quick comparison or deduplication."
+    },
+    {
+      "ColumnName": "timeGenerated",
+      "ColumnOrdinal": 3,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp indicating when the job was last updated."
+    },
+    {
+      "ColumnName": "Endpoint",
+      "ColumnOrdinal": 4,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The endpoint."
+    }
+  ]
+}

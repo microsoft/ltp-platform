@@ -69,12 +69,22 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["llm-model"] }}
         - name: COPILOT_LLM_VERSION
           value: {{ cluster_cfg["copilot-chat"]["llm-version"] }}
+        - name: COPILOT_EMBEDDING_MODEL
+          value: {{ cluster_cfg["copilot-chat"]["embedding-model"] }}
         - name: AGENT_HOST
           value: {{ cluster_cfg["copilot-chat"]["agent-host"] }}
         - name: RESTSERVER_URL
           value: {{ cluster_cfg["copilot-chat"]["rest-server"]["url"] }}
         - name: COPILOT_VALID_VCS
           value: {{ cluster_cfg["copilot-chat"]["valid-vcs"] }}
+        - name: ENVIRONMENT
+          value: {{ cluster_cfg["copilot-chat"]["environment"] | default("prod") }}
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["copilot-chat"]["kusto-user-assigned-client-id"] | default(cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"], true) }}
+        - name: DATA_SRC_KUSTO_CLUSTER_URL
+          value: {{ cluster_cfg["copilot-chat"]["data-src-kusto-cluster-url"] }}
+        - name: DATA_SRC_KUSTO_DATABASE_NAME
+          value: {{ cluster_cfg["copilot-chat"]["data-src-kusto-database-name"] }}
         ports:
         - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
           hostPort:  {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}

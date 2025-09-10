@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { cn } from "./utils";
 
 export type Status = "loading" | "online" | "offline" | "unknown";
 
@@ -7,6 +6,7 @@ export type ChatMessage = {
   role: string;
   message: string;
   timestamp: Date;
+  reasoning?: string; // Optional field for reasoning support
 };
 
 export type Job = {
@@ -43,7 +43,7 @@ interface State {
   setAllModelsInCurrentJob: (models: string[]) => void;
   setCurrentModel: (model: string | null) => void;
   addChatMessage: (chat: ChatMessage) => void;
-  updateLastChatMessage: (lastMessageContent: string) => void;
+  updateLastChatMessage: (lastChat: ChatMessage) => void;
   cleanChat: () => void;
 }
 
@@ -72,11 +72,12 @@ export const useChatStore = create<State>((set) => ({
   setCurrentModel: (model) => set({ currentModel: model }),
 
   addChatMessage: (log) => set((state) => ({ chatMsgs: [...state.chatMsgs, log] })),
-  updateLastChatMessage: (lastMessageContent) => set((state) => {
+  updateLastChatMessage: (lastChat) => set((state) => {
     const chatMsgs = [...state.chatMsgs];
     if (chatMsgs.length > 0) {
-      chatMsgs[chatMsgs.length - 1].message = lastMessageContent;
-      chatMsgs[chatMsgs.length - 1].timestamp = new Date();
+      chatMsgs[chatMsgs.length - 1] = lastChat;
+    } else {
+      chatMsgs.push(lastChat);
     }
     return { chatMsgs };
   }),

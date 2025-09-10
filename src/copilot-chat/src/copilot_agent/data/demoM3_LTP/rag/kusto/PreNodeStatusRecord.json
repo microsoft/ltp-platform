@@ -1,0 +1,41 @@
+{
+  "name": "cluster('{cluster_url}').database('{database_name}').table('PreNodeStatusRecord')",
+  "description": "Contains records of node statuses captured before a specific event or process, including timestamp, host, status, node ID, and endpoint.",
+  "schema": [
+    {
+      "ColumnName": "Timestamp",
+      "ColumnOrdinal": 0,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp when the status was recorded."
+    },
+    {
+      "ColumnName": "HostName",
+      "ColumnOrdinal": 1,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the host where the status was recorded."
+    },
+    {
+      "ColumnName": "Status",
+      "ColumnOrdinal": 2,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The status of the node."
+    },
+    {
+      "ColumnName": "NodeId",
+      "ColumnOrdinal": 3,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The unique identifier of the node."
+    },
+    {
+      "ColumnName": "Endpoint",
+      "ColumnOrdinal": 4,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The endpoint of the node."
+    }
+  ]
+}

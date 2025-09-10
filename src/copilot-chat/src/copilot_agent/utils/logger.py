@@ -1,3 +1,8 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+"""logger"""
+
 import logging
 import sys
 from colorama import Fore, Style, init

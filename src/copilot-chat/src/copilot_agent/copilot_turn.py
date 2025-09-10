@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 """CoPilot Turn."""
 
 import json
@@ -30,8 +33,6 @@ class CoPilotTurn:
         self._version = self._initialize_version()
         # Load help message
         self.help_msg = self.load_help_message()
-        # Preload LTP Dashboard
-        self.ltp_dashboard_short, self.ltp_dashboard_long = self._initialize_dashboard()
         # Question Classifier
         self.classifier = QuestionClassifier(self._version, self.model)
 
@@ -81,7 +82,7 @@ class CoPilotTurn:
             '1': lambda: query_metrics(question, self.help_msg, skip_summary),
             '2': lambda: query_metadata(question, self.help_msg, skip_summary),
             '3': lambda: query_user_manual(question, self.help_msg),
-            '4': lambda: query_powerbi(question, self.ltp_dashboard_short, self.ltp_dashboard_long, self.help_msg),
+            '4': lambda: query_powerbi(question, self.help_msg),
             '5': lambda: ltp_auto_reject(question, self.help_msg),
             '6': lambda: ltp_human_intervention(question, self.help_msg),
         }
@@ -133,28 +134,3 @@ class CoPilotTurn:
         version = COPILOT_VERSION if COPILOT_VERSION in allowed_versions else 'f3'
         logger.info(f'CoPilot - ver:{version}')
         return version
-
-    def _initialize_dashboard(self) -> tuple[list, list]:
-        """Preload the dashboard based on the version."""
-        if self._version == 'f3':
-            self.get_preload_dashboard() # will not replace the existing dashboard if retrieval fails
-            # short version
-            dashboard_file_short = os.path.join(DATA_DIR, 'demoM3_LTP', 'report', 'ltp_dashboard_data_model_short.json')
-            if os.path.exists(dashboard_file_short):
-                with open(dashboard_file_short, 'r') as f:
-                    dashboard_short = json.load(f)
-                    logger.info(f'Loaded dashboard data from {dashboard_file_short}')
-            else:
-                logger.error(f'Dashboard file not found: {dashboard_file_short}')
-                dashboard_short = []
-            # long version
-            dashboard_file_long = os.path.join(DATA_DIR, 'demoM3_LTP', 'report', 'ltp_dashboard_data_model_long.json')
-            if os.path.exists(dashboard_file_long):
-                with open(dashboard_file_long, 'r') as f:
-                    dashboard_long = json.load(f)
-                    logger.info(f'Loaded dashboard data from {dashboard_file_long}')
-            else:
-                logger.error(f'Dashboard file not found: {dashboard_file_long}')
-                dashboard_long = []
-
-        return dashboard_short, dashboard_long

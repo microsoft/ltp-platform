@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 import os
 from ltp_kusto_sdk import NodeStatusClient, NodeActionClient
 from ltp_kusto_sdk.features.node_status.models import NodeStatus

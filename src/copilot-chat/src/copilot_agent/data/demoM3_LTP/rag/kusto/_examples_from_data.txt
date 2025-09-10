@@ -1,0 +1,211 @@
+## Example 17: [from data idx4] Calculate Allocated VM Ratio
+Question: "What is the average percentage of allocated VMs across all clusters in week 30?"
+
+Generated KQL:
+```kql
+let healthStatus = cluster('{cluster_url}').database('{database_name}').table('PBICacheClusterCapacityStatus')
+| where WeekNum == 30;
+// Step 1: Get the latest results among multiple backup data rows
+let latestHealthStatus = healthStatus
+| summarize arg_max(BackupTimeStamp, *) by WeekNum, Cluster
+| project-away BackupTimeStamp;
+// Step 2: Calculate the average percentage of allocated VMs across all clusters
+latestHealthStatus
+| summarize AvgAllocatedPercentage = avg(AvgReadyUsed / (AvgReadyEmpty + AvgReadyUsed + AvgOFR + AvgUnallocatable + AvgHumanInvestigate + AvgExcluded + AvgProbation + AvgSuspected) * 100) by WeekNum
+| project AvgAllocatedPercentage
+```
+
+## Example 18: [from data idx6] Calculate Available VM count
+Question: "How many total VMs were available in the CYS13PrdGPC02 cluster in week 31?"
+
+Generated KQL:
+```kql
+cluster('{cluster_url}').database('{database_name}').table('PBICacheClusterCapacityStatus')
+| where WeekNum == 31 and Cluster == "CYS13PrdGPC02"
+| summarize arg_max(BackupTimeStamp, *) by WeekNum, Cluster
+| project TotalAvailableVMs = AvgReadyEmpty
+```
+
+## Example 19: [from data idx8] Job Duration Time
+Question: "What is the average job duration for hardware failures in week 30?"
+
+Generated KQL:
+```kql
+let JobActions = cluster('{cluster_url}').database('{database_name}').table('JobSummary')
+| summarize arg_max(timeGenerated, *) by jobId
+| where exitCategory == "Hardware Failure" // accepted values are: "Software Failure", "Platform Failure", "Succeed", "Hardware Failure", "User Stop"
+| extend Week = weekofyear(startofweek(launchTime - 1d, 0)) // Monday as the start of the week
+| where Week == 30
+| extend JobDuration = jobDurationHours // Directly use the jobDurationHours which is pre-stored into the table
+| summarize AvgJobDuration = avg(JobDuration);
+JobActions
+```
+
+## Example 20: [from data idx30] Node Recycle Time for Cordon Nodes
+Question: "What was the node recycle time for cordon nodes in the CYS13PrdGPC02 cluster in Week 32?"
+
+Generated KQL:
+```kql
+// step 1: prepares the data and adds flags to categorize each row's status.
+let start_actions = dynamic(["cordoned", "new"]);
+let ua = "ua"; // 'ua' is a specific status indicating the node is unassigned. all Cordon nodes should be unassigned
+let ua_dealloc = "deallocated_ua";
+let ua_alloc = "allocated_ua";
+let end_actions = dynamic(["available", "deallocated_capacity"]);
+let data_with_flags = cluster('{cluster_url}').database('{database_name}').NodeStatusRecord
+| distinct Timestamp, HostName, Status, Endpoint
+| join kind=leftouter 
+    (VMInfo 
+    | distinct HostName, VMSS)
+on HostName
+    | extend VMSS_clean = trim(" ", tolower(VMSS))
+    | join kind=leftouter(
+        ClusterVMSSInfo
+        | extend VMSS_clean = trim(" ", tolower(VMSSName))
+    ) on VMSS_clean
+| extend Timestamp = todatetime(['Timestamp'])
+| where isnotempty(HostName) and isnotempty(Status)
+| sort by HostName  asc, Timestamp  asc, Status asc
+| serialize
+| extend
+    is_start = iif(Status in (start_actions), 1, 0),
+    is_end = iif(Status in (end_actions), 1, 0),
+    is_ua = iif(Status == ua, 1, 0) // Flags to identify the start, end, and 'ua' states of a node's lifecycle event, 'is_ua' specifically checks for the 'ua' status. This flag is crucial.
+| extend is_big_start = iff(Status in (start_actions) and prev(Status) in (end_actions), 1 ,0)
+| extend big_group_id = row_cumsum(is_big_start)
+| extend group_key = strcat(HostName, "_", tostring(big_group_id))
+| serialize
+| extend sub_group_id = row_cumsum(is_start, group_key != prev(group_key))
+| project-away HostName1;
+let duplicated_rows =
+    data_with_flags
+    | where is_start == 1 and sub_group_id >1
+    | extend sub_group_id = sub_group_id - 1;
+let final_data =
+    data_with_flags
+    | union duplicated_rows
+    | sort by HostName, Timestamp, sub_group_id;
+let sum_final_data =
+    final_data
+    | summarize
+        StartTime = minif(Timestamp, is_start == 1),
+        EndTime = max(Timestamp),
+        UAedTime = minif(Timestamp, is_ua == 1)
+    by HostName, big_group_id, sub_group_id, Endpoint, ClusterName
+    | where isnotnull(StartTime) and isnotnull(EndTime)  and isnull(UAedTime)
+    | extend
+        Node_Recycle_Time = todouble(EndTime - StartTime)/todouble(1h)
+    | sort by StartTime
+    | extend WeekNumber = weekofyear(startofweek(StartTime - 1d, 0)); // Monday as the start of the week
+let grouped_by_week =
+sum_final_data
+| summarize
+    sum_Node_Recycle_Time = avg(Node_Recycle_Time),
+    sum_Node = countif(isnotnull(Node_Recycle_Time))
+  by WeekNumber, Endpoint, ClusterName
+| where WeekNumber == 32 // Filter for Week 32
+| where ClusterName == "CYS13PrdGPC02"; // Filter for ClusterName
+grouped_by_week
+```
+
+
+## Example 21: [from data idx32] Node Recycle Time for OFR Nodes
+Question: "What was the node recycle time and node count for ofr nodes in the CYS13PrdGPC02 cluster in Week 31?"
+
+Generated KQL:
+```kql
+// Step 1: Prepares the Data and Adds Flags to Categorize Each Row's Status
+let start_actions = dynamic(["cordoned", "new"]);
+let ua = "ua";
+let ua_dealloc = "deallocated_ua";
+let ua_alloc = "allocated_ua";
+let end_actions = dynamic(["available", "deallocated_capacity"]);
+let data_with_flags = cluster('{cluster_url}').database('{database_name}').NodeStatusRecord
+| distinct Timestamp, HostName, Status, Endpoint
+| join kind=leftouter 
+    (VMInfo 
+    | distinct HostName, VMSS)
+on HostName
+    | extend VMSS_clean = trim(" ", tolower(VMSS))
+    | join kind=leftouter(
+        ClusterVMSSInfo
+        | extend VMSS_clean = trim(" ", tolower(VMSSName))
+    ) on VMSS_clean
+| extend Timestamp = todatetime(['Timestamp'])
+| where isnotempty(HostName) and isnotempty(Status)
+| sort by HostName  asc, Timestamp  asc, Status asc
+| serialize
+| extend
+    is_start = iif(Status in (start_actions), 1, 0),
+    is_end = iif(Status in (end_actions), 1, 0),
+    is_ua = iif(Status == ua, 1, 0),
+    is_ua_dealloc = iif(Status == ua_dealloc, 1, 0),
+    is_ua_alloc = iif(Status == ua_alloc, 1, 0)
+| extend is_big_start = iff(Status in (start_actions) and prev(Status) in (end_actions), 1 ,0)
+| extend big_group_id = row_cumsum(is_big_start)
+| extend group_key = strcat(HostName, "_", tostring(big_group_id))
+| serialize
+| extend sub_group_id = row_cumsum(is_start, group_key != prev(group_key))
+| project-away HostName1;
+// Step 2: Handles Duplicates and Finalizes Data
+let duplicated_rows =
+    data_with_flags
+    | where is_start == 1 and sub_group_id >1
+    | extend sub_group_id = sub_group_id - 1;
+let events_by_subgroup =
+    data_with_flags
+    | union duplicated_rows
+    | sort by HostName, Timestamp, sub_group_id;
+// Step 3: Summarizes and Calculates Time Metrics per Sub-Group
+let subgroup_metrics =
+events_by_subgroup
+| summarize
+    StartTime = minif(Timestamp, is_start == 1),
+    UAedTime = minif(Timestamp, is_ua == 1),
+    UADeallocTime = minif(Timestamp, is_ua_dealloc == 1),
+    UAAllocTime = minif(Timestamp, is_ua_alloc == 1),
+    EndTime = max(Timestamp)
+  by HostName, big_group_id, sub_group_id, Endpoint, ClusterName
+| where isnotnull(StartTime) and isnotnull(UADeallocTime)
+| extend
+    UA_Time = todouble(UADeallocTime - StartTime)/todouble(1h),
+    Allocation_Time = todouble(UAAllocTime - UADeallocTime)/todouble(1h),
+    Validation_Time = todouble(EndTime - UAAllocTime)/todouble(1h),
+    UA_cycle_Time = todouble(EndTime - StartTime)/todouble(1h)
+| sort by StartTime
+| extend NodeRecycleEventID = strcat(HostName, '_', big_group_id)
+| project-away UADeallocTime, UAAllocTime;
+//Step 4: Aggregates Metrics Per Node Recycle Event
+let event_summary_metrics =
+subgroup_metrics
+| summarize
+    EventStartTime = min(StartTime),
+    EventEndTime = max(EndTime),
+    NodeRecycleTime_event = sum(UA_cycle_Time),
+    CountUAAction = countif(isnotnull(UA_cycle_Time))
+by NodeRecycleEventID
+| extend Week = weekofyear(startofweek(EventStartTime - 1d, 0));// Monday as the start of the week
+//Step 5: Joins and Summarizes Data to Create Weekly Metrics of UACycleTime, UATime, AllocationTime, ValidationTime for each ClusterName and Endpoint
+let metrics_with_event_summary =
+subgroup_metrics
+| join kind=leftouter (
+    event_summary_metrics
+) on NodeRecycleEventID;
+//Step 6: Joins and Summarizes Data to Create Weekly Metrics of OFR NodeCount, OFR NodeRecycleTime, Single Recycel UA Time for each ClusterName and Endpoint
+//This step is necessary to calculate the Node Recycle Time, as each node may experience
+let WeeklyNodeRecycleEventMetrics =
+metrics_with_event_summary
+| summarize take_any(NodeRecycleTime_event), take_any(CountUAAction) by NodeRecycleEventID, Week, ClusterName, Endpoint
+| summarize
+    NodeCount = dcount(NodeRecycleEventID), // correct
+    NodeRecycleTime_weekly = avg(NodeRecycleTime_event),
+    UATimeinSingleRecycel_weekly = avg(CountUAAction)
+by Week, ClusterName, Endpoint;
+//Step 7: Join to Get Final Result
+let Res =
+WeeklyNodeRecycleEventMetrics
+| where Week == 31
+| where ClusterName == "CYS13PrdGPC02"
+| order by Week asc;
+Res
+```

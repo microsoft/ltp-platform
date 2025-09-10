@@ -1,0 +1,104 @@
+{
+  "name": "cluster('{cluster_url}').database('{database_name}').table('PBICacheClusterCapacityStatus')",
+  "description": "This table contains the capacity status of the clusters.",
+  "schema": [
+    {
+      "ColumnName": "Week",
+      "ColumnOrdinal": 0,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The week identifier, typically in the format 'YYYY-WW', representing the year and week number."
+    },
+    {
+      "ColumnName": "Cluster",
+      "ColumnOrdinal": 1,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name or identifier of the cluster."
+    },
+    {
+      "ColumnName": "AvgTotal",
+      "ColumnOrdinal": 2,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The weekly average total capacity (number of node count) of the cluster."
+    },
+    {
+      "ColumnName": "AvgReadyEmpty",
+      "ColumnOrdinal": 3,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The weekly average node capacity (number of node count) that is ready to use but empty. This is equivelant to Available node count."
+    },
+    {
+      "ColumnName": "AvgReadyUsed",
+      "ColumnOrdinal": 4,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The weekly average node capacity (number of node count) that is ready and used. This is equivelant to Allocated node count."
+    },
+    {
+      "ColumnName": "AvgOFR",
+      "ColumnOrdinal": 5,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The weekly average OFR (Off For Repair) capacity (number of node count)."
+    },
+    {
+      "ColumnName": "AvgUnallocatable",
+      "ColumnOrdinal": 6,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The weekly average unallocatable capacity (number of node count)."
+    },
+    {
+      "ColumnName": "AvgHumanInvestigate",
+      "ColumnOrdinal": 7,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The weekly average human investigation capacity (number of node count)."
+    },
+    {
+      "ColumnName": "AvgExcluded",
+      "ColumnOrdinal": 8,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The weekly average excluded capacity (number of node count)."
+    },
+    {
+      "ColumnName": "AvgProbation",
+      "ColumnOrdinal": 9,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The weekly average probation capacity (number of node count)."
+    },
+    {
+      "ColumnName": "AvgSuspected",
+      "ColumnOrdinal": 10,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The weekly average suspected capacity (number of node count)."
+    },
+    {
+      "ColumnName": "TIMESTAMP",
+      "ColumnOrdinal": 11,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp of the record."
+    },
+    {
+      "ColumnName": "WeekNum",
+      "ColumnOrdinal": 12,
+      "DataType": "System.Int64",
+      "ColumnType": "long",
+      "description": "The week number."
+    },
+    {
+      "ColumnName": "BackupTimeStamp",
+      "ColumnOrdinal": 13,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The backup timestamp."
+    }
+  ]
+}

@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 set -ex
 
 echo "MINOR_NUMBER: ${MINOR_NUMBER}"

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import c from 'classnames';
 import PropTypes from 'prop-types';
 import { isNil } from 'lodash';

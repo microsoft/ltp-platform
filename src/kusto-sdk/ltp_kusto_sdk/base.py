@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 import json
 from typing import Optional, Dict, Any, List
 from ltp_kusto_sdk.utils.kusto_client import KustoManageClient

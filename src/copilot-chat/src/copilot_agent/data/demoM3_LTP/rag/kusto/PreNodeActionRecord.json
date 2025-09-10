@@ -1,0 +1,62 @@
+{
+  "name": "cluster('{cluster_url}').database('{database_name}').table('PreNodeActionRecord')",
+  "description": "This table records actions performed on nodes, including timestamps, host and node identifiers, action details, reasons, categories, and endpoints.",
+  "schema": [
+    {
+      "ColumnName": "Timestamp",
+      "ColumnOrdinal": 0,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp when the action was recorded."
+    },
+    {
+      "ColumnName": "HostName",
+      "ColumnOrdinal": 1,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the host where the action was recorded."
+    },
+    {
+      "ColumnName": "NodeId",
+      "ColumnOrdinal": 2,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The unique identifier of the node where the action was recorded."
+    },
+    {
+      "ColumnName": "Action",
+      "ColumnOrdinal": 3,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The action that was performed."
+    },
+    {
+      "ColumnName": "Reason",
+      "ColumnOrdinal": 4,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The reason for the action."
+    },
+    {
+      "ColumnName": "Detail",
+      "ColumnOrdinal": 5,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "Additional details about the action."
+    },
+    {
+      "ColumnName": "Category",
+      "ColumnOrdinal": 6,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The category of the action."
+    },
+    {
+      "ColumnName": "Endpoint",
+      "ColumnOrdinal": 7,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The endpoint where the action was recorded."
+    }
+  ]
+}

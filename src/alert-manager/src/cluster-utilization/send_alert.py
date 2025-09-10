@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 import base64
 from bs4 import BeautifulSoup
 from datetime import timezone, datetime, timedelta

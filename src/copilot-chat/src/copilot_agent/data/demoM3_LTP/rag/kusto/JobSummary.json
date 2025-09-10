@@ -1,0 +1,188 @@
+{
+  "name": "cluster('{cluster_url}').database('{database_name}').table('JobSummary')",
+  "description": "A summary of job execution details.",
+  "schema": [
+    {
+      "ColumnName": "jobId",
+      "ColumnOrdinal": 0,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "A unique identifier for the job."
+    },
+    {
+      "ColumnName": "jobHash",
+      "ColumnOrdinal": 1,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "A hash value representing the job, used for quick comparison or deduplication."
+    },
+    {
+      "ColumnName": "jobName",
+      "ColumnOrdinal": 2,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name assigned to the job, typically used for identification or display purposes."
+    },
+    {
+      "ColumnName": "userName",
+      "ColumnOrdinal": 3,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the user who submitted or owns the job."
+    },
+    {
+      "ColumnName": "jobState",
+      "ColumnOrdinal": 4,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The current state or status of the job, such as running, completed, failed, or queued."
+    },
+    {
+      "ColumnName": "retryCount",
+      "ColumnOrdinal": 5,
+      "DataType": "System.Int32",
+      "ColumnType": "int",
+      "description": "The number of times the job has been retried after initial failure."
+    },
+    {
+      "ColumnName": "attemptId",
+      "ColumnOrdinal": 6,
+      "DataType": "System.Int32",
+      "ColumnType": "int",
+      "description": "The unique identifier for a specific attempt of the job, incremented with each retry."
+    },
+    {
+      "ColumnName": "retryDetails",
+      "ColumnOrdinal": 7,
+      "DataType": "System.Object",
+      "ColumnType": "dynamic",
+      "description": "Detailed information about each retry attempt for the job, such as timestamps, error messages, and statuses."
+    },
+    {
+      "ColumnName": "virtualCluster",
+      "ColumnOrdinal": 8,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The name of the virtual cluster where the job was executed or scheduled."
+    },
+    {
+      "ColumnName": "totalGpuCount",
+      "ColumnOrdinal": 9,
+      "DataType": "System.Int32",
+      "ColumnType": "int",
+      "description": "The total number of GPUs allocated to the job during its execution."
+    },
+    {
+      "ColumnName": "jobPriority",
+      "ColumnOrdinal": 10,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The priority level assigned to the job, which may affect scheduling and resource allocation."
+    },
+    {
+      "ColumnName": "jobDurationHours",
+      "ColumnOrdinal": 11,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The total duration of the job in hours."
+    },
+    {
+      "ColumnName": "totalGpuHours",
+      "ColumnOrdinal": 12,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The total number of GPU hours consumed by the job, calculated as the sum of GPU usage across all allocated GPUs and the entire job duration."
+    },
+    {
+      "ColumnName": "idleGpuHours",
+      "ColumnOrdinal": 13,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The total number of GPU hours during which the allocated GPUs were idle while the job was running."
+    },
+    {
+      "ColumnName": "effectiveGpuHours",
+      "ColumnOrdinal": 14,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The total number of GPU hours during which the allocated GPUs were effectively utilized for computation, excluding idle periods."
+    },
+    {
+      "ColumnName": "submissionTime",
+      "ColumnOrdinal": 15,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp indicating when the job was initially submitted to the system."
+    },
+    {
+      "ColumnName": "launchTime",
+      "ColumnOrdinal": 16,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp indicating when the job started execution on the compute resources."
+    },
+    {
+      "ColumnName": "completionTime",
+      "ColumnOrdinal": 17,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp indicating when the job completed execution on the compute resources."
+    },
+    {
+      "ColumnName": "createdDatetime",
+      "ColumnOrdinal": 18,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp indicating when the job was created."
+    },
+    {
+      "ColumnName": "idleGpuPercentage",
+      "ColumnOrdinal": 19,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The percentage of time the allocated GPUs were idle while the job was running."
+    },
+    {
+      "ColumnName": "assignedGpuUtilization",
+      "ColumnOrdinal": 20,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The percentage of time the allocated GPUs were actively utilized for computation."
+    },
+    {
+      "ColumnName": "effectiveGpuUtilization",
+      "ColumnOrdinal": 21,
+      "DataType": "System.Double",
+      "ColumnType": "real",
+      "description": "The percentage of time the allocated GPUs were effectively utilized for computation, excluding idle periods."
+    },
+    {
+      "ColumnName": "exitReason",
+      "ColumnOrdinal": 22,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The reason for the job's termination or completion."
+    },
+    {
+      "ColumnName": "exitCategory",
+      "ColumnOrdinal": 23,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The category of the job's exit status."
+    },
+    {
+      "ColumnName": "timeGenerated",
+      "ColumnOrdinal": 24,
+      "DataType": "System.DateTime",
+      "ColumnType": "datetime",
+      "description": "The timestamp indicating when the job was last updated."
+    },
+    {
+      "ColumnName": "Endpoint",
+      "ColumnOrdinal": 25,
+      "DataType": "System.String",
+      "ColumnType": "string",
+      "description": "The endpoint URL for accessing the job's results."
+    }
+  ]
+}

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 export function validateMountPath(path) {
   let illegalMessage = '';
   const pathRegex = /^(\/[A-Za-z0-9\-._]+)+$/;
