@@ -270,20 +270,23 @@ class CoPilotConversation:
 
     def collect_data_to_kusto(self, log_data: dict):
         """Collect data to Kusto table for analytics."""
-        k_cluster = os.getenv('COLLECT_DST_KUSTO_CLUSTER_URL', '')
-        k_db = os.getenv('COLLECT_DST_KUSTO_DATABASE_NAME', '')
-        # fixed table name to avoid causing accidental pollution of other tables
-        k_table = 'CopilotAnalytics' 
-        KQL = KustoExecutor(k_cluster, k_db, k_table)
-        # Convert log_data dict to a single-row DataFrame
-        df = pd.DataFrame([log_data])
-        # Check if destination backup table exists, create if needed
-        cache_exists = KQL.check_table_existence()
-        logger.info(f"data collection: {k_table} table exists: {cache_exists}")
-        if not cache_exists:
-            # Create table with schema inferred from DataFrame
-            logger.info(f"data collection: {k_table} does not exist, creating it.")
-            KQL.create_table_from_dataframe(df)
-        # Execute query and append results to backup table
-        ingest_status = KQL.ingest_dataframe_to_kusto(df)
-        logger.info(f"data collection: ingesting data into {k_table} table: {ingest_status}.")
+        try:
+            k_cluster = os.getenv('COLLECT_DST_KUSTO_CLUSTER_URL', '')
+            k_db = os.getenv('COLLECT_DST_KUSTO_DATABASE_NAME', '')
+            # fixed table name to avoid causing accidental pollution of other tables
+            k_table = 'CopilotAnalytics' 
+            KQL = KustoExecutor(k_cluster, k_db, k_table)
+            # Convert log_data dict to a single-row DataFrame
+            df = pd.DataFrame([log_data])
+            # Check if destination backup table exists, create if needed
+            cache_exists = KQL.check_table_existence()
+            logger.info(f"data collection: {k_table} table exists: {cache_exists}")
+            if not cache_exists:
+                # Create table with schema inferred from DataFrame
+                logger.info(f"data collection: {k_table} does not exist, creating it.")
+                KQL.create_table_from_dataframe(df)
+            # Execute query and append results to backup table
+            ingest_status = KQL.ingest_dataframe_to_kusto(df)
+            logger.info(f"data collection: ingesting data into {k_table} table: {ingest_status}.")
+        except Exception as e:
+            logger.error(f"Exception during Kusto analytics collection: {e}", exc_info=True)
