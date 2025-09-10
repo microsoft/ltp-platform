@@ -73,8 +73,8 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["agent-host"] }}
         - name: RESTSERVER_URL
           value: {{ cluster_cfg["copilot-chat"]["rest-server"]["url"] }}
-        - name: COPILOT_VALID_GROUPS
-          value: {{ cluster_cfg["copilot-chat"]["valid-groups"] }}
+        - name: COPILOT_VALID_VCS
+          value: {{ cluster_cfg["copilot-chat"]["valid-vcs"] }}
         ports:
         - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
           hostPort:  {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
