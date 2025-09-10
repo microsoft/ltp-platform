@@ -93,10 +93,10 @@ class AuthenticationManager:
             return False
         if "is_admin" in state and "virtual_cluster" in state:
             if state["is_admin"]:
-            # validate pass condition one: user is an admin
+                # validate pass condition one: user is an admin
                 return True
             elif not state["is_admin"] and self.get_membership(state["virtual_cluster"]):
-            # validate pass condition two: user is not an admin, but it belongs to a valid virtualCluster
+                # validate pass condition two: user is not an admin, but it belongs to a valid virtualCluster
                 return True
             else:
                 return False
