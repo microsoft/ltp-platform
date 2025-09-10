@@ -43,4 +43,10 @@ echo "Install sshpass"
 sudo apt-get -y install sshpass
 
 echo "Install kubespray's requirements and ansible is included"
+sudo apt-get -y remove python3-cryptography # avoid conflict with pip
 sudo python3 -m pip install -r ${HOME}/pai-deploy/kubespray/requirements.txt
+
+# workaround python3-apt issue
+SOABI=$(python3 -c 'import sysconfig; print(sysconfig.get_config_var("SOABI"))')
+sudo ln -s /usr/lib/python3/dist-packages/apt_inst.${SOABI}.so /usr/lib/python3/dist-packages/apt_inst.so
+sudo ln -s /usr/lib/python3/dist-packages/apt_pkg.${SOABI}.so /usr/lib/python3/dist-packages/apt_pkg.so
