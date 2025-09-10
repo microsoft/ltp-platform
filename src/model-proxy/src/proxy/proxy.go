@@ -154,9 +154,9 @@ func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Reque
 			return
 		}
 		req.Header.Set("Content-Length", strconv.Itoa(len(newReqBody)))
-		// ket setting for openai spec endpoints
+		// key setting for openai spec endpoints
 		req.Header.Set("Authorization", "Bearer "+curkey)
-		// ket setting for azure spec endpoints
+		// key setting for azure spec endpoints
 		req.Header.Set("Api-key", curkey)
 
 		req.Host = newUrl.Host

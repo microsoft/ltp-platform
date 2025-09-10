@@ -31,7 +31,9 @@ type JsonFileLogger struct {
 // NewJsonFileLogger create a new JsonFileLogger
 func NewJsonFileLogger(folderPath string) *JsonFileLogger {
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
-		os.Mkdir(folderPath, os.ModePerm)
+		if err := os.Mkdir(folderPath, os.ModePerm); err != nil {
+			log.Printf("Failed to create directory %s: %v", folderPath, err)
+		}
 	}
 	date := time.Now().Format("2006-01-02")
 	return &JsonFileLogger{localFolderPath: folderPath, currentDay: date}

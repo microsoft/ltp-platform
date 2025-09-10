@@ -42,7 +42,11 @@ func (ra *RestServerAuthenticator) AuthenticateReq(req *http.Request, reqBody ma
 	token := req.Header.Get("Authorization")
 	token = strings.Replace(token, "Bearer ", "", 1)
 	//  read request body
-	model := reqBody["model"].(string)
+	model, ok := reqBody["model"].(string)
+	if !ok {
+		log.Printf("[-] Error: 'model' field missing or not a string in request body")
+		return false, []string{}
+	}
 	availableModels, ok := ra.tokenToModels[token]
 	if !ok {
 		// request to RestServer to get the models

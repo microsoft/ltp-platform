@@ -121,9 +121,9 @@ func (t *Trace) Marshal() ([]byte, error) {
 
 // convert a request and response to a trace
 func ConvertReqResp2Trace(req *Request, response []string) *Trace {
-	conversactions := make([]*TraceMessage, 0, len(req.Messages)+len(response))
+	conversations := make([]*TraceMessage, 0, len(req.Messages)+len(response))
 	for i, msg := range req.Messages {
-		conversactions = append(conversactions, &TraceMessage{
+		conversations = append(conversations, &TraceMessage{
 			Role:     msg.Role,
 			Content:  msg.Content,
 			Score:    -1,
@@ -132,12 +132,12 @@ func ConvertReqResp2Trace(req *Request, response []string) *Trace {
 		})
 	}
 	for _, resp := range response {
-		conversactions = append(conversactions, &TraceMessage{
+		conversations = append(conversations, &TraceMessage{
 			Role:     "assistant",
 			Content:  resp,
 			Score:    -1,
 			ParentID: len(req.Messages) - 1,
-			ID:       len(conversactions),
+			ID:       len(conversations),
 		})
 	}
 
@@ -161,7 +161,7 @@ func ConvertReqResp2Trace(req *Request, response []string) *Trace {
 			LogitBias:        req.LogitBias,
 			User:             req.User,
 		},
-		Conversations: conversactions,
+		Conversations: conversations,
 	}
 
 	return trace
