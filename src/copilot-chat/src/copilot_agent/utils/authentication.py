@@ -18,7 +18,7 @@ class AuthenticationManager:
         self.authenticate_state = {}  # username: {token, expires_at, groups}
         self.expiration_ms = expiration_ms
         self.restserver_url = os.getenv('RESTSERVER_URL', '')
-        valid_vcs_env = os.getenv('COPILOT_VALID_GROUPS', 'admin,superuser')
+        valid_vcs_env = os.getenv('COPILOT_VALID_VCS', 'admin,superuser')
         self.valid_vcs = [g.strip() for g in valid_vcs_env.split(',') if g.strip()]
 
     def sanitize_username(self, username: str) -> str:
