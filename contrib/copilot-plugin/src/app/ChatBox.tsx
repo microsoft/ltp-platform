@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { Loader2, SendHorizonal } from "lucide-react";
 import { toast } from "sonner";
 import { useChatStore } from "../libs/state";
@@ -45,7 +46,7 @@ export default function ChatBox() {
           messageInfo: {
             userId: paiuser,
             convId: currentConversationId,
-            turnId: Math.random().toString(36).substring(2, 10), // first 8 characters
+            turnId: uuidv4(),
             timestamp: Math.floor(Date.now()),
             timestampUnit: "ms",
             type: "question",

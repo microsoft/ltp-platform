@@ -178,7 +178,7 @@ class CoPilotConversation:
         response_message_info = {
             'userId': user_id,
             'convId': conv_id,
-            'turnId': str(uuid.uuid4())[:8],
+            'turnId': str(uuid.uuid4()),
             'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
             'type': 'answer',
             'timestampUnit': 'ms',
@@ -254,7 +254,7 @@ class CoPilotConversation:
             'messageInfo': {
                 'userId': user_id,
                 'convId': conv_id,
-                'turnId': str(uuid.uuid4())[:8],
+                'turnId': str(uuid.uuid4()),
                 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
                 'type': 'error',
                 'timestampUnit': 'ms',
