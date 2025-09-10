@@ -37,8 +37,10 @@ class AuthenticationManager:
             tuple: (admin, virtualCluster)
         """
         if AGENT_MODE_LOCAL:
+            if username == "admin":
+                return True, []
             if username == "gooduser":
-                return True, ["admin"]
+                return False, ["superuser"]
             if username == "baduser":
                 return False, ["temp"]
             # For any other username in local mode, return empty list
