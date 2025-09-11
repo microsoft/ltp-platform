@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 # This project uses cifar10 dataset to show how to run a training job on CPU/ a single GPU/ multiple GPUs
 # in OpenPAI. Because the models in torchvision.models are for imagenet, so this project is based on 
 # https://github.com/kuangliu/pytorch-cifar, which has good implementations of the common models on cifar10.
