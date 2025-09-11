@@ -18,7 +18,9 @@ Workflow:
 
 - LTP model serving jobs should be deployed in the LTP cluster, and names of these jobs must include `model-serving`.
 
-- LTP model serving jobs should support openai spec api, e.g. `/v1/chat/completions` endpoint. And the api key which is configured in model-proxy service should be supported by these endpoints.
+- LTP model serving jobs should support openai spec api, e.g. `/v1/chat/completions` endpoint. 
+   * The api key which is configured in model-proxy service should be supported by these endpoints.
+   * The endpoints should use the first taskrole's ip and port.
 
 ### Binary configuration
 
