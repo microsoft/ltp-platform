@@ -1,0 +1,125 @@
+name: Build & Deploy Changed Services
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  TAG: ${{ github.run_number }}
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: [self-hosted, paicicd]
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # needed for git diff
+          submodules: false
+
+      - name: Checkout submodules with token
+        run: |
+          git -c http.extraheader="AUTHORIZATION: bearer ${{ secrets.GITHUB_TOKEN }}" submodule sync
+          git -c http.extraheader="AUTHORIZATION: bearer ${{ secrets.GITHUB_TOKEN }}" submodule update --init --force --depth=1
+
+      - name: Get Changed Folders (Services)
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin ${{ github.event.pull_request.base.ref }}
+            changed_files=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}..${{ github.event.pull_request.head.ref }})
+          else
+            changed_files=$(git diff --name-only HEAD~1 HEAD)
+          fi
+
+          echo "Changed files: $changed_files"
+          folders=$(echo "$changed_files" | grep '^src/' | awk -F'/' '{print $2}' | sort -u | tr '\n' ' ')
+          echo "Changed folders: $folders"
+
+          # export as outputs
+          echo "folders=$folders" >> $GITHUB_OUTPUT
+
+      - name: Check if folders are empty
+        id: check
+        run: |
+          if [ -z "${{ steps.changes.outputs.folders }}" ]; then
+            echo "has_changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install python libs
+        if: steps.check.outputs.has_changed == 'true'
+        run: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
+
+      - name: Install kubectl
+        if: steps.check.outputs.has_changed == 'true'
+        run: az aks install-cli
+
+      - name: Decode and unzip config file
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          echo "${{ secrets.CONFIG_FILE_B64 }}" | base64 -d > config.zip
+          mkdir -p $GITHUB_WORKSPACE/config
+          unzip -o config.zip -d $GITHUB_WORKSPACE/config
+          ls -l $GITHUB_WORKSPACE/config
+
+      - name: Arrange Config Files
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
+          ls -l /tmp/auth-configuration
+
+      - name: Build Changed Services
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          changed_services=$(echo "${{ steps.changes.outputs.folders }}" | tr ' ' '\n')
+          echo "Building: $changed_services"
+          $GITHUB_WORKSPACE/build/pai_build.py build -c $GITHUB_WORKSPACE/config/cluster-configuration -s $changed_services
+
+      - name: Push Changed Services
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          changed_services=$(echo "${{ steps.changes.outputs.folders }}" | tr ' ' '\n')
+          echo "Pushing: $changed_services"
+          $GITHUB_WORKSPACE/build/pai_build.py push -c $GITHUB_WORKSPACE/config/cluster-configuration -s $changed_services
+
+      - name: Azure CLI get credentials and deploy
+        if: steps.check.outputs.has_changed == 'true'
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.KUBERNETES_CLUSTER }} --overwrite-existing
+            kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
+            kubelogin convert-kubeconfig -l azurecli
+
+            echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+            echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }}
+            echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
+            echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration
+            echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+            echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }}
+            kubectl get pod
+            kubectl get service
+
+  test:
+    name: Test rest-server
+    needs: build
+    runs-on: [self-hosted, paicicd]
+    steps:
+      - name: Test rest-server
+        run: |
+          echo "Testing rest-server ${{ secrets.PAI_WEB_URL }}/rest-server/api/v2/info"
+          curl ${{ secrets.PAI_WEB_URL }}/rest-server/api/v2/info
+          echo "Checking virtual cluster status..."
+          vc_info=$(curl -H "Authorization: Bearer ${{ secrets.PAI_WEB_TOKEN }}" -s ${{ secrets.PAI_WEB_URL }}/rest-server/api/v2/virtual-clusters)
+          if [ $? -ne 0 ]; then
+            echo "Failed to access virtual cluster API"
+            exit 1
+          fi
+          echo "Virtual cluster info: $vc_info"
