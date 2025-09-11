@@ -1,3 +1,10 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# This tool is used to update group info in the cluster, such as adding/removing virtual clusters or blob storage configs.
+# Usage: python3 updateGroupInfo.py <group_name> <command_type> <item1,item2,...>
+# command_type: addvc, removevc, addblob, removeblob
+
 import requests
 import sys
 

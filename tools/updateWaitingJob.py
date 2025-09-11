@@ -1,3 +1,9 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# This tool is used to update the snapshot state in PostgreSQL for waiting jobs.
+# Usage: python3 updateWaitingJob.py --connection_string "<connection_string>" [--framework_name "<framework_name>"]
+
 import psycopg2
 import argparse
 import hashlib

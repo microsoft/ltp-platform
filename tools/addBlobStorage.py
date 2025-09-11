@@ -1,3 +1,9 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# This tool is used to create blob storage PV/PVC and assign to group.
+# Usage: python3 addBlobStorage.py
+
 import yaml
 import subprocess
 import requests
@@ -29,9 +35,7 @@ def create_pv_yaml(storage_name, storage_account, resource_group, identity, outp
                     'containerName': storage_name,
                     'protocol': 'fuse',
                     'resourceGroup': resource_group,
-                    'storageAccount': storage_account,
-                    'allow-non-empty-temp': 'true',
-                    'cleanup-on-start': 'true'
+                    'storageAccount': storage_account
                 },
                 'volumeHandle': blob_name
             },
@@ -46,7 +50,8 @@ def create_pv_yaml(storage_name, storage_account, resource_group, identity, outp
                 f'--block-cache-path=/mnt/blobfusecache-{container_name}-{storage_account}',
                 '--block-cache-disk-size=1572864',
                 '--block-cache-prefetch=12',
-                '--block-cache-prefetch-on-open=false'
+                '--block-cache-prefetch-on-open=false',
+                '--cleanup-on-start=true'
             ],
             'persistentVolumeReclaimPolicy': 'Retain',
             'storageClassName': 'azureblob-fuse-premium',
@@ -95,7 +100,7 @@ def create_pv_out_yaml(storage_name, storage_account, resource_group, identity, 
                 f'--tmp-path=/mnt/blobfusecache-{container_name}-{storage_account}-out',
                 '--cache-size-mb=512000',
                 '--lazy-write',
-                'cleanup-on-start': 'true'
+                '--cleanup-on-start=true'
             ],
             'persistentVolumeReclaimPolicy': 'Retain',
             'storageClassName': 'azureblob-fuse-premium',

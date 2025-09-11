@@ -1,3 +1,11 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# This tool is used to set the prod job privilege for users in the cluster,
+# so the user can submit prod jobs. By default,
+# the job privilege is set to one month after the current time.
+# Usage: python3 setUserProdJob.py
+
 import requests
 import json
 import time
@@ -52,7 +60,7 @@ if __name__ == "__main__":
         }
         put_request(post_url, data, token)
 
-        print(f"Set job expiration for user {name} to one day from now.")
+        print(f"Set job expiration for user {name} to one month from now.")
         print("***********************************")
 
     print("Job expiration set successfully for all users.")

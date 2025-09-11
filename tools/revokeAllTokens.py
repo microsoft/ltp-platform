@@ -1,3 +1,9 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# This tool is used to revoke all tokens in the cluster.
+# Usage: python3 revokeAllTokens.py
+
 import requests
 import sys
 

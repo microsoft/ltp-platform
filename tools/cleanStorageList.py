@@ -1,3 +1,9 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# This tool is used to refresh the PV/PVC cache in rest-server.
+# Usage: python3 cleanStorageList.py
+
 import requests
 
 def post_request_with_token(url, token):

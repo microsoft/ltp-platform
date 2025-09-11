@@ -1,3 +1,9 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# This tool is used to set the VC admin for users in the cluster.
+# Usage: python3 setUserVcAdmin.py
+
 import requests
 import json
 import time

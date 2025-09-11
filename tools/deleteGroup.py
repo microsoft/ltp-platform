@@ -1,3 +1,9 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# This tool is used to delete a group in the cluster, which also removes the group from all users' group list.
+# Usage: python3 deleteGroup.py <group_name>
+
 import requests
 import sys
 

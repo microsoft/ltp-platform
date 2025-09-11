@@ -1,3 +1,9 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+# This tool is used to display all users in the cluster and their details.
+# Usage: python3 displayUser.py
+
 import requests
 import json
 
