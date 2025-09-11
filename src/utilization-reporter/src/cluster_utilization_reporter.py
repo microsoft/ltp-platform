@@ -53,49 +53,6 @@ def get_failed_job_gpu_mins(failed_jobs: list, start_timestamp: str, end_timesta
     logging.debug(f"Failed job gpu mins in time range from {start_timestamp} to {end_timestamp}: {job_gpu_mins}")
     return job_gpu_mins
 
-@enable_request_debug_log
-def get_non_failed_job_gpu_idle_mins(failed_jobs: list, start_timestamp: str, end_timestamp: str):
-    # get jobs in time range via prometheus api
-    query_url = os.environ.get('PAI_URI').rstrip("/") + QUERY_PREFIX
-    time_range_in_min = int((int(end_timestamp) - int(start_timestamp)) / 1000 / 60)
-    job_regex = "|".join(failed_jobs)
-    query_string = f"sum(count_over_time((task_gpu_percent{{job_name!~\"{job_regex}\"}}==0)[{time_range_in_min}m:]))"
-    resp = requests.get(query_url, params={"query": query_string, "time": int(end_timestamp) // 1000})
-    resp.raise_for_status()
-    result = resp.json()
-    job_gpu_mins = result["data"]["result"][0]["value"][1]
-    logging.debug(f"Non-failed job gpu idle mins in time range from {start_timestamp} to {end_timestamp}: {job_gpu_mins}")
-    return job_gpu_mins
-
-@enable_request_debug_log
-def get_non_failed_job_utilized_gpu_mins(failed_jobs: list, start_timestamp: str, end_timestamp: str):
-    # get jobs in time range via prometheus api
-    query_url = os.environ.get('PAI_URI').rstrip("/") + QUERY_PREFIX
-    time_range_in_min = int((int(end_timestamp) - int(start_timestamp)) / 1000 / 60)
-    job_regex = "|".join(failed_jobs)
-    query_string = f"sum(sum_over_time(task_gpu_percent{{job_name!~\"{job_regex}\"}}[{time_range_in_min}m:]))/100"
-    resp = requests.get(query_url, params={"query": query_string, "time": int(end_timestamp) // 1000})
-    resp.raise_for_status()
-    result = resp.json()
-    job_gpu_mins = result["data"]["result"][0]["value"][1]
-    logging.debug(f"Non-failed job gpu utilized mins in time range from {start_timestamp} to {end_timestamp}: {job_gpu_mins}")
-    return job_gpu_mins
-
-@enable_request_debug_log
-def get_non_failed_job_nonutilized_gpu_mins(failed_jobs: list, start_timestamp: str, end_timestamp: str):
-    # get jobs in time range via prometheus api
-    query_url = os.environ.get('PAI_URI').rstrip("/") + QUERY_PREFIX
-    time_range_in_min = int((int(end_timestamp) - int(start_timestamp)) / 1000 / 60)
-    job_regex = "|".join(failed_jobs)
-    query_string = f"(sum(count_over_time((task_gpu_percent{{job_name!~\"{job_regex}\"}}>0)[{time_range_in_min}m:])))" \
-        f"-(sum(sum_over_time(task_gpu_percent{{job_name!~\"{job_regex}\"}}[{time_range_in_min}m:]))/100)"
-    resp = requests.get(query_url, params={"query": query_string, "time": int(end_timestamp) // 1000})
-    resp.raise_for_status()
-    result = resp.json()
-    job_gpu_mins = result["data"]["result"][0]["value"][1]
-    logging.debug(f"Non-failed job gpu nonutilized mins in time range from {start_timestamp} to {end_timestamp}: {job_gpu_mins}")
-    return job_gpu_mins
-
 
 @enable_request_debug_log
 def get_job_list(state: str, start_timestamp: str, end_timestamp: str):
@@ -136,10 +93,7 @@ def get_cluster_job_gpu_hours():
         cluster_failed_job_gpu_mins = 0
     else:
         cluster_failed_job_gpu_mins = get_failed_job_gpu_mins(failed_jobs, start_timestamp, end_timestamp)
-    # cluster_non_failed_job_gpu_idle_mins = get_non_failed_job_gpu_idle_mins(failed_jobs, start_timestamp, end_timestamp)
-    # cluster_non_failed_job_utilized_gpu_mins = get_non_failed_job_utilized_gpu_mins(failed_jobs, start_timestamp, end_timestamp)
-    # cluster_non_failed_job_nonutilized_gpu_mins = get_non_failed_job_nonutilized_gpu_mins(failed_jobs,
-    #                                                                                       start_timestamp, end_timestamp)
+
     return jsonify(
         {
             "cluster_failed_job_gpu_mins": cluster_failed_job_gpu_mins,

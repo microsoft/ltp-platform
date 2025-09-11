@@ -7,11 +7,11 @@ RUN apt-get update && apt-get upgrade -y && \
     mkdir /var/run/sshd
 
 # Create a non-root user with home directory
-RUN useradd -m -s /bin/bash azureuser
+RUN useradd -m -s /bin/bash sshuser
 
 # Create SSH directory and set permissions
-RUN mkdir -p /home/azureuser/.ssh && \
-    chown azureuser:azureuser /home/azureuser/.ssh
+RUN mkdir -p /home/sshuser/.ssh && \
+    chown sshuser:sshuser /home/sshuser/.ssh
 
 # Expose SSH port
 EXPOSE 22
