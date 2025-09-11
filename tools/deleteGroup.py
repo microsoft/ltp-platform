@@ -2,6 +2,10 @@
 # Licensed under the MIT License.
 
 # This tool is used to delete a group in the cluster, which also removes the group from all users' group list.
+# When new PAI configuration is updated and some of the groups have been changed such as its name and related email,
+# the new group will be created but the old group will still exist in the cluster,
+# so we can use this tool to delete the old group.
+
 # Usage: python3 deleteGroup.py <group_name>
 
 import requests
@@ -30,15 +34,15 @@ if __name__ == "__main__":
 
     group_name = sys.argv[1]
 
-    cluster_name = input("Enter the cluster name: ")
-    if not cluster_name:
-        print("Cluster name cannot be empty.")
+    cluster_url = input("Enter the cluster URL (e.g. example.openpai.org): ")
+    if not cluster_url:
+        print("Cluster URL cannot be empty.")
         exit(1)
     
     token = input("Enter the bearer token: ")
     print("***********************************")   
 
-    paiurl = f"https://{cluster_name}.openpai.org/rest-server/api/v2/group/"
+    paiurl = f"https://{cluster_url}/rest-server/api/v2/group/"
 
     url = f"{paiurl}{group_name}"  # Replace with the actual URL
     response = delete_group(token, url)

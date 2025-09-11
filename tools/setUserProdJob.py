@@ -4,6 +4,7 @@
 # This tool is used to set the prod job privilege for users in the cluster,
 # so the user can submit prod jobs. By default,
 # the job privilege is set to one month after the current time.
+
 # Usage: python3 setUserProdJob.py
 
 import requests
@@ -32,9 +33,9 @@ def get_request(url, token):
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    cluster_name = input("Enter the cluster name: ")
-    if not cluster_name:
-        print("Cluster name cannot be empty.")
+    cluster_url = input("Enter the cluster URL (e.g. example.openpai.org): ")
+    if not cluster_url:
+        print("Cluster URL cannot be empty.")
         exit(1)
     
     names = input("Enter the user names (comma separated): ").split(",")
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     print("***********************************")
 
     for name in names:
-        post_url = f"https://{cluster_name}.openpai.org/rest-server/api/v2/users/{name}"
+        post_url = f"https://{cluster_url}/rest-server/api/v2/users/{name}"
         data = {
             "data": {
             "username": name,

@@ -183,7 +183,11 @@ def refresh_group_info(url, token):
 
 
 if __name__ == "__main__":
-    cluster_name = input("Enter the cluster name: ")
+    cluster_url = input("Enter the cluster URL (e.g. example.openpai.org): ")
+    if not cluster_url:
+        print("Cluster URL cannot be empty.")
+        exit(1)
+
     identity = input("Enter the identity GUID: ")
     
     storage_account = input("Enter the storage account name: ")
@@ -268,7 +272,7 @@ if __name__ == "__main__":
     print("Updating group info...")
     items = [in_blob_name, out_blob_name]
 
-    paiurl = f"https://{cluster_name}.openpai.org/rest-server/api/v2/group/"
+    paiurl = f"https://{cluster_url}/rest-server/api/v2/group/"
 
     for group in groupname:
         url = f"{paiurl}{group}"
@@ -293,7 +297,7 @@ if __name__ == "__main__":
             print(f"Failed to update group info for {group}.")
 
     
-    url = f"https://{cluster_name}.openpai.org/rest-server/api/v2/storages/refresh"
+    url = f"https://{cluster_url}/rest-server/api/v2/storages/refresh"
     response = refresh_group_info(url, bearer_token)
 
     print(response)

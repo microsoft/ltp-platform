@@ -22,15 +22,15 @@ def get_group_info(url, token):
 
 
 if __name__ == "__main__":
-    cluster_name = input("Enter the cluster name: ")
-    if not cluster_name:
-        print("Cluster name cannot be empty.")
+    cluster_url = input("Enter the cluster URL (e.g. example.openpai.org): ")
+    if not cluster_url:
+        print("Cluster URL cannot be empty.")
         exit(1)
     
     token = input("Enter the bearer token: ")
     print("***********************************")
 
-    paiurl = f"https://{cluster_name}.openpai.org/rest-server/api/v2/group/"
+    paiurl = f"https://{cluster_url}/rest-server/api/v2/group/"
 
     group_data = get_group_info(paiurl, token)
     if group_data:

@@ -2,6 +2,11 @@
 # Licensed under the MIT License.
 
 # This tool is used to revoke all tokens in the cluster.
+# When the cluster has been updated with configuration such as 
+# a user email alias has been moved to another group,
+# we need to revoke all tokens to make the change effective
+# so the user can login with the new group permission.
+
 # Usage: python3 revokeAllTokens.py
 
 import requests
@@ -25,16 +30,16 @@ def revoke_tokens(bearer_token, url):
 
 if __name__ == "__main__":
 
-    cluster_name = input("Enter the cluster name: ")
-    if not cluster_name:
-        print("Cluster name cannot be empty.")
+    cluster_url = input("Enter the cluster URL (e.g. example.openpai.org): ")
+    if not cluster_url:
+        print("Cluster URL cannot be empty.")
         exit(1)
     
     token = input("Enter the bearer token: ")
     print("***********************************")   
 
-    paiurl = f"https://{cluster_name}.openpai.org/rest-server/api/v1/token"
-    
+    paiurl = f"https://{cluster_url}/rest-server/api/v1/token"
+
     response = revoke_tokens(token, paiurl)
     if response.status_code == 200:
         print("All tokens have been revoked successfully.")
