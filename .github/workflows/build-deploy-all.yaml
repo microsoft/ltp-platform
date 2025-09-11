@@ -1,0 +1,103 @@
+name: Build & Deploy All Services
+
+on:
+  workflow_dispatch:
+    inputs:
+      rebuildImage:
+        description: 'Rebuild all images'
+        type: boolean
+        default: false
+      repushImage:
+        description: 'Repush all images'
+        type: boolean
+        default: false
+      redeployService:
+        description: 'Redeploy all services'
+        type: boolean
+        default: false
+
+env:
+  TAG: ${{ github.run_number }}
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: [self-hosted, paicicd]
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0       # needed for full git diff history
+          submodules: false    # explicitly ignore submodules
+
+      - name: Install python libs
+        run: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
+
+      - name: Install kubectl
+        run: az aks install-cli
+
+      - name: Decode and unzip config files
+        run: |
+          echo "${{ secrets.CONFIG_FILE_B64 }}" | base64 -d > config.zip
+          mkdir -p $GITHUB_WORKSPACE/config
+          unzip -o config.zip -d $GITHUB_WORKSPACE/config
+
+      - name: Arrange Config Files
+        run: |
+          mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
+          ls -l /tmp/auth-configuration
+
+      - name: Build all Services images
+        if: ${{ inputs.rebuildImage || inputs.repushImage }}
+        run: |
+          $GITHUB_WORKSPACE/build/pai_build.py build \
+            -c $GITHUB_WORKSPACE/config/cluster-configuration \
+            -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana frameworkcontroller hivedscheduler openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
+
+      - name: Push all Services
+        if: ${{ inputs.repushImage }}
+        run: |
+          $GITHUB_WORKSPACE/build/pai_build.py push \
+            -c $GITHUB_WORKSPACE/config/cluster-configuration \
+            -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana frameworkcontroller hivedscheduler openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
+
+      - name: Azure CLI get credentials and deploy
+        if: ${{ inputs.redeployService }}
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az aks get-credentials --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --name ${{ secrets.KUBERNETES_CLUSTER }} --overwrite-existing
+            kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
+            kubelogin convert-kubeconfig -l azurecli
+
+            echo "Stopping all pai services..."
+            echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py service stop -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
+
+            echo "Starting to update pai..."
+            bash $GITHUB_WORKSPACE/contrib/kubespray/script/start-service-in-dev-box.all.sh \
+              -c $GITHUB_WORKSPACE/config/cluster-configuration \
+              -n ${{ secrets.PAI_CLUSTER_NAME }}
+
+            kubectl get pod
+            kubectl get service
+
+  test:
+    name: Test rest-server
+    needs: build
+    runs-on: [self-hosted, paicicd]
+    environment: test
+
+    steps:
+      - name: Test rest-server
+        run: |
+          echo "Testing rest-server ${{ secrets.PAI_WEB_URL }}/rest-server/api/v2/info"
+          curl ${{ secrets.PAI_WEB_URL }}/rest-server/api/v2/info
+          echo "Checking virtual cluster status..."
+          vc_info=$(curl -H "Authorization: Bearer ${{ secrets.PAI_WEB_TOKEN }}" -s ${{ secrets.PAI_WEB_URL }}/rest-server/api/v2/virtual-clusters)
+          if [ $? -ne 0 ]; then
+            echo "Failed to access virtual cluster API"
+            exit 1
+          fi
+          echo "Virtual cluster info: $vc_info"
