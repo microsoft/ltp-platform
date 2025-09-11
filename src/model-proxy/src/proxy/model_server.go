@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 package proxy
 
 import (
@@ -46,9 +49,8 @@ func ListModelServingJobs(restServerUrl string, restServerToken string) ([]strin
 		return nil, fmt.Errorf("failed to read jobs response: %w", err)
 	}
 
-	// Expected: array of jobs with fields { debugId, name, username, state }
+	// Expected: array of jobs with fields { name, username, state }
 	var jobs []struct {
-		DebugId  string `json:"debugId"`
 		Name     string `json:"name"`
 		Username string `json:"username"`
 		State    string `json:"state"`
