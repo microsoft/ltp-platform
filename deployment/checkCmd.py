@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from .clusterObjectModel.cluster_object_model import cluster_object_model
 import os
 import logging
