@@ -49,11 +49,40 @@ const list = asyncHandler(async (req, res) => {
       filters.virtualCluster = req.query.vc.split(',');
     }
 
-    const username = req[userProperty].username;
-    myvcs = await userController.getUserVCs(username);
+    const username = req.query.username;
+    const isAdmin = req.user.admin;
+    const myvcs = await userController.getUserVCs(username);
+    
     if (!filters.virtualCluster || filters.virtualCluster.length === 0) {
-      filters.virtualCluster = myvcs;
-    } else {
+      // Admin users: can see jobs from any VC
+      // Normal users: can see jobs from accessible VCs + own jobs from any VC
+      if (!isAdmin) {
+        // Create security conditions (VC access OR own jobs)
+        const securityConditions = [
+          { virtualCluster: myvcs },
+          { userName: username }
+        ];
+        
+        // Store existing OR conditions to preserve them
+        const existingOrConditions = filters[Op.or] || [];
+        
+        if (existingOrConditions.length > 0) {
+          // Combine security conditions with existing OR conditions using AND logic
+          filters[Op.and] = [
+            { [Op.or]: securityConditions },
+            { [Op.or]: existingOrConditions }
+          ];
+          delete filters[Op.or];
+        } else {
+          filters[Op.or] = securityConditions;
+        }
+        
+        // Remove the direct virtualCluster filter since we're using OR logic
+        delete filters.virtualCluster;
+      }
+    }
+    else {
+      // filters.virtualCluster is not empty, so we need to filter the jobs to only include those in the accessible VCs
       filters.virtualCluster = filters.virtualCluster.filter((vc) =>
         myvcs.includes(vc),
       );
@@ -88,23 +117,50 @@ const list = asyncHandler(async (req, res) => {
     }
     if ('keyword' in req.query) {
       // match text in username, jobname, or vc
-      filters[Op.or] = [
+      const keywordConditions = [
         { userName: { [Op.substring]: req.query.keyword } },
         { jobName: { [Op.substring]: req.query.keyword } },
         { virtualCluster: { [Op.substring]: req.query.keyword } },
       ];
+      
+      // Store existing OR conditions to preserve them
+      const existingOrConditions = filters[Op.or] || [];
+      
+      if (existingOrConditions.length > 0) {
+        // Combine keyword conditions with existing OR conditions using AND logic
+        filters[Op.and] = [
+          { [Op.or]: existingOrConditions },
+          { [Op.or]: keywordConditions }
+        ];
+        delete filters[Op.or];
+      } else {
+        filters[Op.or] = keywordConditions;
+      }
     }
     if ('jobPriority' in req.query) {
       const jobPriorityFilter = req.query.jobPriority.split(',');
       const index = jobPriorityFilter.indexOf('default');
       if (index !== -1) {
         jobPriorityFilter.splice(index, 1);
-        if (filters[Op.or] === undefined) {
-          filters[Op.or] = [];
-        }
-        filters[Op.or].push({ jobPriority: { [Op.is]: null } });
+        
+        const priorityConditions = [];
+        priorityConditions.push({ jobPriority: { [Op.is]: null } });
         if (jobPriorityFilter.length > 0) {
-          filters[Op.or].push({ jobPriority: jobPriorityFilter });
+          priorityConditions.push({ jobPriority: jobPriorityFilter });
+        }
+        
+        // Store existing OR conditions to preserve them
+        const existingOrConditions = filters[Op.or] || [];
+        
+        if (existingOrConditions.length > 0) {
+          // Combine priority conditions with existing OR conditions using AND logic
+          filters[Op.and] = [
+            { [Op.or]: existingOrConditions },
+            { [Op.or]: priorityConditions }
+          ];
+          delete filters[Op.or];
+        } else {
+          filters[Op.or] = priorityConditions;
         }
       } else {
         filters.jobPriority = jobPriorityFilter;
