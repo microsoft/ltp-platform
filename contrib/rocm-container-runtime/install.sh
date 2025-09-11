@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT License.
-
 # install requirements
 apt-get install -y jq moreutils
 
