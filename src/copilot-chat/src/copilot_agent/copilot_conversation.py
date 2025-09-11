@@ -150,17 +150,7 @@ class CoPilotConversation:
     def _handle_feedback_only(self, user_id, conv_id):
         """Handle the case where only feedback is provided."""
         logger.info('User feedback provided without a user question. No operation is required.')
-        resp = {
-            'answer': 'skip',
-            'messageInfo': {
-                'userId': user_id,
-                'convId': conv_id,
-                'turnId': str(uuid.uuid4()),
-                'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
-                'type': 'error',
-                'timestampUnit': 'ms',
-            }
-        }
+        resp = self._make_skip_response(user_id, conv_id, 'feedback_ack')
         out_parameters = OutParameters(resp)
         return out_parameters
 
@@ -174,17 +164,7 @@ class CoPilotConversation:
     def _handle_authenticate_failure(self, user_id, conv_id):
         """Handle authentication failure case."""
         logger.info('User authentication failed. Aborting operation.')
-        resp = {
-            'answer': 'skip',
-            'messageInfo': {
-                'userId': user_id,
-                'convId': conv_id,
-                'turnId': str(uuid.uuid4()),
-                'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
-                'type': 'error',
-                'timestampUnit': 'ms',
-            }
-        }
+        resp = self._make_skip_response(user_id, conv_id, 'error')
         out_parameters = OutParameters(resp)
         return out_parameters
 
@@ -311,3 +291,18 @@ class CoPilotConversation:
             logger.info(f"data collection: ingesting data into {k_table} table: {ingest_status}.")
         except Exception as e:
             logger.error(f"Exception during Kusto analytics collection: {e}", exc_info=True)
+
+    @staticmethod
+    def _make_skip_response(user_id, conv_id, type_str):
+        """Create a standard skip/error response struct for feedback or authentication failure."""
+        return {
+            'answer': 'skip',
+            'messageInfo': {
+                'userId': user_id,
+                'convId': conv_id,
+                'turnId': str(uuid.uuid4()),
+                'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
+                'type': type_str,
+                'timestampUnit': 'ms',
+            }
+        }
