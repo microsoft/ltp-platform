@@ -39,6 +39,8 @@ spec:
           privileged: true        
         command: ["/bin/bash", "-c", "bash /usr/local/bin/start-docker.sh && tail -f /dev/null"]
         env:
+        - name: DOCKER_IMAGE
+          value: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}webportal
         - name: DOCKER_USER
           value: {{ cluster_cfg['cluster']['docker-registry']['username'] }}
         - name: DOCKER_PASS

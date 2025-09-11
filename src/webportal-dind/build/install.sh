@@ -141,10 +141,11 @@ else
 fi
 
 log_info "Logging in to Docker registry"
-echo "$DOCKER_PASS" | docker login luciaopenai.azurecr.io -u "$DOCKER_USER" --password-stdin
+DOCKER_REGISTRY=$(echo "$DOCKER_IMAGE" | cut -d'/' -f1)
+echo "$DOCKER_PASS" | docker login "$DOCKER_REGISTRY" -u "$DOCKER_USER" --password-stdin
 
 log_info "Pulling webportal Docker image"
-docker pull luciaopenai.azurecr.io/luciaopenai/webportal:"$DOCKER_TAG"
+docker pull "$DOCKER_IMAGE":"$DOCKER_TAG"
 
 docker run -d --name webportal \
     -e LAUNCHER_TYPE="$LAUNCHER_TYPE" \
@@ -165,7 +166,7 @@ docker run -d --name webportal \
     -p 8080:8080 \
     --memory=512m \
     -v /var/run/secrets/kubernetes.io/serviceaccount:/var/run/secrets/kubernetes.io/serviceaccount:ro \
-    luciaopenai.azurecr.io/luciaopenai/webportal:"$DOCKER_TAG"
+    "$DOCKER_IMAGE":"$DOCKER_TAG"
 
 EOF
 
