@@ -37,6 +37,16 @@ spec:
         - name: model-proxy-log
           mountPath: /usr/local/ltp/model-proxy
         {%- endif %}
+        ports:
+        - containerPort: {{ cluster_cfg["model-proxy"]["port"] }}
+          hostPort: {{ cluster_cfg["model-proxy"]["port"] }}
+          name: model-proxy
+        livenessProbe:
+          httpGet:
+            path: '/healthz'
+            port: model-proxy
+          initialDelaySeconds: 10
+          periodSeconds: 60
       volumes:
       - name: model-proxy-log
         hostPath:

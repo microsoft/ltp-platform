@@ -75,6 +75,16 @@ func NewProxyHandler(config *types.Config) *ProxyHandler {
 
 // ReverseProxyHandler act as a reverse proxy, it will redirect the request to the destination website and return the response
 func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Request) (string, []string, bool) {
+
+	// handle /healthz
+	if r.URL.Path == "/healthz" {
+		w.WriteHeader(http.StatusOK)
+		if _, err := w.Write([]byte("ok")); err != nil {
+			log.Printf("[-] Error: failed to write healthz response: %v\n", err)
+		}
+		return "", nil, false
+	}
+
 	// handle /v1/models
 	if r.URL.Path == "/v1/models" {
 		model2Url, err := GetJobModelsMapping(r, ph.authenticator.modelKey)
