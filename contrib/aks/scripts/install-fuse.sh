@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 set -xe
 
 DEBIAN_FRONTEND=noninteractive apt-get update -y

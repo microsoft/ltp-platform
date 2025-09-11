@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 NODE_NAME=${MY_NODE_NAME}
 

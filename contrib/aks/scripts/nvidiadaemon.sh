@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 set -x
 
 useradd -c "NVIDIA Persistence Daemon,,," -U -s /usr/sbin/nologin -d /nonexistent -M nvidia-persistenced

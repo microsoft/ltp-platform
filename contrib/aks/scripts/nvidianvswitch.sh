@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 set -x
 
 # Step 1: Enable and Start NVIDIA Fabric Manager and DCGM Services

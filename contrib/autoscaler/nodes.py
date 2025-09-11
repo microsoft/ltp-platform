@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 class WorkerNode(object):
 
     def __init__(self, ip, k8s_name, k8s_is_ready):

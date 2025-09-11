@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import { create } from "zustand";
 
 export type Status = "loading" | "online" | "offline" | "unknown";

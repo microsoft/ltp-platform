@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 # parameters
 # $(n-3) = "GROUP"|"INSTANCE"
 # $(n-2) = name of the group or instance

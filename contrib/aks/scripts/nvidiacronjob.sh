@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 MEM_CLOCK=$1
 GPU_CLOCK=$2
 

@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 set -e
 if [ $# -lt 2 ]; then
   echo "Usage: $0 <resourceGroup> <storageIndentityName>"

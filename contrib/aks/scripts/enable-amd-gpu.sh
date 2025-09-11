@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 cat > /etc/systemd/system/amdgpu.service << EOL
 [Unit]
 Description=Load AMD GPU kernel module

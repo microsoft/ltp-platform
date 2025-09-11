@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 import ky, { Options } from "ky";
 import { Job, useChatStore } from "./state";
 import { toast } from "sonner";
