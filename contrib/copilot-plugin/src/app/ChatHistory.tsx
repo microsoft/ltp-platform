@@ -3,6 +3,7 @@
 
 "use client";
 
+import { v4 as uuidv4 } from "uuid";
 import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 import moment from "moment";
@@ -148,11 +149,14 @@ const Message: React.FC<{ message: ChatMessage, expand?: boolean, isAssistant?: 
           feedback: {
             like: like,
             dislike: dislike,
+            responseUserId: paiuser,
+            responseConvId: currentConversationId,
+            responseTurnId: message.messageInfo?.turnId || "0", // Use message's turnId or fallback to "0"
           },
           messageInfo: {
             userId: paiuser,
             convId: currentConversationId,
-            turnId: message.messageInfo?.turnId || "0", // Use message's turnId or fallback to "0"
+            turnId: uuidv4(), // Use message's turnId or fallback to "0"
             timestamp: Math.floor(Date.now()),
             timestampUnit: "ms",
             type: "feedback",

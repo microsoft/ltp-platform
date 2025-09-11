@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { create } from "zustand";
+import { v4 as uuidv4 } from "uuid";
 
 export type Status = "loading" | "online" | "offline" | "unknown";
 
@@ -81,11 +82,11 @@ export const useChatStore = create<State>((set) => ({
   chatMsgs: [],
   
   // Initialize with a unique conversation ID (will be updated when user is set)
-  currentConversationId: `${Math.random().toString(36).substring(2, 9)}`,
+  currentConversationId: uuidv4(),
 
   setUser: (paiuser) => set((state) => ({ 
     paiuser,
-    currentConversationId: `${Math.random().toString(36).substring(2, 9)}`
+    currentConversationId: uuidv4()
   })),
   setRestServerPath: (path) => set({ restServerPath: path }),
   setJobServerPath: (path) => set({ jobServerPath: path }),
@@ -100,7 +101,7 @@ export const useChatStore = create<State>((set) => ({
   
   // Generate a new conversation ID (useful for starting a new conversation)
   generateNewConversationId: () => set((state) => ({ 
-    currentConversationId: `${Math.random().toString(36).substring(2, 9)}`,
+    currentConversationId: uuidv4(),
     chatMsgs: [] // Clear chat messages when starting new conversation
   })),
 

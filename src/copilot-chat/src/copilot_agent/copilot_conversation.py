@@ -6,11 +6,14 @@
 import os
 from collections import deque
 import uuid
+import pandas as pd
 from datetime import datetime, timezone
 from typing import Union
+import threading
 
 from .utils.logger import logger
 from .utils.authentication import AuthenticationManager
+from .utils.kql_executor import KustoExecutor
 
 from .config import AGENT_MODE_LOCAL, print_env_variables
 from .copilot_turn import CoPilotTurn
@@ -86,25 +89,45 @@ class CoPilotConversation:
         logger.info(f'skip_summary is {skip_summary}')
         username = in_parameters.username
         rest_token = in_parameters.rest_token
-        self._log_message_data('in', in_parameters)
 
-        user_id, conv_id = self._extract_user_and_conv_id(question_msg_info)
+        _is_feedback = self._is_feedback_only(user_feedback, user_prompt)
+        _is_question = self._is_user_question_only(user_feedback, user_prompt)
 
-        if self._is_feedback_only(user_feedback, user_prompt):
-            return self._handle_feedback_only()
-
-        if self._is_user_question_only(user_feedback, user_prompt):
+        # process
+        if _is_feedback:
+            user_id, conv_id = self._extract_user_and_conv_id(question_msg_info)
+            result = self._handle_feedback_only(user_id, conv_id)
+        elif _is_question:
+            user_id, conv_id = self._extract_user_and_conv_id(question_msg_info)
             # Authenticate only for user question
             if not self.auth_manager.is_authenticated(username):
                 logger.info(f'User {username} not authenticated, attempting to authenticate...')
                 self.auth_manager.set_authenticate_state(username, rest_token)
                 if not self.auth_manager.is_authenticated(username):
                     logger.error(f'User {username} failed authentication twice. Aborting operation.')
-                    return self._handle_authenticate_failure()
-            logger.info(f'User {username} authenticated successfully.')
-            return self._handle_user_question(user_id, conv_id, user_prompt, skip_summary, debugging, question_msg_info)
+                    result = self._handle_authenticate_failure(user_id, conv_id)
+                else:
+                    logger.info(f'User {username} authenticated successfully.')
+                    result = self._handle_user_question(user_id, conv_id, user_prompt, skip_summary, debugging, question_msg_info)
+            else:
+                logger.info(f'User {username} authenticated successfully.')
+                result = self._handle_user_question(user_id, conv_id, user_prompt, skip_summary, debugging, question_msg_info)
+        else:
+            result = self._handle_empty_input()
 
-        return self._handle_empty_input()
+        # collect data
+        def log_message():
+            if _is_feedback:
+                self._log_message_data('feedback', in_parameters)
+            elif _is_question:
+                self._log_message_data('in', in_parameters)
+            if isinstance(result, OutParameters):
+                self._log_message_data('out', result)
+            else:
+                logger.warning(f"[CoPilot]: Skipping 'out' log; result is of type {type(result).__name__} and may not have expected attributes.")
+        threading.Thread(target=log_message, daemon=True).start()
+    
+        return result
 
     def _extract_user_and_conv_id(self, question_msg_info):
         """Extract userId and convId from message info, or use defaults."""
@@ -124,10 +147,10 @@ class CoPilotConversation:
         """Return True if only a user question is provided, not feedback."""
         return not user_feedback and user_prompt
 
-    def _handle_feedback_only(self):
+    def _handle_feedback_only(self, user_id, conv_id):
         """Handle the case where only feedback is provided."""
         logger.info('User feedback provided without a user question. No operation is required.')
-        resp = {'answer': 'skip'}
+        resp = self._make_skip_response(user_id, conv_id, 'feedback_ack')
         out_parameters = OutParameters(resp)
         return out_parameters
 
@@ -135,13 +158,15 @@ class CoPilotConversation:
         """Handle the case where both user question and feedback are empty."""
         logger.info('Both user question and feedback are empty. Aborting operation.')
         resp = {'answer': 'skip'}
-        return OutParameters(resp)
+        out_parameters = OutParameters(resp)
+        return out_parameters
 
-    def _handle_authenticate_failure(self):
+    def _handle_authenticate_failure(self, user_id, conv_id):
         """Handle authentication failure case."""
         logger.info('User authentication failed. Aborting operation.')
-        resp = {'answer': 'skip'}
-        return OutParameters(resp)
+        resp = self._make_skip_response(user_id, conv_id, 'error')
+        out_parameters = OutParameters(resp)
+        return out_parameters
 
     def _handle_user_question(self, user_id, conv_id, user_prompt, skip_summary, debugging, question_msg_info):
         """Handle the case where only a user question is provided."""
@@ -157,7 +182,7 @@ class CoPilotConversation:
         response_message_info = {
             'userId': user_id,
             'convId': conv_id,
-            'turnId': str(uuid.uuid4())[:8],
+            'turnId': str(uuid.uuid4()),
             'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
             'type': 'answer',
             'timestampUnit': 'ms',
@@ -175,7 +200,6 @@ class CoPilotConversation:
         logger.info(f'[internal control word] [per user check] user "{user_id}" msg_list length is {len(self.msg_dict[user_id])}')
         self._log_message_history()
         out_parameters = OutParameters(resp)
-        self._log_message_data('out', out_parameters)
         return out_parameters
 
     def build_in_parameters(self, data: dict) -> InParameters:
@@ -187,11 +211,17 @@ class CoPilotConversation:
         """Log and collect data from the request or response for analytics/debugging."""
         if inout == 'in':
             user = parameters.user
+            msg_info = parameters.question_msg_info
+            if user:
+                content = user
+            else:
+                content = 'na'
+            meta = msg_info
+            debug = 'na'
+        elif inout == 'feedback':
             feedback = parameters.feedback
             msg_info = parameters.question_msg_info
-            if user and not feedback:
-                content = user
-            elif feedback and not user:
+            if feedback:
                 content = feedback
             else:
                 content = 'na'
@@ -208,13 +238,18 @@ class CoPilotConversation:
             content = 'na'
             meta = 'na'
             debug = 'na'
+        endpoint = os.environ.get('CLUSTER_ID', 'empty')
         log_data = {
-            'inout': inout,
-            'content': content,
-            'meta': meta,
-            'debug': debug
+            'Timestamp': datetime.utcnow().isoformat() + 'Z',
+            'Endpoint': endpoint,
+            'Type': inout,
+            'Content': content,
+            'Meta': meta,
+            'Debug': debug,
         }
         logger.info(f'[copilot data collection] {log_data}')
+        # ingest kusto table
+        self.collect_data_to_kusto(log_data)
 
     def handle_unexpected_copilot_response(self, user_id: str, conv_id: str) -> OutParameters:
         """Handle unexpected response format from copilot agent and log error."""
@@ -223,7 +258,7 @@ class CoPilotConversation:
             'messageInfo': {
                 'userId': user_id,
                 'convId': conv_id,
-                'turnId': str(uuid.uuid4())[:8],
+                'turnId': str(uuid.uuid4()),
                 'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
                 'type': 'error',
                 'timestampUnit': 'ms',
@@ -232,6 +267,42 @@ class CoPilotConversation:
             'debug': None
         }
         out_parameters = OutParameters(error_resp)
-        self._log_message_data('out', out_parameters)
         return out_parameters
 
+    def collect_data_to_kusto(self, log_data: dict):
+        """Collect data to Kusto table for analytics."""
+        try:
+            k_cluster = os.getenv('COLLECT_DST_KUSTO_CLUSTER_URL', '')
+            k_db = os.getenv('COLLECT_DST_KUSTO_DATABASE_NAME', '')
+            # fixed table name to avoid causing accidental pollution of other tables
+            k_table = 'CopilotAnalytics' 
+            KQL = KustoExecutor(k_cluster, k_db, k_table)
+            # Convert log_data dict to a single-row DataFrame
+            df = pd.DataFrame([log_data])
+            # Check if destination backup table exists, create if needed
+            cache_exists = KQL.check_table_existence()
+            logger.info(f"data collection: {k_table} table exists: {cache_exists}")
+            if not cache_exists:
+                # Create table with schema inferred from DataFrame
+                logger.info(f"data collection: {k_table} does not exist, creating it.")
+                KQL.create_table_from_dataframe(df)
+            # Execute query and append results to backup table
+            ingest_status = KQL.ingest_dataframe_to_kusto(df)
+            logger.info(f"data collection: ingesting data into {k_table} table: {ingest_status}.")
+        except Exception as e:
+            logger.error(f"Exception during Kusto analytics collection: {e}", exc_info=True)
+
+    @staticmethod
+    def _make_skip_response(user_id, conv_id, type_str):
+        """Create a standard skip/error response struct for feedback or authentication failure."""
+        return {
+            'answer': 'skip',
+            'messageInfo': {
+                'userId': user_id,
+                'convId': conv_id,
+                'turnId': str(uuid.uuid4()),
+                'timestamp': int(datetime.now(timezone.utc).timestamp() * 1000),
+                'type': type_str,
+                'timestampUnit': 'ms',
+            }
+        }
