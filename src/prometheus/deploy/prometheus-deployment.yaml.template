@@ -137,8 +137,6 @@ spec:
       - name: prometheus-blob
         persistentVolumeClaim:
           claimName: {{ cluster_cfg["prometheus"]["blob"] }}
-        hostPath:
-          path: {{ cluster_cfg["cluster"]["common"]["data-path"] }}/prometheus/blob
       {% endif %}
       tolerations:
       - key: node.kubernetes.io/memory-pressure
