@@ -897,7 +897,7 @@ spec:
       containers:
       - name: cilium-agent
         image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command:
         - cilium-agent
         args:
@@ -1056,7 +1056,7 @@ spec:
       initContainers:
       - name: config
         image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command:
         - cilium-dbg
         - build-config
@@ -1079,7 +1079,7 @@ spec:
       # We use nsenter command with host's cgroup and mount namespaces enabled.
       - name: mount-cgroup
         image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         env:
         - name: CGROUP_ROOT
           value: /run/cilium/cgroupv2
@@ -1116,7 +1116,7 @@ spec:
             #  - ALL
       - name: apply-sysctl-overwrites
         image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         env:
         - name: BIN_PATH
           value: /opt/cni/bin
@@ -1154,7 +1154,7 @@ spec:
       # only works from privileged containers.
       - name: mount-bpf-fs
         image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         args:
         - 'mount | grep "/sys/fs/bpf type bpf" || mount -t bpf bpf /sys/fs/bpf'
         command:
@@ -1170,7 +1170,7 @@ spec:
           mountPropagation: Bidirectional
       - name: clean-cilium-state
         image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command:
         - /init-container.sh
         env:
@@ -1217,7 +1217,7 @@ spec:
       # Install the CNI binaries in an InitContainer so we don't have a writable host mount in the agent
       - name: install-cni-binaries
         image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command:
           - "/install-plugin.sh"
         resources:
@@ -1400,7 +1400,7 @@ spec:
       containers:
       - name: cilium-envoy
         image: "openpaistatic.azurecr.io/cilium/cilium-envoy:v1.32.6-update"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command:
         - /usr/bin/cilium-envoy-starter
         args:
@@ -1575,7 +1575,7 @@ spec:
       containers:
       - name: cilium-operator
         image: "openpaistatic.azurecr.io/cilium/operator-generic:v1.17.5"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command:
         - cilium-operator-generic
         args:
