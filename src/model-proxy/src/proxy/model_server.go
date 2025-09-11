@@ -49,11 +49,10 @@ func ListModelServingJobs(restServerUrl string, restServerToken string) ([]strin
 		return nil, fmt.Errorf("failed to read jobs response: %w", err)
 	}
 
-	// Expected: array of jobs with fields { name, username, state }
+	// Expected: array of jobs with fields { name, username }
 	var jobs []struct {
 		Name     string `json:"name"`
 		Username string `json:"username"`
-		State    string `json:"state"`
 	}
 	if err := json.Unmarshal(body, &jobs); err != nil {
 		// Try to provide a helpful error if the shape is unexpected
