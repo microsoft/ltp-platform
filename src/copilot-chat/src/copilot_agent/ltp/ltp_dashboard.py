@@ -95,12 +95,12 @@ class KQLRAGSingleton:
 
     @classmethod
     def _init_instance(cls):
-        KUSTO_SAMPLE_FILE = os.path.join(DATA_DIR, 'demoM3_LTP/rag/kusto/_examples.txt')
-        KUSTO_SAMPLE_DATA_FILE = os.path.join(DATA_DIR, 'demoM3_LTP/rag/kusto/_examples_from_data.txt')
-        KUSTO_TABLE_DIR = os.path.join(DATA_DIR, 'demoM3_LTP/rag/kusto')
-        KUSTO_OPERATOR_FILE = os.path.join(DATA_DIR, 'demoM3_LTP/rag/kusto/_operators.txt')
-        KUSTO_RELATIONSHIP_FILE = os.path.join(DATA_DIR, 'demoM3_LTP/rag/kusto/_relationships.txt')
-        KUSTO_KNOWLEDGE_FILE = os.path.join(DATA_DIR, 'demoM3_LTP/rag/kusto/_knowledge.txt')
+        KUSTO_SAMPLE_FILE = os.path.join(DATA_DIR, 'LTP/rag/kusto/_examples.txt')
+        KUSTO_SAMPLE_DATA_FILE = os.path.join(DATA_DIR, 'LTP/rag/kusto/_examples_from_data.txt')
+        KUSTO_TABLE_DIR = os.path.join(DATA_DIR, 'LTP/rag/kusto')
+        KUSTO_OPERATOR_FILE = os.path.join(DATA_DIR, 'LTP/rag/kusto/_operators.txt')
+        KUSTO_RELATIONSHIP_FILE = os.path.join(DATA_DIR, 'LTP/rag/kusto/_relationships.txt')
+        KUSTO_KNOWLEDGE_FILE = os.path.join(DATA_DIR, 'LTP/rag/kusto/_knowledge.txt')
         my_llm_session = LLMSession()
         # prompt
         kql_sample_prompt = DocPrepare.get_txt_as_string(KUSTO_SAMPLE_FILE)
