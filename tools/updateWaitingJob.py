@@ -159,17 +159,20 @@ if __name__ == "__main__":
             },
         }
 
-    snapshot = json.loads(result)
-    if snapshot.get('status', {}).get('state') == 'AttemptCreationPending':        
-        snapshot['status'] = state_json
-        print(json.dumps(snapshot, indent=4))
+        snapshot = json.loads(result)
+        if snapshot.get('status', {}).get('state') == 'AttemptCreationPending':        
+            snapshot['status'] = state_json
+            print(json.dumps(snapshot, indent=4))
+        else:
+            print("The snapshot state is not AttemptCreationPending and no need to update.")
+            exit(0)
+        
+        update = create_update_fields(snapshot)
+        print(update)
+        # Update the snapshot in PostgreSQL
+        update_snapshot_in_postgresql(args.connection_string, args.framework_name, update)
+        print("The snapshot is updated successfully.")
     else:
-        print("The snapshot state is not AttemptCreationPending and no need to update.")
-        exit(0)
-    
-    update = create_update_fields(snapshot)
-    print(update)
-    # Update the snapshot in PostgreSQL
-    update_snapshot_in_postgresql(args.connection_string, args.framework_name, update)
-    print("The snapshot is updated successfully.")
+        print("No data was returned from PostgreSQL. Exiting.")
+        exit(1)
 
