@@ -10,7 +10,6 @@ from .utils.logger import logger
 
 DATA_DIR = pkg_resources.files('copilot_agent.data')
 PROMPT_DIR = pkg_resources.files('copilot_agent.prompts')
-SQLDB_DIR = pkg_resources.files('copilot_agent.data.sqldb')
 
 # set version, ["p0", "ga"]
 COPILOT_VERSION = os.getenv('COPILOT_VERSION', '').lower()

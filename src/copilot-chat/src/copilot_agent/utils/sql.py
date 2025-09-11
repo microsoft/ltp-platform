@@ -10,8 +10,8 @@ import sqlite3
 
 from ..utils.logger import logger
 
-from ..config import SQLDB_DIR
-
+from ..config import DATA_DIR
+SQLDB_DIR = os.path.join(DATA_DIR, 'sql')
 
 class SQLManager:
     """SQL DB backend."""
