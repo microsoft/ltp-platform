@@ -1,7 +1,7 @@
 FROM python:3.12
 
 # Install cron
-RUN apt-get update && apt-get install -y cron && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && apt-get install -y cron && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app

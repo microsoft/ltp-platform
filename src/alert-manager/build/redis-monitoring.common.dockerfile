@@ -1,5 +1,6 @@
 # Redis with Built-in Monitoring Tools for Node Failure Detection
 # Based on official Redis Alpine image with custom monitoring capabilities
+FROM tianon/gosu:latest AS gosu
 
 FROM redis:7-bullseye
 
@@ -10,7 +11,7 @@ LABEL version="1.0"
 
 # Install additional tools needed for monitoring
 # Note: Most tools (redis-cli, bash, date, ps, etc.) are already available in redis:7-alpine
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     bash \
     procps \
     curl \
@@ -29,6 +30,11 @@ COPY ./src/redis-monitoring/ /opt/monitoring/
 # Make scripts executable
 RUN chmod +x /opt/monitoring/*.sh
 
+# Copy the gosu binary from the gosu stage
+COPY --from=gosu /usr/local/bin/gosu /usr/local/bin/gosu
+
+# Ensure it's executable
+RUN chmod +x /usr/local/bin/gosu
 
 # Add monitoring directory to PATH
 ENV PATH="/opt/monitoring:${PATH}"
