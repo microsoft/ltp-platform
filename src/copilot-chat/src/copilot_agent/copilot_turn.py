@@ -17,6 +17,7 @@ from .utils import (
     contextualize_question,
     gen_smart_help,
     get_prompt_from,
+    push_frontend_event,
 )
 
 
@@ -44,6 +45,7 @@ class CoPilotTurn:
             return {'category': None, 'answer': 'DEBUGGING MODE ENABLED', 'debug': {'debugging': debugging}}
 
         # get contextualized question from this and last user inquiry
+        push_frontend_event('<...understanding your inquiry...>', replace=True)
         this_inquiry = messages_list[-1]['content']
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
         question = contextualize_question(this_inquiry, last_inquiry)
@@ -97,7 +99,7 @@ class CoPilotTurn:
         system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'gen_smart_help_prompt_general.txt'))
         if isinstance(self.help_msg, dict) and 'feature' in self.help_msg:
             system_prompt = system_prompt + '\n\n' + self.help_msg['feature']
-        summary = self.model.chat(system_prompt, f'question is: {question}')
+        summary = self.model.try_stream_fallback_chat(system_prompt, f'question is: {question}')
         return summary
 
     def get_preload_dashboard(self):

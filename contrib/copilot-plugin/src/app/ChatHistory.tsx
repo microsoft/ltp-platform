@@ -160,7 +160,7 @@ const Message: React.FC<{ message: ChatMessage, expand?: boolean, isAssistant?: 
           messageInfo: {
             userId: paiuser,
             convId: currentConversationId,
-            turnId: uuidv4(), // Use message's turnId or fallback to "0"
+            turnId: message.messageInfo?.turnId || "0",
             timestamp: Math.floor(Date.now()),
             timestampUnit: "ms",
             type: "feedback",
