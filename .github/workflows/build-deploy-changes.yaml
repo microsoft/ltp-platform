@@ -2,9 +2,9 @@ name: Build & Deploy Changed Services
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, 'release/*']
   pull_request:
-    branches: [main, dev]
+    branches: [main, dev, 'release/*']
   workflow_dispatch:
     inputs:
       branch_name:
@@ -21,6 +21,8 @@ jobs:
     runs-on: [self-hosted, paicicd]
     timeout-minutes: 120
     environment: auto-test
+    container:
+      image: ubuntu:latest
 
     steps:
       - name: Checkout repository
@@ -69,10 +71,6 @@ jobs:
       - name: Install python libs
         if: steps.check.outputs.has_changed == 'true'
         run: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
-
-      - name: Install kubectl
-        if: steps.check.outputs.has_changed == 'true'
-        run: az aks install-cli
 
       - name: Decode and unzip config file
         if: steps.check.outputs.has_changed == 'true'
@@ -124,6 +122,7 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
+            az aks install-cli
             az login --identity
             az aks get-credentials \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
