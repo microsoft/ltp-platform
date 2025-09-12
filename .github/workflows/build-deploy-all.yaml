@@ -34,9 +34,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0       # needed for full git diff history
-          submodules: false    # explicitly ignore submodules
-          ref: ${{ github.event.inputs.branch_name || github.ref_name }}
+          fetch-depth: 0
+          submodules: false
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.inputs.branch_name || github.ref_name }}
 
 
       - name: Install python libs
