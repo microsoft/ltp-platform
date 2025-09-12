@@ -149,7 +149,7 @@ def main():
 
     args = parser.parse_args()
     config_model = load_build_config(args.config)
-    if args.docker_registry is not None:
+    if hasattr(args, 'docker_registry') and args.docker_registry is not None:
         config_model['dockerRegistryInfo']['dockerRegistryDomain'] = args.docker_registry
         if args.docker_namespace is not None:
             config_model['dockerRegistryInfo']['dockerNameSpace'] = args.docker_namespace

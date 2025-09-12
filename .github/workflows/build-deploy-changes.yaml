@@ -79,6 +79,7 @@ jobs:
       - name: Arrange Config Files
         if: steps.check.outputs.has_changed == 'true'
         run: |
+          rm -rf /tmp/auth-configuration
           mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
           ls -l /tmp/auth-configuration
 
