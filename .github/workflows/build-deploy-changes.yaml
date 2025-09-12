@@ -34,19 +34,28 @@ jobs:
         id: changes
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch origin ${{ github.event.pull_request.base.ref }}
-            changed_files=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}..${{ github.event.pull_request.head.ref }})
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
           else
-            changed_files=$(git diff --name-only HEAD~1 HEAD)
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
           fi
 
+          echo "Comparing $base_sha...$head_sha"
+          changed_files=$(git diff --name-only "$base_sha" "$head_sha")
           echo "Changed files: $changed_files"
-          # filter out alert-manager
-          folders=$(echo "$changed_files" | grep '^src/' | grep -v '^alert-manager$' |  awk -F'/' '{print $2}' | sort -u | tr '\n' ' ')
-          echo "Changed folders: $folders"
 
-          # export as outputs
+          # extract service folders under src/, skip alert-manager
+          folders=$(echo "$changed_files" | grep '^src/' \
+            | grep -v '^alert-manager$' \
+            |  awk -F'/' '{print $2}' \
+            | sort -u | tr '\n' ' ')
+          echo "Changed folders: $folders"
+          
+
+          # export as output for next steps
           echo "folders=$folders" >> $GITHUB_OUTPUT
+
 
       - name: Check if folders are empty
         id: check
