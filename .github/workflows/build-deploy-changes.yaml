@@ -33,7 +33,7 @@ jobs:
       - name: Install git
         run: |
           DEBIAN_FRONTEND=noninteractive apt update
-          DEBIAN_FRONTEND=noninteractive apt install -y git docker
+          DEBIAN_FRONTEND=noninteractive apt install -y git docker-cli
           docker version
           docker run --rm hello-world
 
