@@ -17,9 +17,6 @@ class SshProxy(object):
                 return host_conf["hostip"]
 
     def validation_pre(self):
-        for k in ["public-key"]:
-            if k not in self.service_conf:
-                return False, f"{k} is not found in ssh-proxy service configuration"
         if not self.get_master_ip():
             return False, f"No master ip found"
         return True, None
