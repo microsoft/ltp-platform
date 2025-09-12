@@ -18,7 +18,11 @@ export default function ChatBox() {
   
   // Values needed by Lucia Agent API Server
   const TRACE_ID = 'cafe66d8-f37b-42b4-b765-bca9b1f09c2b';
-  const REMOTE_SERVER_URL = `/copilot/api/operation`;
+  // Use local backend when running the dev server (npm start),
+  // and use the relative path for production builds (npm run build).
+  const REMOTE_SERVER_URL = process.env.NODE_ENV === 'development'
+    ? 'http://127.0.0.1:60000/copilot/api/operation'
+    : '/copilot/api/operation';
 
   const makeChatRequest = async (e: React.FormEvent) => {
     e.preventDefault();

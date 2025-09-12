@@ -15,6 +15,7 @@ virtualenv>=20.26.6
 eval_type_backport>=0.2.2
 pandas>=2.2.2
 flask>=3.1.2
+flask-cors>=4.1.2
 openai>=1.106.1
 azure-kusto-data>=5.0.5
 llama-index-core>=0.13.5
