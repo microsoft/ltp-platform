@@ -42,9 +42,12 @@ jobs:
           pwd
           cd "$GITHUB_WORKSPACE"
           pwd
+          ls -al
 
           DEBIAN_FRONTEND=noninteractive apt update
           DEBIAN_FRONTEND=noninteractive apt install -y git
+          git status
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base_sha="${{ github.event.pull_request.base.sha }}"
             git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
