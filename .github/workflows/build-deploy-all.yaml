@@ -92,12 +92,12 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
-            az login --identity
-            az aks install-cli
+            az login --identity --username ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
             az aks get-credentials \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --name ${{ secrets.KUBERNETES_CLUSTER }} \
               --overwrite-existing
+            kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
             kubelogin convert-kubeconfig -l azurecli
 
             echo "Stopping all pai services..."
