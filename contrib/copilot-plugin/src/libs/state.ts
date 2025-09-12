@@ -57,6 +57,7 @@ interface State {
   addChat: (chat: ChatMessage) => void;
   appendToLastAssistant: (chunk: string) => void;
   replaceLastAssistant: (text: string) => void;
+  setLastAssistantMessageInfo: (info: any) => void;
   
   // Conversation management actions
   generateNewConversationId: () => void;
@@ -115,6 +116,16 @@ export const useChatStore = create<State>((set) => ({
     for (let i = msgs.length - 1; i >= 0; i--) {
       if (msgs[i].role === 'assistant') {
         msgs[i] = { ...msgs[i], message: text };
+        break;
+      }
+    }
+    return { chatMsgs: msgs };
+  }),
+  setLastAssistantMessageInfo: (info: any) => set((state) => {
+    const msgs = [...state.chatMsgs];
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].role === 'assistant') {
+        msgs[i] = { ...msgs[i], messageInfo: info };
         break;
       }
     }

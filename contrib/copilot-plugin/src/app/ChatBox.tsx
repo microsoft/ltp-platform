@@ -38,6 +38,17 @@ export default function ChatBox() {
     setPrompt("");
     setLoading(true);
     try {
+      // create a stable turnId and include it in the payload so server will echo/use it
+      const turnId = uuidv4();
+      const messageInfo = {
+        userId: paiuser,
+        convId: currentConversationId,
+        turnId: turnId,
+        timestamp: Math.floor(Date.now()),
+        timestampUnit: "ms",
+        type: "question",
+      };
+
       const payload = {
         async_: false,
         stream: false,
@@ -48,20 +59,14 @@ export default function ChatBox() {
             username: paiuser,
             restToken: restServerToken,
             jobToken: jobServerToken,
-            currentJob: null // currentJob ? { id: currentJob.id, name: currentJob.name, username: currentJob.username, status: currentJob.status, ip: currentJob.ip, port: currentJob.port } : null
+            currentJob: null
           },
-          messageInfo: {
-            userId: paiuser,
-            convId: currentConversationId,
-            turnId: uuidv4(),
-            timestamp: Math.floor(Date.now()),
-            timestampUnit: "ms",
-            type: "question",
-          }
+          messageInfo: messageInfo
         }
       };
-      // Create assistant placeholder and stream response into it
-      useChatStore.getState().addChat({ role: "assistant", message: "", timestamp: new Date() });
+      
+      // Create assistant placeholder and attach the same messageInfo (turnId) so feedback maps to this response
+      useChatStore.getState().addChat({ role: "assistant", message: "", timestamp: new Date(), messageInfo });
       const response = await fetch(REMOTE_SERVER_URL, {
         method: "POST",
         headers: {
@@ -112,6 +117,11 @@ export default function ChatBox() {
                 const parsed = JSON.parse(trimmed);
                 if (parsed && parsed.type === 'append' && typeof parsed.text === 'string') {
                   useChatStore.getState().appendToLastAssistant(parsed.text);
+                  handled = true;
+                }
+                else if (parsed && parsed.type === 'meta' && parsed.messageInfo) {
+                  // attach backend-generated messageInfo (turnId etc.) to the last assistant message
+                  useChatStore.getState().setLastAssistantMessageInfo(parsed.messageInfo);
                   handled = true;
                 }
               } catch (e) {
