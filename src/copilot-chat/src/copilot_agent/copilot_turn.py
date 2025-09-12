@@ -45,12 +45,13 @@ class CoPilotTurn:
             return {'category': None, 'answer': 'DEBUGGING MODE ENABLED', 'debug': {'debugging': debugging}}
 
         # get contextualized question from this and last user inquiry
-        push_frontend_event('<span class="text-gray-400 italic">🤔 Copilot is understanding your inquiry...</span><br/>', replace=False)
+        push_frontend_event('<span class="text-gray-400 italic">🤔 Copilot is understanding your request...</span><br/>', replace=False)
         this_inquiry = messages_list[-1]['content']
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
         question = contextualize_question(this_inquiry, last_inquiry)
 
         # classify the question to determine the solution source and method
+        push_frontend_event('<span class="text-gray-400 italic">🔍 Copilot is finding the right the data source...</span><br/>', replace=False)
         question_type = self.classifier.classify_question(question)
         # objective, concern in the question
         obj, con = question_type.get('lv0_object', '3. [general]'), question_type.get('lv1_concern', '0. [others]')
