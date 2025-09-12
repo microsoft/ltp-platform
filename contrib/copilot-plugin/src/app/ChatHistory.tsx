@@ -11,6 +11,7 @@ import { Bot, User, ThumbsUp, ThumbsDown } from "lucide-react";
 import Markdown, { Components } from "react-markdown";
 
 import remarkGfm from "remark-gfm";
+import rehypeRaw from 'rehype-raw';
 import { ChatMessage, useChatStore } from "../libs/state";
 import { Pane } from "../components/pane";
 
@@ -101,6 +102,7 @@ const CustomMarkdown: React.FC<{ content: string }> = ({ content }) => {
     <div className={`prose-sm text-base break-words word-wrap`}>
       <Markdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw as any]}
         components={{
           pre({ node, ...props }: any) {
             return <PreWithLineNumbers>{props.children}</PreWithLineNumbers>;
