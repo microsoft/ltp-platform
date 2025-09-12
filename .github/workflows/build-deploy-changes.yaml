@@ -44,20 +44,12 @@ jobs:
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base_sha="${{ github.event.pull_request.base.sha }}"
+            git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
             head_sha="${{ github.event.pull_request.head.sha }}"
           else
             base_sha="${{ github.event.before }}"
             head_sha="${{ github.sha }}"
           fi
-
-          pwd
-          echo "---------------"
-          echo "---------------"
-          echo ${{ github.workspace }}
-          cd ${{ github.workspace }} && git log --oneline
-          echo "Base SHA: $base_sha"
-          echo "Head SHA: $head_sha"
-          cd ${{ github.workspace }} && git diff --name-only "$base_sha" "$head_sha"
 
           echo "Comparing $base_sha...$head_sha"
           changed_files=$(git diff --name-only "$base_sha" "$head_sha")
@@ -65,7 +57,7 @@ jobs:
 
           # extract service folders under src/, skip alert-manager
           folders=$(echo "$changed_files" | grep '^src/' \
-            | grep -v '^alert-manager$' \
+            | grep -v 'alert-manager' \
             |  awk -F'/' '{print $2}' \
             | sort -u | tr '\n' ' ')
           echo "Changed folders: $folders"
