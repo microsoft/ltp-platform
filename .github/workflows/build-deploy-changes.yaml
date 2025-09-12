@@ -33,9 +33,8 @@ jobs:
           fi
 
           echo "Changed files: $changed_files"
-          folders=$(echo "$changed_files" | grep '^src/' | awk -F'/' '{print $2}' | sort -u | tr '\n' ' ')
           # filter out alert-manager
-          folders=$(echo "$folders" | grep -v '^alert-manager$' | tr '\n' ' ')
+          folders=$(echo "$changed_files" | grep '^src/' | grep -v '^alert-manager$' |  awk -F'/' '{print $2}' | sort -u | tr '\n' ' ')
           echo "Changed folders: $folders"
 
           # export as outputs
@@ -75,7 +74,7 @@ jobs:
       - name: Build Images of Changed Services
         if: steps.check.outputs.has_changed == 'true'
         run: |
-          changed_services=$(echo "${{ steps.changes.outputs.folders }}" | tr ' ' '\n')
+          changed_services="${{ steps.changes.outputs.folders }}"
           echo "Building: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py build \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
@@ -84,7 +83,7 @@ jobs:
       - name: Push Images of Changed Services to ACR
         if: steps.check.outputs.has_changed == 'true'
         run: |
-          changed_services=$(echo "${{ steps.changes.outputs.folders }}" | tr ' ' '\n')
+          changed_services="${{ steps.changes.outputs.folders }}"
           echo "Pushing: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
@@ -93,7 +92,7 @@ jobs:
       - name: Push Images of Changed Service to GHCR
         if: steps.check.outputs.has_changed == 'true'
         run: |
-          changed_services=$(echo "${{ steps.changes.outputs.folders }}" | tr ' ' '\n')
+          changed_services="${{ steps.changes.outputs.folders }}"
           echo "Pushing: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
