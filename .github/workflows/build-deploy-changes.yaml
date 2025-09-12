@@ -18,8 +18,9 @@ env:
 jobs:
   build:
     name: Build and Deploy
-    runs-on: [self-hosted, paicicd]
+    runs-on: paicicd
     timeout-minutes: 120
+    environment: auto-test
 
     steps:
       - name: Checkout repository
@@ -133,7 +134,8 @@ jobs:
   test:
     name: Test rest-server
     needs: build
-    runs-on: ubuntu-24.04
+    runs-on: paicicd
+    environment: auto-test
     steps:
       - name: Test rest-server
         run: |
