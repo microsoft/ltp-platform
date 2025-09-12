@@ -160,6 +160,11 @@ jobs:
     needs: [build, test]
     runs-on: [self-hosted, paicicd]
     steps:
+      - name: Clean workspace
+        run: |
+          # remove the checkout code
+          rm -rf ${{ github.workspace }}/*
+          
       - name: Clean docker image
         run: |
           echo "Cleaning docker images"
