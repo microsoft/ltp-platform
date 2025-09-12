@@ -21,8 +21,6 @@ jobs:
     runs-on: [self-hosted, paicicd]
     timeout-minutes: 120
     environment: auto-test
-    container:
-      image: ubuntu:latest
 
     steps:
       - name: Checkout repository
@@ -53,7 +51,6 @@ jobs:
             |  awk -F'/' '{print $2}' \
             | sort -u | tr '\n' ' ')
           echo "Changed folders: $folders"
-          
 
           # export as output for next steps
           echo "folders=$folders" >> $GITHUB_OUTPUT
@@ -156,3 +153,12 @@ jobs:
             exit 1
           fi
           echo "Virtual cluster info: $vc_info"
+
+  clean:
+    name: Clean 
+    runs-on: [self-hosted, paicicd]
+    steps:
+      - name: Clean docker image
+        run: |
+          echo "Cleaning docker images"
+          docker system prune -af
