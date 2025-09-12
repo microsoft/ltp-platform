@@ -50,6 +50,11 @@ jobs:
             head_sha="${{ github.sha }}"
           fi
 
+          git log --oneline
+          echo "Base SHA: $base_sha"
+          echo "Head SHA: $head_sha"
+          git diff --name-only "$base_sha" "$head_sha"
+
           echo "Comparing $base_sha...$head_sha"
           changed_files=$(git diff --name-only "$base_sha" "$head_sha")
           echo "Changed files: $changed_files"
