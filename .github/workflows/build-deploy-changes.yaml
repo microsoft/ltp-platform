@@ -156,6 +156,8 @@ jobs:
 
   clean:
     name: Clean 
+    if: ${{ always() }}
+    needs: [build, test]
     runs-on: [self-hosted, paicicd]
     steps:
       - name: Clean docker image
