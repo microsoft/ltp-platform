@@ -130,9 +130,27 @@ export default function ChatBox() {
             }
 
             if (!handled) {
-              // Replace the last assistant message with the full reconstructed text
-              useChatStore.getState().replaceLastAssistant(dataStr);
-            }
+              // If server sent a full snapshot repeatedly (common when backend doesn't send structured append events),
+              // detect the already-displayed prefix and append only the new suffix. This avoids blinking and missing lines
+              // during rapid streaming of many list items.
+              const store = useChatStore.getState();
+              const msgs = store.chatMsgs;
+              let lastAssistant = "";
+              for (let i = msgs.length - 1; i >= 0; i--) {
+                if (msgs[i].role === 'assistant') {
+                  lastAssistant = msgs[i].message || '';
+                  break;
+                }
+              }
+
+              if (lastAssistant && dataStr.startsWith(lastAssistant)) {
+                const suffix = dataStr.slice(lastAssistant.length);
+                if (suffix.length > 0) store.appendToLastAssistant(suffix);
+              } else {
+                // Fallback: replace the last assistant message with the full reconstructed text
+                store.replaceLastAssistant(dataStr);
+              }
+             }
           }
 
           if (isDoneEvent) {
