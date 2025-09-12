@@ -5,6 +5,12 @@ on:
     branches: [ main, dev ]
   pull_request:
     branches: [ main, dev ]
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Branch to run on'
+        required: true
+        default: 'main'
 
 env:
   TAG: ${{ github.run_number }}
@@ -21,6 +27,7 @@ jobs:
         with:
           fetch-depth: 0    # needed for git diff
           submodules: false # ignore submodules
+          ref: ${{ github.event.inputs.branch_name || github.ref_name }}
 
       - name: Get Changed Folders (Services)
         id: changes
