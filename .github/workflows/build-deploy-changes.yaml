@@ -29,6 +29,11 @@ jobs:
       image: ubuntu:latest
 
     steps:
+      - name: Install git
+        run: |
+          DEBIAN_FRONTEND=noninteractive apt update
+          DEBIAN_FRONTEND=noninteractive apt install -y git
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -43,9 +48,6 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           pwd
           ls -al
-
-          DEBIAN_FRONTEND=noninteractive apt update
-          DEBIAN_FRONTEND=noninteractive apt install -y git
           git status
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
