@@ -170,13 +170,14 @@ def query_powerbi(question: str, help_msg):
     """Query PowerBI data."""
 
     # send HTML snippet so frontend (with rehype-raw enabled) can render with Tailwind styling
-    push_frontend_event('<span class="text-gray-400 italic">🔍 Copilot is gathering data to answer your inquiry...</span><br/>', replace=False)
+    push_frontend_event('<span class="text-gray-400 italic">✍️ Copilot is crafting the query...</span><br/>', replace=False)
     query_gen_res, query_gen_status = query_generation_kql(question)
     logger.info(f'KQL Query generation result: {query_gen_res}, status: {query_gen_status}')
     k_cluster = os.environ.get('DATA_SRC_KUSTO_CLUSTER_URL', '')
     k_db = os.environ.get('DATA_SRC_KUSTO_DATABASE_NAME', '')
     k_table = ''
     if query_gen_status == 0:
+        push_frontend_event('<span class="text-gray-400 italic">📥 Copilot is collecting the information...</span><br/>', replace=False)
         KQL = KustoExecutor(k_cluster, k_db, k_table)
         # Replace placeholders
         query_gen_res = query_gen_res.format(
