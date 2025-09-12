@@ -26,15 +26,16 @@ jobs:
     timeout-minutes: 120
     environment: auto-test
     container:
-      image: docker:24.0.5-cli  # CLI only
+      image: ubuntu:latest
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
-
     steps:
       - name: Install git
         run: |
           DEBIAN_FRONTEND=noninteractive apt update
-          DEBIAN_FRONTEND=noninteractive apt install -y git
+          DEBIAN_FRONTEND=noninteractive apt install -y git docker
+          docker version
+          docker run --rm hello-world
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -82,7 +83,7 @@ jobs:
       - name: Install Package
         if: steps.check.outputs.has_changed == 'true'
         run: |
-          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip
+          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip docker
 
       - name: Install python libs
         if: steps.check.outputs.has_changed == 'true'
