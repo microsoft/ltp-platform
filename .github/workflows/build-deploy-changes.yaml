@@ -25,6 +25,8 @@ jobs:
     runs-on: [self-hosted, paicicd]
     timeout-minutes: 120
     environment: auto-test
+    container:
+      image: ubuntu:latest
 
     steps:
       - name: Checkout repository
@@ -67,6 +69,12 @@ jobs:
           else
             echo "has_changed=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Install Package
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          DEBIAN_FRONTEND=noninteractive apt update
+          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip
 
       - name: Install python libs
         if: steps.check.outputs.has_changed == 'true'
@@ -123,13 +131,14 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
-            az login --identity --username ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
+            az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
+            az aks install-cli
             az aks get-credentials \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --name ${{ secrets.KUBERNETES_CLUSTER }} \
               --overwrite-existing
-            kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
             kubelogin convert-kubeconfig -l azurecli
+            kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
 
             echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
             echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }}
@@ -158,13 +167,3 @@ jobs:
           fi
           echo "Virtual cluster info: $vc_info"
 
-  clean:
-    name: Clean 
-    if: ${{ always() }}
-    needs: [build, test]
-    runs-on: [self-hosted, paicicd]
-    steps:
-      - name: Clean docker image
-        run: |
-          echo "Cleaning docker images"
-          docker system prune -af
