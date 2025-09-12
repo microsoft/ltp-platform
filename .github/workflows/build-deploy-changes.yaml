@@ -39,6 +39,9 @@ jobs:
       - name: Get Changed Folders (Services)
         id: changes
         run: |
+          DEBIAN_FRONTEND=noninteractive apt update
+          DEBIAN_FRONTEND=noninteractive apt install -y git
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base_sha="${{ github.event.pull_request.base.sha }}"
             head_sha="${{ github.event.pull_request.head.sha }}"
@@ -73,7 +76,6 @@ jobs:
       - name: Install Package
         if: steps.check.outputs.has_changed == 'true'
         run: |
-          DEBIAN_FRONTEND=noninteractive apt update
           DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip
 
       - name: Install python libs
