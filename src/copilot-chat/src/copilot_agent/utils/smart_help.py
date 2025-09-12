@@ -43,10 +43,10 @@ def gen_smart_help(help_msg, user_question: str, key_lst: list, SMART_HELP=True)
         question_prompt = f'[user question]\n {user_question} \n\n'
         user_prompt = question_prompt + f'[reason to generate the help]\n str{key_lst} \n\n' + capability_promp
         # send to a LLM session to generate a smart help
-        smart_help = model.chat(sys_prompt, user_prompt)
+        smart_help = model.try_stream_fallback_chat(sys_prompt, user_prompt)
         final_help = smart_help
     else:
         dump_help_prompt = f'[reason to generate the help]\n {dump_help} \n\n'
-        final_help = model.chat(sys_prompt, dump_help_prompt)
+        final_help = model.try_stream_fallback_chat(sys_prompt, dump_help_prompt)
 
     return final_help

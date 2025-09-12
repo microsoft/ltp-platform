@@ -55,6 +55,8 @@ interface State {
   setAllModelsInCurrentJob: (models: string[]) => void;
   setCurrentModel: (model: string | null) => void;
   addChat: (chat: ChatMessage) => void;
+  appendToLastAssistant: (chunk: string) => void;
+  replaceLastAssistant: (text: string) => void;
   
   // Conversation management actions
   generateNewConversationId: () => void;
@@ -98,7 +100,27 @@ export const useChatStore = create<State>((set) => ({
   setCurrentModel: (model) => set({ currentModel: model }),
 
   addChat: (log) => set((state) => ({ chatMsgs: [...state.chatMsgs, log] })),
-  
+  appendToLastAssistant: (chunk: string) => set((state) => {
+    const msgs = [...state.chatMsgs];
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].role === 'assistant') {
+        msgs[i] = { ...msgs[i], message: (msgs[i].message || '') + chunk };
+        break;
+      }
+    }
+    return { chatMsgs: msgs };
+  },),
+  replaceLastAssistant: (text: string) => set((state) => {
+    const msgs = [...state.chatMsgs];
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].role === 'assistant') {
+        msgs[i] = { ...msgs[i], message: text };
+        break;
+      }
+    }
+    return { chatMsgs: msgs };
+  }),
+
   // Generate a new conversation ID (useful for starting a new conversation)
   generateNewConversationId: () => set((state) => ({ 
     currentConversationId: uuidv4(),

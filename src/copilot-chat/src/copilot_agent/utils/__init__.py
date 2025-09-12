@@ -31,6 +31,9 @@ from .powerbi import (
 from .promql import (
     execute_promql_query,
 )
+from .push_frontend import(
+    push_frontend_event,
+)
 from .query import (
     gen_kusto_query_fallback_pseudo,
     gen_kusto_query_pseudo,
@@ -94,6 +97,7 @@ __all__ = [
     'is_valid_json',
     'logger',
     'parse_and_align_dcw',
+    'push_frontend_event',
     'retry_function',
     'save_to_csv',
 ]
