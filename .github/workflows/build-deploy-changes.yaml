@@ -72,18 +72,71 @@ jobs:
           mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
           ls -l /tmp/auth-configuration
 
-      - name: Build Changed Services
+      - name: Build Images of Changed Services
         if: steps.check.outputs.has_changed == 'true'
         run: |
           changed_services=$(echo "${{ steps.changes.outputs.folders }}" | tr ' ' '\n')
           echo "Building: $changed_services"
-          $GITHUB_WORKSPACE/build/pai_build.py build -c $GITHUB_WORKSPACE/config/cluster-configuration -s $changed_services
+          $GITHUB_WORKSPACE/build/pai_build.py build \
+            -c $GITHUB_WORKSPACE/config/cluster-configuration \
+            -s $changed_services
 
-      - name: Push Changed Services
+      - name: Push Images of Changed Services to ACR
         if: steps.check.outputs.has_changed == 'true'
         run: |
           changed_services=$(echo "${{ steps.changes.outputs.folders }}" | tr ' ' '\n')
           echo "Pushing: $changed_services"
-          $GITHUB_WORKSPACE/build/pai_build.py push -c $GITHUB_WORKSPACE/config/cluster-configuration -s $changed_services
+          $GITHUB_WORKSPACE/build/pai_build.py push \
+            -c $GITHUB_WORKSPACE/config/cluster-configuration \
+            -s $changed_services
 
-      - name: Az
+      - name: Push Images of Changed Service to GHCR
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          changed_services=$(echo "${{ steps.changes.outputs.folders }}" | tr ' ' '\n')
+          echo "Pushing: $changed_services"
+          $GITHUB_WORKSPACE/build/pai_build.py push \
+            -c $GITHUB_WORKSPACE/config/cluster-configuration \
+            -s $changed_services \
+            --docker-registry ghcr.io \
+            --docker-namespace ${GITHUB_REPOSITORY_OWNER} \
+            --docker-username ${{ github.actor }} \
+            --docker-password ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Azure CLI get credentials and deploy
+        if: steps.check.outputs.has_changed == 'true'
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az login --identity
+            az aks get-credentials \
+              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+              --name ${{ secrets.KUBERNETES_CLUSTER }} \
+              --overwrite-existing
+            kubelogin convert-kubeconfig -l azurecli
+
+            echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+            echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }}
+            echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
+            echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration
+            echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+            echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }}
+            kubectl get pod
+            kubectl get service
+
+  test:
+    name: Test rest-server
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Test rest-server
+        run: |
+          echo "Testing rest-server ${{ secrets.PAI_WEB_URL }}/rest-server/api/v2/info"
+          curl ${{ secrets.PAI_WEB_URL }}/rest-server/api/v2/info
+          echo "Checking virtual cluster status..."
+          vc_info=$(curl -H "Authorization: Bearer ${{ secrets.PAI_WEB_TOKEN }}" -s ${{ secrets.PAI_WEB_URL }}/rest-server/api/v2/virtual-clusters)
+          if [ $? -ne 0 ]; then
+            echo "Failed to access virtual cluster API"
+            exit 1
+          fi
+          echo "Virtual cluster info: $vc_info"
