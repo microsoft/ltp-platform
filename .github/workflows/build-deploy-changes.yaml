@@ -55,7 +55,6 @@ jobs:
           # export as output for next steps
           echo "folders=$folders" >> $GITHUB_OUTPUT
 
-
       - name: Check if folders are empty
         id: check
         run: |
@@ -64,6 +63,12 @@ jobs:
           else
             echo "has_changed=true" >> $GITHUB_OUTPUT
           fi
+
+      - name: Install Package
+        if:
+        run: |
+          apt update
+          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip
 
       - name: Install python libs
         if: steps.check.outputs.has_changed == 'true'
@@ -163,7 +168,7 @@ jobs:
       - name: Clean workspace
         run: |
           # remove the checkout code
-          rm -rf ${{ github.workspace }}/*
+          rm -rf ${{ github.workspace }}
           
       - name: Clean docker image
         run: |
