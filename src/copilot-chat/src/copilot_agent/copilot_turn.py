@@ -45,7 +45,7 @@ class CoPilotTurn:
             return {'category': None, 'answer': 'DEBUGGING MODE ENABLED', 'debug': {'debugging': debugging}}
 
         # get contextualized question from this and last user inquiry
-        push_frontend_event('<...understanding your inquiry...>', replace=True)
+        push_frontend_event('<span class="text-gray-400 italic">🤔 Copilot is understanding your inquiry...</span><br/>', replace=False)
         this_inquiry = messages_list[-1]['content']
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
         question = contextualize_question(this_inquiry, last_inquiry)
