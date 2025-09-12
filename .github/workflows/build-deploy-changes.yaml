@@ -80,7 +80,7 @@ jobs:
       - name: Install Package
         if: steps.check.outputs.has_changed == 'true'
         run: |
-          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip
+          DEBIAN_FRONTEND=noninteractive apt install -y --break-system-packages. python3 python-is-python3 pip git unzip
 
       - name: Install python libs
         if: steps.check.outputs.has_changed == 'true'
