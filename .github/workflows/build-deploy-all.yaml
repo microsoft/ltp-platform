@@ -1,5 +1,9 @@
 name: Build & Deploy All Services
 
+permissions:
+  packages: write
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
@@ -43,14 +47,16 @@ jobs:
       - name: Install python libs
         run: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
 
-      - name: Decode and unzip config files
+      - name: Decode and unzip config file
         run: |
           echo "${{ secrets.CONFIG_FILE_B64 }}" | base64 -d > config.zip
           mkdir -p $GITHUB_WORKSPACE/config
           unzip -o config.zip -d $GITHUB_WORKSPACE/config
+          ls -l $GITHUB_WORKSPACE/config
 
       - name: Arrange Config Files
         run: |
+          rm -rf /tmp/auth-configuration
           mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
           ls -l /tmp/auth-configuration
 

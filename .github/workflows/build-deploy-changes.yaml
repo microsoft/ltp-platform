@@ -1,5 +1,9 @@
 name: Build & Deploy Changed Services
 
+permissions:
+  packages: write
+  contents: read
+
 on:
   push:
     branches: [main, dev, 'release/*']
