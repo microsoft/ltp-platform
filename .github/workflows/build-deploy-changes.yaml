@@ -2,15 +2,15 @@ name: Build & Deploy Changed Services
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main, dev ]
+    branches: [main, dev]
   workflow_dispatch:
     inputs:
       branch_name:
-        description: 'Branch to run on'
+        description: "Branch to run on"
         required: true
-        default: 'main'
+        default: "main"
 
 env:
   TAG: ${{ github.run_number }}
@@ -18,7 +18,7 @@ env:
 jobs:
   build:
     name: Build and Deploy
-    runs-on: paicicd
+    runs-on: [self-hosted, paicicd]
     timeout-minutes: 120
     environment: auto-test
 
@@ -26,9 +26,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0    # needed for git diff
-          submodules: false # ignore submodules
-          ref: ${{ github.event.inputs.branch_name || github.ref_name }}
+          fetch-depth: 0
+          submodules: false
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.inputs.branch_name || github.ref_name }}
 
       - name: Get Changed Folders (Services)
         id: changes
@@ -134,7 +134,7 @@ jobs:
   test:
     name: Test rest-server
     needs: build
-    runs-on: paicicd
+    runs-on: [self-hosted, paicicd]
     environment: auto-test
     steps:
       - name: Test rest-server

@@ -4,19 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       branch_name:
-        description: 'Branch to run on'
+        description: "Branch to run on"
         required: true
-        default: 'main'
+        default: "main"
       rebuildImage:
-        description: 'Rebuild all images'
+        description: "Rebuild all images"
         type: boolean
         default: false
       repushImage:
-        description: 'Repush all images'
+        description: "Repush all images"
         type: boolean
         default: false
       redeployService:
-        description: 'Redeploy all services'
+        description: "Redeploy all services"
         type: boolean
         default: false
 
@@ -26,7 +26,7 @@ env:
 jobs:
   build:
     name: Build and Deploy
-    runs-on: paicicd
+    runs-on: [self-hosted, paicicd]
     timeout-minutes: 120
     environment: auto-test
 
@@ -37,7 +37,6 @@ jobs:
           fetch-depth: 0
           submodules: false
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.inputs.branch_name || github.ref_name }}
-
 
       - name: Install python libs
         run: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
@@ -63,7 +62,7 @@ jobs:
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
             -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana frameworkcontroller hivedscheduler openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
 
-      - name: Push Images of All Services to ACR 
+      - name: Push Images of All Services to ACR
         if: ${{ inputs.repushImage }}
         run: |
           $GITHUB_WORKSPACE/build/pai_build.py push \
@@ -109,7 +108,7 @@ jobs:
   test:
     name: Test rest-server
     needs: build
-    runs-on: paicicd
+    runs-on: [self-hosted, paicicd]
     environment: auto-test
 
     steps:
