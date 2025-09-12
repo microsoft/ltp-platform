@@ -44,7 +44,8 @@ def gen_summary(
         sys_prompt = gen_sum_prompt + '\n\n' + knowledge_prmpt + '\n\n'
         if not skip_summary:
             logger.info('Bypass summary: False')
-            summary = model.chat(sys_prompt, user_prompt)
+            # try stream chat, if fail, fall back to chat
+            summary = model.try_stream_fallback_chat(sys_prompt, user_prompt)
         else:
             logger.info('Bypass summary: True')
             summary = handle_bypass_summary(resp_total, resp_brief)

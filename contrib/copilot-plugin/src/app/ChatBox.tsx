@@ -21,8 +21,8 @@ export default function ChatBox() {
   // Use local backend when running the dev server (npm start),
   // and use the relative path for production builds (npm run build).
   const REMOTE_SERVER_URL = process.env.NODE_ENV === 'development'
-    ? 'http://127.0.0.1:60000/copilot/api/operation'
-    : '/copilot/api/operation';
+    ? 'http://127.0.0.1:60000/copilot/api/operation/stream'
+    : '/copilot/api/operation/stream';
 
   const makeChatRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +60,8 @@ export default function ChatBox() {
           }
         }
       };
+      // Create assistant placeholder and stream response into it
+      useChatStore.getState().addChat({ role: "assistant", message: "", timestamp: new Date() });
       const response = await fetch(REMOTE_SERVER_URL, {
         method: "POST",
         headers: {
@@ -69,15 +71,70 @@ export default function ChatBox() {
         body: JSON.stringify(payload),
       });
       if (!response.ok) throw new Error("Remote server error");
-      const data = await response.json();
-      if (data?.data?.answer !== "skip") {
-        useChatStore.getState().addChat({
-          role: "assistant",
-          message: data?.data?.answer ?? "No answer found",
-          timestamp: new Date(),
-          messageInfo: data?.data?.message_info, // Store the message_info from response
-        });
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No response body for streaming');
+      const decoder = new TextDecoder();
+      // Buffer incoming bytes and parse SSE-style messages (separated by '\n\n')
+      let buffer = '';
+      while (true) {
+        const { value, done: readerDone } = await reader.read();
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+        }
+
+        // Process all complete SSE messages in buffer
+        let sepIndex;
+        while ((sepIndex = buffer.indexOf('\n\n')) !== -1) {
+          const rawEvent = buffer.slice(0, sepIndex);
+          buffer = buffer.slice(sepIndex + 2);
+
+          // Extract data: lines and join with newline to preserve original formatting
+          const lines = rawEvent.split(/\n/);
+          const dataParts: string[] = [];
+          let isDoneEvent = false;
+          for (const line of lines) {
+            if (line.startsWith('data:')) {
+              dataParts.push(line.slice(5));
+            } else if (line.startsWith('event:')) {
+              const ev = line.slice(6).trim();
+              if (ev === 'done') isDoneEvent = true;
+            }
+          }
+
+          if (dataParts.length > 0) {
+            const dataStr = dataParts.join('\n');
+            // If the server sent a JSON 'append' event, append to last assistant message
+            let handled = false;
+            const trimmed = dataStr.trim();
+            if (trimmed.startsWith('{')) {
+              try {
+                const parsed = JSON.parse(trimmed);
+                if (parsed && parsed.type === 'append' && typeof parsed.text === 'string') {
+                  useChatStore.getState().appendToLastAssistant(parsed.text);
+                  handled = true;
+                }
+              } catch (e) {
+                // not JSON, fall through to full replace
+              }
+            }
+
+            if (!handled) {
+              // Replace the last assistant message with the full reconstructed text
+              useChatStore.getState().replaceLastAssistant(dataStr);
+            }
+          }
+
+          if (isDoneEvent) {
+            // stream finished
+            break;
+          }
+        }
+
+        if (readerDone) break;
       }
+
+      // After the streaming loop, do not alter the assembled markdown so newlines are preserved
     } catch (err) {
       toast.error("Failed to get response from remote server");
     }

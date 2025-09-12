@@ -16,6 +16,7 @@ from ..utils.llmsession import LLMSession
 from ..utils.openpai import execute_openpai_query
 from ..utils.powerbi import LTPReportProcessor
 from ..utils.promql import execute_promql_query, execute_promql_query_step, retrive_promql_response_value
+from ..utils.push_frontend import push_frontend_event
 from ..utils.query import gen_promql_query
 from ..utils.summary import gen_summary
 from ..utils.time import get_current_unix_timestamp
@@ -168,6 +169,7 @@ def get_brief_job_metadata(resp):
 def query_powerbi(question: str, help_msg):
     """Query PowerBI data."""
 
+    push_frontend_event('<...querying data to answer your inquiry...>', replace=True)
     query_gen_res, query_gen_status = query_generation_kql(question)
     logger.info(f'KQL Query generation result: {query_gen_res}, status: {query_gen_status}')
     k_cluster = os.environ.get('DATA_SRC_KUSTO_CLUSTER_URL', '')
@@ -202,7 +204,8 @@ def query_powerbi(question: str, help_msg):
 
     if response_status == 0:
         reference = f'\n\n >Reference: the generated KQL query used to get the data:\n\n```\n{query_gen_res}\n```'
-        summary += reference
+        # push to frontend
+        push_frontend_event(reference)
 
     info_dict = {}
     info_dict["s0_query_gen"] = {"res": query_gen_res, "status": query_gen_status}
