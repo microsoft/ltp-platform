@@ -148,12 +148,11 @@ jobs:
             kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
             echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
             echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
-            $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }} < cluster_id || true
-            sleep 1h
+            $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }} < cluster_id 
             echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
-            echo -e "${{ secrets.PAI_CLUSTER_NAME }}" | $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration
+            $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/ cluster-configuration < cluster_id 
             echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
-            echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }}
+            $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }} < cluster_id 
             kubectl get pod
             kubectl get service
 
