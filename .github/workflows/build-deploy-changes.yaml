@@ -150,7 +150,7 @@ jobs:
             echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
             $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }} < cluster_id 
             echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
-            $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/ cluster-configuration < cluster_id 
+            $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration < cluster_id 
             echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
             $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }} < cluster_id 
             kubectl get pod
