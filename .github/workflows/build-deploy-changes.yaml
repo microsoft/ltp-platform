@@ -103,36 +103,36 @@ jobs:
           mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
           ls -l /tmp/auth-configuration
 
-      - name: Build Images of Changed Services
-        if: steps.check.outputs.has_changed == 'true'
-        run: |
-          changed_services="${{ steps.changes.outputs.folders }}"
-          echo "Building: $changed_services"
-          $GITHUB_WORKSPACE/build/pai_build.py build \
-            -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s $changed_services
+      # - name: Build Images of Changed Services
+      #   if: steps.check.outputs.has_changed == 'true'
+      #   run: |
+      #     changed_services="${{ steps.changes.outputs.folders }}"
+      #     echo "Building: $changed_services"
+      #     $GITHUB_WORKSPACE/build/pai_build.py build \
+      #       -c $GITHUB_WORKSPACE/config/cluster-configuration \
+      #       -s $changed_services
 
-      - name: Push Images of Changed Services to ACR
-        if: steps.check.outputs.has_changed == 'true'
-        run: |
-          changed_services="${{ steps.changes.outputs.folders }}"
-          echo "Pushing: $changed_services"
-          $GITHUB_WORKSPACE/build/pai_build.py push \
-            -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s $changed_services
+      # - name: Push Images of Changed Services to ACR
+      #   if: steps.check.outputs.has_changed == 'true'
+      #   run: |
+      #     changed_services="${{ steps.changes.outputs.folders }}"
+      #     echo "Pushing: $changed_services"
+      #     $GITHUB_WORKSPACE/build/pai_build.py push \
+      #       -c $GITHUB_WORKSPACE/config/cluster-configuration \
+      #       -s $changed_services
 
-      - name: Push Images of Changed Service to GHCR
-        if: steps.check.outputs.has_changed == 'true'
-        run: |
-          changed_services="${{ steps.changes.outputs.folders }}"
-          echo "Pushing: $changed_services"
-          $GITHUB_WORKSPACE/build/pai_build.py push \
-            -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s $changed_services \
-            --docker-registry ghcr.io \
-            --docker-namespace ${GITHUB_REPOSITORY_OWNER} \
-            --docker-username ${{ github.actor }} \
-            --docker-password ${{ secrets.GITHUB_TOKEN }}
+      # - name: Push Images of Changed Service to GHCR
+      #   if: steps.check.outputs.has_changed == 'true'
+      #   run: |
+      #     changed_services="${{ steps.changes.outputs.folders }}"
+      #     echo "Pushing: $changed_services"
+      #     $GITHUB_WORKSPACE/build/pai_build.py push \
+      #       -c $GITHUB_WORKSPACE/config/cluster-configuration \
+      #       -s $changed_services \
+      #       --docker-registry ghcr.io \
+      #       --docker-namespace ${GITHUB_REPOSITORY_OWNER} \
+      #       --docker-username ${{ github.actor }} \
+      #       --docker-password ${{ secrets.GITHUB_TOKEN }}
 
       - name: Azure CLI get credentials and deploy
         if: steps.check.outputs.has_changed == 'true'
