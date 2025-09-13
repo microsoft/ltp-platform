@@ -146,7 +146,7 @@ jobs:
               --overwrite-existing
             kubelogin convert-kubeconfig -l azurecli
             kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
-
+            sleep 1h
             echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
             echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }}
             echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
