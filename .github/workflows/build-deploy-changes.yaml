@@ -81,7 +81,8 @@ jobs:
       - name: Install Package
         if: steps.check.outputs.has_changed == 'true'
         run: |
-          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip docker-cli
+          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip docker-cli ca-certificates curl apt-transport-https lsb-release gnupg
+          curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
       - name: Install python libs
         if: steps.check.outputs.has_changed == 'true'
@@ -135,9 +136,8 @@ jobs:
 
       - name: Azure CLI get credentials and deploy
         if: steps.check.outputs.has_changed == 'true'
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
+        run: |
+            az version
             az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
             az aks install-cli
             az aks get-credentials \
