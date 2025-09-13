@@ -45,13 +45,12 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.inputs.branch_name || github.ref_name }}
 
       - name: Install Package
-        if: steps.check.outputs.has_changed == 'true'
         run: |
-          DEBIAN_FRONTEND=noninteractive apt update
-          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip
+          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip docker-cli ca-certificates curl apt-transport-https lsb-release gnupg
+          curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
       - name: Install python libs
-        run: python -m pip install pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
+        run: python -m pip install --break-system-packages pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
 
       - name: Decode and unzip config file
         run: |
@@ -94,11 +93,10 @@ jobs:
             --docker-password ${{ secrets.GITHUB_TOKEN }}
 
       - name: Azure CLI get credentials and deploy
-        if: ${{ inputs.redeployService }}
-        uses: azure/cli@v2
-        with:
-          inlineScript: |
+        run: |
+            az version
             az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
+            az aks install-cli
             az aks get-credentials \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --name ${{ secrets.KUBERNETES_CLUSTER }} \
@@ -106,8 +104,9 @@ jobs:
             kubelogin convert-kubeconfig -l azurecli
             kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
 
+            echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
             echo "Stopping all pai services..."
-            echo -e ${{ secrets.PAI_CLUSTER_NAME }} | $GITHUB_WORKSPACE/paictl.py service stop -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal
+            $GITHUB_WORKSPACE/paictl.py service stop -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal < cluster_id
 
             echo "Starting to update pai..."
             bash $GITHUB_WORKSPACE/contrib/kubespray/script/start-service-in-dev-box.all.sh \
