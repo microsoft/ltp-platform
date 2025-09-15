@@ -66,7 +66,11 @@ spec:
 {% if "copilot-chat" in cluster_cfg %}
             - name: COPILOT_CHAT_URI
               value: {{ cluster_cfg['copilot-chat']['url'] }}
-{% endif %}           
+{% endif %}
+{% if "model-proxy" in cluster_cfg %}
+            - name: MODEL_PROXY_URI
+              value: {{ cluster_cfg['model-proxy']['url'] }}
+{% endif %}
             - name: K8S_DASHBOARD_URI
               value: {{ cluster_cfg['layout']['kubernetes']['dashboard-url'] }}
 {% if cluster_cfg["cluster"]["common"]["cluster-type"] == "yarn" %}

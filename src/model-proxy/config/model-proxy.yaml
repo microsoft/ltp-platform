@@ -1,0 +1,8 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+service_type: "common"
+
+port: 9999
+retry: 5
+modelkey: "123"
