@@ -9,16 +9,13 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
 
 // target job tag to identify model serving jobs
 const TARGET_JOB_TAG = "model-serving"
-
-// REST server and Job server path segments in the URL
-const REST_SERVER_PATH = "rest-server"
-const JOB_SERVER_PATH = "job-server"
 
 var httpClient = &http.Client{Timeout: 120 * time.Second}
 
@@ -128,7 +125,6 @@ func GetJobServerUrl(restServerUrl string, restServerToken string, jobId string)
 		return "", fmt.Errorf("no taskRoles found for job %s", jobId)
 	}
 
-	jobServerPath := strings.Replace(restServerUrl, REST_SERVER_PATH, JOB_SERVER_PATH, 1)
 	// Pick first role, first taskStatus
 	for _, role := range details.TaskRoles {
 		if len(role.TaskStatuses) == 0 {
@@ -143,7 +139,8 @@ func GetJobServerUrl(restServerUrl string, restServerToken string, jobId string)
 		if !ok || port == "" {
 			return "", fmt.Errorf("no http port found for job %s", jobId)
 		}
-		jobServerUrl := fmt.Sprintf("%s/%s:%s", jobServerPath, ts.ContainerIp, port)
+		// return the internal url
+		jobServerUrl := fmt.Sprintf("http://%s:%s", ts.ContainerIp, port)
 		return jobServerUrl, nil
 	}
 
@@ -233,7 +230,11 @@ func GetJobModelsMapping(req *http.Request, modelToken string) (map[string][]str
 	if req == nil || req.Host == "" {
 		return mapping, fmt.Errorf("invalid request or empty host")
 	}
-	restBase := fmt.Sprintf("https://%s/rest-server", req.Host)
+	// get rest server base url from the os environment variable
+	restBase := os.Getenv("REST_SERVER_URI")
+	if restBase == "" {
+		return mapping, fmt.Errorf("REST_SERVER_URI environment variable is not set")
+	}
 
 	restServerToken := req.Header.Get("Authorization")
 	jobIDs, err := ListModelServingJobs(restBase, restServerToken)
