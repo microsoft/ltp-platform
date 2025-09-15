@@ -364,6 +364,9 @@ hyperkube_download_url: "{{ env['cfg']['hyperkube_download_url'] }}"
 kube_network_plugin: {{ env['cfg']['openpai_kube_network_plugin'] | default('cilium') }}
 {%- if 'openpai_kube_network_plugin' not in env['cfg'] or env['cfg']['openpai_kube_network_plugin'] == 'cilium' %}
 cilium_enable_portmap: true
+# update strict to true when upgrading kubespray version
+cilium_kube_proxy_replacement: strict
+cilium_bpf_map_dynamic_size_ratio: 0.001
 {%- endif %}
 
 {%- if 'openpai_kubespray_extra_var' in env['cfg'] %}
