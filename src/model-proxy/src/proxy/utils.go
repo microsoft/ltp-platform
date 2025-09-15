@@ -40,10 +40,8 @@ func ReplaceBaseURL(originalURL string, baseSpec *types.BaseSpec) *url.URL {
 		log.Printf("Failed to parse new base URL: %v", err)
 		return nil
 	}
-	log.Printf("****************************************** %s\n", parsedURL.Path)
 
 	newURL.Path = path.Join(newURL.Path, parsedURL.Path)
-	log.Printf("****************************************** %s\n", newURL.Path)
 	//replace the api-version
 	queryParams := newURL.Query()
 	if baseSpec.Version != "" {

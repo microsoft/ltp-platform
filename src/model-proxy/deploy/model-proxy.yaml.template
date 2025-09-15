@@ -29,6 +29,9 @@ spec:
           - "--retry={{ cluster_cfg['model-proxy']['retry'] }}"
           - "--modelkey={{ cluster_cfg['model-proxy']['modelkey'] }}"
           - "--logdir=/usr/local/ltp/model-proxy/logs"
+        env:
+        - name: REST_SERVER_URI
+          value: {{ cluster_cfg["rest-server"]["uri"] }}
         volumeMounts:
         {%- if cluster_cfg['model-proxy']['log_pvc'] %}
         - name: model-proxy-log-storage

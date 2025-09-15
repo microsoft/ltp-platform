@@ -75,7 +75,7 @@ func NewProxyHandler(config *types.Config) *ProxyHandler {
 
 // ReverseProxyHandler act as a reverse proxy, it will redirect the request to the destination website and return the response
 func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Request) (string, []string, bool) {
-
+	log.Printf("[*] receive a request: %s %s\n", r.Method, r.URL.String())
 	// handle /healthz
 	if r.URL.Path == "/healthz" {
 		w.WriteHeader(http.StatusOK)
