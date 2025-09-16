@@ -63,13 +63,16 @@ def shell_cmd(cmd, timeout):
 
 
 def get_default_iface():
-    g = netifaces.gateways()
-    default = g.get('default', {})
-    gw4 = default.get(netifaces.AF_INET)
-    if gw4:
-        _, iface = gw4[:2]
-        return iface
-    return None
+    try:
+        g = netifaces.gateways()
+        default = g.get('default', {})
+        gw4 = default.get(netifaces.AF_INET)
+        if gw4:
+            _, iface = gw4[:2]
+            return iface
+        return None
+    except Exception:
+        return None
 
 
 class NodeExporter(BaseExporter):
