@@ -4,8 +4,16 @@
 # Licensed under the MIT license.
 
 
-{% if cluster_cfg['cluster']['common']['cluster-local-storage'] == 'true' %}
 pushd $(dirname "$0") > /dev/null
+
+vcs=$(kubectl get statefulset | grep cluster-local-storage-sts)
+if [[ -n "$vcs" ]]; then
+    while read -r vc; do
+        vc_name=$(echo "$vc" | awk '{print $1}')
+        PYTHONPATH="../../../deployment" python -m k8sPaiLibrary.maintaintool.update_resource \
+            --operation delete --resource statefulset --name "$vc_name"
+    done <<< "$vcs"
+fi
 
 {% for vc in cluster_cfg['cluster-local-storage']['clusters'] %}
 PYTHONPATH="../../../deployment" python -m k8sPaiLibrary.maintaintool.update_resource \
@@ -21,4 +29,3 @@ if kubectl get serviceaccount | grep -q "cluster-local-storage-account"; then
 fi
 
 popd > /dev/null
-{% endif %}
