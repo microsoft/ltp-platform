@@ -9,7 +9,7 @@ DEFAULT_RUNTIME="$1"
 
 RUNC_VERSION="1.1.12"
 CONTAINERD_VERSION="1.7.15"
-CNI_VERSION="v1.5.1"
+CNI_VERSION="1.5.1"
 
 mkdir -p /etc/containerd
 mkdir -p /var/lib/containerd
@@ -23,9 +23,9 @@ curl -LO https://nexusstaticsa.blob.core.windows.net/public/containerd/v${CONTAI
 tar -xvzf containerd.tar.gz -C /usr
 rm containerd.tar.gz
 
-curl -LO https://github.com/containernetworking/plugins/releases/download/v1.5.1/cni-plugins-linux-amd64-v1.5.1.tgz || { echo "Failed to download CNI plugins"; exit 1; }
-tar -xvzf cni-plugins-linux-amd64-v1.5.1.tgz -C /opt/cni/bin
-rm cni-plugins-linux-amd64-v1.5.1.tgz
+curl -LO https://github.com/containernetworking/plugins/releases/download/v${CNI_VERSION}/cni-plugins-linux-amd64-v${CNI_VERSION}.tgz || { echo "Failed to download CNI plugins"; exit 1; }
+tar -xvzf cni-plugins-linux-amd64-v${CNI_VERSION}.tgz -C /opt/cni/bin
+rm cni-plugins-linux-amd64-v${CNI_VERSION}.tgz
 
 tee /etc/containerd/config.toml > /dev/null <<EOF
 version = 2
