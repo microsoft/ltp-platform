@@ -23,6 +23,7 @@ import os
 import signal
 import logging
 import argparse
+import netifaces
 from base_exporter import BaseExporter
 import subprocess
 import shlex
@@ -59,6 +60,16 @@ def shell_cmd(cmd, timeout):
         result = 'TimeOut'
         return result
     return result.decode()
+
+
+def get_default_iface():
+    g = netifaces.gateways()
+    default = g.get('default', {})
+    gw4 = default.get(netifaces.AF_INET)
+    if gw4:
+        _, iface = gw4[:2]
+        return iface
+    return None
 
 
 class NodeExporter(BaseExporter):
@@ -103,7 +114,7 @@ class NodeExporter(BaseExporter):
     def collect(self, field_name):  # noqa: C901
         '''Custom collection Method'''
         value = None
-        if 'net' in field_name:
+        if 'net' in field_name and config['ethernet_device']:
             cmd = "grep '{}' ".format(config['ethernet_device']) + self.config['fieldFiles'][field_name]
             val = None
             if 'net_rx' in field_name:
@@ -322,7 +333,7 @@ def init_config(job_id, port=None, ethernet_device='eth0', interval=30):
     # initalize field specific config parameters
     for field_name in FIELD_LIST:
         config['sample_timestamp'][field_name] = datetime.now() - timedelta(seconds=5)
-        if 'net' in field_name:
+        if 'net' in field_name and config['ethernet_device']:
             config['fieldFiles'][field_name] = '/proc/net/dev'
             # initialize counter, this will ensure a initial value is present
             # to calculate bandwidth
@@ -451,7 +462,7 @@ def main():
         "-e",
         "--ethernet_device",
         type=str,
-        default='eth0',
+        default=get_default_iface(),
         help='Ethernet device to monitor')
     parser.add_argument(
         "-i",
