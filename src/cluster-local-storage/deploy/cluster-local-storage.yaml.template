@@ -23,7 +23,7 @@ spec:
       labels:
         app: cluster-local-storage-sts-{{ vc }}
     spec:
-      hostNetwork: true
+      hostNetwork: false
       serviceAccountName: cluster-local-storage-account
       nodeSelector:
         pai-master: "true"
@@ -61,6 +61,7 @@ spec:
         ports:
         - name: vcport-{{ loop.index0 }}
           containerPort: {{ vcport }}
+          hostPort: {{ vcport }}
         livenessProbe:
           httpGet:
             path: /health
