@@ -34,13 +34,16 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.inputs.branch_name || github.ref_name }}
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref_name }}
 
       - name: Get Changed Folders (Services)
         id: changes
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Pull request detected"
+            echo "    pull_request base : ${{ github.event.pull_request.base.ref }}"
+            echo "    pull_request head : ${{ github.event.pull_request.head.ref }}"
             base_sha="${{ github.event.pull_request.base.sha }}"
             git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
             head_sha="${{ github.event.pull_request.head.sha }}"
