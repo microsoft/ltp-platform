@@ -25,7 +25,7 @@ on:
       redeployService:
         description: "Redeploy all services"
         type: boolean
-        default: true
+        default: false
 
 env:
   TAG: ${{ github.run_number }}
@@ -48,7 +48,7 @@ jobs:
           # default booleans if not provided
           echo "rebuildImage=${{ github.event.inputs.rebuildImage != '' && github.event.inputs.rebuildImage || true }}" >> $GITHUB_OUTPUT
           echo "repushImage=${{ github.event.inputs.repushImage != '' && github.event.inputs.repushImage || true }}" >> $GITHUB_OUTPUT
-          echo "redeployService=${{ github.event.inputs.redeployService != '' && github.event.inputs.redeployService || true }}" >> $GITHUB_OUTPUT
+          echo "redeployService=${{ github.event.inputs.redeployService != '' && github.event.inputs.redeployService || false }}" >> $GITHUB_OUTPUT
 
       - name: Checkout repository
         uses: actions/checkout@v4
