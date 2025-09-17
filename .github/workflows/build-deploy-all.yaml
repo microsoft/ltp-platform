@@ -5,6 +5,9 @@ permissions:
   contents: read
 
 on:
+  release:
+    types: 
+      - published
   workflow_dispatch:
     inputs:
       branch_name:
@@ -14,15 +17,15 @@ on:
       rebuildImage:
         description: "Rebuild all images"
         type: boolean
-        default: false
+        default: true
       repushImage:
         description: "Repush all images"
         type: boolean
-        default: false
+        default: true
       redeployService:
         description: "Redeploy all services"
         type: boolean
-        default: false
+        default: true
 
 env:
   TAG: ${{ github.run_number }}
@@ -37,6 +40,16 @@ jobs:
       image: ubuntu:latest
 
     steps:
+      - name: Set default parameters
+        id: defaults
+        run: |
+          # Branch: if release use tag name else use input
+          echo "branch_name=${{ github.event.inputs.branch_name || github.ref_name }}" >> $GITHUB_OUTPUT
+          # default booleans if not provided
+          echo "rebuildImage=${{ github.event.inputs.rebuildImage != '' && github.event.inputs.rebuildImage || true }}" >> $GITHUB_OUTPUT
+          echo "repushImage=${{ github.event.inputs.repushImage != '' && github.event.inputs.repushImage || true }}" >> $GITHUB_OUTPUT
+          echo "redeployService=${{ github.event.inputs.redeployService != '' && github.event.inputs.redeployService || true }}" >> $GITHUB_OUTPUT
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -65,35 +78,42 @@ jobs:
           mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
           ls -l /tmp/auth-configuration
 
+      - name: Set the service set to build and deploy
+        id: set
+        run: |
+          # set it to github output for next steps
+          # skip alert-manager as it cannot be built by github action due to lack of access to private repo
+          echo "services=cluster-configuration device-plugin cluster-local-storage job-exporter log-manager node-exporter grafana watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal copilot-chat model-proxy" >> $GITHUB_OUTPUT
+
       - name: Build Images of All Services
-        if: ${{ github.event.inputs.rebuildImage || github.event.inputs.repushImage }}
+        if: ${{ steps.defaults.outputs.rebuildImage == 'true' || steps.defaults.outputs.repushImage == 'true' }}
         run: |
           $GITHUB_WORKSPACE/build/pai_build.py build \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s base-image cleaning-image cluster-configuration device-plugin job-exporter log-manager grafana frameworkcontroller hivedscheduler openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
+            -s {{ steps.set.outputs.services }}
 
       - name: Push Images of All Services to ACR
-        if: ${{ github.event.inputs.repushImage }}
+        if: ${{ steps.defaults.outputs.repushImage == 'true' }}
         run: |
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s cluster-configuration device-plugin job-exporter log-manager grafana openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal
+            -s {{ steps.set.outputs.services }}
 
       - name: Push Images of Changed Service to GHCR
-        if: ${{ github.event.inputs.repushImage }}
+        if: ${{ steps.defaults.outputs.repushImage == 'true' }}
         run: |
           changed_services=$(echo "${{ steps.changes.outputs.folders }}" | tr ' ' '\n')
           echo "Pushing: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s cluster-configuration device-plugin job-exporter log-manager grafana openpai-runtime watchdog internal-storage postgresql database-controller fluentd pylon rest-server webportal \
+            -s {{ steps.set.outputs.services }} \
             --docker-registry ghcr.io \
             --docker-namespace ${GITHUB_REPOSITORY_OWNER} \
             --docker-username ${{ github.actor }} \
             --docker-password ${{ secrets.GITHUB_TOKEN }}
 
       - name: Azure CLI get credentials and deploy
-        if: ${{ github.event.inputs.redeployService }}
+        if: ${{ steps.defaults.outputs.redeployService == 'true' }}
         run: |
             az version
             az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
@@ -107,13 +127,15 @@ jobs:
 
             echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
             echo "Stopping all pai services..."
-            $GITHUB_WORKSPACE/paictl.py service stop -n cluster-configuration device-plugin node-exporter job-exporter openpai-runtime log-manager prometheus grafana watchdog internal-storage postgresql frameworkcontroller database-controller fluentd hivedscheduler rest-server webportal < cluster_id
+            $GITHUB_WORKSPACE/paictl.py service stop -n {{ steps.set.outputs.services }} < cluster_id
+
+            echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
+            $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config < cluster_id
 
             echo "Starting to update pai..."
-            bash $GITHUB_WORKSPACE/contrib/kubespray/script/start-service-in-dev-box.all.sh \
-              -c $GITHUB_WORKSPACE/config/cluster-configuration \
-              -n ${{ secrets.PAI_CLUSTER_NAME }}
+            $GITHUB_WORKSPACE/paictl.py service start -n {{ steps.set.outputs.services }} < cluster_id
 
+            echo "Checking pai cluster status..."
             kubectl get pod
             kubectl get service
 

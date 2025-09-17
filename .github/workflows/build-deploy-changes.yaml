@@ -46,9 +46,7 @@ jobs:
             git fetch origin ${{ github.event.pull_request.base.ref }} --depth=50
             base_sha=$(git merge-base origin/${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.sha }})
             head_sha="${{ github.event.pull_request.head.sha }}"
-            
-            echo "Base SHA: $base_sha"
-            echo "Head SHA: $head_sha"
+
           else
             base_sha="${{ github.event.before }}"
             head_sha="${{ github.sha }}"
