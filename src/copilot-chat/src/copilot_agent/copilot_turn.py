@@ -100,6 +100,7 @@ class CoPilotTurn:
         system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'gen_smart_help_prompt_general.txt'))
         if isinstance(self.help_msg, dict) and 'feature' in self.help_msg:
             system_prompt = system_prompt + '\n\n' + self.help_msg['feature']
+        push_frontend_event('<span class="text-gray-400 italic">🌐 Accessing public information...</span><br/>', replace=False)
         summary = self.model.try_stream_fallback_chat(system_prompt, f'question is: {question}')
         return summary
 
