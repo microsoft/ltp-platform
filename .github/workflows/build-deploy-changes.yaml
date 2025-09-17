@@ -9,12 +9,6 @@ on:
     branches: [main, dev, 'release/*']
   pull_request:
     branches: [main, dev, 'release/*']
-  workflow_dispatch:
-    inputs:
-      branch_name:
-        description: "Branch to run on"
-        required: true
-        default: "main"
 
 env:
   TAG: ${{ github.run_number }}
