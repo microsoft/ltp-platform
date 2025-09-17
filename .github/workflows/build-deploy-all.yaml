@@ -13,7 +13,7 @@ on:
       branch_name:
         description: "Branch to run on"
         required: true
-        default: "main"
+        default: "dev"
       rebuildImage:
         description: "Rebuild all images"
         type: boolean
@@ -44,7 +44,11 @@ jobs:
         id: defaults
         run: |
           # Branch: if release use tag name else use input
-          echo "branch_name=${{ github.event.inputs.branch_name || github.ref_name }}" >> $GITHUB_OUTPUT
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "branch_name=dev" >> $GITHUB_OUTPUT
+          else
+            echo "branch_name=${{ github.event.inputs.branch_name }}" >> $GITHUB_OUTPUT
+          fi        
           # default booleans if not provided
           echo "rebuildImage=${{ github.event.inputs.rebuildImage != '' && github.event.inputs.rebuildImage || true }}" >> $GITHUB_OUTPUT
           echo "repushImage=${{ github.event.inputs.repushImage != '' && github.event.inputs.repushImage || true }}" >> $GITHUB_OUTPUT
@@ -55,7 +59,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.inputs.branch_name || github.ref_name }}
+          ref: ${{ steps.defaults.outputs.branch_name }}
 
       - name: Install Package
         run: |
@@ -90,14 +94,14 @@ jobs:
         run: |
           $GITHUB_WORKSPACE/build/pai_build.py build \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s {{ steps.set.outputs.services }}
+            -s ${{ steps.set.outputs.services }}
 
       - name: Push Images of All Services to ACR
         if: ${{ steps.defaults.outputs.repushImage == 'true' }}
         run: |
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s {{ steps.set.outputs.services }}
+            -s ${{ steps.set.outputs.services }}
 
       - name: Push Images of Changed Service to GHCR
         if: ${{ steps.defaults.outputs.repushImage == 'true' }}
@@ -106,7 +110,7 @@ jobs:
           echo "Pushing: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s {{ steps.set.outputs.services }} \
+            -s ${{ steps.set.outputs.services }} \
             --docker-registry ghcr.io \
             --docker-namespace ${GITHUB_REPOSITORY_OWNER} \
             --docker-username ${{ github.actor }} \
@@ -127,13 +131,13 @@ jobs:
 
             echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
             echo "Stopping all pai services..."
-            $GITHUB_WORKSPACE/paictl.py service stop -n {{ steps.set.outputs.services }} < cluster_id
+            $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.set.outputs.services }} < cluster_id
 
             echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
             $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config < cluster_id
 
             echo "Starting to update pai..."
-            $GITHUB_WORKSPACE/paictl.py service start -n {{ steps.set.outputs.services }} < cluster_id
+            $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.set.outputs.services }} < cluster_id
 
             echo "Checking pai cluster status..."
             kubectl get pod
