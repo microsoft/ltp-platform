@@ -89,6 +89,8 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["collect-dst-kusto-cluster-url"] }}
         - name: COLLECT_DST_KUSTO_DATABASE_NAME
           value: {{ cluster_cfg["copilot-chat"]["collect-dst-kusto-database-name"] }}
+        - name: CLUSTER_ID
+          value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
         ports:
         - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
           hostPort:  {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
