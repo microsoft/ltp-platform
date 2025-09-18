@@ -21,6 +21,8 @@ from kubernetes import client, config
 
 from ltp_kusto_sdk import NodeStatusClient, NodeActionClient
 from ltp_kusto_sdk.features.node_status.models import NodeStatus
+import yaml
+
 
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -62,6 +64,26 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
             "sync": f"{self._bin_dir}/datasync.sh {self.root} " + "{src} {dst}",
         }
 
+        # generate IP and hostname list from /pai-cluster-config/layout.yaml
+        self._hostname_ip_map = {}
+        layout_file = "/pai-cluster-config/layout.yaml"
+        if os.path.exists(layout_file):
+            try:
+                with open(layout_file, "r") as f:
+                    layout = yaml.safe_load(f)
+
+                    self._hostname_ip_map = {
+                        machine["hostname"]: machine["hostip"]
+                        for machine in layout.get("machine-list", [])
+                        if "hostname" in machine and "hostip" in machine
+                    }
+
+                logger.info(f"Loaded hostname to IP map: {self._hostname_ip_map}")
+            except yaml.YAMLError as e:
+                logger.error(f"Failed to parse layout file {layout_file}: {e}")
+        else:
+            logger.warning(f"Layout file {layout_file} not found, proceeding without hostname to IP mapping")
+
         self._max_workers = int(os.getenv("CLUSTER_LOCAL_STORAGE_MAX_WORKERS", 64))
         self._shutdown_evt = threading.Event()
 
@@ -73,6 +95,14 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
         self._sync_thread.start()
 
         logger.info(f"Serving {self.root} for {self.cluster} cluster on http://{bind[0]}:{bind[1]}")
+
+    def _generate_ssh_command(self, hostname):
+        if hostname in self._hostname_ip_map:
+            ip = self._hostname_ip_map[hostname]
+            return f"ssh {ip}"
+        else:
+            logger.warning(f"Hostname {hostname} not found in hostname_ip_map, using hostname directly")
+            return f"ssh {hostname}"
 
     def _safe_path(self, rel):
         p = (self.root / rel).resolve()
@@ -144,12 +174,12 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
             try:
                 node = self._get_node(data=True, num=1, write_file=True)[0]
                 # azcopy
-                cmd = f"ssh {node} {self._commands['azcopy'].format(path=path, blob_dir=blob_dir, blob_token=blob_token)}"
+                cmd = f"{self._generate_ssh_command(node)} {self._commands['azcopy'].format(path=path, blob_dir=blob_dir, blob_token=blob_token)}"
                 logger.debug(f"Execute command: {cmd}")
                 subprocess.run(cmd, shell=True, check=True)
                 logger.info(f"Azcopy {blob_dir} to {path} finished on {node}")
                 # broadcast
-                cmd = f"scp {self._hostfile} {node}:{self._hostfile} && ssh {node} {self._commands['broadcast'].format(path=path)}"
+                cmd = f"scp {self._hostfile} {node}:{self._hostfile} && {self._generate_ssh_command(node)} {self._commands['broadcast'].format(path=path)}"
                 logger.debug(f"Execute command: {cmd}")
                 subprocess.run(cmd, shell=True, check=True)
                 logger.info(f"Broadcast {path} finished on {node}")
@@ -170,7 +200,7 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
                 results = []
                 with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
                     for node in nodes:
-                        cmd = f"ssh {node} {self._commands['delete'].format(path=path)}"
+                        cmd = f"{self._generate_ssh_command(node)} {self._commands['delete'].format(path=path)}"
                         logger.debug(f"Execute command: {cmd}")
                         results.append(executor.submit(subprocess.run, cmd, shell=True))
                 failed = []
@@ -193,7 +223,7 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
     def _size(self):
         with self.lock:
             logger.info("Checking size ...")
-            cmd = f"ssh {self._get_node(data=True, num=1)[0]} {self._commands['size']}"
+            cmd = f"{self._generate_ssh_command(self._get_node(data=True, num=1)[0])} {self._commands['size']}"
             logger.debug(f"Execute command: {cmd}")
             try:
                 result = subprocess.run(
@@ -221,7 +251,7 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
         results = []
         with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
             for src in srcs:
-                cmd = f"ssh {src} {self._commands['size']}"
+                cmd = f"{self._generate_ssh_command(src)} {self._commands['size']}"
                 logger.debug(f"Execute command: {cmd}")
                 results.append(executor.submit(subprocess.run, cmd, shell=True, capture_output=True, text=True))
         sizes = {}
@@ -254,7 +284,7 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
         with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
             # leave the extra dsts to next time if len(dsts) > len(srcs)
             for src, dst in zip(srcs, dsts):
-                cmd = f"ssh {src} {self._commands['sync'].format(src=src, dst=dst)}"
+                cmd = f"{self._generate_ssh_command(src)} {self._commands['sync'].format(src=src, dst=dst)}"
                 logger.debug(f"Execute command: {cmd}")
                 results.append(executor.submit(subprocess.run, cmd, shell=True))
         failed = []

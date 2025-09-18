@@ -33,6 +33,9 @@ spec:
       - name: cluster-local-storage
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}cluster-local-storage:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /pai-cluster-config
+          name: pai-configuration-local-storage
         env:
         - name: CLUSTER_LOCAL_STORAGE_CLUSTER
           value: '{{ vc }}'
@@ -68,5 +71,9 @@ spec:
             port: {{ vcport }}
           initialDelaySeconds: 10
           periodSeconds: 60
+      volumes:
+      - name: pai-configuration-local-storage
+        configMap:
+          name: pai-configuration
 {%- endfor %}
 {%- endif %}
