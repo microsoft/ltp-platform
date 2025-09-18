@@ -7,4 +7,4 @@ Output of the answer:
 Explain that you understand user's question.
 Explain that what user request is not supported by Lucia Training Platform by design.
 The design decision is a result after carefully balancing for optimal performance and user experience.
-If necessary, mention that the development team do accept user's new feature proposals, to contact the development team, user can send an email to ltpadmin@microsoft.com with a title [New Feature Request].
+If necessary, mention that the development team does accept user's new feature proposals, to contact the development team, user can send an email to ltpadmin@microsoft.com with a title [New Feature Request].
