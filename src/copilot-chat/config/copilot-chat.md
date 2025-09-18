@@ -83,7 +83,7 @@ These metrics provide a comprehensive view of both correctness and efficiency ac
 | User Manual          | 28    | Limited (link unavailable)   | 0.96                    | NA                        | TBD                        | 13.72             | 23.73            | 21.00            |
 | Auto Rejection       | 3     | Full             | 1                       | NA                        | TBD                        | 8.84              | 10.70            | 13.15            |
 | Cluster Job Metrics  | 19    | Not supported    | (0.89)                  | TBD                       | TBD                        | (16.34)           | (26.95)          | (12.42)          |
-| Job Metadata         | 1     | Full             | 1                       | TBD                       | TBD                        | 19.91             | 19.91            | 13.25            |
+| Job Metadata         | 1     | Not supported    | 1                       | TBD                       | TBD                        | 19.91             | 19.91            | 13.25            |
 | Dashboard           | 36    | Full          | 1                       | 0.84                      | TBD                        | 16.9              | 30.2             | 17.6             |
 
 ### Questions to Tryout
