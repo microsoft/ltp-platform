@@ -58,6 +58,8 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["node-status-table"] | default("NodeStatusRecord") }}
         - name: KUSTO_NODE_ACTION_TABLE_NAME
           value: {{ cluster_cfg["alert-manager"]["node-action-table"] | default("NodeActionRecord") }}
+        - name: CLUSTER_ID
+          value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
         ports:
         - name: vcport-{{ loop.index0 }}
           containerPort: {{ vcport }}
