@@ -1,3 +1,2 @@
 ./kusto-sdk
 kubernetes
-yaml
