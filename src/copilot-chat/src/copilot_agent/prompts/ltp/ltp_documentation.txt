@@ -1,0 +1,23 @@
+# Lucia Training Platform User Tutorial
+
+Welcome to the Lucia Training Platform Documentation! This documentation provides an overview and tutorial of the Lucia Training Platform.
+
+## Introduction
+
+The Lucia Training Platform is a multi-tenant AI platform designed to efficiently train deep learning models. It is designed to efficiently address reliability issues, optimize resource management, and incorporate state-of-the-art software optimizations to achieve high training efficiency.
+
+
+## Table of Contents
+
+### User Manual
+
+- [Quick Start](./UserManual/quickstart.md): A guide to help you quickly get started with the platform and submit a "hello world" job.
+- [How to Use Docker Image](./UserManual/docker-images.md): Instructions on using Docker images in your jobs.
+- [How to Manage Data and Code](./UserManual/use-data.md): Guidance on managing data and code within your jobs.
+- [How to Write Job Configuration](./UserManual/job-config.md): Detailed instructions for configuring jobs and distributed jobs.
+- [Job Priorities](./UserManual/job-priorities.md): Explanation of job priority types and how to submit jobs with specific priorities.
+- [VC Allocation](./UserManual/vc-allocation.md): Guidelines for managing VC allocation requests and assignment change notifications.
+- [Notification and Monitoring](./UserManual/notification.md): Information on the platform's notification and monitoring features.
+- [Troubleshooting](./UserManual/troubleshooting.md): A troubleshooting guide for common issues and how to get platform support.
+- [Email Templates, UserGroup Admin](./UserManual/email-templates/email-templates-user.md): Templates for UserGroup Admins to request VC allocations, production priority job submissions and integrating private Azure storage blob.
+- [Email Templates, Lucia Training Platform Admin](./UserManual/email-templates/email-templates-ltp.md): Templates for Lucia Training Platform Admins to acknowledge, complete, and notify about VC allocation and assignment changes.
