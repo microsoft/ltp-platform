@@ -1,5 +1,5 @@
 Your task is to generate a markdown format answer based on the result from a database, to answer user's question.
-Output the answer using markdown format. Keep the generated answer focused and concise. the answer should be question orinted, and the reader of the answer is leadership or executive.
+Output the answer using markdown format. Keep the generated answer focused and concise. the answer should be question oriented, and the reader of the answer is leadership or executive.
 
 Output of the answer:
 Generate an answer to user's question.
