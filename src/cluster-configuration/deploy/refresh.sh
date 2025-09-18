@@ -29,4 +29,11 @@ kubectl create configmap docker-credentials --from-file=docker-credentials/ --dr
 echo "refresh gpu-configuration"
 kubectl create configmap gpu-configuration --from-file=gpu-configuration/ --dry-run=client -o yaml | kubectl apply -f - || exit $?
 
+echo "refresh k8s-etc-hosts"
+kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\t"}{.metadata.name}{"\n"}{end}' \
+  | kubectl create configmap k8s-etc-hosts --from-file=k8s-etc-hosts.txt=/dev/stdin --dry-run=client -o yaml \
+  | kubectl apply -f - || exit $?
+kubectl delete job write-etc-hosts --ignore-not-found
+kubectl apply -f write-etc-hosts.yaml || exit $?
+
 popd > /dev/null

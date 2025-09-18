@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: write-etc-hosts
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        pai-master: "true"
+      volumes:
+        - name: host-etc
+          hostPath:
+            path: /etc
+            type: Directory
+        - name: hosts-config
+          configMap:
+            name: k8s-etc-hosts
+            items:
+              - key: k8s-etc-hosts.txt
+                path: k8s-etc-hosts.txt
+      containers:
+        - name: writer
+          image: alpine:3.18
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          command:
+            - sh
+            - -c
+            - |
+              set -euo pipefail
+              MARKER_START="# BEGIN K8S NODES (managed)"
+              MARKER_END="# END K8S NODES (managed)"
+              HOSTS="/host/etc/hosts"
+              BACKUP="${HOSTS}.k8s.bak.$(date +%s)"
+              TMP="$(mktemp)"
+              echo "Backing up $HOSTS -> $BACKUP"
+              cp "$HOSTS" "$BACKUP"
+              if grep -qF "$MARKER_START" "$HOSTS"; then
+                awk "/$MARKER_START/{exit} {print}" "$HOSTS" > "$TMP"
+              else
+                cat "$HOSTS" > "$TMP"
+              fi
+              echo "$MARKER_START" >> "$TMP"
+              cat /etc/k8s-etc-hosts.txt >> "$TMP"
+              echo "$MARKER_END" >> "$TMP"
+              cp "$TMP" "$HOSTS"
+              rm -f "$TMP"
+              echo "Wrote managed block into $HOSTS; backup at $BACKUP"
+          volumeMounts:
+            - name: host-etc
+              mountPath: /host/etc
+            - name: hosts-config
+              mountPath: /etc/k8s-etc-hosts.txt
+              subPath: k8s-etc-hosts.txt
