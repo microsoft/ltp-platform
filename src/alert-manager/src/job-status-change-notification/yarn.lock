@@ -50,6 +50,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@eslint/core@npm:^0.15.2":
+  version: 0.15.2
+  resolution: "@eslint/core@npm:0.15.2"
+  dependencies:
+    "@types/json-schema": "npm:^7.0.15"
+  checksum: 10c0/c17a6dc4f5a6006ecb60165cc38bcd21fefb4a10c7a2578a0cfe5813bbd442531a87ed741da5adab5eb678e8e693fda2e2b14555b035355537e32bcec367ea17
+  languageName: node
+  linkType: hard
+
 "@eslint/eslintrc@npm:^3.3.1":
   version: 3.3.1
   resolution: "@eslint/eslintrc@npm:3.3.1"
@@ -81,13 +90,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/plugin-kit@npm:^0.2.8":
-  version: 0.2.8
-  resolution: "@eslint/plugin-kit@npm:0.2.8"
+"@eslint/plugin-kit@npm:^0.3.3":
+  version: 0.3.5
+  resolution: "@eslint/plugin-kit@npm:0.3.5"
   dependencies:
-    "@eslint/core": "npm:^0.13.0"
+    "@eslint/core": "npm:^0.15.2"
     levn: "npm:^0.4.1"
-  checksum: 10c0/554847c8f2b6bfe0e634f317fc43d0b54771eea0015c4f844f75915fdb9e6170c830c004291bad57db949d61771732e459f36ed059f45cf750af223f77357c5c
+  checksum: 10c0/c178c1b58c574200c0fd125af3e4bc775daba7ce434ba6d1eeaf9bcb64b2e9fea75efabffb3ed3ab28858e55a016a5efa95f509994ee4341b341199ca630b89e
   languageName: node
   linkType: hard
 
@@ -419,14 +428,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.9.0":
-  version: 1.9.0
-  resolution: "axios@npm:1.9.0"
+"axios@npm:^1.12.0":
+  version: 1.12.2
+  resolution: "axios@npm:1.12.2"
   dependencies:
     follow-redirects: "npm:^1.15.6"
-    form-data: "npm:^4.0.0"
+    form-data: "npm:^4.0.4"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/9371a56886c2e43e4ff5647b5c2c3c046ed0a3d13482ef1d0135b994a628c41fbad459796f101c655e62f0c161d03883454474d2e435b2e021b1924d9f24994c
+  checksum: 10c0/80b063e318cf05cd33a4d991cea0162f3573481946f9129efb7766f38fde4c061c34f41a93a9f9521f02b7c9565ccbc197c099b0186543ac84a24580017adfed
   languageName: node
   linkType: hard
 
@@ -1320,15 +1329,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^4.0.0":
-  version: 4.0.2
-  resolution: "form-data@npm:4.0.2"
+"form-data@npm:^4.0.4":
+  version: 4.0.4
+  resolution: "form-data@npm:4.0.4"
   dependencies:
     asynckit: "npm:^0.4.0"
     combined-stream: "npm:^1.0.8"
     es-set-tostringtag: "npm:^2.1.0"
+    hasown: "npm:^2.0.2"
     mime-types: "npm:^2.1.12"
-  checksum: 10c0/e534b0cf025c831a0929bf4b9bbe1a9a6b03e273a8161f9947286b9b13bf8fb279c6944aae0070c4c311100c6d6dbb815cd955dc217728caf73fad8dc5b8ee9c
+  checksum: 10c0/373525a9a034b9d57073e55eab79e501a714ffac02e7a9b01be1c820780652b16e4101819785e1e18f8d98f0aee866cc654d660a435c378e16a72f2e7cac9695
   languageName: node
   linkType: hard
 
@@ -1838,7 +1848,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "job-status-change-notification@workspace:."
   dependencies:
-    axios: "npm:^1.9.0"
+    axios: "npm:^1.12.0"
     eslint: "npm:^9.26.0"
     eslint-config-prettier: "npm:~10.1.2"
     eslint-plugin-import: "npm:^2.31.0"
@@ -1849,7 +1859,6 @@ __metadata:
     interval-promise: "npm:^1.4.0"
     joi: "npm:^17.13.3"
     module-alias: "npm:^2.2.3"
-    npm-check-updates: "npm:^18.0.1"
     openpaidbsdk: "file:./openpaidbsdk"
     prettier: "npm:~3.5.3"
     sequelize: "npm:^6.37.7"
@@ -2069,16 +2078,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npm-check-updates@npm:^18.0.1":
-  version: 18.0.1
-  resolution: "npm-check-updates@npm:18.0.1"
-  bin:
-    ncu: build/cli.js
-    npm-check-updates: build/cli.js
-  checksum: 10c0/0f4f8c26e8a51a413ee724fe76f0860bd360e0c096a52e928916ef6fe3ff0c2ea0f346ca8d291a43f46a269d05450e2a879fed8aa11871f73970d5f9dfdd162a
-  languageName: node
-  linkType: hard
-
 "object-assign@npm:^4":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
@@ -2169,11 +2168,11 @@ __metadata:
 
 "openpaidbsdk@file:./openpaidbsdk::locator=job-status-change-notification%40workspace%3A.":
   version: 1.0.2
-  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=8f34d7&locator=job-status-change-notification%40workspace%3A."
+  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=2318c0&locator=job-status-change-notification%40workspace%3A."
   dependencies:
     pg: "npm:^8.15.6"
     sequelize: "npm:6.37.7"
-  checksum: 10c0/6d4cf9f022c3e32c6ab3ad6fe8fcfa2672f8a5b01570623d3862b355ba70af628130a5bba35fdbe5c53b8e4670cad2f3222555dfb4d6039f662f649727078201
+  checksum: 10c0/37403f99e7805e802bf87b19a93033e444fc0b753c55ad569c080eeda9f0f6b3fdb16e008107c215737147cc9a4a32b4432ea25474f193ee752a31e8a3db34f7
   languageName: node
   linkType: hard
 
