@@ -90,7 +90,7 @@ class AlertFetcher:
         query = (
             f"ContainerLogV2| "
             f'where ContainerName contains "alerthandler" | '
-            f'where LogMessage contains "alert-handler send alert to admin with alerts" and '
+            f'where LogMessage contains "alert-handler received alerts" and '
             f'LogMessage !contains "NodeFilesystemUsage" and LogMessage !contains "NodeGpuCountChanged" and LogMessage !contains "NodeUnschedulable" | '
             f"where TimeGenerated between(datetime({start_time})..datetime({end_time})) | "
             f"project TimeGenerated, PodName, LogMessage | "

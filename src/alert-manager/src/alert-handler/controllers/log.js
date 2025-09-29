@@ -10,7 +10,6 @@ const logAlerts = async (req, res) => {
   );
 
   const timestamp = new Date().toISOString();
-  
   // Log each alert with detailed information
   if (req.body.alerts && Array.isArray(req.body.alerts)) {
     req.body.alerts.forEach(alert => {
