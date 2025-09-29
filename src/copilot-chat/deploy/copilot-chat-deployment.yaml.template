@@ -65,6 +65,8 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["llm-provider"] }}
         - name: COPILOT_LLM_ENDPOINT
           value: {{ cluster_cfg["copilot-chat"]["llm-endpoint"] }}
+        - name: COPILOT_EMBEDDING_URL
+          value: {{ cluster_cfg["copilot-chat"]["embedding-url"] }}
         - name: COPILOT_LLM_MODEL
           value: {{ cluster_cfg["copilot-chat"]["llm-model"] }}
         - name: COPILOT_LLM_VERSION
