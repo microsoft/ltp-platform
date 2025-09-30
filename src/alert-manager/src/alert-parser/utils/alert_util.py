@@ -26,7 +26,7 @@ class AlertParser:
     @staticmethod
     def parse_message(log):
         """Parse a single alert log message"""
-        pattern = r"\[(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\] alert-handler send alert to admin with alerts: Alertname: (?P<alertname>[^,]+), Severity: (?P<severity>[^,]+), Summary: (?P<summary>.+), Labels: (?P<labels>\{.*?\}), Annotations: (?P<annotations>.*?)"
+        pattern = r"\[(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\] alert-handler received alerts: Alertname: (?P<alertname>[^,]+), Severity: (?P<severity>[^,]+), Summary: (?P<summary>.+), Labels: (?P<labels>\{.*?\}), Annotations: (?P<annotations>.*?)"
         match = re.search(pattern, log)
         if match:
             timestamp = match.group("timestamp")
@@ -90,7 +90,7 @@ class AlertFetcher:
         query = (
             f"ContainerLogV2| "
             f'where ContainerName contains "alerthandler" | '
-            f'where LogMessage contains "alert-handler send alert to admin with alerts" and '
+            f'where LogMessage contains "alert-handler received alerts" and '
             f'LogMessage !contains "NodeFilesystemUsage" and LogMessage !contains "NodeGpuCountChanged" and LogMessage !contains "NodeUnschedulable" | '
             f"where TimeGenerated between(datetime({start_time})..datetime({end_time})) | "
             f"project TimeGenerated, PodName, LogMessage | "
