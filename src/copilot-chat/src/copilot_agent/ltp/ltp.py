@@ -31,7 +31,7 @@ SUB_FEATURE = 'ltp'
 SKIP_LUCIA_CONTROLLER_EXECUTION = True
 
 # session: query cluster or job metrics from Prometheus REST API
-def query_metrics(question: str, help_msg, skip_summary: bool = False):
+def query_metrics(question: str, help_msg, skip_summary: bool = False, llm_session=None):
     """Query cluster or job metrics from Prometheus backend."""
     
     if SKIP_LUCIA_CONTROLLER_EXECUTION:
@@ -69,6 +69,7 @@ def query_metrics(question: str, help_msg, skip_summary: bool = False):
         None,
         help_msg,
         skip_summary,
+        llm_session
     )
 
     # generate additional info dict
@@ -87,7 +88,7 @@ def query_metrics(question: str, help_msg, skip_summary: bool = False):
 
 
 # session: query job metadata from OpenPAI backend
-def query_metadata(question: str, help_msg, skip_summary: bool = False):
+def query_metadata(question: str, help_msg, skip_summary: bool = False, llm_session=None):
     """Query job metadata from OpenPAI backend."""
     # generate query
     logger.info('Generating Query: LTP, Metadata')
@@ -116,6 +117,7 @@ def query_metadata(question: str, help_msg, skip_summary: bool = False):
         None,
         help_msg,
         skip_summary,
+        llm_session
     )
 
     # generate additional info dict
@@ -126,7 +128,7 @@ def query_metadata(question: str, help_msg, skip_summary: bool = False):
 
 
 # session: query user manual from LTP documentation
-def query_user_manual(question: str, help_msg):
+def query_user_manual(question: str, help_msg, llm_session=None):
     """Query user manual."""
     # read documentation
     documentation = get_prompt_from(os.path.join(PROMPT_DIR, SUB_FEATURE, 'ltp_documentation_20250624.txt'))
@@ -134,7 +136,7 @@ def query_user_manual(question: str, help_msg):
 
     # generate answer
     logger.info('Generating Answer: LTP, User Manual')
-    summary = gen_summary(SUB_FEATURE, ltp_doc, None, question, 'gen_result_summary_doc.txt', None, help_msg)
+    summary = gen_summary(SUB_FEATURE, ltp_doc, None, question, 'gen_result_summary_doc.txt', None, help_msg, llm_session=llm_session)
 
     info_dict = {}
     return summary, info_dict
@@ -166,7 +168,7 @@ def get_brief_job_metadata(resp):
     return job_metadatas
 
 
-def query_powerbi(question: str, help_msg):
+def query_powerbi(question: str, help_msg, llm_session=None):
     """Query PowerBI data."""
 
     # send HTML snippet so frontend (with rehype-raw enabled) can render with Tailwind styling
@@ -202,6 +204,7 @@ def query_powerbi(question: str, help_msg):
         None,
         help_msg,
         False,
+        llm_session
     )
 
     if response_status == 0:
@@ -215,7 +218,7 @@ def query_powerbi(question: str, help_msg):
     return summary, info_dict
 
 
-def ltp_auto_reject(question: str, help_msg):
+def ltp_auto_reject(question: str, help_msg, llm_session=None):
     """Auto rejected, unsupported by design."""
 
     logger.info('Generating Answer: LTP, Auto Rejection')
@@ -228,13 +231,14 @@ def ltp_auto_reject(question: str, help_msg):
         None,
         help_msg,
         False,
+        llm_session
     )
 
     info_dict = {}
     return summary, info_dict
 
 
-def ltp_human_intervention(question: str, help_msg):
+def ltp_human_intervention(question: str, help_msg, llm_session=None):
     """Handle human intervention for LTP auto rejection."""
 
     logger.info('Generating Answer: LTP, Human Intervention')
@@ -247,6 +251,7 @@ def ltp_human_intervention(question: str, help_msg):
         None,
         help_msg,
         False,
+        llm_session
     )
 
     info_dict = {}

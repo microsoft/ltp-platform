@@ -6,6 +6,7 @@
 import os
 import requests
 import urllib.parse
+import threading
 
 from datetime import datetime, timezone
 
@@ -20,6 +21,8 @@ class AuthenticationManager:
         self.restserver_url = os.getenv('RESTSERVER_URL', '')
         valid_vcs_env = os.getenv('COPILOT_VALID_VCS', 'admin,superuser')
         self.valid_vcs = [g.strip() for g in valid_vcs_env.split(',') if g.strip()]
+        # Add thread safety for authentication state
+        self._auth_lock = threading.Lock()
 
     def sanitize_username(self, username: str) -> str:
         """Sanitize the username by URL-encoding it to prevent path traversal or injection attacks."""
@@ -71,42 +74,45 @@ class AuthenticationManager:
         """Set the authentication state for a user, storing admin and virtualCluster info."""
         expires_at = int(datetime.now(timezone.utc).timestamp() * 1000) + self.expiration_ms
         is_admin, virtual_cluster = self.authenticate(username, token)
-        if is_admin is not None and virtual_cluster is not None:
-            self.authenticate_state[username] = {
-                'token': token,
-                'expires_at': expires_at,
-                'is_admin': is_admin,
-                'virtual_cluster': virtual_cluster
-            }
-        else:
-            self.revoke(username)
+        with self._auth_lock:
+            if is_admin is not None and virtual_cluster is not None:
+                self.authenticate_state[username] = {
+                    'token': token,
+                    'expires_at': expires_at,
+                    'is_admin': is_admin,
+                    'virtual_cluster': virtual_cluster
+                }
+            else:
+                self.authenticate_state.pop(username, None)  # Thread-safe removal
 
     def is_authenticated(self, username: str) -> bool:
-        state = self.authenticate_state.get(username)
-        now = int(datetime.now(timezone.utc).timestamp() * 1000)
-        if not state:
-            return False
-        if state['expires_at'] < now:
-            self.revoke(username)
-            return False
-        if "is_admin" not in state:
-            return False
-        if "virtual_cluster" not in state:
-            return False
-        if "is_admin" in state and "virtual_cluster" in state:
-            if state["is_admin"]:
-                # validate pass condition one: user is an admin
-                return True
-            elif not state["is_admin"] and self.get_membership(state["virtual_cluster"]):
-                # validate pass condition two: user is not an admin, but it belongs to a valid virtualCluster
-                return True
-            else:
+        with self._auth_lock:
+            state = self.authenticate_state.get(username)
+            now = int(datetime.now(timezone.utc).timestamp() * 1000)
+            if not state:
                 return False
-        return False
+            if state['expires_at'] < now:
+                # Expired, remove from state
+                self.authenticate_state.pop(username, None)
+                return False
+            if "is_admin" not in state:
+                return False
+            if "virtual_cluster" not in state:
+                return False
+            if "is_admin" in state and "virtual_cluster" in state:
+                if state["is_admin"]:
+                    # validate pass condition one: user is an admin
+                    return True
+                elif not state["is_admin"] and self.get_membership(state["virtual_cluster"]):
+                    # validate pass condition two: user is not an admin, but it belongs to a valid virtualCluster
+                    return True
+                else:
+                    return False
+            return False
 
     def get_membership(self, groups: list) -> bool:
         return any(group in self.valid_vcs for group in groups)
 
     def revoke(self, username: str):
-        if username in self.authenticate_state:
-            del self.authenticate_state[username]
+        with self._auth_lock:
+            self.authenticate_state.pop(username, None)
