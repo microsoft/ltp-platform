@@ -6,46 +6,71 @@
 import os
 import time
 import openai
+import requests
+import threading
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from ..utils.logger import logger
 
 class LLMSession:
-    """A class to interact with the Azure OpenAI model."""
-    # Global stream callback that external code (server endpoint) can set
-    _global_stream_callback = None
+    """A thread-safe singleton class for interacting with the Azure OpenAI model."""
+    _instance = None
+    _lock = threading.Lock()  # Lock object to ensure thread safety
+    _global_stream_callback = None  # Define the class-level attribute explicitly
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            with cls._lock:  # Ensure only one thread can create the instance
+                if not cls._instance:  # Double-check to avoid race conditions
+                    cls._instance = super(LLMSession, cls).__new__(cls)
+        return cls._instance
 
     def __init__(self):
-        # Env Var to set the LLM provider, accepted values are 'openai' or 'azure'
-        self.provider = os.environ.get("COPILOT_LLM_PROVIDER")
-        logger.info(f'COPILOT LLM Endpoint Provider: {self.provider}')
-        self.azure_api_key = os.environ.get("AZURE_OPENAI_API_KEY")
-        self.openai_api_key = os.environ.get("OPENAI_API_KEY")
-        self.endpoint = os.environ.get("COPILOT_LLM_ENDPOINT")
-        self.model_name = os.environ.get("COPILOT_LLM_MODEL")
-        self.model_version = os.environ.get("COPILOT_LLM_VERSION")
-        self.embedding_model_name = os.environ.get("COPILOT_EMBEDDING_MODEL")
-        if self.provider == "openai":
-            self.model = openai.OpenAI(
-                base_url=self.endpoint,
-                api_key=self.openai_api_key
-            )
-            self.embedding_model = openai.OpenAI(
-                base_url=self.endpoint,
-                api_key=self.openai_api_key
-            )
-        elif self.provider == "azure":
-            self.model = openai.AzureOpenAI(
-                azure_endpoint=self.endpoint,
-                api_key=self.azure_api_key,
-                api_version=self.model_version
-            )
-            self.embedding_model = openai.AzureOpenAI(
-                azure_endpoint=self.endpoint,
-                api_key=self.azure_api_key,
-                api_version=self.model_version
-            )
-        else:
-            logger.error(f'Unsupported LLM provider: {self.provider}')
-            raise ValueError(f'Unsupported LLM provider: {self.provider}')
+        if not hasattr(self, "_initialized"):  # Ensure __init__ runs only once
+            self._initialized = True
+            # Env Var to set the LLM provider, accepted values are 'openai' or 'azure'
+            self.provider = os.environ.get("COPILOT_LLM_PROVIDER")
+            logger.info(f'COPILOT LLM Endpoint Provider: {self.provider}')
+            self.azure_api_key = os.environ.get("AZURE_OPENAI_API_KEY")
+            self.openai_api_key = os.environ.get("OPENAI_API_KEY")
+            self.endpoint = os.environ.get("COPILOT_LLM_ENDPOINT")
+            self.model_name = os.environ.get("COPILOT_LLM_MODEL")
+            self.model_version = os.environ.get("COPILOT_LLM_VERSION")
+            self.embedding_model_name = os.environ.get("COPILOT_EMBEDDING_MODEL")
+            # Create a persistent session for HTTP requests
+            self.session = requests.Session()
+            retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+            adapter = HTTPAdapter(max_retries=retries)
+            self.session.mount('https://', adapter)
+            self.session.headers.update({"Authorization": f"Bearer {self.openai_api_key or self.azure_api_key}"})
+
+            if self.provider == "openai":
+                self.model = openai.OpenAI(
+                    base_url=self.endpoint,
+                    api_key=self.openai_api_key
+                )
+                self.embedding_model = openai.OpenAI(
+                    base_url=self.endpoint,
+                    api_key=self.openai_api_key
+                )
+            elif self.provider == "azure":
+                self.model = openai.AzureOpenAI(
+                    azure_endpoint=self.endpoint,
+                    api_key=self.azure_api_key,
+                    api_version=self.model_version
+                )
+                self.embedding_model = openai.AzureOpenAI(
+                    azure_endpoint=self.endpoint,
+                    api_key=self.azure_api_key,
+                    api_version=self.model_version
+                )
+            else:
+                logger.error(f'Unsupported LLM provider: {self.provider}')
+                raise ValueError(f'Unsupported LLM provider: {self.provider}')
+
+    def close_session(self):
+        """Close the persistent HTTP session."""
+        self.session.close()
 
     def chat(self, system_prompt, user_prompt):
         """Chat with the language model."""
