@@ -9,28 +9,41 @@ import openai
 from ..utils.logger import logger
 
 class LLMSession:
-    """A class to interact with the Azure OpenAI model."""
-    # Global stream callback that external code (server endpoint) can set
-    _global_stream_callback = None
+    """A thread-safe class for interacting with the Azure OpenAI model."""
+    _global_stream_callback = None  # Class-level attribute for backward compatibility
+    _config_cache = None  # Cache configuration to avoid repeated env var reads
+    _config_lock = threading.Lock()  # Lock for config cache
 
     def __init__(self):
-        # Env Var to set the LLM provider, accepted values are 'openai' or 'azure'
-        self.provider = os.environ.get("COPILOT_LLM_PROVIDER")
-        logger.info(f'COPILOT LLM Endpoint Provider: {self.provider}')
-        self.azure_api_key = os.environ.get("AZURE_OPENAI_API_KEY")
-        self.openai_api_key = os.environ.get("OPENAI_API_KEY")
-        self.endpoint = os.environ.get("COPILOT_LLM_ENDPOINT")
-        self.embedding_url = os.environ.get("COPILOT_EMBEDDING_URL")
-        self.model_name = os.environ.get("COPILOT_LLM_MODEL")
-        self.model_version = os.environ.get("COPILOT_LLM_VERSION")
-        self.embedding_model_name = os.environ.get("COPILOT_EMBEDDING_MODEL")
+        """Initialize a new LLMSession instance per request."""
+        # Use cached config to avoid repeated environment variable reads
+        config = self._get_cached_config()
+        
+        self.provider = config['provider']
+        self.azure_api_key = config['azure_api_key']
+        self.openai_api_key = config['openai_api_key']
+        self.endpoint = config['endpoint']
+        self.model_name = config['model_name']
+        self.model_version = config['model_version']
+        self.embedding_model_name = config['embedding_model_name']
+        
+        # Create a separate session for each instance to avoid blocking
+        self.session = requests.Session()
+        
+        # Per-instance stream callback to avoid cross-user contamination
+        self._instance_stream_callback = None
+        retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+        adapter = HTTPAdapter(max_retries=retries)
+        self.session.mount('https://', adapter)
+        self.session.headers.update({"Authorization": f"Bearer {self.openai_api_key or self.azure_api_key}"})
+
         if self.provider == "openai":
             self.model = openai.OpenAI(
                 base_url=self.endpoint,
                 api_key=self.openai_api_key
             )
             self.embedding_model = openai.OpenAI(
-                base_url=self.embedding_url,
+                base_url=self.endpoint,
                 api_key=self.openai_api_key
             )
         elif self.provider == "azure":
@@ -40,13 +53,35 @@ class LLMSession:
                 api_version=self.model_version
             )
             self.embedding_model = openai.AzureOpenAI(
-                azure_endpoint=self.embedding_url,
+                azure_endpoint=self.endpoint,
                 api_key=self.azure_api_key,
                 api_version=self.model_version
             )
         else:
             logger.error(f'Unsupported LLM provider: {self.provider}')
             raise ValueError(f'Unsupported LLM provider: {self.provider}')
+
+    @classmethod
+    def _get_cached_config(cls):
+        """Get cached configuration or read from environment variables."""
+        if cls._config_cache is None:
+            with cls._config_lock:
+                if cls._config_cache is None:  # Double-check pattern
+                    cls._config_cache = {
+                        'provider': os.environ.get("COPILOT_LLM_PROVIDER"),
+                        'azure_api_key': os.environ.get("AZURE_OPENAI_API_KEY"),
+                        'openai_api_key': os.environ.get("OPENAI_API_KEY"),
+                        'endpoint': os.environ.get("COPILOT_LLM_ENDPOINT"),
+                        'model_name': os.environ.get("COPILOT_LLM_MODEL"),
+                        'model_version': os.environ.get("COPILOT_LLM_VERSION"),
+                        'embedding_model_name': os.environ.get("COPILOT_EMBEDDING_MODEL")
+                    }
+                    logger.info(f'COPILOT LLM Endpoint Provider: {cls._config_cache["provider"]}')
+        return cls._config_cache
+
+    def close_session(self):
+        """Close the persistent HTTP session."""
+        self.session.close()
 
     def chat(self, system_prompt, user_prompt):
         """Chat with the language model."""
@@ -190,13 +225,13 @@ class LLMSession:
                     if chunk:
                         # accumulate to reconstruct full text and yield the full snapshot
                         full += chunk
-                        # call global callback if configured (external subscribers)
+                        # call instance callback first (higher priority), then global callback
                         try:
-                            cb = LLMSession._global_stream_callback
+                            cb = self._instance_stream_callback or LLMSession._global_stream_callback
                             if cb:
                                 cb(full)
                         except Exception:
-                            logger.debug('Global stream callback failed')
+                            logger.debug('Stream callback failed')
                         yield full
 
                 # If stream finishes without exception, stop generator normally
@@ -223,13 +258,21 @@ class LLMSession:
     def clear_global_stream_callback(cls):
         cls._global_stream_callback = None
 
+    def set_instance_stream_callback(self, cb):
+        """Set per-instance stream callback to avoid cross-user contamination."""
+        self._instance_stream_callback = cb
+
+    def clear_instance_stream_callback(self):
+        """Clear per-instance stream callback."""
+        self._instance_stream_callback = None
+
     def try_stream_fallback_chat(self, system_prompt: str, user_prompt: str) -> str:
         """Try streaming the response (if a global stream callback is set) and fall back to the blocking chat call.
 
         Returns the final aggregated text.
         """
         try:
-            if getattr(LLMSession, '_global_stream_callback', None):
+            if self._instance_stream_callback or getattr(LLMSession, '_global_stream_callback', None):
                 logger.info('LLMSession: streaming via try_stream_fallback_chat')
                 last = ''
                 for snapshot in self.stream_chat(system_prompt, user_prompt):

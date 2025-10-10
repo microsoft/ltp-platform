@@ -85,20 +85,24 @@ class CoPilotService:
             q.put(chunk)
 
         def worker():
-            # set global callback on LLMSession so any call to model.stream_chat will invoke it
-            original_cb = getattr(LLMSession, '_global_stream_callback', None)
-            LLMSession.set_global_stream_callback(on_chunk)
+            # Create a dedicated LLM session for this request with per-instance callback
+            # This eliminates the global callback race condition that causes cross-user contamination
             try:
                 in_parameters = self.copilot_conversation.build_in_parameters(data)
-                self.copilot_conversation.perform_operation(in_parameters)
+                # Create a fresh LLM session for this streaming request
+                llm_session = LLMSession()
+                llm_session.set_instance_stream_callback(on_chunk)
+                
+                # Pass the dedicated session to the conversation
+                result = self.copilot_conversation.perform_operation(in_parameters, llm_session=llm_session)
             except Exception as e:
                 logger.error(f"Error during streaming operation worker: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
                 q.put(json.dumps({'error': str(e)}))
             finally:
                 # signal end of stream
                 q.put(None)
-                # restore original callback
-                LLMSession.set_global_stream_callback(original_cb)
 
         def event_stream():
             # start worker thread
