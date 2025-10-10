@@ -14,10 +14,9 @@ from ..utils.llmsession import LLMSession
 from ..utils.smart_help import gen_smart_help
 from ..utils.utils import get_prompt_from
 
-model = LLMSession()
 
 def gen_summary(
-    SUB_FEATURE, resp_total, resp_brief, question, gen_prompt_file, knowledge_prompt_file, help_msg, skip_summary=False
+    SUB_FEATURE, resp_total, resp_brief, question, gen_prompt_file, knowledge_prompt_file, help_msg, skip_summary=False, llm_session=None
 ):
     """Generate a summary."""
     logger.info('Generating Response Report')
@@ -45,7 +44,7 @@ def gen_summary(
         if not skip_summary:
             logger.info('Bypass summary: False')
             # try stream chat, if fail, fall back to chat
-            summary = model.try_stream_fallback_chat(sys_prompt, user_prompt)
+            summary = llm_session.try_stream_fallback_chat(sys_prompt, user_prompt)
         else:
             logger.info('Bypass summary: True')
             summary = handle_bypass_summary(resp_total, resp_brief)
@@ -53,7 +52,7 @@ def gen_summary(
         logger.info('generating smart help')
         help_keys = ['corrupted_data']
         summary = help_keys[0]
-        summary = gen_smart_help(help_msg, question, help_keys)
+        summary = gen_smart_help(help_msg, question, help_keys, llm_session)
     return summary
 
 

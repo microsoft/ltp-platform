@@ -9,11 +9,10 @@ from ..config import COPILOT_VERSION, PROMPT_DIR
 from ..utils.llmsession import LLMSession
 from ..utils.utils import get_prompt_from
 
-model = LLMSession()
 
 
 # generate help message for CoPilot agent
-def gen_smart_help(help_msg, user_question: str, key_lst: list, SMART_HELP=True) -> str:
+def gen_smart_help(help_msg, user_question: str, key_lst: list, SMART_HELP=True, llm_session=None) -> str:
     """Generate smart help message for CoPilot agent."""
     # dump help method
     dump_help = ''
@@ -43,10 +42,10 @@ def gen_smart_help(help_msg, user_question: str, key_lst: list, SMART_HELP=True)
         question_prompt = f'[user question]\n {user_question} \n\n'
         user_prompt = question_prompt + f'[reason to generate the help]\n str{key_lst} \n\n' + capability_promp
         # send to a LLM session to generate a smart help
-        smart_help = model.try_stream_fallback_chat(sys_prompt, user_prompt)
+        smart_help = llm_session.try_stream_fallback_chat(sys_prompt, user_prompt)
         final_help = smart_help
     else:
         dump_help_prompt = f'[reason to generate the help]\n {dump_help} \n\n'
-        final_help = model.try_stream_fallback_chat(sys_prompt, dump_help_prompt)
+        final_help = llm_session.try_stream_fallback_chat(sys_prompt, dump_help_prompt)
 
     return final_help

@@ -17,6 +17,7 @@ from .utils.push_frontend import push_frontend_event, push_frontend_meta
 
 from .config import AGENT_MODE_LOCAL, print_env_variables
 from .copilot_turn import CoPilotTurn
+from .utils.llmsession import LLMSession
 
 HISTORY_DEPTH = int(os.getenv('COPILOT_HISTORY_DEPTH', 64))
 if HISTORY_DEPTH <= 0:
@@ -78,7 +79,7 @@ class CoPilotConversation:
         for user_id, messages in self.msg_dict.items():
             logger.info(f'[internal control word] [msg_dict audit]: user "{user_id}" msg_list length is {len(messages)}')
 
-    def perform_operation(self, in_parameters: InParameters) -> OutParameters:
+    def perform_operation(self, in_parameters: InParameters, llm_session: LLMSession) -> OutParameters:
         """Main entry for performing an operation. Delegates to helpers for clarity."""
         logger.info('[CoPilot]: New Chat Round Started')
         user_prompt = in_parameters.user
@@ -108,10 +109,10 @@ class CoPilotConversation:
                     result = self._handle_authenticate_failure(user_id, conv_id, turn_id)
                 else:
                     logger.info(f'User {username} authenticated successfully.')
-                    result = self._handle_user_question(user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info)
+                    result = self._handle_user_question(user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info, llm_session)
             else:
                 logger.info(f'User {username} authenticated successfully.')
-                result = self._handle_user_question(user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info)
+                result = self._handle_user_question(user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info, llm_session)
         else:
             result = self._handle_empty_input()
 
@@ -170,14 +171,14 @@ class CoPilotConversation:
         out_parameters = OutParameters(resp)
         return out_parameters
 
-    def _handle_user_question(self, user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info):
+    def _handle_user_question(self, user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info, llm_session: LLMSession):
         """Handle the case where only a user question is provided."""
         if user_id not in self.msg_dict:
             self.msg_dict[user_id] = deque(maxlen=HISTORY_DEPTH)
         msg_user = {'role': 'user', 'content': user_prompt}
         self.manage_conv_history(user_id, msg_user)
         logger.info(f'[internal control word] [per user check] user "{user_id}" msg_list length is {len(self.msg_dict[user_id])}')
-        resp = self.copilot.process_turn(self.msg_dict[user_id], skip_summary, debugging)
+        resp = self.copilot.process_turn(self.msg_dict[user_id], skip_summary, debugging, llm_session)
         if not isinstance(resp, dict):
             logger.info('Unexpected response format from copilot.process_turn')
             return self.handle_unexpected_copilot_response(user_id, conv_id, turn_id)
