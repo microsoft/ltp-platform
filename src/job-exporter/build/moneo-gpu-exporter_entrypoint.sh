@@ -1,13 +1,13 @@
 #!/bin/bash
 
-if lspci | grep -qi 'Advanced Micro Devices'; then
+if lsmod | grep -qi amdgpu; then
     echo "AMD Graphics Card Detected."
     # Launches AMD RDC Daemon
     nohup /opt/rocm/bin/rdcd -u </dev/null >/dev/null 2>&1 &
     echo "rdc Daemon Started!"
     python3 /Moneo/src/worker/exporters/amd_exporter.py &
     echo "AMD Exporter Started!"
-elif lspci | grep -qi 'NVIDIA'; then
+elif lsmod | grep -qi nvidia; then
     echo "NVIDIA Graphics card detected."
     python3 /update-dcgm.py
     # Launches NVIDIA DCGM Daemon

@@ -128,7 +128,7 @@ def query_metadata(question: str, help_msg, skip_summary: bool = False):
 def query_user_manual(question: str, help_msg):
     """Query user manual."""
     # read documentation
-    documentation = get_prompt_from(os.path.join(PROMPT_DIR, SUB_FEATURE, 'ltp_documentation_20250624.txt'))
+    documentation = get_prompt_from(os.path.join(PROMPT_DIR, SUB_FEATURE, 'ltp_documentation.txt'))
     ltp_doc = {'lucia training platform documentation': documentation}
 
     # generate answer

@@ -120,10 +120,46 @@ def main():
         nargs='+',
         help="The service list that contains corresponding images you want to push"
     )
+    push_parser.add_argument(
+        '--docker-registry',
+        type=str,
+        help="The docker registry you want to push to, which will override the config file"
+    )
+    push_parser.add_argument(
+        "--docker-namespace",
+        type=str,
+        help="The docker namespace you want to push to, which will override the config file if '--docker-registry' is also set"
+    )
+    push_parser.add_argument(
+        '--docker-username',
+        type=str,
+        help="The docker username you want to use for authentication, which will override the config file if '--docker-registry' is also set"
+    )
+    push_parser.add_argument(
+        '--docker-password',
+        type=str,
+        help="The docker password you want to use for authentication, which will override the config file if '--docker-registry' is also set"
+    )
+    push_parser.add_argument(
+        "--docker-tag",
+        type=str,
+        help="The docker tag you want to push to, which will override the config file if '--docker-registry' is also set"
+    )
     push_parser.set_defaults(func=push_image)
 
     args = parser.parse_args()
     config_model = load_build_config(args.config)
+    if hasattr(args, 'docker_registry') and args.docker_registry is not None:
+        config_model['dockerRegistryInfo']['dockerRegistryDomain'] = args.docker_registry
+        if args.docker_namespace is not None:
+            config_model['dockerRegistryInfo']['dockerNameSpace'] = args.docker_namespace
+        if args.docker_username is not None:
+            config_model['dockerRegistryInfo']['dockerUserName'] = args.docker_username
+        if args.docker_password is not None:
+            config_model['dockerRegistryInfo']['dockerPassword'] = args.docker_password
+        if args.docker_tag is not None:
+            config_model['dockerRegistryInfo']['dockerTag'] = args.docker_tag
+    
     args.func(args, config_model)
 
     endtime = datetime.datetime.now()

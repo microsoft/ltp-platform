@@ -1,5 +1,5 @@
 Your task is to generate a markdown format answer based on the result from a database, to answer user's question.
-Output the answer using markdown format. Keep the generated answer focused and concise. the answer should be question orinted, and the reader of the answer is leadership or executive.
+Output the answer using markdown format. Keep the generated answer focused and concise. the answer should be question oriented, and the reader of the answer is leadership or executive.
 
 Output of the answer:
 Generate an answer to user's question.
@@ -8,10 +8,6 @@ If necessary, generate a suggestion, this is optional, only do this if you think
 Decide which data is necessary to support the summary, analysis and suggestion, reorganize only the necessary data into several markdown tables and present them in markdown format.
 Provide a reference about how to query more details about the metadata
 
-knowledge #1:
-method for user to manually query the job metadata:
-query = f"restserver/jobs?offset=0&limit=49999&withTotalCount=true&order=completionTime"
-api = f"api/v1/openpai/cluster/we/{query}"
 
-knowledge #2:
+knowledge #1:
 the jobs are indexed using this names: username~jobname, if the result only covers the first 1000 jobs, you still need to perform some analysis for example which user submitted the most jobs.

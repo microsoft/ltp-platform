@@ -19,7 +19,8 @@ const express = require('express');
 const emailController = require('@alert-handler/controllers/mail');
 const jobController = require('@alert-handler/controllers/job');
 const nodeController = require('@alert-handler/controllers/node');
-const userController = require('@alert-handler/controllers/user')
+const userController = require('@alert-handler/controllers/user');
+const logController = require('@alert-handler/controllers/log');
 
 const router = express.Router();
 
@@ -80,5 +81,11 @@ router
   .route('/alert-handler/set-quotas')
   /** POST /alert-handler/set-quota */
   .post(userController.setQuotas);
+
+// log
+router
+  .route('/alert-handler/log-alerts')
+  /** POST /alert-handler/log-alerts */
+  .post(logController.logAlerts);
 
 module.exports = router;

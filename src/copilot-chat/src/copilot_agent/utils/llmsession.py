@@ -18,6 +18,7 @@ class LLMSession:
         self.azure_api_key = os.environ.get("AZURE_OPENAI_API_KEY")
         self.openai_api_key = os.environ.get("OPENAI_API_KEY")
         self.endpoint = os.environ.get("COPILOT_LLM_ENDPOINT")
+        self.embedding_url = os.environ.get("COPILOT_EMBEDDING_URL")
         self.model_name = os.environ.get("COPILOT_LLM_MODEL")
         self.model_version = os.environ.get("COPILOT_LLM_VERSION")
         self.embedding_model_name = os.environ.get("COPILOT_EMBEDDING_MODEL")
@@ -27,7 +28,7 @@ class LLMSession:
                 api_key=self.openai_api_key
             )
             self.embedding_model = openai.OpenAI(
-                base_url=self.endpoint,
+                base_url=self.embedding_url,
                 api_key=self.openai_api_key
             )
         elif self.provider == "azure":
@@ -37,7 +38,7 @@ class LLMSession:
                 api_version=self.model_version
             )
             self.embedding_model = openai.AzureOpenAI(
-                azure_endpoint=self.endpoint,
+                azure_endpoint=self.embedding_url,
                 api_key=self.azure_api_key,
                 api_version=self.model_version
             )

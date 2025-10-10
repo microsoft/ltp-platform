@@ -65,6 +65,8 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["llm-provider"] }}
         - name: COPILOT_LLM_ENDPOINT
           value: {{ cluster_cfg["copilot-chat"]["llm-endpoint"] }}
+        - name: COPILOT_EMBEDDING_URL
+          value: {{ cluster_cfg["copilot-chat"]["embedding-url"] | default(cluster_cfg["copilot-chat"]["llm-endpoint"], true) }}
         - name: COPILOT_LLM_MODEL
           value: {{ cluster_cfg["copilot-chat"]["llm-model"] }}
         - name: COPILOT_LLM_VERSION
@@ -74,7 +76,7 @@ spec:
         - name: AGENT_HOST
           value: {{ cluster_cfg["copilot-chat"]["agent-host"] }}
         - name: RESTSERVER_URL
-          value: {{ cluster_cfg["copilot-chat"]["rest-server"]["url"] }}
+          value: {{ cluster_cfg["rest-server"]["uri"] }}
         - name: COPILOT_VALID_VCS
           value: {{ cluster_cfg["copilot-chat"]["valid-vcs"] }}
         - name: ENVIRONMENT
@@ -89,6 +91,8 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["collect-dst-kusto-cluster-url"] }}
         - name: COLLECT_DST_KUSTO_DATABASE_NAME
           value: {{ cluster_cfg["copilot-chat"]["collect-dst-kusto-database-name"] }}
+        - name: CLUSTER_ID
+          value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
         ports:
         - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
           hostPort:  {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}

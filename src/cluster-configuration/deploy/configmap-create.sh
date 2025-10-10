@@ -22,3 +22,7 @@ kubectl create configmap  docker-credentials --from-file=docker-credentials/ --d
 kubectl create configmap  gpu-configuration --from-file=gpu-configuration/ --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
 kubectl create configmap  pai-version --from-file=../../../version/PAI.VERSION --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
 kubectl create configmap  k8s-version --from-file=../../../version/K8S.VERSION --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?
+
+kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\t"}{.metadata.name}{"\n"}{end}' \
+  | kubectl create configmap k8s-etc-hosts --from-file=k8s-etc-hosts.txt=/dev/stdin --dry-run=client -o yaml \
+  | kubectl apply -f - || exit $?
