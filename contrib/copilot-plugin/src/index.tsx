@@ -22,12 +22,16 @@ if (process.env.NODE_ENV === 'development') {
   // For local development
   const container = document.getElementById('root');
   if (container) {
+    const user = process.env.REACT_APP_USER || "dev.ben";
+    // Set the document title to include the username
+    document.title = `Copilot Plugin (${user})`;
+    
     const root = ReactDOM.createRoot(container);
     root.render(
       <React.StrictMode>
         <App
           restUrl="rest-server"
-          user="dev.ben"
+          user={user}
           restToken=""
           modelToken=""
         />
