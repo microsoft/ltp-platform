@@ -78,6 +78,7 @@
     "start": "node scripts/start.js",
     "start:user1": "REACT_APP_USER=dev.eva PORT=3000 node scripts/start.js",
     "start:user2": "REACT_APP_USER=dev.ben PORT=3001 node scripts/start.js",
+    "start:user3": "REACT_APP_USER=dev.unknown PORT=3002 node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "clean": "rimraf build"
