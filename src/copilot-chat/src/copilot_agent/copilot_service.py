@@ -51,10 +51,11 @@ class CoPilotService:
     def instance_operation(self):
         """POST endpoint to handle copilot operations."""
         logger.info("Received request at /copilot/api/operation")
+        llm_session = LLMSession()
         try:
             data = request.get_json()
             in_parameters = self.copilot_conversation.build_in_parameters(data)
-            out_parameters = self.copilot_conversation.perform_operation(in_parameters)
+            out_parameters = self.copilot_conversation.perform_operation(in_parameters, llm_session=llm_session)
             response = {
                 "status": "success",
                 "data": out_parameters.__dict__
