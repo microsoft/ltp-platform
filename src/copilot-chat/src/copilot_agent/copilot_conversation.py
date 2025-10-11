@@ -106,7 +106,7 @@ class CoPilotConversation:
                 self.auth_manager.set_authenticate_state(username, rest_token)
                 if not self.auth_manager.is_authenticated(username):
                     logger.error(f'User {username} failed authentication twice. Aborting operation.')
-                    result = self._handle_authenticate_failure(user_id, conv_id, turn_id)
+                    result = self._handle_authenticate_failure(user_id, conv_id, turn_id, llm_session)
                 else:
                     logger.info(f'User {username} authenticated successfully.')
                     result = self._handle_user_question(user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info, llm_session)
@@ -164,11 +164,19 @@ class CoPilotConversation:
         out_parameters = OutParameters(resp)
         return out_parameters
 
-    def _handle_authenticate_failure(self, user_id, conv_id, turn_id):
+    def _handle_authenticate_failure(self, user_id, conv_id, turn_id, llm_session: LLMSession = None):
         """Handle authentication failure case."""
         logger.info('User authentication failed. Aborting operation.')
         resp = self._make_skip_response(user_id, conv_id, turn_id, 'error')
         out_parameters = OutParameters(resp)
+
+        # If LLM session is available, set up thread-local context and use push_frontend_event
+        if llm_session:
+            from .utils.push_frontend import set_thread_llm_session, push_frontend_event
+            set_thread_llm_session(llm_session)
+            error_message = '<span class="text-gray-400 italic">Unauthorized - Authentication failed</span>'
+            push_frontend_event(error_message)
+        
         return out_parameters
 
     def _handle_user_question(self, user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info, llm_session: LLMSession):
