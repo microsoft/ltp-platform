@@ -3371,24 +3371,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:6.9.16":
-  version: 6.9.16
-  resolution: "nodemailer@npm:6.9.16"
-  checksum: 10c0/9fd73ab4ab5b81544c3c9820afbe386369aba442f997b2f58d171222a898a7aed580fc100bfe6eebc194f18ba6e169d67ee40ca64d32d69022d89e575cef97a4
-  languageName: node
-  linkType: hard
-
-"nodemailer@npm:^6.9.13, nodemailer@npm:^6.9.14":
-  version: 6.10.1
-  resolution: "nodemailer@npm:6.10.1"
-  checksum: 10c0/e81fde258ea4f4e5646e9e3eebe89294d007939999d2d1a8c96c5488fa00bf659e46cf76fccb2697e9aa6ef9807a1ed47ff2aef6ad30b795e3849b6997066d16
-  languageName: node
-  linkType: hard
-
-"nodemailer@npm:^7.0.3":
-  version: 7.0.3
-  resolution: "nodemailer@npm:7.0.3"
-  checksum: 10c0/835492262328471b94a080cea43ea20f4232e19a915400cd71c7f4f4ab93a7d361775154eebe30a8fc40379eecf11a0bbc73e6cf4bbee9dccb6dd1cf7a1dc792
+"nodemailer@npm:^7.0.7":
+  version: 7.0.9
+  resolution: "nodemailer@npm:7.0.9"
+  checksum: 10c0/029af0c89d64a521aa9969196e44c13ef289c7f419264eed8d63682610999e06205b0fc264ab8ac65941dc3eefd3c435f23337a32880614cc199744c9be6209a
   languageName: node
   linkType: hard
 
@@ -3624,7 +3610,7 @@ __metadata:
     express-bearer-token: "npm:^3.0.0"
     joi: "npm:^17.13.3"
     module-alias: "npm:^2.2.3"
-    nodemailer: "npm:^7.0.3"
+    nodemailer: "npm:^7.0.7"
     prettier: "npm:~3.5.3"
     winston: "npm:2"
     ws: "npm:^8.18.2"
