@@ -16,14 +16,11 @@ from ..utils.llmsession import LLMSession
 from ..utils.types import DCW, Customer, Design
 from ..utils.utils import get_prompt_from
 
-model = LLMSession()
-
-
 # generate dcw (design, criteria, workload) from using question
-def gen_dcw(user_prompt: str, map_existing: bool) -> DCW:
+def gen_dcw(user_prompt: str, map_existing: bool, llm_session: LLMSession) -> DCW:
     """Generate a DCW object from the user's question."""
     sys_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'gen_dcw_prompt.txt'))
-    resp = model.chat(sys_prompt, user_prompt)
+    resp = llm_session.chat(sys_prompt, user_prompt)
     logger.info(f'gen_dcw, user_prompt, is {user_prompt}')
     logger.info(f'gen_dcw, resp, is {resp}')
     if 'target' not in resp.lower() and 'baseline' not in resp.lower():
@@ -41,7 +38,7 @@ def gen_dcw(user_prompt: str, map_existing: bool) -> DCW:
 
         if all(item not in dcw.Workload.lower() for item in revise_json['list']):
             logger.info(f'before revise: {dcw}')
-            dcw.Workload = model.chat(revise_sys_prompt, revise_user_prompt)
+            dcw.Workload = llm_session.chat(revise_sys_prompt, revise_user_prompt)
             logger.info(f'after revise: {dcw}')
 
     return dcw

@@ -24,8 +24,6 @@ from ..utils.types import DCW
 from ..utils.utils import get_prompt_from
 from .ltp_dashboard import query_generation_kql
 
-model = LLMSession()
-
 SUB_FEATURE = 'ltp'
 
 SKIP_LUCIA_CONTROLLER_EXECUTION = True
@@ -44,7 +42,7 @@ def query_metrics(question: str, help_msg, skip_summary: bool = False, llm_sessi
     else:
         # generate query
         logger.info('Generating Query: LTP, Metrics')
-        query, end_time_stamp, parallel, param = gen_promql_query(SUB_FEATURE, question)
+        query, end_time_stamp, parallel, param = gen_promql_query(SUB_FEATURE, question, llm_session)
 
         if not query:
             logger.info(f'No query found in the response, query is {query}')
