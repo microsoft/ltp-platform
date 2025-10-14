@@ -22,14 +22,14 @@ from .config import AGENT_PORT, AGENT_MODE_LOCAL
 # --- New CoPilotAPI class (Flask app setup and endpoints) ---
 class CoPilotService:
     """Flask app and endpoint manager for CoPilot."""
-    def __init__(self, copilot_conversation: CoPilotConversation):
+    def __init__(self):
         """
         Initialize the CoPilotAPI with a CoPilot instance, set up Flask app and endpoints.
 
         Args:
             copilot: Instance of CoPilot business logic class.
         """
-        self.copilot_conversation = copilot_conversation
+        self.copilot_conversation = CoPilotConversation()
         self.host = os.getenv('AGENT_HOST', '127.0.0.1')
         self.app = Flask(__name__)
         self.app.add_url_rule('/copilot/api/status', view_func=self.status, methods=['GET'])

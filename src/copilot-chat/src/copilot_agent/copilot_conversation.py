@@ -64,7 +64,7 @@ class CoPilotConversation:
     def __init__(self):
         """Initialize CoPilotConversation, message history, and authentication manager."""
         print_env_variables()
-        self.copilot = CoPilotTurn(verbose=False)
+        self.copilot_turn = CoPilotTurn(verbose=False)
         self.msg_dict = {}  # Dictionary to store message deques per user
         self.auth_manager = AuthenticationManager()
 
@@ -186,7 +186,7 @@ class CoPilotConversation:
         msg_user = {'role': 'user', 'content': user_prompt}
         self.manage_conv_history(user_id, msg_user)
         logger.info(f'[internal control word] [per user check] user "{user_id}" msg_list length is {len(self.msg_dict[user_id])}')
-        resp = self.copilot.process_turn(self.msg_dict[user_id], skip_summary, debugging, llm_session)
+        resp = self.copilot_turn.process_turn(self.msg_dict[user_id], skip_summary, debugging, llm_session)
         if not isinstance(resp, dict):
             logger.info('Unexpected response format from copilot.process_turn')
             return self.handle_unexpected_copilot_response(user_id, conv_id, turn_id)
