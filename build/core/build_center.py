@@ -28,13 +28,15 @@ import logging.config
 
 class BuildCenter:
 
-    def __init__(self, build_config, process_list, type):
+    def __init__(self, build_config, process_list, type, arg_config=None):
 
         self.logger = logging.getLogger(__name__)
         build_utility.setup_logger_config(self.logger)
 
         self.build_config = build_config
         self.task_type = type
+
+        self.arg_config = arg_config
 
         self.process_list = [service.lower() for service in process_list] if process_list is not None else None
 
@@ -138,7 +140,7 @@ class BuildCenter:
                     for inedge in self.graph.services[item].inedges:
                         build_worker.copy_dependency_folder(os.path.join(self.codeDir,inedge),
                         os.path.join(self.graph.services[item].path,self.dependencyDir+inedge))
-                    build_worker.build_single_component(self.graph.services[item])
+                    build_worker.build_single_component(self.graph.services[item], self.arg_config.imagelist)
             self.logger.info("Build all components succeed")
 
         except Exception as e:
