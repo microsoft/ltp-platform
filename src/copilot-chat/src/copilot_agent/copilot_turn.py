@@ -49,7 +49,7 @@ class CoPilotTurn:
         push_frontend_event('<span class="text-gray-400 italic">🤔 Copilot is understanding your request...</span><br/>', replace=False)
         this_inquiry = messages_list[-1]['content']
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
-        question = contextualize_question(this_inquiry, last_inquiry)
+        question = contextualize_question(this_inquiry, last_inquiry, llm_session)
 
         # classify the question to determine the solution source and method
         push_frontend_event('<span class="text-gray-400 italic">🔍 Copilot is finding the right the data source...</span><br/>', replace=False)

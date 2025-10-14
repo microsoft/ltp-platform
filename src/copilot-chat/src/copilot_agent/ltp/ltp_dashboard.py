@@ -15,8 +15,6 @@ from ..utils.logger import logger
 
 from ..config import DATA_DIR
 
-model = LLMSession()
-
 
 # Document preparation utilities
 class DocPrepare:
