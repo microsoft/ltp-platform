@@ -8,9 +8,9 @@ set -x
 wait_for_dpkg_lock() {
     if ! timeout 300 bash -c \
         'while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 \
-                 || pgrep -x "apt|apt-get|dpkg|unattended-upgrades" >/dev/null; do
-             sleep 3
-         done'
+                || pgrep -x "apt|apt-get|dpkg|unattended-upgrades" >/dev/null; do
+            sleep 3
+        done'
     then
         echo "Timed out waiting for dpkg lock."
         exit 124
