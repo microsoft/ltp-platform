@@ -17,35 +17,33 @@ from ..utils.sql import SQLManager
 from ..utils.time import get_current_unix_timestamp
 from ..utils.utils import extract_json_dict, get_prompt_from
 
-model = LLMSession()
 
-
-def gen_kusto_query_pseudo(SUB_FEATURE: str, gen_prompt_file: str, user_prompt: str) -> dict:
+def gen_kusto_query_pseudo(SUB_FEATURE: str, gen_prompt_file: str, user_prompt: str, llm_session: LLMSession) -> dict:
     """Generate controller input."""
     sys_prompt = get_prompt_from(os.path.join(PROMPT_DIR, SUB_FEATURE, gen_prompt_file))
-    resp = model.chat(sys_prompt, user_prompt)
+    resp = llm_session.chat(sys_prompt, user_prompt)
     controller_input = extract_json_dict(benchmark=resp, nested=False)
     return controller_input
 
 
-def gen_kusto_query_fallback_pseudo(question, SUB_FEATURE, gen_fallback_prompt) -> str:
+def gen_kusto_query_fallback_pseudo(question, SUB_FEATURE, gen_fallback_prompt, llm_session: LLMSession) -> str:
     """Generate fallback query from RCA to status."""
     logger.info('Generate a fall back status query')
     system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, SUB_FEATURE, gen_fallback_prompt))
     user_prompt = f'<user input> is\n{question}'
-    resp = model.chat(system_prompt, user_prompt)
+    resp = llm_session.chat(system_prompt, user_prompt)
     fall_back_question = resp.replace('```', '')
     return fall_back_question
 
 
-def gen_sql_query(SUB_FEATURE: str, database: SQLManager, question: str) -> str:
+def gen_sql_query(SUB_FEATURE: str, database: SQLManager, question: str, llm_session: LLMSession) -> str:
     """Generate a general SQL query."""
     logger.info('Generate a SQL query')
     generation_prompt = get_prompt_from(os.path.join(PROMPT_DIR, SUB_FEATURE, 'gen_query_sql_general.txt'))
     accepeted_value_prompt = database.get_unique_values()
     system_prompt = generation_prompt + f'<accepted values> are\n{accepeted_value_prompt}'
     user_prompt = f'<user input> is\n{question}'
-    resp = model.chat(system_prompt, user_prompt)
+    resp = llm_session.chat(system_prompt, user_prompt)
     logger.info(f'resp {resp}')
     matches = re.findall(r'[`\']{3}(.*?)[`\']{3}', resp, re.DOTALL)
     if not matches:
@@ -136,7 +134,7 @@ def _get_promql_param():
     return param
 
 
-def _gen_promql_query_param(SUB_FEATURE: str, question: str) -> dict:
+def _gen_promql_query_param(SUB_FEATURE: str, question: str, llm_session: LLMSession) -> dict:
     """Generate a general PromQL query."""
     logger.info('Generate a PromQL query')
     generation_prompt = get_prompt_from(os.path.join(PROMPT_DIR, SUB_FEATURE, 'gen_query_promql_metrics.txt'))
@@ -144,16 +142,16 @@ def _gen_promql_query_param(SUB_FEATURE: str, question: str) -> dict:
     # logger.info(f'accepeted_value_prompt:\n{accepeted_value_prompt}')
     system_prompt = generation_prompt + f'<accepted values> are\n{accepeted_value_prompt}'
     user_prompt = f'<user input> is\n{question}'
-    resp = model.chat(system_prompt, user_prompt)
+    resp = llm_session.chat(system_prompt, user_prompt)
     logger.info(f'resp:\n{resp}')
     params = extract_json_dict(benchmark=resp, nested=False)
     logger.info(f'params:\n{params}')
     return params
 
 
-def gen_promql_query(SUB_FEATURE: str, question: str) -> tuple[str, bool]:
+def gen_promql_query(SUB_FEATURE: str, question: str, llm_session: LLMSession) -> tuple[str, bool]:
     """Generate a general PromQL query."""
-    params = _gen_promql_query_param(SUB_FEATURE, question)
+    params = _gen_promql_query_param(SUB_FEATURE, question, llm_session)
     if not isinstance(params, dict):
         logger.info(f'No query found in the response, params is {params}')
         return None, None, None, None
