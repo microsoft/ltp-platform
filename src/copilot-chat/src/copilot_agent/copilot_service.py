@@ -29,7 +29,7 @@ class CoPilotService:
         Args:
             copilot: Instance of CoPilot business logic class.
         """
-        self.copilot_conversation = CoPilotConversation()
+        self.sessions = {}
         self.host = os.getenv('AGENT_HOST', '127.0.0.1')
         self.app = Flask(__name__)
         self.app.add_url_rule('/copilot/api/status', view_func=self.status, methods=['GET'])
@@ -48,14 +48,25 @@ class CoPilotService:
         """GET endpoint for health/status check."""
         return jsonify({"status": "running"})
 
+    def get_or_create_session(self, user_id, conv_id):
+        """Retrieve or create a copilot_conversation for the given userId and convId."""
+        session_key = f"{user_id}_{conv_id}"
+        if session_key not in self.sessions:
+            self.sessions[session_key] = CoPilotConversation()
+        return self.sessions[session_key]
+
     def instance_operation(self):
         """POST endpoint to handle copilot operations."""
         logger.info("Received request at /copilot/api/operation")
-        llm_session = LLMSession()
         try:
             data = request.get_json()
-            in_parameters = self.copilot_conversation.build_in_parameters(data)
-            out_parameters = self.copilot_conversation.perform_operation(in_parameters, llm_session=llm_session)
+            user_id = data['data']['messageInfo']['userId']
+            conv_id = data['data']['messageInfo']['convId']
+            copilot_conversation = self.get_or_create_session(user_id, conv_id)
+
+            llm_session = LLMSession()
+            in_parameters = copilot_conversation.build_in_parameters(data)
+            out_parameters = copilot_conversation.perform_operation(in_parameters, llm_session=llm_session)
             response = {
                 "status": "success",
                 "data": out_parameters.__dict__
@@ -75,6 +86,12 @@ class CoPilotService:
         logger.info("Received request at /copilot/api/operation/stream")
         try:
             data = request.get_json()
+            user_id = data['data']['messageInfo']['userId']
+            conv_id = data['data']['messageInfo']['convId']
+            copilot_conversation = self.get_or_create_session(user_id, conv_id)
+        except KeyError as e:
+            logger.error(f"Missing key in JSON body for stream_operation: {e}")
+            return jsonify({"status": "error", "message": f"Missing key: {e}"}), 400
         except Exception as e:
             logger.error(f"Failed to parse JSON body for stream_operation: {e}")
             return jsonify({"status": "error", "message": "invalid json"}), 400
@@ -87,15 +104,14 @@ class CoPilotService:
 
         def worker():
             # Create a dedicated LLM session for this request with per-instance callback
-            # This eliminates the global callback race condition that causes cross-user contamination
             try:
-                in_parameters = self.copilot_conversation.build_in_parameters(data)
+                in_parameters = copilot_conversation.build_in_parameters(data)
                 # Create a fresh LLM session for this streaming request
                 llm_session = LLMSession()
                 llm_session.set_instance_stream_callback(on_chunk)
-                
+
                 # Pass the dedicated session to the conversation
-                result = self.copilot_conversation.perform_operation(in_parameters, llm_session=llm_session)
+                result = copilot_conversation.perform_operation(in_parameters, llm_session=llm_session)
             except Exception as e:
                 logger.error(f"Error during streaming operation worker: {e}")
                 import traceback
