@@ -16,7 +16,7 @@ COPILOT_VERSION = os.getenv('COPILOT_VERSION', '').lower()
 # set agent cross talk
 AGENT_PORT = int(os.getenv('AGENT_PORT', '50000'))
 AGENT_MODE_LOCAL = os.getenv('AGENT_MODE', '').lower() == 'local'
-AGENT_MODE_CA_LOCAL = os.getenv('AGENT_MODE_CA', '').lower() == 'local'
+AGENT_MINIMAL_ON = os.getenv('AGENT_MINIMAL', '').lower() == 'on'
 #
 TO_CONTROLLER = True
 #
@@ -31,4 +31,3 @@ def print_env_variables():
     logger.info(f"Env Var: COPILOT_VERSION: {os.getenv('COPILOT_VERSION', 'na')}")
     logger.info(f"Env Var: AGENT_PORT: {os.getenv('AGENT_PORT', '50000')}")
     logger.info(f"Env Var: AGENT_MODE: {os.getenv('AGENT_MODE', 'na')}")
-    logger.info(f"Env Var: AGENT_MODE_CA: {os.getenv('AGENT_MODE_CA', 'na')}")
