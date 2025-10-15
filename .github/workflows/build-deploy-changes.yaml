@@ -77,7 +77,7 @@ jobs:
         if: steps.check.outputs.has_changed == 'true'
         run: |
           # check whether steps.changes.outputs.folders contains 'alert-manager'
-          if [[ " ${{ steps.changes.outputs.folders }} " == *" alert-manager "* ]]; then
+          if echo "${{ steps.changes.outputs.folders }}" | grep -q "alert-manager"; then
             echo "Installing python-icm alertmanager dependencies..."
             echo "${{ secrets.ICM_PACKAGE_B64 }}" | base64 -d > python-icm.zip
             unzip -o python-icm.zip -d $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
