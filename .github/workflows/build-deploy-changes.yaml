@@ -55,9 +55,8 @@ jobs:
           changed_files=$(git diff --name-only "$base_sha" "$head_sha")
           echo "Changed files: $changed_files"
 
-          # extract service folders under src/, skip alert-manager
+          # extract service folders under src/
           folders=$(echo "$changed_files" | grep '^src/' \
-            | grep -v 'alert-manager' \
             |  awk -F'/' '{print $2}' \
             | sort -u | tr '\n' ' ')
           echo "Changed folders: $folders"
@@ -83,6 +82,16 @@ jobs:
       - name: Install python libs
         if: steps.check.outputs.has_changed == 'true'
         run: python -m pip install --break-system-packages pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
+
+      - name: Install Special Packages
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          # check whether steps.changes.outputs.folders contains 'alert-manager'
+          if [[ " ${{ steps.changes.outputs.folders }} " == *" alert-manager "* ]]; then
+            echo "Installing python-icm alertmanager dependencies..."
+            echo "${{ secrets.ICM_PACKAGE_B64 }}" | base64 -d > python-icm.zip
+            unzip -o python-icm.zip -d $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
+          fi
 
       - name: Decode and unzip config file
         if: steps.check.outputs.has_changed == 'true'
