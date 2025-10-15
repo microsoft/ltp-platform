@@ -2,11 +2,10 @@
 // Licensed under the MIT License.
 
 import ky, { Options } from "ky";
-import { Job, useChatStore } from "./state";
+import { useChatStore } from "./state";
 import { toast } from "sonner";
 
 const API_BASE_URL = window.location.origin;
-const TARGET_JOB_TAG = "model-serving";
 
 export const api = {
   post: async (path: string, key: string | null = null, options: Options = {}) => {
@@ -66,98 +65,36 @@ export const api = {
 
 };
 
-export async function fetchJobList(): Promise<void> {
-  const restServerPath = useChatStore.getState().restServerPath;
+export async function fetchAllModels(): Promise<string[]> {
+  const modelProxyPath = useChatStore.getState().modelProxyPath;
+  const modelsUrl = `${modelProxyPath}/v1/models`;
   const restServerToken = useChatStore.getState().restServerToken;
 
-  const getJobsUrl = `${restServerPath}/api/v2/jobs?state=RUNNING`;
   try {
-    const data: any = await api.get(getJobsUrl, restServerToken);
-    const jobs = (data as { debugId: string, name: string, username: string, state: string }[])
-      .filter(job => job.name.includes(TARGET_JOB_TAG))
-      .map(job => ({
-        id: job.debugId,
-        name: job.name,
-        username: job.username,
-        status: job.state,
-        ip: "",
-        port: 0,
-      } as Job));
-
-    const jobsWithDetails = await Promise.all(jobs.map(async job => {
-      const jobDetailsUrl = `${restServerPath}/api/v2/jobs/${job.username}~${job.name}`;
-      try {
-        const jobInfo: any = await api.get(jobDetailsUrl, restServerToken);
-        const details = jobInfo as { taskRoles: { [key: string]: { taskStatuses: [{ containerIp: string, containerPorts: { http: string } }] } } };
-        if (!details || !details.taskRoles) {
-          console.warn(`No task roles found for job ${job.name}`);
-          return null;
-        }
-        const taskStatuses = Object.values(details.taskRoles)[0].taskStatuses;
-        if (!taskStatuses) {
-          console.warn(`No task statuses found for job ${job.name}`);
-          return null;
-        }
-        job.ip = taskStatuses[0].containerIp;
-        job.port = parseInt(taskStatuses[0].containerPorts.http);
-        return job;
-      } catch (error) {
-        console.warn(`Failed to fetch details for job ${job.name}:`, error);
-        return null;
-      }
-    }));
-
-    const filteredJobs = jobsWithDetails.filter((job): job is Job => job !== null);
-    useChatStore.getState().setAllJobs(filteredJobs);
-    console.log("Fetched job list:", filteredJobs);
-  } catch (error) {
-    console.error("Failed to fetch job list:", error);
-    useChatStore.getState().setAllJobs([]);
-  }
-}
-
-export async function fetchModelsInCurrentJob(): Promise<string[]> {
-  const currentJob = useChatStore.getState().currentJob;
-  if (!currentJob) {
-    console.warn("No current job selected");
-    return [];
-  }
-
-  const jobServerPath = useChatStore.getState().jobServerPath;
-  const jobServerToken = useChatStore.getState().jobServerToken;
-
-  const modelsUrl = `${jobServerPath}/${currentJob.ip}:${currentJob.port}/v1/models`;
-  try {
-    const data: any = await api.get(modelsUrl, jobServerToken);
+    const data: any = await api.get(modelsUrl, restServerToken);
     const models = data as { data: [{ id: string }] };
     if (!models || !models.data) {
-      console.warn(`No models found for job ${currentJob.name}`);
-      useChatStore.getState().setAllModelsInCurrentJob([]);
+      console.warn(`No models found from model proxy`);
+      useChatStore.getState().setAllModels([]);
       return [];
     }
     const modelList = models.data.map((model: { id: string }) => model.id);
-    useChatStore.getState().setAllModelsInCurrentJob(modelList);
+    useChatStore.getState().setAllModels(modelList);
     return modelList;
   } catch (error) {
-    console.error("Failed to fetch models in current job:", error);
-    useChatStore.getState().setAllModelsInCurrentJob([]);
+    console.error("Failed to fetch all models:", error);
+    useChatStore.getState().setAllModels([]);
     return [];
   }
 }
 
 export async function chatRequest(abortSignal?: AbortSignal) {
-  const currentJob = useChatStore.getState().currentJob;
-  if (!currentJob) {
-    console.warn("No current job selected");
-    return;
-  }
-
-  const jobServerPath = useChatStore.getState().jobServerPath;
-  const jobServerToken = useChatStore.getState().jobServerToken;
+  const restServerToken = useChatStore.getState().restServerToken;
+  const modelProxyPath = useChatStore.getState().modelProxyPath;
   const currentModel = useChatStore.getState().currentModel;
   const chatMsgs = useChatStore.getState().chatMsgs;
 
-  const modelsUrl = `${jobServerPath}/${currentJob.ip}:${currentJob.port}/v1/chat/completions`;
+  const modelsUrl = `${modelProxyPath}/v1/chat/completions`;
   const data = {
     model: currentModel,
     messages: chatMsgs.filter(
@@ -168,7 +105,7 @@ export async function chatRequest(abortSignal?: AbortSignal) {
     })),
   };
   try {
-    const response: any = await api.post(modelsUrl, jobServerToken, {
+    const response: any = await api.post(modelsUrl, restServerToken, {
       json: data,
       signal: abortSignal,
     });
@@ -195,18 +132,13 @@ export async function chatRequest(abortSignal?: AbortSignal) {
 }
 
 export async function chatStreamRequest(abortSignal?: AbortSignal) {
-  const currentJob = useChatStore.getState().currentJob;
-  if (!currentJob) {
-    console.warn("No current job selected");
-    return;
-  }
-
-  const jobServerPath = useChatStore.getState().jobServerPath;
-  const jobServerToken = useChatStore.getState().jobServerToken;
+  const restServerToken = useChatStore.getState().restServerToken;
+  const modelProxyPath = useChatStore.getState().modelProxyPath;
   const currentModel = useChatStore.getState().currentModel;
   const chatMsgs = useChatStore.getState().chatMsgs;
 
-  const modelsUrl = `${jobServerPath}/${currentJob.ip}:${currentJob.port}/v1/chat/completions`;
+  const modelsUrl = `${modelProxyPath}/v1/chat/completions`;
+
   const data = {
     model: currentModel,
     stream: true,
@@ -228,7 +160,7 @@ export async function chatStreamRequest(abortSignal?: AbortSignal) {
   useChatStore.getState().addChatMessage(newMsg);
 
   try {
-    const response = await api.postStream(modelsUrl, jobServerToken, {
+    const response = await api.postStream(modelsUrl, restServerToken, {
       json: data,
       signal: abortSignal,
       timeout: false, // Disable timeout for streaming

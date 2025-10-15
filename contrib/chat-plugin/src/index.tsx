@@ -12,7 +12,6 @@ declare global {
       id: string;
       title: string;
       uri: string;
-      token: string;
     }];
   }
 }
@@ -61,10 +60,9 @@ class ProtocolPluginElement extends HTMLElement {
     
     const plugins = window.PAI_PLUGINS;
     const pluginIndex = Number(params.get("index")) || 0;
-    const modelToken = plugins[pluginIndex].token || "";
 
     const root = ReactDOM.createRoot(this);
-    root.render(React.createElement(App, {restUrl, user, restToken, modelToken}));
+    root.render(React.createElement(App, {restUrl, user, restToken}));
   }
 
 }
