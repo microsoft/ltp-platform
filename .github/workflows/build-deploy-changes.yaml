@@ -83,7 +83,6 @@ jobs:
         if: steps.check.outputs.has_changed == 'true'
         run: python -m pip install --break-system-packages pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
 
-
       - name: Install Special libs
         if: steps.check.outputs.has_changed == 'true'
         run: |
@@ -180,4 +179,3 @@ jobs:
             exit 1
           fi
           echo "Virtual cluster info: $vc_info"
-
