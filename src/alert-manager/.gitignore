@@ -2,3 +2,5 @@
 node_modules/
 
 deploy/icm-certs/
+
+**/kusto-sdk/
