@@ -15,7 +15,7 @@ from .utils.authentication import AuthenticationManager
 from .utils.kql_executor import KustoExecutor
 from .utils.push_frontend import push_frontend_event, push_frontend_meta
 
-from .config import AGENT_MODE_LOCAL, print_env_variables
+from .config import AGENT_MINIMAL_ON, print_env_variables
 from .copilot_turn import CoPilotTurn
 from .utils.llmsession import LLMSession
 
@@ -263,8 +263,9 @@ class CoPilotConversation:
             'Debug': debug,
         }
         logger.info(f'[copilot data collection] {log_data}')
-        # ingest kusto table
-        self.collect_data_to_kusto(log_data)
+        if not AGENT_MINIMAL_ON:
+            # ingest kusto table
+            self.collect_data_to_kusto(log_data)
 
     def handle_unexpected_copilot_response(self, user_id: str, conv_id: str, turn_id: str) -> OutParameters:
         """Handle unexpected response format from copilot agent and log error."""

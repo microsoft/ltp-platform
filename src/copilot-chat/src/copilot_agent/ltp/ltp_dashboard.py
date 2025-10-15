@@ -13,7 +13,7 @@ from ..utils.llmsession import LLMSession
 from ..utils.rag import QueryGeneratorRAG
 from ..utils.logger import logger
 
-from ..config import DATA_DIR
+from ..config import DATA_DIR, AGENT_MINIMAL_ON
 
 
 # Document preparation utilities
@@ -112,6 +112,8 @@ class KQLRAGSingleton:
         kql_sample_docs_data = DocPrepare.get_txt_as_list_hashtag(KUSTO_SAMPLE_DATA_FILE)
         kql_knowledge_docs = DocPrepare.get_txt_as_list(KUSTO_KNOWLEDGE_FILE)
         kql_schema_docs = kql_table_docs + kql_operator_docs + kql_sample_docs + kql_sample_docs_data + kql_knowledge_docs
+        if AGENT_MINIMAL_ON:
+            kql_schema_docs = []
         logger.info(f'length of kql_schema_docs: {len(kql_schema_docs)}')
         for doc in kql_schema_docs:
             logger.info(doc[:50])
