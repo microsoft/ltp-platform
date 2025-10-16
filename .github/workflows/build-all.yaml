@@ -1,4 +1,4 @@
-name: Build & Deploy Changed Services
+name: Build All Services
 
 permissions:
   packages: write
@@ -15,7 +15,7 @@ env:
 
 jobs:
   build:
-    name: Build and Deploy
+    name: Build All
     runs-on: [self-hosted, paicicd]
     timeout-minutes: 120
     environment: auto-test
