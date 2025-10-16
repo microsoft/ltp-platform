@@ -68,7 +68,7 @@ RUN sed -i 's/systemctl --now enable nvidia-dcgm/#&/' Moneo/src/worker/install/n
     sudo bash Moneo/src/worker/install/nvidia.sh
 
 ENV PATH "${PATH}:/opt/rocm/bin"
-COPY build/moneo-*-exporter_entrypoint.sh .
+COPY build/moneo-*-exporter_entrypoint.sh ./
 COPY build/update-dcgm.py .
 
 # For the job exporter
