@@ -11,10 +11,10 @@ from .utils.logger import logger
 from .config import COPILOT_VERSION, DATA_DIR, PROMPT_DIR
 from .ltp import ltp_auto_reject, ltp_human_intervention, query_metadata, query_metrics, query_user_manual, query_powerbi
 from .utils import (
+    Contextualizer,
     LLMSession,
     LTPReportProcessor,
     QuestionClassifier,
-    contextualize_question,
     gen_smart_help,
     get_prompt_from,
     push_frontend_event,
@@ -24,16 +24,20 @@ from .utils import (
 class CoPilotTurn:
     """CoPilot Turn, handles each inquiry/response turn."""
 
-    def __init__(self, verbose: bool = False) -> None:
+    def __init__(self, llm_session: LLMSession, verbose: bool = False) -> None:
         """Initialize."""
         self.verbose = verbose
+        self.llm_session = llm_session
         # Initialize version
         self._version = self._initialize_version()
         # Load help message
         self.help_msg = self.load_help_message()
+        self.system_prompt_answer_general = get_prompt_from(os.path.join(PROMPT_DIR, 'gen_smart_help_prompt_general.txt'))
+        self.classifier = QuestionClassifier(self._version, self.llm_session)
+        self.contextualizer = Contextualizer(self.llm_session)
 
     # entry function, processes the list of messages and returns a dictionary with the results
-    def process_turn(self, messages_list: list, skip_summary: bool = False, debugging: bool = False, llm_session: LLMSession = None) -> dict:
+    def process_turn(self, messages_list: list, skip_summary: bool = False, debugging: bool = False) -> dict:
         """Process the list of messages and return a dictionary with the results."""
         if debugging:
             logger.info(f'DEBUGGING: {debugging}')
@@ -41,56 +45,55 @@ class CoPilotTurn:
 
         # Set thread-local session for push_frontend functions to use correct callback
         from .utils.push_frontend import set_thread_llm_session
-        set_thread_llm_session(llm_session)
-        
-        classifier = QuestionClassifier(self._version, llm_session)
+        set_thread_llm_session(self.llm_session)
 
         # get contextualized question from this and last user inquiry
         push_frontend_event('<span class="text-gray-400 italic">🤔 Copilot is understanding your request...</span><br/>', replace=False)
         this_inquiry = messages_list[-1]['content']
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
-        question = contextualize_question(this_inquiry, last_inquiry, llm_session)
+        question = self.contextualizer.contextualize(this_inquiry, last_inquiry)
 
         # classify the question to determine the solution source and method
         push_frontend_event('<span class="text-gray-400 italic">🔍 Copilot is finding the right the data source...</span><br/>', replace=False)
-        question_type = classifier.classify_question(question)
+        question_type = self.classifier.classify_question(question)
         # objective, concern in the question
         obj, con = question_type.get('lv0_object', '3. [general]'), question_type.get('lv1_concern', '0. [others]')
 
         # verion f3, resolves objective 8 (Lucia Training Platform)
         if self._version == 'f3':
             if obj.count('8') > 0:
-                answer, debug = self.query_ltp(question, con, skip_summary, llm_session)
+                answer, debug = self.query_ltp(question, con, skip_summary)
             elif obj.count('3') > 0:
-                answer = self.gen_smart_help_general(question, llm_session)
+                answer = self.gen_answer_general(question)
                 debug = {}
             elif obj.count('9') > 0:
                 help_keys = ['feature']
-                answer = gen_smart_help(self.help_msg, question, help_keys, llm_session=llm_session)
+                answer = gen_smart_help(self.help_msg, question, help_keys, True, self.llm_session)
+                
                 debug = {}
             else:
                 help_keys = ['unsupported_question']
-                answer = gen_smart_help(self.help_msg, question, help_keys, llm_session=llm_session)
+                answer = gen_smart_help(self.help_msg, question, help_keys, True, self.llm_session)
                 debug = {}
         else:
             # Placeholder for other version implementations
             help_keys = ['unsupported_question']
-            answer = gen_smart_help(self.help_msg, question, help_keys, llm_session=llm_session)
+            answer = gen_smart_help(self.help_msg, question, help_keys, True, self.llm_session)
             debug = {}
         
         return {'category': question_type, 'answer': answer, 'debug': debug}
 
-    def query_ltp(self, question: str, con: str, skip_summary: bool, llm_session: LLMSession) -> tuple[str, dict]:
+    def query_ltp(self, question: str, con: str, skip_summary: bool) -> tuple[str, dict]:
         """Query about Lucia Training Platform."""
         # Mapping concern codes to handler functions  
         # Updated to pass llm_session to prevent singleton blocking
         handlers = {
-            '1': lambda: query_metrics(question, self.help_msg, skip_summary, llm_session),
-            '2': lambda: query_metadata(question, self.help_msg, skip_summary, llm_session),
-            '3': lambda: query_user_manual(question, self.help_msg, llm_session),
-            '4': lambda: query_powerbi(question, self.help_msg, llm_session),
-            '5': lambda: ltp_auto_reject(question, self.help_msg, llm_session),
-            '6': lambda: ltp_human_intervention(question, self.help_msg, llm_session),
+            '1': lambda: query_metrics(question, self.help_msg, skip_summary, self.llm_session),
+            '2': lambda: query_metadata(question, self.help_msg, skip_summary, self.llm_session),
+            '3': lambda: query_user_manual(question, self.help_msg, self.llm_session),
+            '4': lambda: query_powerbi(question, self.help_msg, self.llm_session),
+            '5': lambda: ltp_auto_reject(question, self.help_msg, self.llm_session),
+            '6': lambda: ltp_human_intervention(question, self.help_msg, self.llm_session),
         }
         for code, handler in handlers.items():
             if con.count(code) > 0:
@@ -98,13 +101,13 @@ class CoPilotTurn:
         return 'unsupported concern.', {}
 
     # generate generic smart help message based on user input
-    def gen_smart_help_general(self, question: str, llm_session: LLMSession) -> str:
+    def gen_answer_general(self, question: str) -> str:
         """Generate smart help message based on user input."""
-        system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'gen_smart_help_prompt_general.txt'))
+        system_prompt = self.system_prompt_answer_general
         if isinstance(self.help_msg, dict) and 'feature' in self.help_msg:
             system_prompt = system_prompt + '\n\n' + self.help_msg['feature']
         push_frontend_event('<span class="text-gray-400 italic">🌐 Accessing public information...</span><br/>', replace=False)
-        summary = llm_session.try_stream_fallback_chat(system_prompt, f'question is: {question}')
+        summary = self.llm_session.try_stream_fallback_chat(system_prompt, f'question is: {question}')
         return summary
 
     def get_preload_dashboard(self):

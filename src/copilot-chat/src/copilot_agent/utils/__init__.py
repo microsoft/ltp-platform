@@ -5,7 +5,7 @@
 
 from .authentication import AuthenticationManager
 from .classify import QuestionClassifier
-from .conversation_manager import contextualize_question
+from .conversation_manager import Contextualizer
 from .dcw import dcw_parser, extract_dcw_from_history, gen_dcw, parse_and_align_dcw
 from .kql_executor import KustoExecutor
 from .logger import (
@@ -66,6 +66,7 @@ from .utils import (
 __all__ = [
     'DCW',
     'AuthenticationManager',
+    'Contextualizer',
     'Customer',
     'Design',
     'KustoExecutor',
@@ -76,7 +77,6 @@ __all__ = [
     'QueryGeneratorRAG',
     'SQLManager',
     'RestAPIClient',
-    'contextualize_question',
     'dcw_parser',
     'execute_openpai_query',
     'execute_promql_query',
