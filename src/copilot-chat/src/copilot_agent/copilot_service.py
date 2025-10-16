@@ -48,11 +48,11 @@ class CoPilotService:
         """GET endpoint for health/status check."""
         return jsonify({"status": "running"})
 
-    def get_or_create_session(self, user_id, conv_id):
+    def get_or_create_session(self, user_id, conv_id, llm_session):
         """Retrieve or create a copilot_conversation for the given userId and convId."""
         session_key = f"{user_id}_{conv_id}"
         if session_key not in self.sessions:
-            self.sessions[session_key] = CoPilotConversation()
+            self.sessions[session_key] = CoPilotConversation(llm_session)
         return self.sessions[session_key]
 
     def instance_operation(self):
@@ -62,11 +62,12 @@ class CoPilotService:
             data = request.get_json()
             user_id = data['data']['messageInfo']['userId']
             conv_id = data['data']['messageInfo']['convId']
-            copilot_conversation = self.get_or_create_session(user_id, conv_id)
-
             llm_session = LLMSession()
+            copilot_conversation = self.get_or_create_session(user_id, conv_id, llm_session)
+
+            
             in_parameters = copilot_conversation.build_in_parameters(data)
-            out_parameters = copilot_conversation.perform_operation(in_parameters, llm_session=llm_session)
+            out_parameters = copilot_conversation.perform_operation(in_parameters)
             response = {
                 "status": "success",
                 "data": out_parameters.__dict__
@@ -84,11 +85,26 @@ class CoPilotService:
         forwarded to the HTTP response. This avoids changing many internal call chains.
         """
         logger.info("Received request at /copilot/api/operation/stream")
+
+        # Create queue BEFORE the callback function
+        q = queue.Queue()
+
+        def on_chunk(chunk: str):
+            # put chunk into queue for streaming response
+            q.put(chunk)
+        
         try:
             data = request.get_json()
             user_id = data['data']['messageInfo']['userId']
             conv_id = data['data']['messageInfo']['convId']
-            copilot_conversation = self.get_or_create_session(user_id, conv_id)
+            llm_session = LLMSession()  # Create a new LLM session
+            llm_session.set_instance_stream_callback(on_chunk)
+            copilot_conversation = self.get_or_create_session(user_id, conv_id, llm_session)  # Pass llm_session
+            
+            # CRITICAL: Update the llm_session in the conversation for subsequent requests
+            # The copilot_turn needs to use the NEW llm_session with the NEW callback
+            copilot_conversation.llm_session = llm_session
+            copilot_conversation.copilot_turn.llm_session = llm_session
         except KeyError as e:
             logger.error(f"Missing key in JSON body for stream_operation: {e}")
             return jsonify({"status": "error", "message": f"Missing key: {e}"}), 400
@@ -96,22 +112,14 @@ class CoPilotService:
             logger.error(f"Failed to parse JSON body for stream_operation: {e}")
             return jsonify({"status": "error", "message": "invalid json"}), 400
 
-        q = queue.Queue()
 
-        def on_chunk(chunk: str):
-            # put chunk into queue for streaming response
-            q.put(chunk)
 
         def worker():
-            # Create a dedicated LLM session for this request with per-instance callback
+            # Use the llm_session from the copilot_conversation
             try:
                 in_parameters = copilot_conversation.build_in_parameters(data)
-                # Create a fresh LLM session for this streaming request
-                llm_session = LLMSession()
-                llm_session.set_instance_stream_callback(on_chunk)
-
-                # Pass the dedicated session to the conversation
-                result = copilot_conversation.perform_operation(in_parameters, llm_session=llm_session)
+                # Reuse the llm_session passed to the conversation
+                copilot_conversation.perform_operation(in_parameters)
             except Exception as e:
                 logger.error(f"Error during streaming operation worker: {e}")
                 import traceback
