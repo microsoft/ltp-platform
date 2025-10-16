@@ -61,12 +61,13 @@ class OutParameters:
 # --- New CoPilot class (business logic only) ---
 class CoPilotConversation:
     """CoPilot Conversation, manages the inquiry/response turns for each user."""
-    def __init__(self):
+    def __init__(self, llm_session: LLMSession) -> None:
         """Initialize CoPilotConversation, message history, and authentication manager."""
         print_env_variables()
-        self.copilot_turn = CoPilotTurn(verbose=False)
+        self.copilot_turn = CoPilotTurn(llm_session=llm_session, verbose=False)
         self.msg_dict = {}  # Dictionary to store message deques per user
         self.auth_manager = AuthenticationManager()
+        self.llm_session = llm_session
 
     def manage_conv_history(self, user_id: str, message: dict) -> None:
         """Append a message to the user's message history."""
@@ -79,7 +80,7 @@ class CoPilotConversation:
         for user_id, messages in self.msg_dict.items():
             logger.info(f'[internal control word] [msg_dict audit]: user "{user_id}" msg_list length is {len(messages)}')
 
-    def perform_operation(self, in_parameters: InParameters, llm_session: LLMSession) -> OutParameters:
+    def perform_operation(self, in_parameters: InParameters) -> OutParameters:
         """Main entry for performing an operation. Delegates to helpers for clarity."""
         logger.info('[CoPilot]: New Chat Round Started')
         user_prompt = in_parameters.user
@@ -106,13 +107,13 @@ class CoPilotConversation:
                 self.auth_manager.set_authenticate_state(username, rest_token)
                 if not self.auth_manager.is_authenticated(username):
                     logger.error(f'User {username} failed authentication twice. Aborting operation.')
-                    result = self._handle_authenticate_failure(user_id, conv_id, turn_id, llm_session)
+                    result = self._handle_authenticate_failure(user_id, conv_id, turn_id)
                 else:
                     logger.info(f'User {username} authenticated successfully.')
-                    result = self._handle_user_question(user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info, llm_session)
+                    result = self._handle_user_question(user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info)
             else:
                 logger.info(f'User {username} authenticated successfully.')
-                result = self._handle_user_question(user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info, llm_session)
+                result = self._handle_user_question(user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info)
         else:
             result = self._handle_empty_input()
 
@@ -164,29 +165,29 @@ class CoPilotConversation:
         out_parameters = OutParameters(resp)
         return out_parameters
 
-    def _handle_authenticate_failure(self, user_id, conv_id, turn_id, llm_session: LLMSession = None):
+    def _handle_authenticate_failure(self, user_id, conv_id, turn_id):
         """Handle authentication failure case."""
         logger.info('User authentication failed. Aborting operation.')
         resp = self._make_skip_response(user_id, conv_id, turn_id, 'error')
         out_parameters = OutParameters(resp)
 
         # If LLM session is available, set up thread-local context and use push_frontend_event
-        if llm_session:
+        if self.llm_session:
             from .utils.push_frontend import set_thread_llm_session, push_frontend_event
-            set_thread_llm_session(llm_session)
+            set_thread_llm_session(self.llm_session)
             error_message = '<span class="text-gray-400 italic">Unauthorized - Authentication failed</span>'
             push_frontend_event(error_message)
         
         return out_parameters
 
-    def _handle_user_question(self, user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info, llm_session: LLMSession):
+    def _handle_user_question(self, user_id, conv_id, turn_id, user_prompt, skip_summary, debugging, question_msg_info):
         """Handle the case where only a user question is provided."""
         if user_id not in self.msg_dict:
             self.msg_dict[user_id] = deque(maxlen=HISTORY_DEPTH)
         msg_user = {'role': 'user', 'content': user_prompt}
         self.manage_conv_history(user_id, msg_user)
         logger.info(f'[internal control word] [per user check] user "{user_id}" msg_list length is {len(self.msg_dict[user_id])}')
-        resp = self.copilot_turn.process_turn(self.msg_dict[user_id], skip_summary, debugging, llm_session)
+        resp = self.copilot_turn.process_turn(self.msg_dict[user_id], skip_summary, debugging)
         if not isinstance(resp, dict):
             logger.info('Unexpected response format from copilot.process_turn')
             return self.handle_unexpected_copilot_response(user_id, conv_id, turn_id)

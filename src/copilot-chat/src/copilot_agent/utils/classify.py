@@ -14,6 +14,12 @@ class QuestionClassifier:
     def __init__(self, version, model):
         self.version = version
         self.model = model
+        if self.version == 'f3':
+            self.lv0_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv0.txt'))
+            self.lv1_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv1.txt'))
+        else:
+            self.lv0_system_prompt = None
+            self.lv1_system_prompt = None
 
     def classify_question(self, question: str) -> dict:
         """Classify the question and return a dictionary with the results."""
@@ -31,17 +37,15 @@ class QuestionClassifier:
     def classifier_lv0(self, question: str) -> str:
         """Classify the user question into several categories."""
         if self.version == 'f3':
-            sys_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv0.txt'))
+            resp = self.model.chat(self.lv0_system_prompt, question)
         else:
-            raise ValueError(f'Unsupported version: {self.version}')
-        resp = self.model.chat(sys_prompt, question)
+            resp = '3'  # default to 3
         return resp
 
     def classifier_lv1(self, question: str) -> str:
         """Classify the user question into several categories."""
         if self.version == 'f3':
-            sys_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv1.txt'))
-            resp = self.model.chat(sys_prompt, question)
+            resp = self.model.chat(self.lv1_system_prompt, question)
         else:
             resp = '0'  # default to 0
         return resp
