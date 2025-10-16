@@ -1,0 +1,107 @@
+name: Build & Deploy Changed Services
+
+permissions:
+  packages: write
+  contents: read
+
+on:
+  push:
+    branches: [main, dev, 'release/*']
+  pull_request:
+    branches: [main, dev, 'release/*']
+
+env:
+  TAG: ${{ github.run_number }}
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: [self-hosted, paicicd]
+    timeout-minutes: 120
+    environment: auto-test
+    container:
+      image: ubuntu:latest
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    steps:
+      - name: Install git
+        run: |
+          DEBIAN_FRONTEND=noninteractive apt update
+          DEBIAN_FRONTEND=noninteractive apt install -y git
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref_name }}
+
+      - name: Get All Services
+        id: all
+        run: |
+          services=$(ls -1d src/* | awk -F'/' '{print $2}' | tr '\n' ' ')
+          echo "All services: $services"
+          echo "::set-output name=services::$services"
+
+      - name: Install Package
+        if: steps.all.outputs.services != ''
+        run: |
+          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip docker-cli ca-certificates curl apt-transport-https lsb-release gnupg parallel
+          curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+      - name: Install python libs
+        if: steps.all.outputs.services != ''
+        run: python -m pip install --break-system-packages pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
+
+      - name: Install Special libs
+        if: steps.all.outputs.services != ''
+        run: |
+          # check whether steps.all.outputs.services contains 'alert-manager'
+          if echo "${{ steps.all.outputs.services }}" | grep -q "alert-manager"; then
+            echo "Installing python-icm alertmanager dependencies..."
+            echo "${{ secrets.ICM_PACKAGE_B64 }}" | base64 -d > python-icm.zip
+            unzip -o python-icm.zip -d $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
+            ls -l $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
+          fi
+
+      - name: Decode and unzip config file
+        if: steps.all.outputs.services != ''
+        run: |
+          echo "${{ secrets.CONFIG_FILE_B64 }}" | base64 -d > config.zip
+          mkdir -p $GITHUB_WORKSPACE/config
+          unzip -o config.zip -d $GITHUB_WORKSPACE/config
+          ls -l $GITHUB_WORKSPACE/config
+
+      - name: Arrange Config Files
+        if: steps.all.outputs.services != ''
+        run: |
+          rm -rf /tmp/auth-configuration
+          mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
+          ls -l /tmp/auth-configuration
+
+      - name: Build Images of Changed Services
+        if: steps.all.outputs.services != ''
+        run: |
+          all_services="${{ steps.all.outputs.services }}"
+          echo "Building: $all_services"
+          echo "--------------------------------"
+          failed_services=""
+          for service in $all_services; do
+            echo "Building service: $service"
+            if python3 $GITHUB_WORKSPACE/build/pai_build.py build \
+              -c $GITHUB_WORKSPACE/config/cluster-configuration \
+              -s $service; then
+              echo "✓ Successfully built: $service"
+            else
+              echo "✗ Failed to build: $service"
+              failed_services="$failed_services $service"
+            fi
+          done
+            
+          if [ -n "$failed_services" ]; then
+            echo "::error::Failed to build services:$failed_services"
+            echo "FAILED_SERVICES=$failed_services" 
+            exit 1
+          else
+            echo "All services built successfully"
+          fi
