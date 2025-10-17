@@ -232,7 +232,7 @@ class LLMSession:
                                 cb(full)
                         except Exception:
                             logger.debug('Stream callback failed')
-                        yield full
+                        yield chunk
 
                 # If stream finishes without exception, stop generator normally
                 return
