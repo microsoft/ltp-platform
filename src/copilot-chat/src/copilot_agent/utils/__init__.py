@@ -33,6 +33,7 @@ from .promql import (
 )
 from .push_frontend import(
     push_frontend_event,
+    set_thread_llm_session,
 )
 from .query import (
     gen_kusto_query_fallback_pseudo,
@@ -105,4 +106,5 @@ __all__ = [
     'push_frontend_event',
     'retry_function',
     'save_to_csv',
+    'set_thread_llm_session',
 ]
