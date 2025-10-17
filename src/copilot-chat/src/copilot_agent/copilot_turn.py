@@ -9,7 +9,7 @@ import os
 from .utils.logger import logger
 
 from .config import COPILOT_VERSION, DATA_DIR, PROMPT_DIR
-from .ltp import ltp_auto_reject, ltp_human_intervention, query_metadata, query_metrics, query_user_manual, query_powerbi
+from .ltp import LTP
 from .utils import (
     Contextualizer,
     LLMSession,
@@ -18,6 +18,7 @@ from .utils import (
     gen_smart_help,
     get_prompt_from,
     push_frontend_event,
+    set_thread_llm_session
 )
 
 
@@ -35,6 +36,7 @@ class CoPilotTurn:
         self.system_prompt_answer_general = get_prompt_from(os.path.join(PROMPT_DIR, 'gen_smart_help_prompt_general.txt'))
         self.classifier = QuestionClassifier(self._version, self.llm_session)
         self.contextualizer = Contextualizer(self.llm_session)
+        self.processor = LTP(self.llm_session, False)
 
     # entry function, processes the list of messages and returns a dictionary with the results
     def process_turn(self, messages_list: list, skip_summary: bool = False, debugging: bool = False) -> dict:
@@ -44,7 +46,6 @@ class CoPilotTurn:
             return {'category': None, 'answer': 'DEBUGGING MODE ENABLED', 'debug': {'debugging': debugging}}
 
         # Set thread-local session for push_frontend functions to use correct callback
-        from .utils.push_frontend import set_thread_llm_session
         set_thread_llm_session(self.llm_session)
 
         # get contextualized question from this and last user inquiry
@@ -52,10 +53,12 @@ class CoPilotTurn:
         this_inquiry = messages_list[-1]['content']
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
         question = self.contextualizer.contextualize(this_inquiry, last_inquiry)
+        #question = this_inquiry
 
         # classify the question to determine the solution source and method
         push_frontend_event('<span class="text-gray-400 italic">🔍 Copilot is finding the right the data source...</span><br/>', replace=False)
         question_type = self.classifier.classify_question(question)
+        #question_type = {'lv0_object': '3', 'lv1_concern': '0'}
         # objective, concern in the question
         obj, con = question_type.get('lv0_object', '3. [general]'), question_type.get('lv1_concern', '0. [others]')
 
@@ -85,15 +88,16 @@ class CoPilotTurn:
 
     def query_ltp(self, question: str, con: str, skip_summary: bool) -> tuple[str, dict]:
         """Query about Lucia Training Platform."""
+        self.processor.llm_session = self.llm_session  # ensure processor uses the current llm_session
         # Mapping concern codes to handler functions  
         # Updated to pass llm_session to prevent singleton blocking
         handlers = {
-            '1': lambda: query_metrics(question, self.help_msg, skip_summary, self.llm_session),
-            '2': lambda: query_metadata(question, self.help_msg, skip_summary, self.llm_session),
-            '3': lambda: query_user_manual(question, self.help_msg, self.llm_session),
-            '4': lambda: query_powerbi(question, self.help_msg, self.llm_session),
-            '5': lambda: ltp_auto_reject(question, self.help_msg, self.llm_session),
-            '6': lambda: ltp_human_intervention(question, self.help_msg, self.llm_session),
+            '1': lambda: self.processor.query_metrics(question, self.help_msg, skip_summary),
+            '2': lambda: self.processor.query_metadata(question, self.help_msg, skip_summary),
+            '3': lambda: self.processor.query_user_manual(question, self.help_msg),
+            '4': lambda: self.processor.query_powerbi(question, self.help_msg),
+            '5': lambda: self.processor.auto_reject(question, self.help_msg),
+            '6': lambda: self.processor.human_intervention(question, self.help_msg),
         }
         for code, handler in handlers.items():
             if con.count(code) > 0:
