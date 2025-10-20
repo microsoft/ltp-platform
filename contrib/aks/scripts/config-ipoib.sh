@@ -5,9 +5,21 @@
 
 set -x
 
-DEBIAN_FRONTEND=noninteractive apt-get update -y
-DEBIAN_FRONTEND=noninteractive apt-get install -y network-manager net-tools rsync || echo "Failed in apt install"
+wait_for_dpkg_lock() {
+    if ! timeout 300 bash -c \
+        'while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 \
+                || pgrep -x "apt|apt-get|dpkg|unattended-upgrades" >/dev/null; do
+            sleep 3
+        done'
+    then
+        echo "Timed out waiting for dpkg lock."
+        exit 124
+    fi
+    bash -c 'exec "$@"' -- "$@"
+}
 
+wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get update -y'
+wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get install -y network-manager net-tools rsync || echo "Failed in apt install"'
 
 # rename
 INIT=0
