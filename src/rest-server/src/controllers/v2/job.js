@@ -50,7 +50,15 @@ const list = asyncHandler(async (req, res) => {
     }
 
     const username = req[userProperty].username;
-    myvcs = await userController.getUserVCs(username);
+    currentvcs = await userController.getUserVCs(username);
+    let myvcs = await userController.getUserHistoryVCs(username);
+    if (!myvcs || myvcs.length === 0) {
+      myvcs = currentvcs;
+    }
+    else {
+      myvcs = Array.from(new Set([...myvcs, ...currentvcs]));
+    }
+
     if (!filters.virtualCluster || filters.virtualCluster.length === 0) {
       filters.virtualCluster = myvcs;
     } else {

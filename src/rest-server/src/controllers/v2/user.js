@@ -35,6 +35,11 @@ const getUserVCs = async (username) => {
   return [...virtualClusters];
 };
 
+const getUserHistoryVCs = async (username) => {
+  const userInfo = await userModel.getUser(username);
+  return userInfo.history_vclist || [];
+};
+
 const getUser = async (req, res, next) => {
   try {
     const username = req.params.username;
@@ -810,4 +815,5 @@ module.exports = {
   updateUserPassword,
   createUser,
   getUserVCs,
+  getUserHistoryVCs,
 };

@@ -87,6 +87,9 @@ async function read(key) {
         extension: JSON.parse(
           Buffer.from(userData.data.extension, 'base64').toString(),
         ),
+        history_vclist: JSON.parse(
+          Buffer.from(userData.data.history_vclist, 'base64').toString(),
+        ),
       });
 
       cache.set(key, userInstance);
@@ -153,6 +156,9 @@ async function readAll() {
             email: Buffer.from(item.data.email, 'base64').toString(),
             extension: JSON.parse(
               Buffer.from(item.data.extension, 'base64').toString(),
+            ),
+            history_vclist: JSON.parse(
+              Buffer.from(item.data.history_vclist, 'base64').toString(),
             ),
           });
           allUserInstance.push(userInstance);
