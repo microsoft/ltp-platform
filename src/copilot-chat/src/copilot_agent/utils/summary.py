@@ -11,7 +11,6 @@ from ..utils.logger import logger
 
 from ..config import TOKEN_LIMIT, PROMPT_DIR
 from ..utils.llmsession import LLMSession
-from ..utils.smart_help import gen_smart_help
 from ..utils.utils import get_prompt_from
 
 
@@ -51,8 +50,8 @@ def gen_summary(
     else:
         logger.info('generating smart help')
         help_keys = ['corrupted_data']
-        summary = help_keys[0]
-        summary = gen_smart_help(help_msg, question, help_keys, llm_session)
+        sys_prompt = help_msg[help_keys[0]] if help_keys[0] in help_msg else help_keys[0]
+        summary = llm_session.try_stream_fallback_chat(sys_prompt, question)
     return summary
 
 

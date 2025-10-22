@@ -47,7 +47,7 @@ from .restapi import (
     RestAPIClient,
 )
 from .smart_help import (
-    gen_smart_help,
+    SmartHelp,
 )
 from .sql import (
     SQLManager,
@@ -80,6 +80,7 @@ __all__ = [
     'PowerBIClient',
     'QuestionClassifier',
     'QueryGeneratorRAG',
+    'SmartHelp',
     'SQLManager',
     'SystemData',
     'RestAPIClient',
@@ -94,7 +95,6 @@ __all__ = [
     'gen_kusto_query_fallback_pseudo',
     'gen_kusto_query_pseudo',
     'gen_size_range',
-    'gen_smart_help',
     'gen_sql_query',
     'gen_summary',
     'get_current_unix_timestamp',
