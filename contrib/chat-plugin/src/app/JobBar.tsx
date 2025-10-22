@@ -110,7 +110,7 @@ export default function JobBar() {
         <button
           onClick={fetchModels}
           className="inline-flex items-center p-1.5 border border-transparent rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          title="Refresh job and model lists"
+          title="Refresh model lists"
           disabled={isModelsLoading}
         >
           <RefreshCw className={`h-5 w-5 ${isModelsLoading ? "animate-spin" : ""}`} aria-hidden="true" />
