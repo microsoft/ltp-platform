@@ -31,21 +31,21 @@ class LTP:
     SUB_FEATURE = 'ltp'
     SKIP_LUCIA_CONTROLLER_EXECUTION = True
 
-    def __init__(self, llm_session: LLMSession = None, skip_execution: bool = True) -> None:
+    def __init__(self, llm_session: LLMSession = None) -> None:
         """
         Initialize LTP Query Engine.
         
         Args:
             llm_session: LLM session for generating queries and summaries
-            skip_execution: Whether to skip actual query execution (for testing/development)
         """
         self.llm_session = llm_session
-        self.skip_execution = skip_execution
+        self.feature_skipped = True
+        self.ltp_documentation = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'ltp_documentation_20250624.txt'))
 
     def query_metrics(self, question: str, help_msg, skip_summary: bool = False):
         """Query cluster or job metrics from Prometheus backend."""
         
-        if self.skip_execution:
+        if self.feature_skipped:
             logger.info('Skipping PromQL query generation.')
             query, end_time_stamp, parallel, param = None, None, None, {'scrape_interval': None, 'time_offset': None}
             logger.info('Skipping PromQL query execution.')
@@ -103,7 +103,7 @@ class LTP:
         logger.info('Generating Query: LTP, Metadata')
         query = 'restserver/jobs?offset=0&limit=49999&withTotalCount=true&order=completionTime'
 
-        if self.skip_execution:
+        if self.feature_skipped:
             logger.info('Skipping job metadata query execution.')
             resp = f'Skipping job metadata query execution due to lack of support, this will be enabled in the next release.'
             job_metadata = {'result': resp}
@@ -137,9 +137,7 @@ class LTP:
 
     def query_user_manual(self, question: str, help_msg):
         """Query user manual."""
-        # read documentation
-        documentation = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'ltp_documentation_20250624.txt'))
-        ltp_doc = {'lucia training platform documentation': documentation}
+        ltp_doc = {'lucia training platform documentation': self.ltp_documentation}
 
         # generate answer
         logger.info('Generating Answer: LTP, User Manual')
@@ -276,3 +274,28 @@ class LTP:
         else:
             # Return the object as is if it's already serializable
             return data
+
+    def query_all_in_one(self, question: str, help_msg, skip_summary: bool = False):
+        """Query all in one big session."""
+        ltp_doc = {'lucia training platform documentation': self.ltp_documentation}
+
+        sys_prompt0 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_doc.txt'))
+        sys_prompt1 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_metrics.txt'))
+        sys_prompt2 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_metadata.txt'))
+        sys_prompt3 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_dashboard.txt'))
+        sys_prompt4 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_rejection.txt'))
+        sys_prompt5 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_human.txt'))
+        sys_prompt = (
+            sys_prompt0 + '\n\n' +
+            sys_prompt1 + '\n\n' +
+            sys_prompt2 + '\n\n' +
+            sys_prompt3 + '\n\n' +
+            sys_prompt4 + '\n\n' +
+            sys_prompt5 + '\n\n the user manual of lucia training platform is: \n\n' +
+            self.ltp_documentation
+        )
+
+        summary = self.llm_session.chat(sys_prompt, question)
+
+        info_dict = {}
+        return summary, info_dict

@@ -15,10 +15,10 @@ from .utils import (
     LLMSession,
     LTPReportProcessor,
     QuestionClassifier,
-    gen_smart_help,
     get_prompt_from,
     push_frontend_event,
-    set_thread_llm_session
+    set_thread_llm_session,
+    SmartHelp
 )
 
 
@@ -36,33 +36,39 @@ class CoPilotTurn:
         self.system_prompt_answer_general = get_prompt_from(os.path.join(PROMPT_DIR, 'gen_smart_help_prompt_general.txt'))
         self.classifier = QuestionClassifier(self._version, self.llm_session)
         self.contextualizer = Contextualizer(self.llm_session)
-        self.processor = LTP(self.llm_session, False)
+        self.processor = LTP(self.llm_session)
+        self.smart_help = SmartHelp(self.help_msg, self.llm_session)
 
     # entry function, processes the list of messages and returns a dictionary with the results
     def process_turn(self, messages_list: list, skip_summary: bool = False, debugging: bool = False) -> dict:
         """Process the list of messages and return a dictionary with the results."""
-        if debugging:
-            logger.info(f'DEBUGGING: {debugging}')
-            return {'category': None, 'answer': 'DEBUGGING MODE ENABLED', 'debug': {'debugging': debugging}}
 
         # Set thread-local session for push_frontend functions to use correct callback
         set_thread_llm_session(self.llm_session)
 
-        # get contextualized question from this and last user inquiry
+        # get from message list
         push_frontend_event('<span class="text-gray-400 italic">🤔 Copilot is understanding your request...</span><br/>', replace=False)
         this_inquiry = messages_list[-1]['content']
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
+
+        # debug only
+        if False:
+            question = this_inquiry
+            question_type = {'lv0_object': 'none', 'lv1_concern': 'none'}
+            answer, debug = self.processor.query_all_in_one(question, self.help_msg, skip_summary)
+            debug = {}
+            return {'category': question_type, 'answer': answer, 'debug': debug}
+
+        # get contextualized question from this and last user inquiry
         question = self.contextualizer.contextualize(this_inquiry, last_inquiry)
-        #question = this_inquiry
 
         # classify the question to determine the solution source and method
         push_frontend_event('<span class="text-gray-400 italic">🔍 Copilot is finding the right the data source...</span><br/>', replace=False)
         question_type = self.classifier.classify_question(question)
-        #question_type = {'lv0_object': '3', 'lv1_concern': '0'}
-        # objective, concern in the question
         obj, con = question_type.get('lv0_object', '3. [general]'), question_type.get('lv1_concern', '0. [others]')
 
         # verion f3, resolves objective 8 (Lucia Training Platform)
+        push_frontend_event('<span class="text-gray-400 italic">⏳ Copilot is processing your inquiry...</span><br/>', replace=False)
         if self._version == 'f3':
             if obj.count('8') > 0:
                 answer, debug = self.query_ltp(question, con, skip_summary)
@@ -71,17 +77,18 @@ class CoPilotTurn:
                 debug = {}
             elif obj.count('9') > 0:
                 help_keys = ['feature']
-                answer = gen_smart_help(self.help_msg, question, help_keys, True, self.llm_session)
+                answer = self.smart_help.generate(question, help_keys, True)
                 
                 debug = {}
             else:
                 help_keys = ['unsupported_question']
-                answer = gen_smart_help(self.help_msg, question, help_keys, True, self.llm_session)
+                answer = self.smart_help.generate(question, help_keys, True)
+
                 debug = {}
         else:
             # Placeholder for other version implementations
             help_keys = ['unsupported_question']
-            answer = gen_smart_help(self.help_msg, question, help_keys, True, self.llm_session)
+            answer = self.smart_help.generate(question, help_keys, True)
             debug = {}
         
         return {'category': question_type, 'answer': answer, 'debug': debug}
