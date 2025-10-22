@@ -69,6 +69,7 @@ class CoPilotTurn:
 
         # verion f3, resolves objective 8 (Lucia Training Platform)
         push_frontend_event('<span class="text-gray-400 italic">⏳ Copilot is processing your inquiry...</span><br/>', replace=False)
+        self.smart_help.llm_session = self.llm_session  # ensure processor uses the current llm_session
         if self._version == 'f3':
             if obj.count('8') > 0:
                 answer, debug = self.query_ltp(question, con, skip_summary)
