@@ -200,6 +200,8 @@ const update = asyncHandler(async (req, res) => {
   const userName = req.user.username;
   const frameworkName = `${userName}~${jobName}`;
 
+  const jobType = res.locals.protocol.jobType || 'others';
+  
   // check duplicate job
   try {
     const data = await job.get(frameworkName);
@@ -216,6 +218,7 @@ const update = asyncHandler(async (req, res) => {
     }
   }
   await job.put(frameworkName, res.locals.protocol, req.body);
+  await job.addTag(frameworkName, jobType);
   res.status(status('Accepted')).json({
     status: status('Accepted'),
     message: `Update job ${jobName} for user ${userName} successfully.`,
