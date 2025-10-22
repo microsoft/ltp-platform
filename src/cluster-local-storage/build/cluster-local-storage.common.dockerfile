@@ -34,7 +34,6 @@ RUN mkdir -p /root/.ssh && \
 
 WORKDIR /usr/src/app
 COPY ./src .
-
 COPY ./bin/* /usr/local/cluster-local-storage/
 RUN chmod -R 0755 /usr/local/cluster-local-storage/
 
