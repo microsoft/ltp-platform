@@ -34,7 +34,8 @@ RUN mkdir -p /root/.ssh && \
 
 WORKDIR /usr/src/app
 COPY ./src .
-COPY --chmod=0755 ./bin/ /usr/local/cluster-local-storage/
+COPY ./bin/* /usr/local/cluster-local-storage/
+RUN chmod -R 0755 /usr/local/cluster-local-storage/
 
 RUN pip3 install -r requirements.txt
 
