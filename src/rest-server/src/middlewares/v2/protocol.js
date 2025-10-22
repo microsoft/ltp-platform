@@ -120,6 +120,40 @@ const protocolValidate = (protocolYAML) => {
       }
     }
   }
+
+  // check jobType 
+  if ("jobType" in protocolObj) {
+    const validJobTypes = ['inference', 'training', 'others'];
+    if (!validJobTypes.includes(protocolObj.jobType)) {
+      throw createError(
+        'Bad Request',
+        'InvalidProtocolError',
+        `Job type ${protocolObj.jobType} is not valid.`,
+      );
+    }
+
+    if (protocolObj.jobType === 'inference') {
+      // check parameters for inference job
+      if (!('parameters' in protocolObj)) {
+        throw createError(
+          'Bad Request',
+          'InvalidProtocolError',
+          `Parameters (INTERNAL_SERVER_IP, INTERNAL_SERVER_PORT, API_KEY) must be specified for inference job.`,
+        );
+      }
+      const requiredParams = ['INTERNAL_SERVER_IP', 'INTERNAL_SERVER_PORT', 'API_KEY'];
+      for (const param of requiredParams) {
+        if (!(param in protocolObj.parameters)) {
+          throw createError(
+            'Bad Request',
+            'InvalidProtocolError',
+            `Parameter ${param} must be specified for inference job.`,
+          );
+        }
+      }
+    }
+  }
+
   for (const taskRole of Object.keys(protocolObj.taskRoles)) {
     for (const field of prerequisiteFields) {
       if (
