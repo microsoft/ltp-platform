@@ -1,7 +1,6 @@
 name: Build All Services
 
 permissions:
-  packages: write
   contents: read
 
 on:
