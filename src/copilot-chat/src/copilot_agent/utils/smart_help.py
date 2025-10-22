@@ -10,42 +10,48 @@ from ..utils.llmsession import LLMSession
 from ..utils.utils import get_prompt_from
 
 
-
-# generate help message for CoPilot agent
-def gen_smart_help(help_msg, user_question: str, key_lst: list, SMART_HELP=True, llm_session=None) -> str:
-    """Generate smart help message for CoPilot agent."""
-    # dump help method
-    dump_help = ''
-    if isinstance(help_msg, dict):
-        for key in key_lst:
-            if key in help_msg:
-                dump_help += help_msg[key]
-                dump_help += '\n\n'
-    # version
-    _version = 'f0f1'
-    if COPILOT_VERSION == 'f2':
-        _version = 'f2'
-    # capability
-    if _version == 'f2':
-        capability_str = help_msg['feature'] + help_msg['sku'] + help_msg['workload']
-    elif _version == 'f0f1':
-        capability_str = help_msg['feature']
-    else:
-        capability_str = help_msg['feature']
-
-    sys_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'gen_smart_help_prompt.txt'))
+class SmartHelp:
+    """Smart help generator for CoPilot agent."""
     
-
-    if SMART_HELP:
-        # smart help method
-        capability_promp = f'[features]\n {capability_str} \n\n'
-        question_prompt = f'[user question]\n {user_question} \n\n'
-        user_prompt = question_prompt + f'[reason to generate the help]\n str{key_lst} \n\n' + capability_promp
-        # send to a LLM session to generate a smart help
-        smart_help = llm_session.try_stream_fallback_chat(sys_prompt, user_prompt)
-        final_help = smart_help
-    else:
-        dump_help_prompt = f'[reason to generate the help]\n {dump_help} \n\n'
-        final_help = llm_session.try_stream_fallback_chat(sys_prompt, dump_help_prompt)
-
-    return final_help
+    def __init__(self, help_msg: dict, llm_session: LLMSession):
+        """Initialize with cached prompts."""
+        self.help_msg = help_msg
+        self.llm_session = llm_session
+        self._version = 'f0f1' if COPILOT_VERSION != 'f2' else 'f2'
+        
+        # Load prompt once during initialization
+        self.sys_prompt = get_prompt_from(
+            os.path.join(PROMPT_DIR, 'gen_smart_help_prompt.txt')
+        )
+        
+        # Prepare capability string based on version
+        if self._version == 'f2':
+            self.capability_str = (help_msg['feature'] + 
+                                  help_msg['sku'] + 
+                                  help_msg['workload'])
+        else:
+            self.capability_str = help_msg['feature']
+    
+    def generate(self, user_question: str, key_lst: list, 
+                 smart_help: bool = True) -> str:
+        """Generate smart help message."""
+        # Build dump_help from keys
+        dump_help = '\n\n'.join(
+            self.help_msg[key] for key in key_lst 
+            if key in self.help_msg
+        )
+        
+        if smart_help:
+            capability_prompt = f'[features]\n {self.capability_str} \n\n'
+            question_prompt = f'[user question]\n {user_question} \n\n'
+            user_prompt = (question_prompt + 
+                          f'[reason to generate the help]\n {key_lst} \n\n' + 
+                          capability_prompt)
+            return self.llm_session.try_stream_fallback_chat(
+                self.sys_prompt, user_prompt
+            )
+        else:
+            dump_help_prompt = f'[reason to generate the help]\n {dump_help} \n\n'
+            return self.llm_session.try_stream_fallback_chat(
+                self.sys_prompt, dump_help_prompt
+            )
