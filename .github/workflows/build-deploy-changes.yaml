@@ -92,6 +92,8 @@ jobs:
             echo "${{ secrets.ICM_PACKAGE_B64 }}" | base64 -d > python-icm.zip
             unzip -o python-icm.zip -d $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
             ls -l $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
+            # XXX 
+            cat $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm/README.md
           fi
 
       - name: Decode and unzip config file
