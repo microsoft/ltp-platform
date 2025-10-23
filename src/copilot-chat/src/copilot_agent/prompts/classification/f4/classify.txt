@@ -1,0 +1,99 @@
+Your task is to contextualize the user's question, and understand the user's intention from the question they asked, and assign a object and a concern as an indicator of the type of the question.
+
+Please output  in the following format:
+```json
+{
+  "new_question": "",
+  "lv0_object": "",
+  "lv1_concern": ""
+}
+```
+
+# method for contextualize the user's question
+
+you need to first classify the relationship between this_question and last_question as either a 'direct follow-up' or a 'new query'. A 'direct follow-up' is a question that uses conversational shortcuts or comparative phrases (e.g., "how about X?", "what about X?", "why?") to build directly upon the previous question's intent. If it's classified as a 'direct follow-up', you should complement the missing language concepts (intent, specific entities, and attributes) from the last question. If it's a 'new query' (meaning it introduces a new topic, metric, or entity, even if it shares a common attribute like a week number), you must NOT contextualize it and should return the question as is.
+
+# method for identifying the object
+
+Four question objects are supported:
+
+8. [training_platform]: it means the user wants to ask for guidance of how to use a model training platform, specifically the Lucia Training Platform, or ask for detailed information about an already launched training job, usually such questions can be answered by searching or querying the detailed logs, debugging informations provided by the training platform.
+3. [general]: it means user's can be answered fully using public information or general knowledge, without the need to ask for more context input from user.
+9. [persona]: it means the user wants to understand the persona of you, what features you can provide, what capabilities you can serve.
+4. [others]: it means user's prompt is not [training_platform] nor [general] nor [persona]. Note that the above types have specific definition. If user question is not belong to [training_platform] nor [general] nor [persona], it should be [others].
+
+below knowldge describes some key concepts commonly asked in the training_platform object questions:
+knowledge #1:
+single node trainig, distributed training, how to config a job, how to submit an issue related to the training platform, etc.
+
+knowledge #2:
+the user manual of LTP (Lucia Training Platform) provides a detailed usage guidance to assist user better utilize the resource to perform single or distributed training task per their request.
+
+knowledge #3: the whole user manual consists several sections of documentation, with each focusing on explaining the detail instructions, configurations, information. Available sections are:
+- [Quick Start](./UserManual/quickstart.md): A guide to help you quickly get started with the platform and submit a "hello world" job.
+- [How to Use Docker Image](./UserManual/docker-images.md): Instructions on using Docker images in your jobs.
+- [How to Manage Data and Code](./UserManual/use-data.md): Guidance on managing data and code within your jobs.
+- [How to Write Job Configuration](./UserManual/job-config.md): Detailed instructions for configuring jobs and distributed jobs.
+- [Job Priorities](./UserManual/job-priorities.md): Explanation of job priority types and how to submit jobs with specific priorities.
+- [VC Allocation](./UserManual/vc-allocation.md): Guidelines for managing VC allocation requests and assignment change notifications.
+- [Notification and Monitoring](./UserManual/notification.md): Information on the platform's notification and monitoring features.
+- [Troubleshooting](./UserManual/troubleshooting.md): A troubleshooting guide for common issues and how to get platform support.
+- [Email Templates, UserGroup Admin](./UserManual/email-templates/email-templates-user.md): Templates for UserGroup Admins to request VC allocations, production priority job submissions and integrating private Azure storage blob.
+- [Email Templates, Lucia Training Platform Admin](./UserManual/email-templates/email-templates-ltp.md): Templates for Lucia Training Platform Admins to acknowledge, complete, and notify about VC allocation and assignment changes.
+
+
+knowledge #4: there is a Lucia Training Platform Dashboard which includes data to let platform administrators and platform users to get detailed information about the performance, availability, failures, and resource utilization:
+- Cluster Capacity Status
+- Availability Status
+- Node Health and Failures
+- Job Interruption Analysis
+- Node Recycle Times
+- Mean Time Between Failures (MTBF)
+- Daily Node Runtime Failures
+- Failure Categorization and Reasons
+- Daily Node Failure Occurrences
+
+# method for identifying the concern:
+
+Seven concerns are supported:
+
+1. [cluster_job_metrics]: it means the key concern of the user is to understand the current status overview of an object. Usually it requires perform root cause analysis to answer user's concerns.
+2. [job_metadata]: it means the key concern of the user is to understand the root cause of an issue or problem about an object. Usually it requires perform root cause analysis to answer user's concerns.
+3. [user_manual]: it means the key concern of the user is to understand a general concept on what is Lucia Training Platform, or LTP, or training platform, usually the question embedded with a intention to understand how to use the platform.
+4. [dashboard]: it means the key concern of the user is to get detailed information about the performance, availability, failures, and resource utilization of a model training platform.
+5. [auto_rejection]: it means the key concern of the user is not supported by the design of the trainig platform, the examples below provides some unsupported feature for you to compare with.
+6. [human_intervention]: it means the key concern of the user is: not straightforward and may involve multiple potential causes, requiring human judgment to diagnose and resolve, or highlights failures or malfunctions in systems, resources, or infrastructure that cannot be automatically diagnose (e.g, ssh connection issue, GPU failure, node failure, job failure, portal crash, etc.), or explicitly or implicitly requests human assistance to investigate, diagnose, or fix the problem.
+0. [others]: it means the key concern of the user is too general to abstrct.
+
+below knowldge describes some key concepts commonly asked in the cluster_job_metrics concern questions:
+knowledge #1: metrics backend is Prometheus REST API server
+knowledge #2: metrics could be cluster metrics, job metrics, filtered by specific virtual cluster (VC) or user, etc.
+
+below knowldge describes some key concepts commonly asked in the user_manual concern questions:
+knowledge #1: the user manual of LTP (Lucia Training Platform) provides a detailed usage guidance to assist user better utilize the resource to perform single or distributed training task per their request.
+knowledge #2: the whole user manual consists several sections of documentation, with each focusing on explaining the detail instructions, configurations, information. Available sections are:
+- [Quick Start](./UserManual/quickstart.md): A guide to help you quickly get started with the platform and submit a "hello world" job.
+- [How to Use Docker Image](./UserManual/docker-images.md): Instructions on using Docker images in your jobs.
+- [How to Manage Data and Code](./UserManual/use-data.md): Guidance on managing data and code within your jobs.
+- [How to Write Job Configuration](./UserManual/job-config.md): Detailed instructions for configuring jobs and distributed jobs.
+- [Job Priorities](./UserManual/job-priorities.md): Explanation of job priority types and how to submit jobs with specific priorities.
+- [VC Allocation](./UserManual/vc-allocation.md): Guidelines for managing VC allocation requests and assignment change notifications.
+- [Notification and Monitoring](./UserManual/notification.md): Information on the platform's notification and monitoring features.
+- [Troubleshooting](./UserManual/troubleshooting.md): A troubleshooting guide for common issues and how to get platform support.
+- [Email Templates, UserGroup Admin](./UserManual/email-templates/email-templates-user.md): Templates for UserGroup Admins to request VC allocations, production priority job submissions and integrating private Azure storage blob.
+- [Email Templates, Lucia Training Platform Admin](./UserManual/email-templates/email-templates-ltp.md): Templates for Lucia Training Platform Admins to acknowledge, complete, and notify about VC allocation and assignment changes.
+knowledge #3: [How to Write Job Configuration] section details below topics: Parameters and Secrets, Distributed Settings, Environment Variables for Distributed Jobs, Job Exit Specifications
+
+below knowledge describes what dashboard data provides:
+knowledge #4: there is a Lucia Training Platform Dashboard which includes data to let platform administrators and platform users to get detailed information about the performance, availability, failures, and resource utilization:
+- Cluster Capacity Status
+- Availability Status
+- Node Health and Failures
+- Job Interruption Analysis
+- Node Recycle Times
+- Mean Time Between Failures (MTBF)
+- Daily Node Runtime Failures
+- Failure Categorization and Reasons
+- Daily Node Failure Occurrences
+
+
