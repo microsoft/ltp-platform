@@ -47,7 +47,7 @@ class CoPilotTurn:
         set_thread_llm_session(self.llm_session)
 
         # get from message list
-        push_frontend_event('<span class="text-gray-400 italic">🤔 Copilot is understanding your request...</span><br/>', replace=False)
+
         this_inquiry = messages_list[-1]['content']
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
 
@@ -58,19 +58,26 @@ class CoPilotTurn:
             answer, debug = self.processor.query_all_in_one(question, self.help_msg, skip_summary)
             debug = {}
             return {'category': question_type, 'answer': answer, 'debug': debug}
+        
+        if self._version == 'f4':
+            push_frontend_event('<span class="text-gray-400 italic">🧠 Copilot is understanding your request...</span><br/>', replace=False)
+            question_type = self.classifier.parse_question(this_inquiry, last_inquiry)
+            question = question_type.get('new_question', this_inquiry)
+            obj = question_type.get('lv0_object', '3. [general]')
+            con = question_type.get('lv1_concern', '0. [others]')
+        else:
+            # get contextualized question from this and last user inquiry
+            push_frontend_event('<span class="text-gray-400 italic">🤔 Copilot is understanding your request...</span><br/>', replace=False)
+            question = self.contextualizer.contextualize(this_inquiry, last_inquiry)
+            # classify the question to determine the solution source and method
+            push_frontend_event('<span class="text-gray-400 italic">🔍 Copilot is finding the right the data source...</span><br/>', replace=False)
+            question_type = self.classifier.classify_question(question)
+            obj, con = question_type.get('lv0_object', '3. [general]'), question_type.get('lv1_concern', '0. [others]')
 
-        # get contextualized question from this and last user inquiry
-        question = self.contextualizer.contextualize(this_inquiry, last_inquiry)
-
-        # classify the question to determine the solution source and method
-        push_frontend_event('<span class="text-gray-400 italic">🔍 Copilot is finding the right the data source...</span><br/>', replace=False)
-        question_type = self.classifier.classify_question(question)
-        obj, con = question_type.get('lv0_object', '3. [general]'), question_type.get('lv1_concern', '0. [others]')
-
-        # verion f3, resolves objective 8 (Lucia Training Platform)
+        # verion f3, f4, resolves objective 8 (Lucia Training Platform)
         push_frontend_event('<span class="text-gray-400 italic">⏳ Copilot is processing your inquiry...</span><br/>', replace=False)
         self.smart_help.llm_session = self.llm_session  # ensure processor uses the current llm_session
-        if self._version == 'f3':
+        if self._version in ['f3', 'f4']:
             if obj.count('8') > 0:
                 answer, debug = self.query_ltp(question, con, skip_summary)
             elif obj.count('3') > 0:
@@ -141,7 +148,7 @@ class CoPilotTurn:
 
     def load_help_message(self) -> dict:
         """Load the help message based on the version."""
-        help_doc_path = os.path.join(PROMPT_DIR, 'help', f'infrawise_help_{self._version}.json')
+        help_doc_path = os.path.join(PROMPT_DIR, 'help', f'infrawise_help.json')
         if not os.path.exists(help_doc_path):
             logger.error(f'Help doc not found: {help_doc_path}')
             raise FileNotFoundError(f'Help doc not found: {help_doc_path}')
@@ -152,7 +159,7 @@ class CoPilotTurn:
 
     def _initialize_version(self) -> str:
         """Determine and set the version."""
-        allowed_versions = {'f2', 'f3', 'f0f1'}
+        allowed_versions = {'f2', 'f3', 'f0f1', 'f4'}
         version = COPILOT_VERSION if COPILOT_VERSION in allowed_versions else 'f3'
         logger.info(f'CoPilot - ver:{version}')
         return version

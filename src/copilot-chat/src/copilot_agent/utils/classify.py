@@ -8,7 +8,7 @@ import os
 from ..config import PROMPT_DIR
 
 from ..utils.logger import logger
-from ..utils.utils import get_prompt_from
+from ..utils.utils import get_prompt_from, extract_json_dict
 
 class QuestionClassifier:
     def __init__(self, version, model):
@@ -17,6 +17,9 @@ class QuestionClassifier:
         if self.version == 'f3':
             self.lv0_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv0.txt'))
             self.lv1_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv1.txt'))
+        elif self.version == 'f4':
+            self.lv0_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f4/classify.txt'))
+            self.lv1_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f4/examples.txt'))
         else:
             self.lv0_system_prompt = None
             self.lv1_system_prompt = None
@@ -49,3 +52,16 @@ class QuestionClassifier:
         else:
             resp = '0'  # default to 0
         return resp
+
+    def parse_question(self, this_inquiry: str, last_inquiry: str) -> dict:
+        """Classify the question and return a dictionary with the results."""
+        question_struct = {'new_question': '', 'lv0_object': None, 'lv1_concern': None}
+        resp = self.model.chat(self.lv0_system_prompt + self.lv1_system_prompt, f'this_inquiry: {this_inquiry}, last_inquiry: {last_inquiry}')
+        resp_dict = extract_json_dict(resp, nested=False)
+        if resp_dict:
+            if isinstance(resp_dict, dict):
+                question_struct['new_question'] = resp_dict.get('new_question', '')
+                question_struct['lv0_object'] = resp_dict.get('lv0_object', None)
+                question_struct['lv1_concern'] = resp_dict.get('lv1_concern', None)
+        return question_struct
+    
