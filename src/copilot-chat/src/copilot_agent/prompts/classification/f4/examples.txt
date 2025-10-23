@@ -1,0 +1,582 @@
+# Following are some examples
+
+## set a
+
+[Example a.1]
+this_question: how about week 27?
+last_question: what is the failure node count for week 28
+thinking: "how about week 27?" would be classified as a direct follow-up. It's a comparative phrase ("how about") and the only new entity is "week 27." The model would then infer the intent and attributes from the last question ("what is the failure node count for...") and correctly build the new question.
+output:
+```json
+{
+  "new_question": "what is the failure node count for week 27?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example a.2]
+this_question: what can you do?
+last_question: what is the failure node count for week 28
+output:
+```json
+{
+  "new_question": "what can you do?",
+  "lv0_object": "9",
+  "lv1_concern": "0"
+}
+```
+
+[Example a.3]
+this_question: What is the average job duration for hardware failures in week 30?
+last_question: What is the percentage of "Available VMs (Empty)" in the LON64PrdGPC01 cluster in week 30?
+thinking: "What is the average job duration for hardware failures in week 30?" would be classified as a new query. While it shares "week 30" with the last question, its core intent (average job duration) and main entity (hardware failures) are completely different from the last question's intent (percentage of available VMs) and entity (LON64PrdGPC01 cluster). The new logic would correctly decide not to apply any contextualization.
+output:
+```json
+{
+  "new_question": "What is the average job duration for hardware failures in week 30?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+## set b
+
+[Example b.1]
+this_question
+Is distributed training supported?
+output:
+```json
+{
+  "new_question": "Is distributed training supported?",
+  "lv0_object": "8",
+  "lv1_concern": "3"
+}
+```
+
+[Example b.3]
+this_question
+what is the weather
+output:
+```json
+{
+  "new_question": "what is the weather",
+  "lv0_object": "4",
+  "lv1_concern": "0"
+}
+```
+
+[Example b.7]
+this_question
+What is Chrismax
+output:
+```json
+{
+  "new_question": "What is Chrismax",
+  "lv0_object": "3",
+  "lv1_concern": "0"
+}
+```
+
+[Example b.8]
+this_question
+Hi!
+output:
+```json
+{
+  "new_question": "Hi!",
+  "lv0_object": "3",
+  "lv1_concern": "0"
+}
+```
+
+[Example b.9]
+this_question
+What can you do?
+output:
+```json
+{
+  "new_question": "What can you do?",
+  "lv0_object": "9",
+  "lv1_concern": "0"
+}
+```
+
+[Example b.10]
+this_question
+What is the average availability ratio for the cluster CYS13PrdGPC02 in Week 27?
+output:
+```json
+{
+  "new_question": "What is the average availability ratio for the cluster CYS13PrdGPC02 in Week 27?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.11]
+this_question
+Which cluster had the highest percentage of allocated VMs in Week 22?
+output:
+```json
+{
+  "new_question": "Which cluster had the highest percentage of allocated VMs in Week 22?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.12]
+this_question
+What was the most common reason for node failures?
+output:
+```json
+{
+  "new_question": "What was the most common reason for node failures?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.13]
+this_question
+What is the Mean Time Between Failures (MTBF) for the cluster CYS13PrdGPC02 in Week 27?
+output:
+```json
+{
+  "new_question": "What is the Mean Time Between Failures (MTBF) for the cluster CYS13PrdGPC02 in Week 27?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.14]
+this_question
+What is the average reaction time for hardware failures in Week 27?
+output:
+```json
+{
+  "new_question": "What is the average reaction time for hardware failures in Week 27?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.15]
+this_question
+How many job interruptions occurred due to hardware failures, and what was the average duration of these interruptions?
+output:
+```json
+{
+  "new_question": "How many job interruptions occurred due to hardware failures, and what was the average duration of these interruptions?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.16]
+this_question
+Which cluster had the highest percentage of unallocatable VMs in Week 27?
+output:
+```json
+{
+  "new_question": "Which cluster had the highest percentage of unallocatable VMs in Week 27?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.17]
+this_question
+What was the total number of hardware-related node failures in Week 27 across all endpoints?
+output:
+```json
+{
+  "new_question": "What was the total number of hardware-related node failures in Week 27 across all endpoints?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.18]
+this_question
+What was the node recycle time for cordon nodes in the CYS13PrdGPC02 cluster in Week 25?
+output:
+```json
+{
+  "new_question": "What was the node recycle time for cordon nodes in the CYS13PrdGPC02 cluster in Week 25?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.19]
+this_question
+What was the average availability ratio for the cluster CYS13PrdGPC02 in Week 27?
+output:
+```json
+{
+  "new_question": "What was the average availability ratio for the cluster CYS13PrdGPC02 in Week 27?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.20]
+this_question
+How many deallocated nodes were reported for the cluster SJC24PrdGPC03?
+output:
+```json
+{
+  "new_question": "How many deallocated nodes were reported for the cluster SJC24PrdGPC03?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example b.21]
+this_question
+introduce yourself
+output:
+```json
+{
+  "new_question": "introduce yourself",
+  "lv0_object": "9",
+  "lv1_concern": "0"
+}
+```
+
+[Example b.22]
+this_question
+There is no mechanism to prevent Virtual Cluster (VC) resource abuse, such as requesting an excessive number of GPUs.
+output:
+```json
+{
+  "new_question": "There is no mechanism to prevent Virtual Cluster (VC) resource abuse, such as requesting an excessive number of GPUs.",
+  "lv0_object": "8",
+  "lv1_concern": "5"
+}
+```
+
+[Example b.23]
+this_question
+Users may be duplicating efforts by building Docker images that have already been created by others.
+output:
+```json
+{
+  "new_question": "Users may be duplicating efforts by building Docker images that have already been created by others.",
+  "lv0_object": "8",
+  "lv1_concern": "5"
+}
+```
+
+[Example b.24]
+this_question
+I have been trying to get 4 nodes and successfully been allocated. However, it gets stuck three nodes are running and one keeps waiting -- blocking the whole process. Can you please take a look at it?
+output:
+```json
+{
+  "new_question": "I have been trying to get 4 nodes and successfully been allocated. However, it gets stuck three nodes are running and one keeps waiting -- blocking the whole process. Can you please take a look at it?",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.25]
+this_question
+seems that we meet some network issue today, some nodes can connect to archive.ubuntu.com but some cannot, could you help to check? Err:12 jammy InRelease  Could not connect to archive.ubuntu.com:80 (185.125.190.81), connection timed out Could not connect to archive.ubuntu.com:80 (91.189.91.82), connection timed out Could not connect to archive.ubuntu.com:80 (185.125.190.83), connection timed out Could not connect to archive.ubuntu.com:80 (185.125.190.82), connection timed out Could not connect to archive.ubuntu.com:80 (91.189.91.83), connection timed out
+output:
+```json
+{
+  "new_question": "seems that we meet some network issue today, some nodes can connect to archive.ubuntu.com but some cannot, could you help to check? Err:12 jammy InRelease  Could not connect to archive.ubuntu.com:80 (185.125.190.81), connection timed out Could not connect to archive.ubuntu.com:80 (91.189.91.82), connection timed out Could not connect to archive.ubuntu.com:80 (185.125.190.83), connection timed out Could not connect to archive.ubuntu.com:80 (185.125.190.82), connection timed out Could not connect to archive.ubuntu.com:80 (91.189.91.83), connection timed out",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.26]
+this_question
+We meet this issue, seems the portal is crashed.
+output:
+```json
+{
+  "new_question": "We meet this issue, seems the portal is crashed.",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.27]
+this_question
+We have a 16 node job failed and we have try to resume several times, each time failed seems because of communication, could you help to find if there are some bad nodes in it? These are job links:
+output:
+```json
+{
+  "new_question": "We have a 16 node job failed and we have try to resume several times, each time failed seems because of communication, could you help to find if there are some bad nodes in it? These are job links:",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.28]
+this_question
+When I try to submit job this afternoon, the portal says Error
+output:
+```json
+{
+  "new_question": "When I try to submit job this afternoon, the portal says Error",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.29]
+this_question
+we have a 16-node job that seems to be hanging during startup ‚Äî the GPU utilization stays at 0. We've retried multiple times on the same 16 nodes, but the issue persists each time. Could you please help check if there might be any issues with these nodes? here is the job link
+output:
+```json
+{
+  "new_question": "we have a 16-node job that seems to be hanging during startup ‚Äî the GPU utilization stays at 0. We've retried multiple times on the same 16 nodes, but the issue persists each time. Could you please help check if there might be any issues with these nodes? here is the job link",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.30]
+this_question
+Thanks to the powerful Lucia platform, we have successfully started several 16-node experiments. However, when some experiments are stopped, it seems that the portal does not show that these nodes have been released. This may also cause the jobs submitted later to be waiting all the time. And is it possible to replace the 3 bad nodes in the cluster so that we can start an additional experiment or scale up the current experiment, which will speed up our experiment progress.
+output:
+```json
+{
+  "new_question": "Thanks to the powerful Lucia platform, we have successfully started several 16-node experiments. However, when some experiments are stopped, it seems that the portal does not show that these nodes have been released. This may also cause the jobs submitted later to be waiting all the time. And is it possible to replace the 3 bad nodes in the cluster so that we can start an additional experiment or scale up the current experiment, which will speed up our experiment progress.",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.31]
+this_question
+It seems that there are some potentially faulty nodes on the <code>rstar</code> VC. When we submit multi-node jobs, they may randomly land on these problematic nodes, causing job failures‚Äîeven though the codebase remains unchanged. Here are two job links that may help illustrate the issue: Would it be possible to detect these potentially bad nodes and report them for maintenance? Thanks for your help!
+output:
+```json
+{
+  "new_question": "It seems that there are some potentially faulty nodes on the <code>rstar</code> VC. When we submit multi-node jobs, they may randomly land on these problematic nodes, causing job failures‚Äîeven though the codebase remains unchanged. Here are two job links that may help illustrate the issue: Would it be possible to detect these potentially bad nodes and report them for maintenance? Thanks for your help!",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.32]
+this_question
+sigma-s-mi300 shows it has been fully used (100%, so no more jobs can be submitted), but just half of the GPUs and CPUs shown been occupied. See the attached screenshot.
+output:
+```json
+{
+  "new_question": "sigma-s-mi300 shows it has been fully used (100%, so no more jobs can be submitted), but just half of the GPUs and CPUs shown been occupied. See the attached screenshot.",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.33]
+this_question
+This job encountered "No CUDA GPUs are available".
+output:
+```json
+{
+  "new_question": "This job encountered "No CUDA GPUs are available".",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+[Example b.34]
+this_question
+As far as we know, there are three ways for us to communicate with blob storage: Using storage configs for read and write a public blob container. Using blobfuse2 to manually mount our private blob containers for rw. Using azcopy to pre-download necessary files and post-upload results to some specific blob containers. When we are training small models like less than 2B model, the problem may not so obvious and may not cause timeout. But recently, we are trying 7B and 10B models, whose ckpt will be 110G+ (together with the sliced states of each GPU), we may need to continually start with a previously trained ckpt and save the updated ckpts periodically. This demand may require not slow IO speed with blob. We try to save a ckpt after the second step in a training experiment. The current results are: Saving 7B model with method 1 will be timeout:  Saving 7B model with method 2 is okay, Method 3 require too much labour for saving ckpts periodically. what is the Best Practice of Using Blob Storage?"
+output:
+```json
+{
+  "new_question": "As far as we know, there are three ways for us to communicate with blob storage: Using storage configs for read and write a public blob container. Using blobfuse2 to manually mount our private blob containers for rw. Using azcopy to pre-download necessary files and post-upload results to some specific blob containers. When we are training small models like less than 2B model, the problem may not so obvious and may not cause timeout. But recently, we are trying 7B and 10B models, whose ckpt will be 110G+ (together with the sliced states of each GPU), we may need to continually start with a previously trained ckpt and save the updated ckpts periodically. This demand may require not slow IO speed with blob. We try to save a ckpt after the second step in a training experiment. The current results are: Saving 7B model with method 1 will be timeout:  Saving 7B model with method 2 is okay, Method 3 require too much labour for saving ckpts periodically. what is the Best Practice of Using Blob Storage?"",
+  "lv0_object": "8",
+  "lv1_concern": "6"
+}
+```
+
+## set c
+
+[Example c.1]
+this_question:
+what is the idle gpu counts for virtual cluster (vc): mi300s?
+output:
+```json
+{
+  "new_question": "what is the idle gpu counts for virtual cluster (vc): mi300s?",
+  "lv0_object": "8",
+  "lv1_concern": "1"
+}
+```
+
+[Example c.2]
+this_question:
+query allocated gpu counts, end time is now, offset is 1 day
+output:
+```json
+{
+  "new_question": "query allocated gpu counts, end time is now, offset is 1 day",
+  "lv0_object": "8",
+  "lv1_concern": "1"
+}
+
+[Example c.3]
+this_question:
+query job meta data
+output:
+```json
+{
+  "new_question": "query job meta data",
+  "lv0_object": "8",
+  "lv1_concern": "2"
+}
+
+[Example c.4]
+this_question:
+how to submit a distributed training job?
+output:
+```json
+{
+  "new_question": "how to submit a distributed training job?",
+  "lv0_object": "8",
+  "lv1_concern": "3"
+}
+
+[Example c.5]
+this_question:
+write/create a new benchmark for ...
+output:
+```json
+{
+  "new_question": "write/create a new benchmark for ...",
+  "lv0_object": "4",
+  "lv1_concern": "0"
+}
+```
+
+[Example c.6]
+this_question:
+query a list of running or history jobs
+output:
+```json
+{
+  "new_question": "query a list of running or history jobs",
+  "lv0_object": "8",
+  "lv1_concern": "1"
+}
+```
+
+[Example c.31]
+this_question:
+I'm new to the platform, it would be nice if I could access the job via ssh for debugging, currently I can only modify the yaml file and rerun the job for debugging, which is a bit cumbersome.
+output:
+```json
+{
+  "new_question": "I'm new to platform, it would be nice if I could access the job via ssh for debugging, currently I can only modify the yaml file and rerun the job for debugging, which is a bit cumbersome.",
+  "lv0_object": "8",
+  "lv1_concern": "3"
+}
+```
+
+[Example c.32]
+this_question:
+Is there any jump machine that can be used to ssh to the MI300x machine?
+output:
+```json
+{
+  "new_question": "Is there any jump machine that can be used to ssh to the MI300x machine?",
+  "lv0_object": "8",
+  "lv1_concern": "3"
+}
+```
+
+[Example c.33]
+this_question:
+I conducted experiments using the same environment and dataset on both a single node and multiple nodes. From the experiments, I observed the following:</p>\n<ol>\n<li>The total training steps for a single node are 8,638, with an estimated training time of around 52 hours.<a href=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-1n-ts-speed-2\" rel=\"noreferrer noopener\" title=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-1n-ts-speed-2\" target=\"_blank\">Platform for AI</a></li><li>The total training steps for 4 nodes are 2,159, with an estimated training time of around 77 hours. <a href=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-4n-ts-2159\" rel=\"noreferrer noopener\" title=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-4n-ts-2159\" target=\"_blank\">Platform for AI</a></li></ol>\n<p>I am wondering whether there might be some communication overhead causing the training time on multiple nodes to be higher than on a single node. Thank you!
+output:
+```json
+{
+  "new_question": "I conducted experiments using the same environment and dataset on both a single node and multiple nodes. From the experiments, I observed the following:</p>\n<ol>\n<li>The total training steps for a single node are 8,638, with an estimated training time of around 52 hours.<a href=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-1n-ts-speed-2\" rel=\"noreferrer noopener\" title=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-1n-ts-speed-2\" target=\"_blank\">Platform for AI</a></li><li>The total training steps for 4 nodes are 2,159, with an estimated training time of around 77 hours. <a href=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-4n-ts-2159\" rel=\"noreferrer noopener\" title=\"https://we.openpai.org/job-detail.html?username=xinzhang3&amp;jobName=qwencoder25-7b-cl-powershell-4n-ts-2159\" target=\"_blank\">Platform for AI</a></li></ol>\n<p>I am wondering whether there might be some communication overhead causing the training time on multiple nodes to be higher than on a single node. Thank you!",
+  "lv0_object": "8",
+  "lv1_concern": "1"
+}
+```
+
+[Example c.34]
+this_question:
+Users may not be familiar with certain types of GPUs (especially AMD GPUs). Launching jobs on these GPUs often results in a higher failure rate due to lack of familiarity.
+output:
+```json
+{
+  "new_question": "Users may not be familiar with certain types of GPUs (especially AMD GPUs). Launching jobs on these GPUs often results in a higher failure rate due to lack of familiarity.",
+  "lv0_object": "8",
+  "lv1_concern": "3"
+}
+```
+
+[Example c.35]
+this_question:
+The behavior of different job priorities is not transparent to users, making it difficult for them to make informed decisions.
+output:
+```json
+{
+  "new_question": "The behavior of different job priorities is not transparent to users, making it difficult for them to make informed decisions.",
+  "lv0_object": "8",
+  "lv1_concern": "3"
+}
+```
+
+[Example c.36]
+this_question:
+Can I setup a SSH connection to the node?
+output:
+```json
+{
+  "new_question": "Can I setup a SSH connection to the node?",
+  "lv0_object": "8",
+  "lv1_concern": "3"
+}
+```
+
+[Example c.37]
+this_question:
+Users are unable to manage their expectations regarding job completion times due to a lack of visibility into job progress or estimated end times.
+output:
+```json
+{
+  "new_question": "Users are unable to manage their expectations regarding job completion times due to a lack of visibility into job progress or estimated end times.",
+  "lv0_object": "8",
+  "lv1_concern": "5"
+}
+```
+
+[Example c.38]
+this_question:
+Which job had the longest duration in week 30, and what was its exit reason?
+output:
+```json
+{
+  "new_question": "Which job had the longest duration in week 30, and what was its exit reason?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
+
+[Example c.39]
+this_question:
+What are the cluster names in pai-wcu endpoint?
+output:
+```json
+{
+  "new_question": "What are the cluster names in pai-wcu endpoint?",
+  "lv0_object": "8",
+  "lv1_concern": "4"
+}
+```
