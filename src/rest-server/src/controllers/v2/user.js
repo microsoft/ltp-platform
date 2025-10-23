@@ -139,6 +139,7 @@ const createUserIfUserNotExist = async (req, res, next) => {
       password: userData.oid,
       grouplist: grouplist,
       extension: {},
+      history_vclist: [],
     };
 
     const existUser = await userModel.getUser(username).catch(() => null);

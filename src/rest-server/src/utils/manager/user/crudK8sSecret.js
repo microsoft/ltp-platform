@@ -87,9 +87,9 @@ async function read(key) {
         extension: JSON.parse(
           Buffer.from(userData.data.extension, 'base64').toString(),
         ),
-        history_vclist: JSON.parse(
-          Buffer.from(userData.data.history_vclist, 'base64').toString(),
-        ),
+        history_vclist: userData.data.history_vclist
+          ? JSON.parse(Buffer.from(userData.data.history_vclist, 'base64').toString())
+          : [],
       });
 
       cache.set(key, userInstance);
@@ -157,9 +157,9 @@ async function readAll() {
             extension: JSON.parse(
               Buffer.from(item.data.extension, 'base64').toString(),
             ),
-            history_vclist: JSON.parse(
-              Buffer.from(item.data.history_vclist, 'base64').toString(),
-            ),
+            history_vclist: item.data.history_vclist
+              ? JSON.parse(Buffer.from(item.data.history_vclist, 'base64').toString())
+              : [],
           });
           allUserInstance.push(userInstance);
         } catch (error) {

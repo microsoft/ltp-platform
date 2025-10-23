@@ -27,6 +27,7 @@ const userSchema = Joi.object()
     grouplist: Joi.array().items(Joi.string()).required(),
     password: Joi.string().empty('').default(''),
     extension: Joi.object().pattern(/\w+/, Joi.required()).required(),
+    history_vclist: Joi.array().items(Joi.string()),
   })
   .required();
 
