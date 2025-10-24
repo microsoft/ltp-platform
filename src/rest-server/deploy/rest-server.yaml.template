@@ -180,6 +180,7 @@ spec:
 {% else %}
         - name: FORCE_ACR
           value: "false"
+{% endif %}
         ports:
         - name: rest-server
           containerPort: 8080
