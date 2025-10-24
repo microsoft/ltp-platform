@@ -48,11 +48,16 @@ class CoPilotService:
         """GET endpoint for health/status check."""
         return jsonify({"status": "running"})
 
-    def get_or_create_session(self, user_id, conv_id, llm_session):
-        """Retrieve or create a copilot_conversation for the given userId and convId."""
+    def get_or_create_session(self, user_id, conv_id):
+        """Retrieve or create a copilot_conversation for the given userId and convId, reusing its LLMSession.
+
+        A new LLMSession is created ONLY when the conversation is first seen; subsequent requests reuse
+        the existing session to avoid repeated client/session setup overhead. This helps reduce per-request
+        latency (~hundreds of ms) previously incurred by constructing new OpenAI/Azure clients.
+        """
         session_key = f"{user_id}_{conv_id}"
         if session_key not in self.sessions:
-            self.sessions[session_key] = CoPilotConversation(llm_session)
+            self.sessions[session_key] = CoPilotConversation(LLMSession())
         return self.sessions[session_key]
 
     def instance_operation(self):
@@ -62,8 +67,8 @@ class CoPilotService:
             data = request.get_json()
             user_id = data['data']['messageInfo']['userId']
             conv_id = data['data']['messageInfo']['convId']
-            llm_session = LLMSession()
-            copilot_conversation = self.get_or_create_session(user_id, conv_id, llm_session)
+            copilot_conversation = self.get_or_create_session(user_id, conv_id)
+            llm_session = copilot_conversation.llm_session
 
             
             in_parameters = copilot_conversation.build_in_parameters(data)
@@ -97,14 +102,10 @@ class CoPilotService:
             data = request.get_json()
             user_id = data['data']['messageInfo']['userId']
             conv_id = data['data']['messageInfo']['convId']
-            llm_session = LLMSession()  # Create a new LLM session
+            copilot_conversation = self.get_or_create_session(user_id, conv_id)
+            llm_session = copilot_conversation.llm_session
+            # Attach streaming callback to existing session (no new session creation)
             llm_session.set_instance_stream_callback(on_chunk)
-            copilot_conversation = self.get_or_create_session(user_id, conv_id, llm_session)  # Pass llm_session
-            
-            # CRITICAL: Update the llm_session in the conversation for subsequent requests
-            # The copilot_turn needs to use the NEW llm_session with the NEW callback
-            copilot_conversation.llm_session = llm_session
-            copilot_conversation.copilot_turn.llm_session = llm_session
         except KeyError as e:
             logger.error(f"Missing key in JSON body for stream_operation: {e}")
             return jsonify({"status": "error", "message": f"Missing key: {e}"}), 400
@@ -126,6 +127,11 @@ class CoPilotService:
                 logger.error(traceback.format_exc())
                 q.put(json.dumps({'error': str(e)}))
             finally:
+                # Clear streaming callback to avoid affecting subsequent non-stream requests
+                try:
+                    llm_session.clear_instance_stream_callback()
+                except Exception:
+                    logger.debug('Failed to clear instance stream callback')
                 # signal end of stream
                 q.put(None)
 
