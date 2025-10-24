@@ -156,6 +156,7 @@ if (launcherType === 'k8s') {
     jobRestrictionGitScriptName: process.env.JOB_RESTRICTION_GIT_SCRIPT_NAME || 'unset',
     clstoreHostPath: process.env.CLUSTER_LOCAL_STORAGE_HOST_PATH,
     clstoreJobPath: process.env.CLUSTER_LOCAL_STORAGE_JOB_PATH,
+    forceAcr: process.env.FORCE_ACR === 'true',
   };
 
   const { error, value } = k8sLauncherConfigSchema.validate(launcherConfig);
