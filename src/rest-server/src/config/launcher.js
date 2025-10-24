@@ -84,6 +84,7 @@ const k8sLauncherConfigSchema = Joi.object()
     jobRestrictionGitScriptName: Joi.string().required(),
     clstoreHostPath: Joi.string().empty(''),
     clstoreJobPath: Joi.string().empty(''),
+    forceAcr: Joi.boolean().required(),
   })
   .required();
 
