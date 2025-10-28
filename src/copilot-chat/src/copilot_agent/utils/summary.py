@@ -43,6 +43,8 @@ def gen_summary(
         if not skip_summary:
             logger.info('Bypass summary: False')
             # try stream chat, if fail, fall back to chat
+            if llm_session is None:
+                raise ValueError("llm_session is required when skip_summary is False")
             summary = llm_session.try_stream_fallback_chat(sys_prompt, user_prompt)
         else:
             logger.info('Bypass summary: True')
@@ -51,12 +53,17 @@ def gen_summary(
         logger.info('generating smart help')
         help_keys = ['corrupted_data']
         sys_prompt = help_msg[help_keys[0]] if help_keys[0] in help_msg else help_keys[0]
+        if llm_session is None:
+            raise ValueError("llm_session is required for smart help generation")
         summary = llm_session.try_stream_fallback_chat(sys_prompt, question)
     return summary
 
 
 def handle_bypass_summary(resp_total, resp_brief):
-    """Handle bypass summary logic."""
+    """Handle bypass summary logic.
+
+    Returns full data if under TOKEN_LIMIT else brief data.
+    """
     if len(str(resp_total)) < TOKEN_LIMIT:
         logger.info('Outputing full data')
         return resp_total
