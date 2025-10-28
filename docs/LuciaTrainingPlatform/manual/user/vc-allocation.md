@@ -8,7 +8,7 @@ UserGroup Admins can perform specific management requests related to the VC. The
 
 - The Admin should create a Security Group with email enabled on [idweb](<ph:idweb_url>), and mention the name of the Security Group in the *UserGroup* field while making a VC Allocation request. The Lucia Training Platform manages access based on UserGroups rather than individual user accounts.
 - Send a request email to Lucia Training Platform Admin.
-  - Please using the [Request for VC Allocation](email-templates/email-templates-user.md#request-for-vc-allocation) email template.
+  - Please use the [Request for VC Allocation](email-templates/email-templates-user.md#request-for-vc-allocation) email template.
   - Please include both contacts in the "To" field: 
     - Lucia Training Platform Admin Group ([<ph:email_addr_alert>](mailto:<ph:email_addr_alert>))
     - Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
