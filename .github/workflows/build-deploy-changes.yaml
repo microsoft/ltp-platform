@@ -23,6 +23,8 @@ jobs:
       image: ubuntu:latest
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
+    env:
+      DOCKER_BUILDKIT: "1"
     steps:
       - name: Install git
         run: |
