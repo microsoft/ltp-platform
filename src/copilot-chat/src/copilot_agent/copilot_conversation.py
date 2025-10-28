@@ -13,7 +13,6 @@ import threading
 from .utils.logger import logger
 from .utils.authentication import AuthenticationManager
 from .utils.kql_executor import KustoExecutor
-from .utils.push_frontend import push_frontend_event, push_frontend_meta
 
 from .config import AGENT_MINIMAL_ON, print_env_variables
 from .copilot_turn import CoPilotTurn
