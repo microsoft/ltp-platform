@@ -18,7 +18,7 @@ Lucia Training Platform supports three types of job priorities:
 
 To submit a job with a production or opportunity priority, add `jobPriorityClass: $PriorityValue` to the job configuration file. Accepted values are *prod*, *oppo*. Below is an example you can reference.
 
-```ymal
+```yaml
 extras:
   hivedScheduler:
     jobPriorityClass: $PriorityValue
