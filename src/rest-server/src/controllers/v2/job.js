@@ -26,6 +26,13 @@ const { Op } = require('sequelize');
 const { userProperty } = require('@pai/config/token');
 const userController = require('@pai/controllers/v2/user');
 
+const getUserHistoryVCs = async (username) => {
+  const jobs = await job.list(['virtualCluster'], { userName: username });
+  const vcs = Array.from(new Set(jobs.map((j) => j.virtualCluster)));
+  logger.info(`User ${username} has accessed historical virtual clusters: ${vcs}`);
+  return vcs;
+};
+
 const list = asyncHandler(async (req, res) => {
   // ?keyword=<keyword filter>&username=<username1>,<username2>&vc=<vc1>,<vc2>
   //    &state=<state1>,<state2>&offset=<offset>&limit=<limit>&withTotalCount=true
@@ -405,6 +412,7 @@ const getLogs = asyncHandler(async (req, res) => {
 
 // module exports
 module.exports = {
+  getUserHistoryVCs,
   list,
   get,
   update,

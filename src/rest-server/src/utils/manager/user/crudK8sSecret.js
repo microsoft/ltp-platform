@@ -20,6 +20,7 @@ const logger = require('@pai/config/logger');
 const groupModel = require('@pai/models/v2/group');
 const k8sModel = require('@pai/models/kubernetes/kubernetes');
 const { Mutex } = require('async-mutex');
+const jobController = require('@pai/controllers/v2/job');
 
 const USER_NAMESPACE = process.env.PAI_USER_NAMESPACE || 'pai-user-v2';
 
@@ -201,8 +202,12 @@ async function create(key, value) {
       grouplist: value.grouplist,
       email: value.email,
       extension: value.extension,
+      history_vclist: [],
     });
     await User.encryptUserPassword(userInstance);
+
+    // retrieve VC list from the history job list belonging to the user if exists
+    userInstance.history_vclist = await jobController.getUserHistoryVCs(userInstance.username);
 
     // retrieve VC from group list
     const vcSet = new Set();
@@ -217,6 +222,13 @@ async function create(key, value) {
     const vcResults = await Promise.all(vcPromises);
     vcResults.forEach(vcs => vcs.forEach(vc => vcSet.add(vc)));
 
+    // Merge vcResults into userInstance.history_vclist and remove duplicates
+    const mergedVCList = new Set([
+      ...userInstance.history_vclist,
+      ...Array.from(vcSet),
+    ]);
+    userInstance.history_vclist = Array.from(mergedVCList);
+
     const userData = {
       metadata: { name: hexKey },
       type: 'Opaque',
@@ -230,7 +242,7 @@ async function create(key, value) {
         extension: Buffer.from(JSON.stringify(userInstance.extension)).toString(
           'base64',
         ),
-        history_vclist: Buffer.from(JSON.stringify(Array.from(vcSet))).toString('base64'),
+        history_vclist: Buffer.from(JSON.stringify(userInstance.history_vclist)).toString('base64'),
       },
     };
     const logId = Math.floor(Math.random() * 100000);
@@ -278,6 +290,12 @@ async function update(key, value, updatePassword = false) {
     });
     if (updatePassword) {
       await User.encryptUserPassword(userInstance);
+    }
+
+    // if userInstance.history_vclist is empty, set it to the retrieved VC list
+    // retrieve VC list from the job list belonging to the user
+    if (!userInstance.history_vclist || userInstance.history_vclist.length === 0) {
+      userInstance.history_vclist = await jobController.getUserHistoryVCs(userInstance.username);
     }
 
     // retrieve VC from group list
