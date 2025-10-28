@@ -21,8 +21,8 @@ export default function ChatBox() {
   // Use local backend when running the dev server (npm start),
   // and use the relative path for production builds (npm run build).
   const REMOTE_SERVER_URL = process.env.NODE_ENV === 'development'
-    ? 'http://127.0.0.1:60000/copilot/api/operation/stream'
-    : '/copilot/api/operation/stream';
+    ? 'http://127.0.0.1:60000/copilot/api/stream'
+    : '/copilot/api/stream';
 
   const makeChatRequest = async (e: React.FormEvent) => {
     e.preventDefault();
