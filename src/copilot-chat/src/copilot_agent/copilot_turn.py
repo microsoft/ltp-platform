@@ -72,7 +72,12 @@ class CoPilotTurn:
         push_frontend_event('<span class="text-gray-400 italic">⏳ Copilot is processing your inquiry...</span><br/>', replace=False)
         self.smart_help.llm_session = self.llm_session  # ensure processor uses the current llm_session
         if self._version in ['f3', 'f4']:
-            if obj.count('8') > 0:
+            # If classification failed, treat as unsupported.
+            if obj is None or con is None:
+                help_keys = ['unsupported_question']
+                answer = self.smart_help.generate(question, help_keys, True)
+                debug = {}
+            elif obj.count('8') > 0:
                 answer, debug = self.query_ltp(question, con, skip_summary)
             elif obj.count('3') > 0:
                 answer = self.gen_answer_general(question)
@@ -80,12 +85,10 @@ class CoPilotTurn:
             elif obj.count('9') > 0:
                 help_keys = ['feature']
                 answer = self.smart_help.generate(question, help_keys, True)
-                
                 debug = {}
             else:
                 help_keys = ['unsupported_question']
                 answer = self.smart_help.generate(question, help_keys, True)
-
                 debug = {}
         else:
             # Placeholder for other version implementations
