@@ -56,7 +56,6 @@ class SimpleLogger:
         try:
             print(f"{Fore.GREEN}[INFO]{Style.RESET_ALL} {msg}", flush=True)
         except (BrokenPipeError, OSError):
-            # stdout/stderr closed (client disconnected); fallback to Python logging
             logging.getLogger().info(msg)
     def error(self, msg):
         try:
