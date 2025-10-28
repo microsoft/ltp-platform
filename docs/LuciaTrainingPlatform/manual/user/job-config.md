@@ -89,8 +89,8 @@ mpirun -np 32 -H taskrole-0:8,taskrole-1:8,taskrole-2:8,taskrole-3:8 --allow-run
 ### Distributed Job Examples
 
 Learn how to set up and run distributed jobs across multiple nodes. This section includes examples:
-1. [Distributed train with PyTorch](https://microsoftapc.sharepoint.com/:u:/t/LuciaTrainingPlatform/Ef85jIBRRFVMrLqfnBc0IbwBqrLPfs0ffbOdHye_lhLNiA?e=GyTl5I): This example demonstrates how to run a distributed training job with PyTorch with the torchrun and environment variables.
-2. [Distributed nccl test with mpirun](https://microsoftapc.sharepoint.com/:u:/t/LuciaTrainingPlatform/EaQWdk0-taREnBfw5pqVxVwByQtmVco8Cf5pjN_c0Uh64Q?e=LDkHJo): This example demonstrates how to run a distributed NCCL test with MPI.
+1. [Distributed train with PyTorch](<ph:sharepoint_uri_pytorch>): This example demonstrates how to run a distributed training job with PyTorch with the torchrun and environment variables.
+2. [Distributed nccl test with mpirun](<ph:sharepoint_uri_mpirun>): This example demonstrates how to run a distributed NCCL test with MPI.
 
 ## Job Exit Specifications
 

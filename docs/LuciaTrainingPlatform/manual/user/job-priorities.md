@@ -33,8 +33,8 @@ By default, users are allowed to submit jobs only with *default* and *oppo* prio
 To submit a job with *prod* priority, users must contact their UserGroup Admin. The UserGroup Admin must request permission from the Lucia Training Platform Admin. When sending the email, please adhere to the following practices:
 - Please use the [Request for Production Priority Job Submission Approval](email-templates/email-templates-user.md#request-for-production-priority-job-submission-approval) email template.
 - Please include both contacts in the "To" field: 
-  - Lucia Training Platform Admin Group ([ltp-admin-alert@microsoft.com](mailto:ltp-admin-alert@microsoft.com))
-  - Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+  - Lucia Training Platform Admin Group ([<ph:email_addr_alert>](mailto:<ph:email_addr_alert>))
+  - Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 - The request must specify the duration for which the user needs access to submit the *prod* job, and the access will automatically expire after the specified duration.
 
 The Lucia Training Platform Admin will provide a decision (approval or rejection) regarding the request. If approved, the UserGroup Admin is responsible for disseminating the decision to the relevant users. Users in the specified UserGroup will be permitted to submit production priority jobs after receiving the approval notification before expiration.

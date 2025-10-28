@@ -24,14 +24,14 @@ To access data from Azure Blob Storage, you can either:
 To onboard your private storage, follow these steps:
 
 - Assign the Storage Blob Data Contributor role to the platform's managed identities in your storage account. Refer to the detailed instructions in [Grant access to the storage account](https://learn.microsoft.com/en-us/entra/identity-platform/multi-service-web-app-access-storage?tabs=azure-portal%2Cprogramming-language-csharp#grant-access-to-the-storage-account). Make sure you assign the proper role to all below listed platform's managed identities:
-  - principal ID: `9a37a8cf-a478-4b1d-b8f9-eadbc248bec6`
-  - principal ID: `d909f402-f702-42cb-8887-2c0f85e4f17d`
-  - principal ID: `7405b64d-a4a7-4449-a2f6-8c6e24efbf7b`
+  - principal ID: `<ph:principal_id_store_0>`
+  - principal ID: `<ph:principal_id_store_1>`
+  - principal ID: `<ph:principal_id_store_2>`
 - Request your UserGroup Admin to contact the Lucia Training Platform Admin to integrate your storage into your UserGroup. 
   - Please use the [Request for Integrating Private Azure Storage Blob](email-templates/email-templates-user.md#request-for-integrating-private-azure-storage-blob) email template. 
   - Please include both contacts in the "To" field: 
-    - Lucia Training Platform Admin Group ([ltp-admin-alert@microsoft.com](mailto:ltp-admin-alert@microsoft.com))
-    - Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+    - Lucia Training Platform Admin Group ([<ph:email_addr_alert>](mailto:<ph:email_addr_alert>))
+    - Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **Note: Private data storage is accessible to all users within the same UserGroup. Other UserGroups will not have access.**
 

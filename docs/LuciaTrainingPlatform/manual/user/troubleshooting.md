@@ -4,8 +4,8 @@
 
 If you have any questions or issues while using the platform, please reach out to the platform support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel].
 
-- Join the **Lucia Training Platform User Feedback** team through the code: `zdvi2c9` by Teams App -> Teams -> New Items -> Join team -> Join a team with a code.
-- Submit your question or issue in the [**User Feedback** channel](https://teams.microsoft.com/l/channel/19%3AlrUjYbE4bhxd5hG34dJkRXEdSJF02WrcpEXayX58OdQ1%40thread.tacv2/User%20Feedback?groupId=656a4831-e31d-41fd-9ce0-6384a5156c74). The support team will respond to your inquiry as soon as possible.
+- Join the **Lucia Training Platform User Feedback** team through the code: `<ph:teams_joincode>` by Teams App -> Teams -> New Items -> Join team -> Join a team with a code.
+- Submit your question or issue in the [**User Feedback** channel](<ph:teams_url>). The support team will respond to your inquiry as soon as possible.
 
 
 ## Common Issues

@@ -11,9 +11,9 @@ Public images on Docker Hub can be pulled directly after the job is submitted.
 ### Private Docker Images
 
 To use private Docker images, you need to assign the `acrPull` permission to the platform's managed identities in your Azure Container Registry (ACR). Make sure you assign the proper role to all below listed platform's managed identities:
-- principal ID: `b956019c-3be9-47e5-ae4d-18bc2c599a0b`
-- principal ID: `0604b3f1-d040-4545-a9e0-2f4b4f8cabd3`
-- principal ID: `3b8d9c3b-6820-45a5-a346-94d13210a9ba`
+- principal ID: `<ph:principal_id_acr_0>`
+- principal ID: `<ph:principal_id_acr_1>`
+- principal ID: `<ph:principal_id_acr_2>`
 
 Refer to the detailed instructions in [Grant the identity permissions to access other Azure resources](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-tasks-authentication-managed-identity#3-grant-the-identity-permissions-to-access-other-azure-resources).
 

@@ -10,7 +10,7 @@
 
 **Subject:** Approved - Production Job Submission Request
 
-**From:** Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**From:** Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **To:** UserGroup Admin, Lucia Training Platform Admin
 
@@ -26,7 +26,7 @@ This is to inform you the completion of the Production Job Submission request yo
 
 **Duration:** [Duration before users lose the permission to submit production priority jobs. The default duration is 1 day.]
 
-If you have any questions or issues while using the Lucia Training Platform, please reach out to the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](https://teams.microsoft.com/l/channel/19%3AlrUjYbE4bhxd5hG34dJkRXEdSJF02WrcpEXayX58OdQ1%40thread.tacv2/User%20Feedback?groupId=656a4831-e31d-41fd-9ce0-6384a5156c74). If you are not a member of this channel, please refer to [Platform Issue Handling](https://eng.ms/docs/cloud-ai-platform/azure-core/azure-specialized/hpcai/azure-hpc/lucia-platform-team-documentation/luciatrainingplatform/usermanual/troubleshooting) for how to join.
+If you have any questions or issues while using the Lucia Training Platform, please reach out to the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](<ph:teams_url>). If you are not a member of this channel, please refer to [Platform Issue Handling](<ph:doc_release_root>/troubleshooting) for how to join.
 
 Best regards,
 
@@ -40,7 +40,7 @@ Lucia Training Platform Admin
 
 **Subject:** Rejected - Production Job Submission Request
 
-**From:** Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**From:** Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **To:** UserGroup Admin, Lucia Training Platform Admin
 
@@ -54,7 +54,7 @@ This is to inform you the completion of the Production Job Submission request yo
 
 **Details:** [Please clearly state the reason for rejection. Direct them to applicable LTP resources to facilitate their work.]
 
-If you have any questions or issues while using the Lucia Training Platform, please reach out to the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](https://teams.microsoft.com/l/channel/19%3AlrUjYbE4bhxd5hG34dJkRXEdSJF02WrcpEXayX58OdQ1%40thread.tacv2/User%20Feedback?groupId=656a4831-e31d-41fd-9ce0-6384a5156c74). If you are not a member of this channel, please refer to [Platform Issue Handling](https://eng.ms/docs/cloud-ai-platform/azure-core/azure-specialized/hpcai/azure-hpc/lucia-platform-team-documentation/luciatrainingplatform/usermanual/troubleshooting) for how to join.
+If you have any questions or issues while using the Lucia Training Platform, please reach out to the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](<ph:teams_url>). If you are not a member of this channel, please refer to [Platform Issue Handling](<ph:doc_release_root>/troubleshooting) for how to join.
 
 Best regards,
 
@@ -70,7 +70,7 @@ Lucia Training Platform Admin
 
 **Subject:** Acknowledgment of VC Allocation Request
 
-**From:** Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**From:** Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **To:** UserGroup, UserGroup Admin, Lucia Training Platform Admin
 
@@ -100,7 +100,7 @@ Lucia Training Platform Admin
 
 **Subject:** Completion of VC Allocation Request
 
-**From:** Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**From:** Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **To:** UserGroup, UserGroup Admin, Lucia Training Platform Admin
 
@@ -120,7 +120,7 @@ We are pleased to inform you that your VC allocation request has been successful
 
 **Effective Date and Time:** [Date and time when the change takes effect. (YYYY-MM-DD, HH:MM:SS, Timezone)]
 
-If you have any questions or issues while using the Lucia Training Platform, please reach out to the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](https://teams.microsoft.com/l/channel/19%3AlrUjYbE4bhxd5hG34dJkRXEdSJF02WrcpEXayX58OdQ1%40thread.tacv2/User%20Feedback?groupId=656a4831-e31d-41fd-9ce0-6384a5156c74). If you are not a member of this channel, please refer to [Platform Issue Handling](https://eng.ms/docs/cloud-ai-platform/azure-core/azure-specialized/hpcai/azure-hpc/lucia-platform-team-documentation/luciatrainingplatform/usermanual/troubleshooting) for how to join.
+If you have any questions or issues while using the Lucia Training Platform, please reach out to the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](<ph:teams_url>). If you are not a member of this channel, please refer to [Platform Issue Handling](<ph:doc_release_root>/troubleshooting) for how to join.
 
 Best regards,
 
@@ -136,7 +136,7 @@ Lucia Training Platform Admin
 
 **Subject:** Completion of Integrating Private Azure Storage Blob
 
-**From:** Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**From:** Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **To:** UserGroup, UserGroup Admin, Lucia Training Platform Admin
 
@@ -154,7 +154,7 @@ We are pleased to inform you that your Blob integration request has been success
 
 Please note that all users associated with the UserGroup related to the above VC can access the content of this Blob. Users not associated with this UserGroup do not have access.
 
-If you have any questions or issues while using the Lucia Training Platform, please reach out to the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](https://teams.microsoft.com/l/channel/19%3AlrUjYbE4bhxd5hG34dJkRXEdSJF02WrcpEXayX58OdQ1%40thread.tacv2/User%20Feedback?groupId=656a4831-e31d-41fd-9ce0-6384a5156c74). If you are not a member of this channel, please refer to [Platform Issue Handling](https://eng.ms/docs/cloud-ai-platform/azure-core/azure-specialized/hpcai/azure-hpc/lucia-platform-team-documentation/luciatrainingplatform/usermanual/troubleshooting) for how to join.
+If you have any questions or issues while using the Lucia Training Platform, please reach out to the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](<ph:teams_url>). If you are not a member of this channel, please refer to [Platform Issue Handling](<ph:doc_release_root>/troubleshooting) for how to join.
 
 Best regards,
 
@@ -170,7 +170,7 @@ Lucia Training Platform Admin
 
 **Subject:** Notification of VC Assignment Change
 
-**From:** Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**From:** Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **To:** UserGroup(s), UserGroup Admin(s), Lucia Training Platform Admin
 
@@ -192,7 +192,7 @@ This is to notify you of the following upcoming VC assignment change:
 
 **User Groups Added:** [UserGroup names being added]
 
-For any questions or concerns regarding this assignment, please email it to your UserGroup Admin and Lucia Training Platform Admin. If you have any questions or issues while using the Lucia Training Platform, please contact the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](https://teams.microsoft.com/l/channel/19%3AlrUjYbE4bhxd5hG34dJkRXEdSJF02WrcpEXayX58OdQ1%40thread.tacv2/User%20Feedback?groupId=656a4831-e31d-41fd-9ce0-6384a5156c74). If you are not a member of this channel, please refer to [Platform Issue Handling](https://eng.ms/docs/cloud-ai-platform/azure-core/azure-specialized/hpcai/azure-hpc/lucia-platform-team-documentation/luciatrainingplatform/usermanual/troubleshooting) for how to join.
+For any questions or concerns regarding this assignment, please email it to your UserGroup Admin and Lucia Training Platform Admin. If you have any questions or issues while using the Lucia Training Platform, please contact the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](<ph:teams_url>). If you are not a member of this channel, please refer to [Platform Issue Handling](<ph:doc_release_root>/troubleshooting) for how to join.
 
 Best regards,
 
@@ -206,7 +206,7 @@ Lucia Training Platform Admin
 
 **Subject:** Notification of VC Re-Assignment Change
 
-**From:** Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**From:** Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **To:** UserGroup(s), UserGroup Admin(s), Lucia Training Platform Admin
 
@@ -236,7 +236,7 @@ This is to notify you of the following upcoming VC re-assignment change:
 
 We appreciate your understanding and cooperation. These changes are aimed at enhancing overall system efficiency and providing a better experience for everyone.
 
-For any questions or concerns regarding this re-assignment, please email it to your UserGroup Admin and Lucia Training Platform Admin. If you have any questions or issues while using the Lucia Training Platform, please contact the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](https://teams.microsoft.com/l/channel/19%3AlrUjYbE4bhxd5hG34dJkRXEdSJF02WrcpEXayX58OdQ1%40thread.tacv2/User%20Feedback?groupId=656a4831-e31d-41fd-9ce0-6384a5156c74). If you are not a member of this channel, please refer to [Platform Issue Handling](https://eng.ms/docs/cloud-ai-platform/azure-core/azure-specialized/hpcai/azure-hpc/lucia-platform-team-documentation/luciatrainingplatform/usermanual/troubleshooting) for how to join.
+For any questions or concerns regarding this re-assignment, please email it to your UserGroup Admin and Lucia Training Platform Admin. If you have any questions or issues while using the Lucia Training Platform, please contact the support team via the [**Lucia Training Platform** Team Group - **User Feedback** Channel](<ph:teams_url>). If you are not a member of this channel, please refer to [Platform Issue Handling](<ph:doc_release_root>/troubleshooting) for how to join.
 
 Best regards,
 

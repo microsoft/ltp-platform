@@ -8,7 +8,7 @@
 
 **From:** UserGroup Admin
 
-**To:** Lucia Training Platform Admin Group ([ltp-admin-alert@microsoft.com](mailto:ltp-admin-alert@microsoft.com)); Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**To:** Lucia Training Platform Admin Group ([<ph:email_addr_alert>](mailto:<ph:email_addr_alert>)); Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **Body:**
 
@@ -44,7 +44,7 @@ Your Name
 
 **From:** UserGroup Admin
 
-**To:** Lucia Training Platform Admin Group ([ltp-admin-alert@microsoft.com](mailto:ltp-admin-alert@microsoft.com)); Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**To:** Lucia Training Platform Admin Group ([<ph:email_addr_alert>](mailto:<ph:email_addr_alert>)); Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **Body:**
 
@@ -76,7 +76,7 @@ Your Name
 
 **From:** UserGroup Admin
 
-**To:** Lucia Training Platform Admin Group ([ltp-admin-alert@microsoft.com](mailto:ltp-admin-alert@microsoft.com)); Lucia Training Platform Admin ([ltpadmin@microsoft.com](mailto:ltpadmin@microsoft.com))
+**To:** Lucia Training Platform Admin Group ([<ph:email_addr_alert>](mailto:<ph:email_addr_alert>)); Lucia Training Platform Admin ([<ph:email_addr_main>](mailto:<ph:email_addr_main>))
 
 **Body:**
 

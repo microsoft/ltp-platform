@@ -12,7 +12,7 @@ Proceed with the following steps only after you have been successfully added to 
 
 **Step 2**. Click `Submit Job` on the left pane, then click `Single Job` to reach the Job submission page.
 
-**Step 3**. Click the `Edit YAML` button at the bottom-right of the page, and paste the contents of [hello-world-job.yaml](https://microsoftapc.sharepoint.com/:u:/t/LuciaTrainingPlatform/ETgawzdHDz5MhWKbFwEafsABMKYwWBKcO9Gwb9xsGgBrZA?e=XcNctq).
+**Step 3**. Click the `Edit YAML` button at the bottom-right of the page, and paste the contents of [hello-world-job.yaml](<ph:sharepoint_uri_hello>).
 
 **Step 4**. Select your VC (Virtual Cluster), and set the job name.
 
@@ -28,7 +28,7 @@ Proceed with the following steps only after you have been successfully added to 
 
 ![Sample Image](./pictures/job-submission.png)
 
-**Here is a demo video for the job submission: [helloworld.gif](https://microsoftapc.sharepoint.com/:i:/t/LuciaTrainingPlatform/EZPy9TQ_rx9EhqcRW79VuhkBA5T7v8wwSTLXnL4L73vZLw?e=FXMWQ3)**
+**Here is a demo video for the job submission: [helloworld.gif](<ph:sharepoint_uri_demo>)**
 
 ![Sample Image](./pictures/demo.gif)
 
@@ -40,4 +40,4 @@ Click the `Stdout` and `Stderr` buttons on the job detail page to view the stdou
 
 ## Debug and SSH into a Running Job
 
-By default, SSH access to a running job is not allowed. If you have special requirements, please contact the Lucia Training Platform Admin via [**Lucia Training Platform** Team Group - **User Feedback** Channel](https://teams.microsoft.com/l/channel/19%3AlrUjYbE4bhxd5hG34dJkRXEdSJF02WrcpEXayX58OdQ1%40thread.tacv2/User%20Feedback?groupId=656a4831-e31d-41fd-9ce0-6384a5156c74). If you are not a member of this channel, please refer to [Platform Issue Handling](https://eng.ms/docs/cloud-ai-platform/azure-core/azure-specialized/hpcai/azure-hpc/lucia-platform-team-documentation/luciatrainingplatform/usermanual/troubleshooting) for how to join.
+By default, SSH access to a running job is not allowed. If you have special requirements, please contact the Lucia Training Platform Admin via [**Lucia Training Platform** Team Group - **User Feedback** Channel](<ph:teams_url>). If you are not a member of this channel, please refer to [Platform Issue Handling](<ph:doc_release_root>/troubleshooting) for how to join.
