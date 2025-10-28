@@ -40,7 +40,7 @@ class LTP:
         """
         self.llm_session = llm_session
         self.feature_skipped = True
-        self.ltp_documentation = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'ltp_documentation_20250624.txt'))
+        self.ltp_documentation = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'ltp_documentation.txt'))
 
     def query_metrics(self, question: str, help_msg, skip_summary: bool = False):
         """Query cluster or job metrics from Prometheus backend."""

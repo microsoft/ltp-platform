@@ -6,6 +6,10 @@
 import os
 import time
 import openai
+import requests
+import threading
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from ..utils.logger import logger
 
 class LLMSession:
