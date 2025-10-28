@@ -24,7 +24,7 @@ extras:
     jobPriorityClass: $PriorityValue
 ```
 
-To submis a job with a default priority, simply remove the `jobPriorityClass` from the job configuration file.
+To submit a job with a default priority, simply remove the `jobPriorityClass` from the job configuration file.
 
 ## Submitting a Production Priority Job 
 
