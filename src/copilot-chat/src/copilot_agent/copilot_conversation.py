@@ -199,10 +199,6 @@ class CoPilotConversation:
             'type': 'answer',
             'timestampUnit': 'ms',
         }
-        # try:
-        #     push_frontend_meta(response_message_info)
-        # except Exception:
-        #     logger.debug('Failed to push early meta event for streaming client')
         resp['messageInfo'] = response_message_info
         debug_info = resp.get('debug')
         msg_add_kusto_resp = debug_info.get('kusto_response', None) if debug_info is not None else None
