@@ -274,27 +274,3 @@ class LTP:
         else:
             # Return the object as is if it's already serializable
             return data
-
-    def query_all_in_one(self, question: str, help_msg, skip_summary: bool = False):
-        """Query all in one big session."""
-
-        sys_prompt0 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_doc.txt'))
-        sys_prompt1 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_metrics.txt'))
-        sys_prompt2 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_metadata.txt'))
-        sys_prompt3 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_dashboard.txt'))
-        sys_prompt4 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_rejection.txt'))
-        sys_prompt5 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_human.txt'))
-        sys_prompt = (
-            sys_prompt0 + '\n\n' +
-            sys_prompt1 + '\n\n' +
-            sys_prompt2 + '\n\n' +
-            sys_prompt3 + '\n\n' +
-            sys_prompt4 + '\n\n' +
-            sys_prompt5 + '\n\n the user manual of lucia training platform is: \n\n' +
-            self.ltp_documentation
-        )
-
-        summary = self.llm_session.chat(sys_prompt, question)
-
-        info_dict = {}
-        return summary, info_dict
