@@ -20,7 +20,7 @@ const logger = require('@pai/config/logger');
 const groupModel = require('@pai/models/v2/group');
 const k8sModel = require('@pai/models/kubernetes/kubernetes');
 const { Mutex } = require('async-mutex');
-const jobController = require('@pai/controllers/v2/job');
+const { job } = require('@pai/models/v2/job');
 
 const USER_NAMESPACE = process.env.PAI_USER_NAMESPACE || 'pai-user-v2';
 
@@ -207,7 +207,8 @@ async function create(key, value) {
     await User.encryptUserPassword(userInstance);
 
     // retrieve VC list from the history job list belonging to the user if exists
-    userInstance.history_vclist = await jobController.getUserHistoryVCs(userInstance.username);
+    const vcsFromJob = await job.listVCsFromJob(userInstance.username);
+    userInstance.history_vclist = vcsFromJob;
 
     // retrieve VC from group list
     const vcSet = new Set();
@@ -286,7 +287,8 @@ async function update(key, value, updatePassword = false) {
       grouplist: value.grouplist,
       email: value.email,
       extension: value.extension,
-      history_vclist: value.history_vclist || [],
+      //history_vclist: value.history_vclist || [],
+      history_vclist: [],
     });
     if (updatePassword) {
       await User.encryptUserPassword(userInstance);
@@ -295,7 +297,8 @@ async function update(key, value, updatePassword = false) {
     // if userInstance.history_vclist is empty, set it to the retrieved VC list
     // retrieve VC list from the job list belonging to the user
     if (!userInstance.history_vclist || userInstance.history_vclist.length === 0) {
-      userInstance.history_vclist = await jobController.getUserHistoryVCs(userInstance.username);
+      const vcsFromJob = await job.listVCsFromJob(userInstance.username);
+      userInstance.history_vclist = vcsFromJob;
     }
 
     // retrieve VC from group list
