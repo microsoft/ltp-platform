@@ -277,7 +277,6 @@ class LTP:
 
     def query_all_in_one(self, question: str, help_msg, skip_summary: bool = False):
         """Query all in one big session."""
-        ltp_doc = {'lucia training platform documentation': self.ltp_documentation}
 
         sys_prompt0 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_doc.txt'))
         sys_prompt1 = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'gen_result_summary_metrics.txt'))
