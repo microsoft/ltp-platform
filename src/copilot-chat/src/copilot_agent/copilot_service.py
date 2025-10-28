@@ -68,8 +68,6 @@ class CoPilotService:
             user_id = data['data']['messageInfo']['userId']
             conv_id = data['data']['messageInfo']['convId']
             copilot_conversation = self.get_or_create_session(user_id, conv_id)
-            llm_session = copilot_conversation.llm_session
-
             
             in_parameters = copilot_conversation.build_in_parameters(data)
             out_parameters = copilot_conversation.perform_operation(in_parameters)
