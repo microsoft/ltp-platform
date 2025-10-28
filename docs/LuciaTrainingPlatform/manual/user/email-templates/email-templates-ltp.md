@@ -148,7 +148,7 @@ We are pleased to inform you that your Blob integration request has been success
 
 **Resource Group Name:** [The resource group name where the Blob Storage Account was created from]
 
-**Blob URL:** [The full URL to the Blob, e,g. https://<storage_account_name>.blob.core.windows.net/<container_name>/<blob_name>]
+**Blob URL:** [The full URL to the Blob, e.g. https://<storage_account_name>.blob.core.windows.net/<container_name>/<blob_name>]
 
 **VC:** [VC name(s) targeted by this allocation action]
 
