@@ -322,7 +322,6 @@ const GroupedChatMessages: React.FC = () => {
          const overflowY = style.overflowY
          if ((overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') && cur.scrollHeight > cur.clientHeight) {
            cur.scrollTop = cur.scrollHeight
-           console.debug('[ChatHistory] scrollToBottom scrolled element', cur.tagName, { newScrollTop: cur.scrollTop })
            return
          }
        } catch (e) {
@@ -334,9 +333,8 @@ const GroupedChatMessages: React.FC = () => {
      // fallback to window/document
      try {
        window.scrollTo(0, document.documentElement.scrollHeight)
-       console.debug('[ChatHistory] scrollToBottom scrolled window', document.documentElement.scrollHeight)
      } catch (e) {
-       console.debug('[ChatHistory] scrollToBottom window scroll failed', e)
+       // ignore
      }
    }
 
@@ -344,39 +342,18 @@ const GroupedChatMessages: React.FC = () => {
      const el = scrollRef.current
      if (!el) return
 
-     // Debug: log scroll metrics on message updates
-     try {
-       const now = Date.now()
-       const scrollHeight = el.scrollHeight
-       const clientHeight = el.clientHeight
-       const scrollTop = el.scrollTop
-       const distanceFromBottom = scrollHeight - scrollTop - clientHeight
-       console.debug(`[ChatHistory] messages changed @${now} count=${groupedMessages.length}`, {
-         scrollHeight,
-         clientHeight,
-         scrollTop,
-         distanceFromBottom,
-         prevCount: prevCountRef.current,
-         lastText: lastTextRef.current?.slice(0, 200) || '(none)'
-       })
-     } catch (err) {
-       console.debug('[ChatHistory] debug log failed', err)
-     }
-
      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
      const shouldScroll =
        distanceFromBottom < NEAR_BOTTOM_THRESHOLD &&
        (prevCountRef.current != groupedMessages.length || lastTextRef.current != lastText)
 
      if (shouldScroll) {
-       console.debug('[ChatHistory] will auto-scroll (requestAnimationFrame)')
        // try smooth scrolling in next frame
        requestAnimationFrame(() => {
          try {
            scrollToBottom(el)
-           console.debug('[ChatHistory] did auto-scroll (requestAnimationFrame)')
          } catch (e) {
-           console.debug('[ChatHistory] auto-scroll (RAF) failed', e)
+           // ignore
          }
        })
 
@@ -384,9 +361,8 @@ const GroupedChatMessages: React.FC = () => {
        setTimeout(() => {
          try {
            scrollToBottom(el)
-           console.debug('[ChatHistory] did auto-scroll (timeout)')
          } catch (e) {
-           console.debug('[ChatHistory] auto-scroll (timeout) failed', e)
+           // ignore
          }
        }, 120)
      }
@@ -402,22 +378,18 @@ const GroupedChatMessages: React.FC = () => {
 
      const observer = new MutationObserver((mutations) => {
        try {
-         console.debug('[ChatHistory] MutationObserver triggered, mutations:', mutations.length)
          const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
-         console.debug('[ChatHistory] MutationObserver metrics', { scrollTop: el.scrollTop, scrollHeight: el.scrollHeight, clientHeight: el.clientHeight, distanceFromBottom })
          if (distanceFromBottom < NEAR_BOTTOM_THRESHOLD) {
-           console.debug('[ChatHistory] MutationObserver will auto-scroll (RAF)')
            requestAnimationFrame(() => {
              try {
                scrollToBottom(el)
-               console.debug('[ChatHistory] MutationObserver did auto-scroll')
              } catch (e) {
-               console.debug('[ChatHistory] MutationObserver auto-scroll failed', e)
+               // ignore
              }
            })
          }
        } catch (e) {
-         console.debug('[ChatHistory] MutationObserver callback error', e)
+         // ignore
        }
      })
 
