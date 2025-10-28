@@ -34,7 +34,7 @@ class CoPilotService:
         self.app = Flask(__name__)
         self.app.add_url_rule('/copilot/api/status', view_func=self.status, methods=['GET'])
         self.app.add_url_rule('/copilot/api/operation', view_func=self.instance_operation, methods=['POST'])
-        self.app.add_url_rule('/copilot/api/operation/stream', view_func=self.stream_operation, methods=['POST'])
+        self.app.add_url_rule('/copilot/api/stream', view_func=self.stream_operation, methods=['POST'])
 
         # If running in local agent mode, enable CORS to allow local testing from dev frontends.
         if AGENT_MODE_LOCAL:
@@ -89,7 +89,7 @@ class CoPilotService:
         It sets a module-level callback in the summary module so streaming chunks are
         forwarded to the HTTP response. This avoids changing many internal call chains.
         """
-        logger.info("Received request at /copilot/api/operation/stream")
+        logger.info("Received request at /copilot/api/stream")
 
         # Create queue BEFORE the callback function
         q = queue.Queue()
