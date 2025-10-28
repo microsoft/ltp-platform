@@ -61,7 +61,7 @@ taskRoles:
 
 ## Environment Variables for Distributed Jobs
 
-The Lucia Training Platform predefines several environment variables to mange distributed jobs, such as how to connect to the master node, the number of worker nodes, and the worker index. Use these variables in distributed job configuration.
+The Lucia Training Platform predefines several environment variables to manage distributed jobs, such as how to connect to the master node, the number of worker nodes, and the worker index. Use these variables in distributed job configuration.
 
 | **Category**          | **Environment Variable Name**                                  | **Description**                                                                 |
 |-----------------------|-----------------------------------------------------------------|---------------------------------------------------------------------------------|
