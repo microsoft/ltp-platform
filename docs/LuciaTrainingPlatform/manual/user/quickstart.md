@@ -16,7 +16,7 @@ Proceed with the following steps only after you have been successfully added to 
 
 **Step 4**. Select your VC (Virtual Cluster), and set the job name.
 
-**Step 5**. Define the `task role name`, `commands` to run, and `resouce SKU` requirements. They will be automatically updated in the config file.
+**Step 5**. Define the `task role name`, `commands` to run, and `resource SKU` requirements. They will be automatically updated in the config file.
 - `task role name`: What is a taskrole? For single server jobs, there should be only one task role. For some distributed jobs, there may be multiple task roles. For example, when TensorFlow is used to run distributed jobs, it has two roles: the parameter server and the worker.
 **Note: The task role name will be used in the platform environment variables shown in the right-hand box, which can be referenced inside `commands`.**
 - `commands`: the commands will be run on each node parallelly, it can be written like a bash script.
