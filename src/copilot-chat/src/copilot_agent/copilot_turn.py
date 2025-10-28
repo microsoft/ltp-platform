@@ -52,12 +52,6 @@ class CoPilotTurn:
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
 
         # debug only
-        if False:
-            question = this_inquiry
-            question_type = {'lv0_object': 'none', 'lv1_concern': 'none'}
-            answer, debug = self.processor.query_all_in_one(question, self.help_msg, skip_summary)
-            debug = {}
-            return {'category': question_type, 'answer': answer, 'debug': debug}
         
         if self._version == 'f4':
             push_frontend_event('<span class="text-gray-400 italic">🧠 Copilot is understanding your request...</span><br/>', replace=False)
