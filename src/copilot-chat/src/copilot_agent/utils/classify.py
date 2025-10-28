@@ -63,5 +63,6 @@ class QuestionClassifier:
                 question_struct['new_question'] = resp_dict.get('new_question', '')
                 question_struct['lv0_object'] = resp_dict.get('lv0_object', None)
                 question_struct['lv1_concern'] = resp_dict.get('lv1_concern', None)
+        logger.info(f'Parsed question structure: {question_struct}')
         return question_struct
     
