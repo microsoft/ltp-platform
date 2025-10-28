@@ -1,0 +1,59 @@
+protocolVersion: 2
+name: nccl_test_4nodes
+type: job
+jobRetryCount: 0
+prerequisites:
+  - type: dockerimage
+    uri: 'superbench/superbench:v0.10.0-cuda12.2'
+    name: docker_image0
+taskRoles:
+  taskrole:
+    instances: 4
+    completion:
+      minFailedInstances: 1
+      minSucceededInstances: 1
+    taskRetryCount: 0
+    dockerImage: docker_image0
+    extraContainerOptions:
+      infiniband: true
+    resourcePerInstance:
+      gpu: 8
+      cpu: 88
+      memoryMB: 819200
+    commands:
+      - 'if [ "$PAI_CURRENT_TASK_ROLE_CURRENT_TASK_INDEX" -eq 0 ]; then'
+      - mkdir -p /opt/microsoft
+      - >-
+        wget
+        https://raw.githubusercontent.com/Azure/azhpc-images/master/topology/ndv4-topo.xml
+        -O /opt/microsoft/ndv4-topo.xml
+      - >-
+        LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib:/usr/local/mpi/lib:/opt/hpcx/ucx/lib:$LD_LIBRARY_PATH
+        mpirun -np 32 -H taskrole-0:8,taskrole-1:8,taskrole-2:8,taskrole-3:8
+        --allow-run-as-root --map-by ppr:8:node --bind-to numa  -mca
+        plm_rsh_no_tree_spawn 1 -mca plm_rsh_num_concurrent 800 -mca
+        coll_hcoll_enable 0 -x NCCL_IB_PCI_RELAXED_ORDERING=1 -x
+        NCCL_NET_GDR_LEVEL=5 -x NCCL_MIN_NCHANNELS=32 -x UCX_TLS=rc -x
+        NCCL_ALGO=NVLS,TREE -x NCCL_SOCKET_IFNAME=eth0 -x
+        CUDA_DEVICE_ORDER=PCI_BUS_ID -x NCCL_DEBUG=WARN -x
+        NCCL_TOPO_FILE=/opt/microsoft/ndv4-topo.xml
+        /opt/superbench/bin/all_reduce_perf -b 4M -f 2 -g 1 -G 1 -e 4G -n 5000
+      - else
+      - >-
+        export
+        LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib:/usr/local/mpi/lib:/opt/hpcx/ucx/lib:$LD_LIBRARY_PATH
+      - mkdir -p /opt/microsoft
+      - >-
+        wget
+        https://raw.githubusercontent.com/Azure/azhpc-images/master/topology/ndv4-topo.xml
+        -O /opt/microsoft/ndv4-topo.xml
+      - sleep 1d
+      - fi
+defaults:
+  virtualCluster: test
+extras:
+  com.microsoft.pai.runtimeplugin:
+    - plugin: ssh
+      parameters:
+        jobssh: false
+        sshbarrier: true

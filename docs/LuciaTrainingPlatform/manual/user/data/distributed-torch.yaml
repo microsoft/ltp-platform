@@ -1,0 +1,75 @@
+protocolVersion: 2
+name: mistral_train_4nodes_torch
+type: job
+jobRetryCount: 0
+prerequisites:
+  - type: dockerimage
+    uri: >-
+      nvcr.io/nvidia/pytorch:24.03-py3
+    name: docker_image0
+taskRoles:
+  worker:
+    instances: 2
+    completion:
+      minFailedInstances: 1
+    taskRetryCount: 0
+    dockerImage: docker_image0
+    extraContainerOptions:
+      infiniband: true
+    resourcePerInstance:
+      gpu: 8
+      cpu: 88
+      memoryMB: 819200
+    commands:
+      - echo "prepare network and topology..."
+      - mkdir -p /opt/microsoft
+      - >-
+        wget
+        https://raw.githubusercontent.com/Azure/azhpc-images/master/topology/ndv4-topo.xml
+        -O /opt/microsoft/ndv4-topo.xml
+      - export NCCL_IB_PCI_RELAXED_ORDERING=1
+      - export NCCL_SOCKET_IFNAME=eth0
+      - export CUDA_DEVICE_ORDER=PCI_BUS_ID
+      - export NCCL_NET_GDR_LEVEL=5
+      - export NCCL_TOPO_FILE=/opt/microsoft/ndv4-topo.xml
+      - export NCCL_DEBUG=WARN
+      - ls -alh /mnt/pvc-blob-nfs/
+      - nvidia-smi
+      - echo "Download code..."
+      - >-
+        git clone
+        git clone https://github.com/stanford-crfm/mistral.git
+      - cd mistral
+      - ls -alh .
+      - echo "Install dependencies..."
+      - pip install --upgrade pip --user
+      - pip install deepspeed==0.14.4 --user
+      - pip install datasets numpy tensorboard jsonlines ujson --user
+      - pip install torchinfo torchdata--user
+      - pip install h5py --user
+      - pip install setup/pip-requirements.txt --user
+      - 'echo "[Used Python Env]"'
+      - pip list
+      - echo "Exam environment variables..."
+      - 'echo "node_rank:"$PAI_CURRENT_TASK_ROLE_CURRENT_TASK_INDEX'
+      - 'echo "master_addr:"$PAI_HOST_IP_worker_0'
+      - 'echo "master_port:"$PAI_PORT_LIST_worker_0_http'
+      - export GPU_PER_NODE_COUNT=8
+      - >-
+        export NUM_PROCESS=$((GPU_PER_NODE_COUNT *
+        PAI_TASK_ROLE_TASK_COUNT_worker))
+      - 'echo "gpu count:"$GPU_PER_NODE_COUNT'
+      - 'echo "node count:"$PAI_TASK_ROLE_TASK_COUNT_worker'
+      - 'echo "num process:"$NUM_PROCESS'
+      - echo "Start training..."
+      - >-
+        torchrun --num_gpus $GPU_PER_NODE_COUNT --num_nodes $PAI_TASK_ROLE_TASK_COUNT_worker --master_addr $PAI_HOST_IP_worker_0 --master_port $PAI_PORT_LIST_worker_0_http --node_rank $PAI_CURRENT_TASK_ROLE_CURRENT_TASK_INDEX train.py --config conf/mistral-micro.yaml --training_arguments.fp16 true --training_arguments.per_device_train_batch_size 1 --run_id mistral-micro-multi-gpu
+      - echo "End training..."
+defaults:
+  virtualCluster: test
+extras:
+  com.microsoft.pai.runtimeplugin:
+    - plugin: ssh
+      parameters:
+        jobssh: false
+        sshbarrier: true
