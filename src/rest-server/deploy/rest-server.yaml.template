@@ -174,12 +174,9 @@ spec:
           value: {{ cluster_cfg['rest-server']['hived-computing-device-envs'] }}
         - name: ALERT_MANAGER_URL
           value: "{{ cluster_cfg['alert-manager']['url'] }}"
-{% if cluster_cfg['rest-server']['force_acr'] != 'false' %}
-        - name: FORCE_ACR
-          value: "true"
-{% else %}
-        - name: FORCE_ACR
-          value: "false"
+{% if 'image-regex' in cluster_cfg['rest-server'] %}
+        - name: IMAGE_REGEX
+          value: "{{ cluster_cfg['rest-server']['image-regex'] }}"
 {% endif %}
         ports:
         - name: rest-server

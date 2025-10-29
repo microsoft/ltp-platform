@@ -75,19 +75,6 @@ const getReqeustedGpuCount = (protocol) => {
   return gpuCount;
 };
 
-function getImageName(prerequisites) {
-  if (
-    typeof prerequisites !== 'object' ||
-    typeof prerequisites.dockerimage !== 'object'
-  ) {
-    return null;
-  }
-
-  const dockerImages = Object.values(prerequisites.dockerimage);
-  const img = dockerImages.find(p => p.type === 'dockerimage' && p.uri);
-  return img?.uri ?? null;
-}
-
 const getJobPriority = (protocol) => {
   return protocol.extras?.hivedScheduler?.jobPriorityClass || null;
 };
@@ -103,24 +90,6 @@ const check = async (req, res, next) => {
 
     const userPrioritySet = userInfo.extension?.jobPriority ?? null;
     const userPriorityExpiration = userInfo.extension?.jobExpiration ?? null;
-
-    const forceAcr = launcherConfig.forceAcr;
-    if (forceAcr === true) {
-      const imageName = getImageName(jobProtocol.prerequisites);
-      const imageRepo = imageName.split('/')[0].trim().toLowerCase();
-      const isAzureCR = /\.azurecr\.io$/i.test(imageRepo);
-      // Reject if it’s not ACR
-      if (!isAzureCR) {
-        return next(
-          createError(
-            'Forbidden',
-            'InvalidImageError',
-            `The image ${imageRepo || imageName} is not allowed. ` +
-            `Please use an image from Azure Container Registry (ACR).`
-          )
-        );
-      }
-    }
 
     if (jobPriority === 'prod') {
       if (userPrioritySet !== 1) {

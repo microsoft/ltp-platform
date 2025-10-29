@@ -53,6 +53,19 @@ const render = (template, dict, tags = ['<%', '%>']) => {
   return result.trim();
 };
 
+function getImageName(prerequisites) {
+  if (
+    typeof prerequisites !== 'object' ||
+    typeof prerequisites.dockerimage !== 'object'
+  ) {
+    return null;
+  }
+
+  const dockerImages = Object.values(prerequisites.dockerimage);
+  const img = dockerImages.find(p => p.type === 'dockerimage' && p.uri);
+  return img?.uri ?? null;
+}
+
 const protocolValidate = (protocolYAML) => {
   const protocolObj = yaml.load(protocolYAML);
   if (!protocolSchema.validate(protocolObj)) {
@@ -85,6 +98,38 @@ const protocolValidate = (protocolYAML) => {
       } else {
         prerequisites[item.type][item.name] = item;
         prerequisiteSet.add(item.name);
+      }
+    }
+    const imageRegexPattern = launcherConfig.imageRegex;
+    let imageRegex;
+
+    try {
+      if (imageRegexPattern && imageRegexPattern.length > 0) {
+        imageRegex = new RegExp(imageRegexPattern);
+      }
+    } catch (error) {
+      console.error(`Invalid imageRegex pattern: ${imageRegexPattern}. Error: ${error.message}`);
+      return next(
+        createError(
+          'Internal Server Error',
+          'InvalidImageRegexError',
+          `The provided imageRegex pattern "${imageRegexPattern}" is invalid.`
+        )
+      );
+    }
+
+    if (imageRegex) {
+      const imageName = getImageName(protocolObj.prerequisites);
+      // Check if the imageName matches the imageRegex
+      const match = imageName && imageRegex.test(imageName);
+      if (!match) {
+        return next(
+          createError(
+            'Forbidden',
+            'InvalidImageError',
+            `The image ${imageName} is not allowed.`
+          )
+        );
       }
     }
   }

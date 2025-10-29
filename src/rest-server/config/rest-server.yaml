@@ -52,4 +52,3 @@ code-restriction:
   git-branch-model: no-existing-branch-model
   script-prefix: no-existing-prefix
   script-name: no-existing-name
-force_acr: false
