@@ -1580,8 +1580,6 @@ const listVCsFromJob = async (username) => {
       where: { userName: username },
     });
 
-    logger.info(`Frameworks raw result for user ${username}: ${JSON.stringify(frameworks, null, 2)}`);
-
     const vcsSet = new Set();
     frameworks.forEach((framework) => {
       if (framework.virtualCluster) {

@@ -43,6 +43,36 @@ const cache = new Map();
 
 const readMutex = new Mutex();
 
+async function getHistoryVCs(name, grouplist, retrieveFromHistory=true) {
+  // Retrieve VC list from the user's job history
+  let vcsFromJob = [];
+  if (retrieveFromHistory) {
+    logger.info(`Retrieving VC list from job history for user: ${name}`);
+    vcsFromJob = await job.listVCsFromJob(name);
+  }
+
+  // Retrieve VC list from each group the user belongs to
+  const vcSet = new Set();
+  const vcPromises = grouplist.map(async group => {
+    try {
+      return await groupModel.getGroupVCs(group);
+    } catch (error) {
+      console.error(`Failed to fetch VCs for group ${group}:`, error);
+      return []; // Return an empty array on failure
+    }
+  });
+  const vcResults = await Promise.all(vcPromises);
+  vcResults.forEach(vcs => vcs.forEach(vc => vcSet.add(vc)));
+
+  // Merge VC lists and remove duplicates
+  const mergedVCList = new Set([
+    ...vcsFromJob,
+    ...Array.from(vcSet),
+  ]);
+
+  return Array.from(mergedVCList);
+}
+
 async function read(key) {
   if (cache.has(key)) {
     logger.info(`Read user info from cache: ${key}`);
@@ -207,28 +237,7 @@ async function create(key, value) {
     await User.encryptUserPassword(userInstance);
 
     // retrieve VC list from the history job list belonging to the user if exists
-    const vcsFromJob = await job.listVCsFromJob(userInstance.username);
-    userInstance.history_vclist = vcsFromJob;
-
-    // retrieve VC from group list
-    const vcSet = new Set();
-    const vcPromises = value.grouplist.map(async group => {
-        try {
-            return await groupModel.getGroupVCs(group);
-        } catch (error) {
-            console.error(`Failed to fetch VCs for group ${group}:`, error);
-            return []; // Return an empty array on failure
-        }
-    });
-    const vcResults = await Promise.all(vcPromises);
-    vcResults.forEach(vcs => vcs.forEach(vc => vcSet.add(vc)));
-
-    // Merge vcResults into userInstance.history_vclist and remove duplicates
-    const mergedVCList = new Set([
-      ...userInstance.history_vclist,
-      ...Array.from(vcSet),
-    ]);
-    userInstance.history_vclist = Array.from(mergedVCList);
+    userInstance.history_vclist = await getHistoryVCs(userInstance.username, userInstance.grouplist);
 
     const userData = {
       metadata: { name: hexKey },
@@ -287,8 +296,7 @@ async function update(key, value, updatePassword = false) {
       grouplist: value.grouplist,
       email: value.email,
       extension: value.extension,
-      //history_vclist: value.history_vclist || [],
-      history_vclist: [],
+      history_vclist: value.history_vclist || [],
     });
     if (updatePassword) {
       await User.encryptUserPassword(userInstance);
@@ -296,30 +304,17 @@ async function update(key, value, updatePassword = false) {
 
     // if userInstance.history_vclist is empty, set it to the retrieved VC list
     // retrieve VC list from the job list belonging to the user
-    if (!userInstance.history_vclist || userInstance.history_vclist.length === 0) {
-      const vcsFromJob = await job.listVCsFromJob(userInstance.username);
-      userInstance.history_vclist = vcsFromJob;
-    }
+    const vclist = await getHistoryVCs(
+      userInstance.username,
+      userInstance.grouplist,
+      userInstance.history_vclist.length === 0
+    );
 
-    // retrieve VC from group list
-    const vcSet = new Set();
-    const vcPromises = value.grouplist.map(async group => {
-        try {
-            return await groupModel.getGroupVCs(group);
-        } catch (error) {
-            console.error(`Failed to fetch VCs for group ${group}:`, error);
-            return []; // Return an empty array on failure
-        }
-    });
-    const vcResults = await Promise.all(vcPromises);
-    vcResults.forEach(vcs => vcs.forEach(vc => vcSet.add(vc)));
-
-    // Merge vcResults into userInstance.history_vclist and remove duplicates
-    const mergedVCList = new Set([
-      ...userInstance.history_vclist,
-      ...Array.from(vcSet),
-    ]);
-    userInstance.history_vclist = Array.from(mergedVCList);
+    // Merge userInstance.history_vclist with vclist and remove duplicates
+    userInstance.history_vclist = Array.from(new Set([
+      ...(userInstance.history_vclist || []),
+      ...(vclist || []),
+    ]));
 
     const userData = {
       metadata: { name: hexKey },
