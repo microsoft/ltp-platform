@@ -52,17 +52,6 @@ jobs:
         if: steps.all.outputs.services != ''
         run: python -m pip install --break-system-packages pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
 
-      - name: Install Special libs
-        if: steps.all.outputs.services != ''
-        run: |
-          # check whether steps.all.outputs.services contains 'alert-manager'
-          if echo "${{ steps.all.outputs.services }}" | grep -q "alert-manager"; then
-            echo "Installing python-icm alertmanager dependencies..."
-            echo "${{ secrets.ICM_PACKAGE_B64 }}" | base64 -d > python-icm.zip
-            unzip -o python-icm.zip -d $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
-            ls -l $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
-          fi
-
       - name: Decode and unzip config file
         if: steps.all.outputs.services != ''
         run: |
@@ -78,7 +67,7 @@ jobs:
           mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
           ls -l /tmp/auth-configuration
 
-      - name: Build Images of Changed Services
+      - name: Build Images of Services
         if: steps.all.outputs.services != ''
         run: |
           all_services="${{ steps.all.outputs.services }}"

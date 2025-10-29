@@ -6,9 +6,9 @@ permissions:
 
 on:
   push:
-    branches: [main, dev, 'release/*']
+    branches: [main, dev, "release/*"]
   pull_request:
-    branches: [main, dev, 'release/*']
+    branches: [main, dev, "release/*"]
 
 env:
   TAG: ${{ github.run_number }}
@@ -83,19 +83,6 @@ jobs:
         if: steps.check.outputs.has_changed == 'true'
         run: python -m pip install --break-system-packages pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
 
-      - name: Install Special libs
-        if: steps.check.outputs.has_changed == 'true'
-        run: |
-          # check whether steps.changes.outputs.folders contains 'alert-manager'
-          if echo "${{ steps.changes.outputs.folders }}" | grep -q "alert-manager"; then
-            echo "Installing python-icm alertmanager dependencies..."
-            echo "${{ secrets.ICM_PACKAGE_B64 }}" | base64 -d > python-icm.zip
-            unzip -o python-icm.zip -d $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
-            ls -l $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm
-            # XXX 
-            cat $GITHUB_WORKSPACE/src/alert-manager/src/node-recycler/python-icm/README.md
-          fi
-
       - name: Decode and unzip config file
         if: steps.check.outputs.has_changed == 'true'
         run: |
@@ -134,6 +121,23 @@ jobs:
         run: |
           changed_services="${{ steps.changes.outputs.folders }}"
           echo "Pushing: $changed_services"
+          # check whether alter-manager is in the changed services
+          echo "Changed services before removing alter-manager: $changed_services"
+          if [[ "$changed_services" == *"alter-manager"* ]]; then
+            echo "alter-manager is in the changed services"
+            changed_services=$(echo $changed_services | sed 's/alter-manager//g')
+            # push specific images in alter-manager to GHCR
+            echo "Pushing specific alter-manager images to GHCR"
+            $GITHUB_WORKSPACE/build/pai_build.py push \
+              -c $GITHUB_WORKSPACE/config/cluster-configuration \
+              -s alert-manager \
+              -i abnormal-detector,alert-handler,alert-parser,cert-expiration-checker,cluster-utilization,job-data-recorder,job-status-change-notification,node-failure-detection,node-issue-classifier,nvidia-gpu-low-perf-fixer,redis-monitoring \
+              --docker-registry ghcr.io \
+              --docker-namespace ${GITHUB_REPOSITORY_OWNER} \
+              --docker-username ${{ github.actor }} \
+              --docker-password ${{ secrets.GITHUB_TOKEN }}
+          fi
+
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
             -s $changed_services \
@@ -145,24 +149,24 @@ jobs:
       - name: Azure CLI get credentials and deploy
         if: steps.check.outputs.has_changed == 'true'
         run: |
-            az version
-            az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
-            az aks install-cli
-            az aks get-credentials \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --name ${{ secrets.KUBERNETES_CLUSTER }} \
-              --overwrite-existing
-            kubelogin convert-kubeconfig -l azurecli
-            kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
-            echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
-            echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
-            $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }} < cluster_id 
-            echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
-            $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration < cluster_id 
-            echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
-            $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }} < cluster_id 
-            kubectl get pod
-            kubectl get service
+          az version
+          az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
+          az aks install-cli
+          az aks get-credentials \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --name ${{ secrets.KUBERNETES_CLUSTER }} \
+            --overwrite-existing
+          kubelogin convert-kubeconfig -l azurecli
+          kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
+          echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
+          echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+          $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }} < cluster_id 
+          echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
+          $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration < cluster_id 
+          echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+          $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }} < cluster_id 
+          kubectl get pod
+          kubectl get service
 
   test:
     name: Test rest-server
