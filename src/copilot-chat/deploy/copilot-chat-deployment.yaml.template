@@ -45,6 +45,7 @@ spec:
             memory: "1Gi"
             cpu: "500m"
         env:
+        # copilot global envs
         - name: AGENT_PORT
           value: "{{ cluster_cfg["copilot-chat"]["agent-port"] | default("50000") }}"
         - name: COPILOT_HISTORY_DEPTH
@@ -91,6 +92,40 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["collect-dst-kusto-cluster-url"] }}
         - name: COLLECT_DST_KUSTO_DATABASE_NAME
           value: {{ cluster_cfg["copilot-chat"]["collect-dst-kusto-database-name"] }}
+        # feature-wise envs
+        - name: PRINCIPAL_ID_ACR_0
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["principal-id-acr-0"] }}
+        - name: PRINCIPAL_ID_ACR_1
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["principal-id-acr-1"] }}
+        - name: PRINCIPAL_ID_ACR_2
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["principal-id-acr-2"] }}
+        - name: PRINCIPAL_ID_STORE_0
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["principal-id-store-0"] }}
+        - name: PRINCIPAL_ID_STORE_1
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["principal-id-store-1"] }}
+        - name: PRINCIPAL_ID_STORE_2
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["principal-id-store-2"] }}
+        - name: EMAIL_ADDR_ALERT
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["email-addr-alert"] }}
+        - name: EMAIL_ADDR_MAIN
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["email-addr-main"] }}
+        - name: TEAMS_URL
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["teams-url"] }}
+        - name: TEAMS_JOINCODE
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["teams-joincode"] }}
+        - name: DOC_RELEASE_ROOT
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["doc-release-root"] }}
+        - name: SHAREPOINT_URI_PYTORCH
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["sharepoint-uri-pytorch"] }}
+        - name: SHAREPOINT_URI_MPIRUN
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["sharepoint-uri-mpirun"] }}
+        - name: SHAREPOINT_URI_HELLO
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["sharepoint-uri-hello"] }}
+        - name: SHAREPOINT_URI_DEMO
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["sharepoint-uri-demo"] }}
+        - name: IDWEB_URL
+          value: {{ cluster_cfg["copilot-chat"]["user-manual"]["idweb-url"] }}
+        # external-dependent envs
         - name: CLUSTER_ID
           value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
         ports:
