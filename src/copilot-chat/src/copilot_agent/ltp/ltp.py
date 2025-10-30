@@ -23,6 +23,7 @@ from ..utils.time import get_current_unix_timestamp
 from ..utils.types import DCW
 from ..utils.utils import get_prompt_from
 from .ltp_dashboard import query_generation_kql
+from .ltp_manual import UserManual
 
 
 class LTP:
@@ -40,7 +41,8 @@ class LTP:
         """
         self.llm_session = llm_session
         self.feature_skipped = True
-        self.ltp_documentation = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'ltp_documentation.txt'))
+        self.manual = UserManual(feature=self.SUB_FEATURE, manual_dir='user', index_file='index.md')
+        self.ltp_documentation = self.manual.get_content()
 
     def query_metrics(self, question: str, help_msg, skip_summary: bool = False):
         """Query cluster or job metrics from Prometheus backend."""
