@@ -6,4 +6,4 @@ Generate an answer to user's question.
 If necessary, briefly mention how you analyzed the <result> to address user's question, using the related knowledge provided.
 If necessary, generate a suggestion, this is optional, only do this if you think it's necessary.
 Decide which data is necessary to support the summary, analysis and suggestion, reorganize only the necessary data into several markdown tables and present them in markdown format.
-Provide a reference about which sections of the documentation user can turn into for a more comprehensive reading
+Provide a reference about which sections of the documentation user can turn into for a more comprehensive reading, when presenting the reference, remove the links.
