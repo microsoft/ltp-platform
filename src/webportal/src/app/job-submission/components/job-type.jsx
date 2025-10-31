@@ -6,7 +6,6 @@ import { BasicSection } from './basic-section';
 import { Dropdown } from 'office-ui-fabric-react';
 import { FormShortSection } from './form-page';
 import PropTypes from 'prop-types';
-import context from './context';
 
 export const JobType = React.memo(props => {
   const { onChange, jobType } = props;
@@ -20,7 +19,6 @@ export const JobType = React.memo(props => {
           text: jobType,
         };
       }),
-    [jobTypes],
   );
 
   const _onChange = useCallback(
@@ -30,8 +28,8 @@ export const JobType = React.memo(props => {
         if (item.text === 'inference') {
           alert(
             `Inference jobs have three forced parameters: 
-  1. INTERNAL_SERVER_IP=$PAI_HOST_IP_taskrole_0 : Fix value, used to inference service IP
-  2. INTERNAL_SERVER_PORT=$PAI_PORT_LIST_taskrole_0_http : Fixed Value used to inference service port
+  1. INTERNAL_SERVER_IP=$PAI_HOST_IP_taskrole_0 : Fixed value, used to inference service IP
+  2. INTERNAL_SERVER_PORT=$PAI_PORT_LIST_taskrole_0_http : Fixed value used to inference service port
   3. API_KEY="...": A random generated string, can be set arbitrarily)
 
 The three parameters will be automatically added to your job parameters upon switching to inference job type.
@@ -51,7 +49,7 @@ The three parameters will be automatically added to your job parameters upon swi
           placeholder='Select an option'
           options={options}
           onChange={_onChange}
-          selectedKey={jobTypeIndex === -1 ? null : `jobType_${jobTypeIndex}`}
+          selectedKey={jobTypeIndex === -1 ? "jobType_0" : `jobType_${jobTypeIndex}`}
         />
       </FormShortSection>
     </BasicSection>

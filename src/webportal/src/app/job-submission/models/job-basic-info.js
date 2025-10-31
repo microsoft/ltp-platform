@@ -27,7 +27,7 @@ import { isEmpty, get } from 'lodash';
 
 export class JobBasicInfo {
   constructor(props) {
-    const { name, jobRetryCount, virtualCluster, jobType} = props;
+    const { name, jobRetryCount, virtualCluster, jobType } = props;
     this.name = name || '';
     this.jobRetryCount = jobRetryCount || 0;
     this.virtualCluster = virtualCluster || '';
