@@ -88,7 +88,11 @@ const list = asyncHandler(async (req, res) => {
       tagsNotContainFilter.name = req.query.tagsNotContain.split(',');
     }
     if ('jobType' in req.query){
-      tagsContainFilter.name += req.query.jobType.split(',');
+      if (Array.isArray(tagsContainFilter.name)) {
+        tagsContainFilter.name.push(...req.query.jobType.split(','));
+      } else {
+        tagsContainFilter.name = req.query.jobType.split(',');
+      }
     }
     if ('keyword' in req.query) {
       // match text in username, jobname, or vc
