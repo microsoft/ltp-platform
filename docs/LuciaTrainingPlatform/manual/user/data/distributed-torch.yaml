@@ -44,7 +44,7 @@ taskRoles:
       - pip install --upgrade pip --user
       - pip install deepspeed==0.14.4 --user
       - pip install datasets numpy tensorboard jsonlines ujson --user
-      - pip install torchinfo torchdata--user
+      - pip install torchinfo torchdata --user
       - pip install h5py --user
       - pip install setup/pip-requirements.txt --user
       - 'echo "[Used Python Env]"'
