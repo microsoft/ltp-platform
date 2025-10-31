@@ -37,7 +37,6 @@ taskRoles:
       - nvidia-smi
       - echo "Download code..."
       - >-
-        git clone
         git clone https://github.com/stanford-crfm/mistral.git
       - cd mistral
       - ls -alh .
