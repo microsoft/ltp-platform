@@ -138,7 +138,10 @@ const protocolValidate = (protocolYAML) => {
         throw createError(
           'Bad Request',
           'InvalidProtocolError',
-          `Parameters (INTERNAL_SERVER_IP, INTERNAL_SERVER_PORT, API_KEY) must be specified for inference job.`,
+          `The following parameters must be specified for inference job:
+INTERNAL_SERVER_IP=$PAI_HOST_IP_taskrole_0
+INTERNAL_SERVER_PORT=$PAI_PORT_LIST_taskrole_0_http
+API_KEY=[any string]`,
         );
       }
       const requiredParams = ['INTERNAL_SERVER_IP', 'INTERNAL_SERVER_PORT', 'API_KEY'];
@@ -224,11 +227,11 @@ const protocolRender = (protocolObj) => {
       $parameters: protocolObj.parameters,
       $script:
         protocolObj.prerequisites.script[
-          protocolObj.taskRoles[taskRole].script
+        protocolObj.taskRoles[taskRole].script
         ],
       $output:
         protocolObj.prerequisites.output[
-          protocolObj.taskRoles[taskRole].output
+        protocolObj.taskRoles[taskRole].output
         ],
       $data:
         protocolObj.prerequisites.data[protocolObj.taskRoles[taskRole].data],
