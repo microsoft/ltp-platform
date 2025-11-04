@@ -147,7 +147,7 @@ class JobReactTimeClient(PostgreSQLBaseClient):
         try:
             query = select(JobReactTimeModel).where(
                 JobReactTimeModel.job_id == job_id
-            ).order_by(JobReactTimeModel.created_at.desc()).limit(1)
+            ).order_by(JobReactTimeModel.time_generated.desc()).limit(1)
 
             result = session.execute(query).scalar_one_or_none()
             return result.to_dict() if result else None
