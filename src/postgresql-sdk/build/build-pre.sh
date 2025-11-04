@@ -5,6 +5,6 @@
 
 pushd $(dirname "$0") > /dev/null
 
-cp -arfT "../../ltp-common/data_schema" "../sdk/ltp_postgresql_sdk/data_schema"
+cp -arfT "../../ltp-storage-common/" "../sdk/ltp-storage-common"
 
 popd > /dev/null
