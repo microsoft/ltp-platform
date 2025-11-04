@@ -10,6 +10,9 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: [],
+  // Add typography plugin so markdown rendered with `prose` classes is styled
+  plugins: [
+    require('@tailwindcss/typography')
+  ],
 }
 

@@ -8,7 +8,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 import moment from "moment";
 import { Bot, User, ThumbsUp, ThumbsDown } from "lucide-react";
-import Markdown, { Components } from "react-markdown";
+import ReactMarkdown from "react-markdown";
 
 import remarkGfm from "remark-gfm";
 import rehypeRaw from 'rehype-raw';
@@ -97,10 +97,22 @@ const PreWithLineNumbers: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 };
 
+const fixStreamingMarkdown = (raw: string): string => {
+  // During streaming an unfinished code fence (``` without closing) prevents proper formatting.
+  // Detect an odd number of fenced code blocks and temporarily close it for rendering only.
+  const fenceRegex = /```/g;
+  const count = (raw.match(fenceRegex) || []).length;
+  if (count % 2 === 1) {
+    return raw + "\n```"; // append a closing fence (not persisted in state)
+  }
+  return raw;
+};
+
 const CustomMarkdown: React.FC<{ content: string }> = ({ content }) => {
+  const renderText = fixStreamingMarkdown(content);
   return (
-    <div className={`prose-sm text-base break-words word-wrap`}>
-      <Markdown
+    <div className={"prose prose-sm max-w-none break-words"}>
+      <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw as any]}
         components={{
@@ -108,15 +120,41 @@ const CustomMarkdown: React.FC<{ content: string }> = ({ content }) => {
             return <PreWithLineNumbers>{props.children}</PreWithLineNumbers>;
           },
           ol({ node, ...props }: any) {
-            return <ol className="list-decimal" {...props} />;
+            return <ol className="list-decimal pl-6 my-2" {...props} />;
+          },
+          ul({ node, ...props }: any) {
+            return <ul className="list-disc pl-6 my-2" {...props} />;
+          },
+          table({ node, ...props }: any) {
+            return <table className="table-auto border-collapse my-3" {...props} />;
+          },
+          th({ node, ...props }: any) {
+            return <th className="border px-2 py-1 bg-gray-100" {...props} />;
+          },
+          td({ node, ...props }: any) {
+            return <td className="border px-2 py-1 align-top" {...props} />;
+          },
+          code({ inline, className, children, ...props }: any) {
+            const language = /language-(\w+)/.exec(className || "")?.[1];
+            if (inline) {
+              return <code className="px-1 py-0.5 rounded bg-gray-100" {...props}>{children}</code>;
+            }
+            return (
+              <pre className="relative bg-gray-900 text-gray-100 rounded-md p-3 overflow-auto text-sm">
+                <code className={className}>{children}</code>
+                {language && (
+                  <span className="absolute top-1 right-2 text-xs text-gray-400 select-none">{language}</span>
+                )}
+              </pre>
+            );
           }
         }}
       >
-        {content}
-      </Markdown>
+        {renderText}
+      </ReactMarkdown>
     </div>
   );
-}
+};
 
 // Message component
 const Message: React.FC<{ message: ChatMessage, expand?: boolean, isAssistant?: boolean }> = ({ message, expand = true, isAssistant = false }) => {
