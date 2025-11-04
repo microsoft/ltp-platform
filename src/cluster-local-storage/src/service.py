@@ -19,8 +19,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from kubernetes import client, config
 
-from ltp_kusto_sdk import NodeStatusClient, NodeActionClient
-from ltp_kusto_sdk.features.node_status.models import NodeStatus
+from ltp_storage.factory import create_node_status_client, create_node_action_client
+from ltp_storage.data_schema.node_status import NodeStatus
 
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -40,8 +40,8 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
         self.state = "idle"
         self.sync_interval = int(os.getenv("CLUSTER_LOCAL_STORAGE_SYNC_INTERVAL", sync_interval))
 
-        self.status_client = NodeStatusClient() if os.getenv("LTP_KUSTO_CLUSTER_URI") else None
-        self.action_client = NodeActionClient() if os.getenv("LTP_KUSTO_CLUSTER_URI") else None
+        self.status_client = create_node_status_client() if os.getenv("LTP_STORAGE_BACKEND_DEFAULT") else None
+        self.action_client = create_node_action_client() if os.getenv("LTP_STORAGE_BACKEND_DEFAULT") else None
 
         try:
             config.load_incluster_config()

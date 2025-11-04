@@ -48,16 +48,27 @@ spec:
           value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
         - name: ENVIRONMENT
           value: {{ cluster_cfg["alert-manager"]["environment"] | default("prod") }}
+        # Storage backend selection
+        - name: LTP_STORAGE_BACKEND_DEFAULT
+          value: "{{ cluster_cfg['alert-manager'].get('storage-backend', 'kusto') }}"
+{% if cluster_cfg["alert-manager"].get("storage-backend", "kusto") == "kusto" %}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
-          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
+          value: {{ cluster_cfg["alert-manager"]["kusto"]["kusto-user-assigned-client-id"] }}
         - name: LTP_KUSTO_CLUSTER_URI
-          value: {{ cluster_cfg["alert-manager"]["kusto-cluster"] }}
+          value: {{ cluster_cfg["alert-manager"]["kusto"]["kusto-cluster"] }}
         - name: LTP_KUSTO_DATABASE_NAME
-          value: {{ cluster_cfg["alert-manager"]["kusto-database"] }}
+          value: {{ cluster_cfg["alert-manager"]["kusto"]["kusto-database"] }}
         - name: KUSTO_NODE_STATUS_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-status-table"] | default("NodeStatusRecord") }}
+          value: {{ cluster_cfg["alert-manager"]["kusto"]["node-status-table"] }}
         - name: KUSTO_NODE_ACTION_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-action-table"] | default("NodeActionRecord") }}
+          value: {{ cluster_cfg["alert-manager"]["kusto"]["node-action-table"] }}
+{% endif %}
+{% if cluster_cfg["alert-manager"].get("storage-backend", "kusto") == "postgresql" %}
+        - name: POSTGRES_CONNECTION_STR
+          value: "{{ cluster_cfg['alert-manager']['postgresql']['connection-str'] }}"
+        - name: POSTGRES_SCHEMA
+          value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
+{% endif %}
         ports:
         - name: vcport-{{ loop.index0 }}
           containerPort: {{ vcport }}

@@ -1,8 +1,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+"""
+Node Recycler - now supports dual storage backends (Kusto/PostgreSQL).
+
+Environment Variables:
+    LTP_STORAGE_BACKEND_DEFAULT: Default backend ('kusto' or 'postgresql')
+    CLUSTER_ID: Current cluster/endpoint identifier
+"""
+
 from concurrent.futures import ThreadPoolExecutor
 import os
+import sys
 import json
 import time
 import random
@@ -15,8 +24,9 @@ import requests
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.compute import ComputeManagementClient
 
-from ltp_kusto_sdk import NodeStatusClient, NodeActionClient
-from ltp_kusto_sdk.features.node_status.models import NodeStatus
+# Import from ltp_storage (shared package)
+from ltp_storage.factory import create_node_status_client, create_node_action_client
+from ltp_storage.data_schema.node_status import NodeStatus
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -456,13 +466,14 @@ class NodeRecycler:
     @classmethod
     def node_recycle_pipeline_loop(cls, interval=600):
         """Pipeline loop to recycle nodes with hardware failures.
-        Update Kusto status and action tables accordingly.
+        Updates storage backend (Kusto or PostgreSQL) based on configuration.
 
         Args:
             interval (int): Time interval to repeat the pipeline in the loop.
         """
-        status_client, action_client = NodeStatusClient(), NodeActionClient()
-        logger.info("Created Kusto clients for node status and action tables")
+        status_client = create_node_status_client()
+        action_client = create_node_action_client()
+        logger.info("Created storage clients for node status and action tables")
         while True:
             logger.info(f"{datetime.now()} Starting to UA and Deallocate Nodes")
             cls.ua_and_deallocate_pipeline(status_client, action_client)

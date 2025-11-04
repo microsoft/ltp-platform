@@ -11,10 +11,9 @@ from typing import Dict, List, Optional, Tuple, Any
 import pandas as pd
 
 from ...utils.node_util import Node
-from .models import NodeStatus, NodeStatusRecord, StatusGroup
+from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus
 from ...utils.time_util import convert_timestamp
 from ...base import KustoBaseClient
-from ...utils.request_util import RequestUtil
 
 # Constants for environment variables and defaults
 DEFAULT_CLUSTER_ID = "wcu"

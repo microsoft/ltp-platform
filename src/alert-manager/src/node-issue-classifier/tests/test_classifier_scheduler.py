@@ -15,8 +15,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from classifier_scheduler import NodeIssueClassifierScheduler
 from classifier import NodeFailure, NodeFailureCategory
-from ltp_kusto_sdk.features.node_status.models import NodeStatus
-from ltp_kusto_sdk.features.node_action.client import NodeAction
+from ltp_storage.data_schema.node_status import NodeStatus
+from ltp_storage.data_schema.node_action import NodeAction
 
 @pytest.fixture
 def mock_node_record_updater():

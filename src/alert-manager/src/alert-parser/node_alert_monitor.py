@@ -11,9 +11,9 @@ from datetime import datetime
 from typing import Dict, List, Tuple, Optional
 import logging
 
-from ltp_kusto_sdk.utils.request_util import RequestUtil
-from ltp_kusto_sdk.utils.time_util import convert_timestamp, parse_duration
-from ltp_kusto_sdk.features.node_status.models import NodeStatus, NodeStatusRecord
+from ltp_storage.utils.request_util import RequestUtil
+from ltp_storage.utils.time_util import convert_timestamp, parse_duration
+from ltp_storage.data_schema.node_status import NodeStatus, NodeStatusRecord
 from utils.alert_util import AlertFetcher, AlertMapper
 from node_updater import NodeRecordUpdater
 

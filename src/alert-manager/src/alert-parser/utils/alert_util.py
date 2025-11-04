@@ -9,16 +9,15 @@ from datetime import datetime
 import os
 import logging
 
-from ltp_kusto_sdk.base import KustoBaseClient
-from ltp_kusto_sdk.utils.time_util import parse_duration, convert_timestamp
+from ltp_storage.factory import create_alert_client
+from ltp_storage.utils.time_util import parse_duration, convert_timestamp
 
 # set logger with timestamp
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Get Kusto configuration from environment variables
-KUSTO_ALERT_CLUSTER = os.getenv('KUSTO_ALERT_CLUSTER', 'https://ltp-kusto-alerts.westus2.kusto.windows.net')
-KUSTO_ALERT_DATABASE = os.getenv('KUSTO_ALERT_DATABASE', 'DefaultWorkspace-id-westus2')
+LTP_STORAGE_BACKEND_DEFAULT = os.getenv('LTP_STORAGE_BACKEND_DEFAULT', 'kusto')
 
 class AlertParser:
     """Parser for alert log messages"""
@@ -76,27 +75,14 @@ class AlertFetcher:
     """Fetches and processes alerts from Kusto"""
     
     def __init__(self):
-        self.client = KustoBaseClient(
-            cluster=KUSTO_ALERT_CLUSTER,
-            database=KUSTO_ALERT_DATABASE
-        )
+        self.client = create_alert_client()
 
     def fetch_logs(self, end_time_stamp, time_offset):
         """Fetch raw alert logs from Kusto"""
         end_time = datetime.fromtimestamp(end_time_stamp)
         time_offset_delta = parse_duration(time_offset)
         start_time = end_time - time_offset_delta
-        # TODO: fix bug of NodeFilesystemUsage, NodeGpuCountChanged, NodeUnschedulable and remove them from the query
-        query = (
-            f"ContainerLogV2| "
-            f'where ContainerName contains "alerthandler" | '
-            f'where LogMessage contains "alert-handler received alerts" and '
-            f'LogMessage !contains "NodeFilesystemUsage" and LogMessage !contains "NodeGpuCountChanged" and LogMessage !contains "NodeUnschedulable" | '
-            f"where TimeGenerated between(datetime({start_time})..datetime({end_time})) | "
-            f"project TimeGenerated, PodName, LogMessage | "
-            f"sort by TimeGenerated asc")
-        
-        records = self.client.execute_query(query)
+        records = self.client.query_alerts(start_time=start_time, end_time=end_time)
         logger.info(f"Fetched {len(records)} alert logs from Kusto.")
         return records if records else None
 

@@ -10,8 +10,8 @@ from typing import Generator
 # Set up Python path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
-from ltp_kusto_sdk.features.node_action.client import NodeActionClient
-from ltp_kusto_sdk.features.node_action.models import NodeAction
+from ltp_storage.data_schema.node_action import NodeActionClient
+from ltp_storage.data_schema.node_action import NodeAction
 from ltp_kusto_sdk.utils.time_util import convert_timestamp
 
 

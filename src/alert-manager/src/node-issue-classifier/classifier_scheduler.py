@@ -12,8 +12,8 @@ import logging
 from datetime import datetime
 from classifier import NodeIssueClassifier
 
-from ltp_kusto_sdk.features.node_status.models import NodeStatus
-from ltp_kusto_sdk.features.node_action.client import NodeAction
+from ltp_storage.data_schema.node_status import NodeStatus
+from ltp_storage.data_schema.node_action import NodeAction
 
 from node_recorder_helper import NodeRecordUpdater
 

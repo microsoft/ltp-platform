@@ -12,7 +12,7 @@ from typing import Generator
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from ltp_kusto_sdk.features.node_status.client import NodeStatusClient
-from ltp_kusto_sdk.features.node_status.models import NodeStatusRecord, NodeStatus
+from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus
 from ltp_kusto_sdk.utils.kusto_client import KustoManageClient
 from ltp_kusto_sdk.utils.time_util import convert_timestamp
 

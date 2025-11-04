@@ -1,0 +1,8 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+service_type: "common"
+
+# Schema to manage
+schema-name: "ltp_sdk"
+

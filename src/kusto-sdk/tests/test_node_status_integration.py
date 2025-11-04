@@ -5,7 +5,7 @@ import os
 import pytest
 from datetime import datetime, timedelta
 from ltp_kusto_sdk.features.node_status.client import NodeStatusClient
-from ltp_kusto_sdk.features.node_status.models import NodeStatus
+from ltp_storage.data_schema.node_status import NodeStatus
 
 
 @pytest.fixture

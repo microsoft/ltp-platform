@@ -9,6 +9,7 @@ setup(
     packages=find_packages(),
     package_dir={"ltp_kusto_sdk": "ltp_kusto_sdk"},
     install_requires=[
+        "ltp-storage-common",  # Shared data schemas and interfaces
         "azure-kusto-data>=0.0.45",
         "azure-kusto-ingest>=0.0.45",
         "azure-identity>=1.5.0",
