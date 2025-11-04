@@ -9,7 +9,7 @@ To do this, please use follow below steps.
 
 Example:
 <user question> is: perform analysis to identify any statistically significant day-of-week periodicity or hourly trends, and estimate the expected availability for the next Monday morning if current trends continue.
-<context message> is: "### Average Availability Ratio for `pai-wcu` Endpoint in Week 30\n\nThe average availability ratio for the `pai-wcu` endpoint in Week 30 is 12.36%.\n\n---\n\n### Analysis: \n- The query filtered for the target endpoint `pai-wcu` and retrieved relevant cluster data using the mapping. \n- It calculated the average availability ratio by analyzing the `AvgReadyEmpty` over the total availability-related metrics, and then averaged these ratios across relevant clusters.\n\n### Supporting Data:\n| Endpoint | Week Number | Average Availability Ratio |\n|----------|-------------|----------------------------|\n| pai-wcu  | 30          | 12.36%                    |\n\n### Suggestion:\nAlthough availability ratios are often specific to operational contexts, a 12.36% availability ratio appears to be quite low. If this was not expected, consider:\n1. Investigating potential causes (e.g., resource allocation, system bottlenecks, or misconfigurations).\n2. Setting a targeted improvement plan focused on availability boost.\n\nFor more detailed insights, refer to the dashboard table PBICacheClusterCapacityStatus for Week 30 and the availability ratio breakdown across clusters.
+<context message> is: "### Average Availability Ratio in Week 30\n\nThe average availability ratio in Week 30 is 12.36%.\n\n---\n\n### Analysis: \n- It calculated the average availability ratio by analyzing the `Avg` over the total availability-related metrics, and then averaged these ratios across relevant clusters.\n\n### Supporting Data:\n| Endpoint | Week Number | Average Availability Ratio |\n|----------|-------------|----------------------------|\n| general  | 30          | 12.36%                    |\n\n### Suggestion:\nAlthough availability ratios are often specific to operational contexts, a 12.36% availability ratio appears to be quite low. If this was not expected, consider:\n1. Investigating potential causes (e.g., resource allocation, system bottlenecks, or misconfigurations).\n2. Setting a targeted improvement plan focused on availability boost.\n\nFor more detailed insights, refer to the database for Week 30 and the availability ratio breakdown across clusters.
 <output> is:
 
 ## Advanced Analysis Feature (In Development)
@@ -18,11 +18,11 @@ Please note that the capability to execute complex statistical models directly w
 
 ## Rephrased Analysis Task
 
-"Given the existing temporal distribution of availability data points for the `pai-wcu` endpoint in Week 30, identify any statistically significant day-of-week periodicity or hourly trends using a time-series decomposition model (e.g., STL or ARIMA). Subsequently, estimate the expected availability for the next Monday morning if current trends continue, after statistically accounting for and excluding the influence of any identified outliers."
+"Given the existing temporal distribution of availability data points in Week 30, identify any statistically significant day-of-week periodicity or hourly trends using a time-series decomposition model (e.g., STL or ARIMA). Subsequently, estimate the expected availability for the next Monday morning if current trends continue, after statistically accounting for and excluding the influence of any identified outliers."
 
 ## Step-by-Step Analysis Plan
 
-This plan relies on the system having access to the historical, time-stamped availability metric data for the `pai-wcu` endpoint during Week 30. 
+This plan relies on the system having access to the historical, time-stamped availability metric data during Week 30. 
 
 - **Step 1: Data Preparation and Cleaning**
   - Input Verification: Confirm the availability data points are properly formatted as a time series (i.e., a series of values indexed by time).
