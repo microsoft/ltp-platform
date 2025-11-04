@@ -77,7 +77,6 @@ class StorageFactory:
             except ImportError as e:
                 logger.error(f"Failed to import PostgreSQL SDK: {e}")
                 logger.warning("Falling back to Kusto")
-                backend = StorageBackend.KUSTO
         
         # Kusto backend (default/fallback)
         from ltp_kusto_sdk import NodeStatusClient as KustoNodeStatusClient
@@ -107,7 +106,6 @@ class StorageFactory:
             except ImportError as e:
                 logger.error(f"Failed to import PostgreSQL SDK: {e}")
                 logger.warning("Falling back to Kusto")
-                backend = StorageBackend.KUSTO
         
         # Kusto backend (default/fallback)
         from ltp_kusto_sdk import NodeActionClient as KustoNodeActionClient
@@ -137,7 +135,6 @@ class StorageFactory:
             except ImportError as e:
                 logger.error(f"Failed to import PostgreSQL SDK: {e}")
                 logger.warning("Falling back to Kusto")
-                backend = StorageBackend.KUSTO
         
         # Kusto backend (default/fallback)
         from ltp_kusto_sdk.features.alert.client import AlertClient as KustoAlertClient
@@ -167,7 +164,6 @@ class StorageFactory:
             except ImportError as e:
                 logger.error(f"Failed to import PostgreSQL SDK: {e}")
                 logger.warning("Falling back to Kusto")
-                backend = StorageBackend.KUSTO
         
         # Kusto backend (default/fallback)
         from ltp_kusto_sdk.features.job_summary.client import JobSummaryClient as KustoJobSummaryClient
@@ -197,7 +193,6 @@ class StorageFactory:
             except ImportError as e:
                 logger.error(f"Failed to import PostgreSQL SDK: {e}")
                 logger.warning("Falling back to Kusto")
-                backend = StorageBackend.KUSTO
         
         # Kusto backend (default/fallback)
         from ltp_kusto_sdk.features.job_react_time.client import JobReactTimeClient as KustoJobReactTimeClient

@@ -4,8 +4,8 @@
 """Alert client for PostgreSQL operations."""
 
 from typing import List, Optional, Dict, Any
-from datetime import datetime, timedelta
-from sqlalchemy import select, and_, func
+from datetime import datetime
+from sqlalchemy import select, and_
 from ...base import PostgreSQLBaseClient
 from ...models import AlertRecord as AlertRecordModel
 from ltp_storage.data_schema.alert_records import AlertRecordData

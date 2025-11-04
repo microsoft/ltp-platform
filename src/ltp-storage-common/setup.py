@@ -10,6 +10,7 @@ setup(
     package_dir={"ltp_storage": "ltp_storage"},
     install_requires=[
         "python-dateutil>=2.8.0",
+        "pandas>=1.0.0",
     ],
     extras_require={
         "dev": [

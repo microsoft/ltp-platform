@@ -6,6 +6,7 @@
 import os
 from typing import Optional
 from .database import DatabaseManager
+from typing import List, Dict, Any
 
 
 class PostgreSQLBaseClient:

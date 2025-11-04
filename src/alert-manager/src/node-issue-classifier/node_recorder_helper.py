@@ -20,7 +20,6 @@ Environment Variables:
 import os
 import time
 import logging
-import sys
 
 from ltp_storage.factory import create_node_status_client, create_node_action_client
 

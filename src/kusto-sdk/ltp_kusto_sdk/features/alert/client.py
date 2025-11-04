@@ -4,10 +4,8 @@
 """Alert client for Kusto SDK - queries existing Azure Log Analytics alerts."""
 
 import os
-import re
-import json
 from typing import List, Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 from ...base import KustoBaseClient
 
 import logging

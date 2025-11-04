@@ -6,7 +6,7 @@
 import os
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from sqlalchemy import select, and_, or_
+from sqlalchemy import select, and_
 from ...base import PostgreSQLBaseClient
 from ...models import NodeAction as NodeActionModel, NodeActionAttributes as NodeActionAttributesModel
 from ltp_storage.data_schema.node_action import NodeAction as NodeActionRecord

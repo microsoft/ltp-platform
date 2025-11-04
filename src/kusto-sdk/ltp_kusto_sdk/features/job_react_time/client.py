@@ -6,7 +6,6 @@
 import os
 import pandas as pd
 from typing import List, Optional, Dict, Any
-from datetime import datetime
 from ...base import KustoBaseClient
 
 # Environment variable names

@@ -20,9 +20,7 @@ while supporting both Kusto and PostgreSQL backends.
 """
 
 import os
-import sys
 import pandas as pd
-from datetime import datetime
 
 # Import from ltp_storage (shared package)
 from ltp_storage.factory import (
@@ -31,7 +29,6 @@ from ltp_storage.factory import (
     create_node_action_client,
 )
 
-from ltp_storage.utils.time_util import convert_timestamp
 
 class StorageUtil:
     """
@@ -237,8 +234,7 @@ class StorageUtil:
                 df['Endpoint'] = self.endpoint
             
             # Determine which client to use based on table name
-            is_react_table = (table_name == self.job_react_table or 
-                            'react' in table_name.lower())
+            is_react_table = (table_name == self.job_react_table)
             
             # Ingest using appropriate client (factory already handles backend)
             if is_react_table:
