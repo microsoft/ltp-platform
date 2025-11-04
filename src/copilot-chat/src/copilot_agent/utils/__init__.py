@@ -3,6 +3,7 @@
 
 """Init file for utils module."""
 
+from .analysis import GeneralAnalysis
 from .authentication import AuthenticationManager
 from .classify import QuestionClassifier
 from .conversation_manager import Contextualizer
@@ -70,6 +71,7 @@ __all__ = [
     'Contextualizer',
     'Customer',
     'Design',
+    'GeneralAnalysis',
     'KustoExecutor',
     'LLMSession',
     'LTPReportProcessor',

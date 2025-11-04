@@ -580,3 +580,15 @@ output:
   "lv1_concern": "4"
 }
 ```
+
+[Example d.1]
+this_question:
+Perform analysis to identify the performance bottlenecks.
+output:
+```json
+{
+  "new_question": "Perform analysis to identify the performance bottlenecks.",
+  "lv0_object": "5",
+  "lv1_concern": "0"
+}
+```

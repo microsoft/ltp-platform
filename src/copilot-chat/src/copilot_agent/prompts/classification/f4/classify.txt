@@ -20,6 +20,7 @@ Four question objects are supported:
 8. [training_platform]: it means the user wants to ask for guidance of how to use a model training platform, specifically the Lucia Training Platform, or ask for detailed information about an already launched training job, usually such questions can be answered by searching or querying the detailed logs, debugging informations provided by the training platform.
 3. [general]: it means user's can be answered fully using public information or general knowledge, without the need to ask for more context input from user.
 9. [persona]: it means the user wants to understand the persona of you, what features you can provide, what capabilities you can serve.
+5. [analysis]: it means user specificly requires an data analysis task to be performed, such questions usually start with 'perform analysis ...'.
 4. [others]: it means user's prompt is not [training_platform] nor [general] nor [persona]. Note that the above types have specific definition. If user question is not belong to [training_platform] nor [general] nor [persona], it should be [others].
 
 below knowldge describes some key concepts commonly asked in the training_platform object questions:

@@ -11,6 +11,7 @@ from .utils.logger import logger
 from .config import COPILOT_VERSION, DATA_DIR, PROMPT_DIR
 from .ltp import LTP
 from .utils import (
+    GeneralAnalysis,
     Contextualizer,
     LLMSession,
     LTPReportProcessor,
@@ -38,6 +39,7 @@ class CoPilotTurn:
         self.contextualizer = Contextualizer(self.llm_session)
         self.processor = LTP(self.llm_session)
         self.smart_help = SmartHelp(self.help_msg, self.llm_session)
+        self.analyzer = GeneralAnalysis(self.llm_session)
 
     # entry function, processes the list of messages and returns a dictionary with the results
     def process_turn(self, messages_list: list, skip_summary: bool = False, debugging: bool = False) -> dict:
@@ -49,6 +51,7 @@ class CoPilotTurn:
         # get from message list
 
         this_inquiry = messages_list[-1]['content']
+        last_response = messages_list[-2]['content']['answer'] if len(messages_list) > 1 else None
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
 
         # debug only
@@ -71,6 +74,7 @@ class CoPilotTurn:
         # verion f3, f4, resolves objective 8 (Lucia Training Platform)
         push_frontend_event('<span class="text-gray-400 italic">⏳ Copilot is processing your inquiry...</span><br/>', replace=False)
         self.smart_help.llm_session = self.llm_session  # ensure processor uses the current llm_session
+        self.analyzer.llm_session = self.llm_session  # ensure processor uses the current llm_session
         if self._version in ['f3', 'f4']:
             # If classification failed, treat as unsupported.
             if obj is None or con is None:
@@ -85,6 +89,10 @@ class CoPilotTurn:
             elif obj.count('9') > 0:
                 help_keys = ['feature']
                 answer = self.smart_help.generate(question, help_keys, True)
+                debug = {}
+            elif obj.count('5') > 0:
+                push_frontend_event('<span class="text-gray-400 italic">🔬 Performing analysis...</span><br/>', replace=False)
+                answer = self.analyzer.generate(question, [last_response] if last_response else None)
                 debug = {}
             else:
                 help_keys = ['unsupported_question']
