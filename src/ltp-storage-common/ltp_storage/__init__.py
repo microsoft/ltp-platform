@@ -16,6 +16,7 @@ from .factory import (
     create_job_summary_client,
     create_job_react_time_client,
 )
+from .data_schema.alert_records import AlertParser
 
 __version__ = "0.1.0"
 
@@ -27,5 +28,6 @@ __all__ = [
     "create_alert_client",
     "create_job_summary_client",
     "create_job_react_time_client",
+    "AlertParser",
 ]
 

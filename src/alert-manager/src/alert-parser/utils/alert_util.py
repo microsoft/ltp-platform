@@ -11,6 +11,7 @@ import logging
 
 from ltp_storage.factory import create_alert_client
 from ltp_storage.utils.time_util import parse_duration, convert_timestamp
+from ltp_storage.data_schema.alert_records import AlertParser
 
 # set logger with timestamp
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -19,57 +20,6 @@ logger = logging.getLogger(__name__)
 # Get Kusto configuration from environment variables
 LTP_STORAGE_BACKEND_DEFAULT = os.getenv('LTP_STORAGE_BACKEND_DEFAULT', 'kusto')
 
-class AlertParser:
-    """Parser for alert log messages"""
-    
-    @staticmethod
-    def parse_message(log):
-        """Parse a single alert log message"""
-        pattern = r"\[(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\] alert-handler received alerts: Alertname: (?P<alertname>[^,]+), Severity: (?P<severity>[^,]+), Summary: (?P<summary>.+), Labels: (?P<labels>\{.*?\}), Annotations: (?P<annotations>.*?)"
-        match = re.search(pattern, log)
-        if match:
-            timestamp = match.group("timestamp")
-            alertname = match.group("alertname")
-            severity = match.group("severity")
-            summary = match.group("summary")
-            if 'segfault' in summary:
-                summary = "Segfault"
-            labels = json.loads(match.group("labels"))
-            annotations = match.group("annotations")
-            if alertname == "undefined" and "report_type" in labels:
-                alertname = labels["report_type"]
-            return {
-                "timestamp": timestamp,
-                "alertname": alertname,
-                "severity": severity,
-                "summary": summary,
-                "labels": labels,
-                "annotations": annotations,
-            }
-        else:
-            logger.info(f"Failed to parse log message: {log}")
-            return None
-
-    @staticmethod
-    def generate_row(alert):
-        """Generate a standardized alert row"""
-        keys = [
-            "severity",
-            "summary",
-            "alertname",
-            "node_name",
-            "labels",
-            "annotations",
-            "timestamp",
-        ]
-        alert = AlertParser.parse_message(alert)
-        for key in keys:
-            if key not in alert:
-                if key in alert["labels"]:
-                    alert[key] = alert["labels"][key]
-                else:
-                    alert[key] = ""
-        return alert
 
 class AlertFetcher:
     """Fetches and processes alerts from Kusto"""
@@ -78,26 +28,15 @@ class AlertFetcher:
         self.endpoint = os.getenv("CLUSTER_ID")
         self.client = create_alert_client(endpoint=self.endpoint)
 
-    def fetch_logs(self, end_time_stamp, time_offset):
+    def fetch_logs(self, end_time_stamp, time_offset, nodes=None):
         """Fetch raw alert logs from Kusto"""
         end_time = datetime.fromtimestamp(end_time_stamp)
         time_offset_delta = parse_duration(time_offset)
         start_time = end_time - time_offset_delta
-        records = self.client.query_alerts(start_time=start_time, end_time=end_time)
+        records = self.client.query_alerts(start_time=start_time, end_time=end_time, nodes=nodes)
         logger.info(f"Fetched {len(records)} alert logs from Kusto.")
         return records if records else None
 
-    def process_alerts(self, alerts_data, nodes=None):
-        """Process raw alert data"""
-        alerts = [AlertParser.generate_row(row["LogMessage"]) for row in alerts_data]
-        alerts_df = pd.DataFrame(alerts)
-        if nodes is not None:
-            alerts_df = alerts_df[alerts_df["node_name"].isin(nodes)]
-        if alerts_df.empty:
-            logger.info("No alerts found for the specified nodes.")
-            return []
-        alerts_df["timestamp"] = pd.to_datetime(alerts_df["timestamp"], errors="coerce")
-        return alerts_df
     
     def shrink_alerts(self, alerts_df):
         """Shrink alerts DataFrame to essential columns"""
@@ -145,15 +84,14 @@ class AlertFetcher:
         
         return result_df
         
-
     def get_node_alert_records(self, end_time_stamp, time_offset, tolerent_duration="15m", endpoint="wcu", nodes=None):
         """Get processed alert records for nodes"""
         print(f"Fetching alerts from Kusto for nodes: {nodes} with time offset: {time_offset} and end time: {end_time_stamp}")
-        alerts_data = self.fetch_logs(end_time_stamp, time_offset)
+        alerts_data = self.fetch_logs(end_time_stamp, time_offset, nodes=nodes)
         if alerts_data is None:
             return None
 
-        return self.process_alerts(alerts_data, nodes=nodes)
+        return pd.DataFrame(alerts_data)
 
     def find_node_alerts(self, alerts, node, end_time_stamp, start_time_stamp):
         """Find alerts for a specific node in a time period"""
