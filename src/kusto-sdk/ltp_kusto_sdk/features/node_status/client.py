@@ -16,7 +16,7 @@ from ...utils.time_util import convert_timestamp
 from ...base import KustoBaseClient
 
 # Constants for environment variables and defaults
-DEFAULT_CLUSTER_ID = "wcu"
+DEFAULT_CLUSTER_ID = "test-cluster"
 DEFAULT_KUSTO_CLUSTER = "https://your-kusto-cluster.kusto.windows.net"
 DEFAULT_KUSTO_DATABASE = "Test"
 DEFAULT_STATUS_TABLE = "NodeStatusRecord"

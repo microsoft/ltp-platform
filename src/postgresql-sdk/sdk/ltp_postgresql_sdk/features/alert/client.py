@@ -95,7 +95,8 @@ class AlertClient(PostgreSQLBaseClient):
         severity: Optional[str] = None,
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
-        endpoint: Optional[str] = None
+        endpoint: Optional[str] = None,
+        nodes: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Query alert records with filters.
@@ -107,7 +108,7 @@ class AlertClient(PostgreSQLBaseClient):
             start_time: Filter by start timestamp
             end_time: Filter by end timestamp
             endpoint: Filter by endpoint
-            
+            nodes: Filter by nodes
         Returns:
             List of alert records as dictionaries
         """
@@ -129,7 +130,8 @@ class AlertClient(PostgreSQLBaseClient):
                 filters.append(AlertRecordModel.timestamp <= end_time)
             if endpoint:
                 filters.append(AlertRecordModel.endpoint == endpoint)
-            
+            if nodes:
+                filters.append(AlertRecordModel.node_name.in_(nodes))
             if filters:
                 query = query.where(and_(*filters))
             

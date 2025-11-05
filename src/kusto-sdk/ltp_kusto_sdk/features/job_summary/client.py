@@ -129,33 +129,3 @@ class JobSummaryClient(KustoBaseClient):
         # Convert list of dicts to DataFrame for Kusto ingestion
         df = pd.DataFrame(records)
         self.ingest_job_summaries(df)
-    
-    def update_job_summary_exit_category(self, job_id: str, exit_category: str, exit_reason: str = "", endpoint: Optional[str] = None) -> None:
-        """
-        Update exit category for a job by ingesting a new record.
-        Note: Kusto is append-only, so we ingest a new record with updated fields.
-        
-        Args:
-            job_id: Job identifier
-            exit_category: New exit category
-            exit_reason: New exit reason
-            endpoint: Endpoint (cluster ID)
-        """
-        endpoint = endpoint or self.endpoint
-        
-        # First, get the latest record for this job
-        existing = self.query_job_summaries_by_job_ids([job_id], endpoint)
-        
-        if not existing:
-            return
-        
-        # Update the fields
-        record = existing[0].copy()
-        record['exitCategory'] = exit_category
-        if exit_reason:
-            record['exitReason'] = exit_reason
-        record['timeGenerated'] = pd.Timestamp.now().to_pydatetime()
-        
-        # Ingest the updated record
-        self.ingest_data([record])
-

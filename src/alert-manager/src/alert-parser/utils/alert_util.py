@@ -75,7 +75,8 @@ class AlertFetcher:
     """Fetches and processes alerts from Kusto"""
     
     def __init__(self):
-        self.client = create_alert_client()
+        self.endpoint = os.getenv("CLUSTER_ID")
+        self.client = create_alert_client(endpoint=self.endpoint)
 
     def fetch_logs(self, end_time_stamp, time_offset):
         """Fetch raw alert logs from Kusto"""

@@ -6,7 +6,10 @@
 import os
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+import pandas as pd
+
 from ...base import KustoBaseClient
+from ltp_storage.data_schema.alert_records import AlertParser
 
 import logging
 logger = logging.getLogger(__name__)
@@ -43,9 +46,10 @@ class AlertClient(KustoBaseClient):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         endpoint: Optional[str] = None,
+        nodes: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Query alert logs from ContainerLogV2.
+        Query alert logs from ContainerLogV2 and parse into structured alert records.
         
         Args:
             node_name: Filter by node name (parsed from labels)
@@ -53,10 +57,10 @@ class AlertClient(KustoBaseClient):
             severity: Filter by severity
             start_time: Filter by start timestamp
             end_time: Filter by end timestamp
-            endpoint: Not used for Kusto (kept for interface compatibility)
+            endpoint: Cluster/endpoint identifier for parsed records
             
         Returns:
-            List of parsed alert records
+            List of parsed alert records as dictionaries
         """
         # TODO: fix bug of NodeFilesystemUsage, NodeGpuCountChanged, NodeUnschedulable and remove them from the query
         query = (
@@ -80,5 +84,17 @@ class AlertClient(KustoBaseClient):
         # Execute query and parse results
         logger.info(f"Executing query: {query}")
         raw_results = self.execute_query(query)
-        return raw_results
-    
+        
+        if not raw_results:
+            return []
+        
+        alerts = [AlertParser.generate_row(row["LogMessage"]) for row in raw_results]
+        alerts_df = pd.DataFrame(alerts)
+        
+        if nodes is not None:
+            alerts_df = alerts_df[alerts_df["node_name"].isin(nodes)]
+        if alerts_df.empty:
+            logger.info("No alerts found for the specified nodes.")
+            return []
+        alerts_df["timestamp"] = pd.to_datetime(alerts_df["timestamp"], errors="coerce")
+        return alerts_df.to_dict(orient="records")

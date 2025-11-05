@@ -63,7 +63,6 @@ node-issue-classifier:
   coccurred_hardware_failure_node_limit: 5
 node-recycler:
   configured: False
-  environment: prod
   icm:
     host: prod.microsofticm.com
     crt_name: cert.pem

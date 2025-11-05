@@ -9,6 +9,7 @@ from sqlalchemy import select, and_
 from ...base import PostgreSQLBaseClient
 from ...models import JobSummary as JobSummaryModel
 from ltp_storage.data_schema.job_records import JobSummaryRecord
+from ltp_storage.utils.time_util import parse_duration
 
 
 class JobSummaryClient(PostgreSQLBaseClient):
@@ -275,7 +276,7 @@ class JobSummaryClient(PostgreSQLBaseClient):
         finally:
             session.close()
     
-    def query_unknown_category_records(self, retain_time_hours: int = 720, endpoint: Optional[str] = None) -> List[Dict[str, Any]]:
+    def query_unknown_category_records(self, retain_time: str = "30d", endpoint: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Query records with unknown exit category within the retention window.
         
@@ -286,10 +287,9 @@ class JobSummaryClient(PostgreSQLBaseClient):
         Returns:
             List of job summary records with unknown category
         """
-        from datetime import timedelta
         session = self.get_session()
         try:
-            cutoff_time = datetime.utcnow() - timedelta(hours=retain_time_hours)
+            cutoff_time = datetime.utcnow() - parse_duration(retain_time)
             
             query = select(JobSummaryModel).where(
                 and_(
@@ -352,41 +352,3 @@ class JobSummaryClient(PostgreSQLBaseClient):
             return [result.to_dict() for result in results]
         finally:
             session.close()
-    
-    def update_job_summary(self, job_id: str, updates: Dict[str, Any], endpoint: Optional[str] = None) -> bool:
-        """
-        Update job summary fields for a specific job.
-        
-        Args:
-            job_id: Job identifier
-            updates: Dictionary of field names and new values
-            endpoint: Filter by endpoint (cluster ID)
-            
-        Returns:
-            bool: True if updated, False if not found
-        """
-        session = self.get_session()
-        try:
-            # Get the latest record for this job_id
-            query = select(JobSummaryModel).where(JobSummaryModel.job_id == job_id)
-            
-            if endpoint:
-                query = query.where(JobSummaryModel.endpoint == endpoint)
-            
-            query = query.order_by(JobSummaryModel.time_generated.desc()).limit(1)
-            
-            job_summary = session.execute(query).scalar_one_or_none()
-            
-            if not job_summary:
-                return False
-            
-            # Update fields
-            for key, value in updates.items():
-                if hasattr(job_summary, key):
-                    setattr(job_summary, key, value)
-            
-            session.commit()
-            return True
-        finally:
-            session.close()
-

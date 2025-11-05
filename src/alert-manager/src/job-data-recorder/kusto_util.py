@@ -68,7 +68,7 @@ class StorageUtil:
         category = ''
         
         try:
-            # Get triaged actions from the client
+            # Get triaged actions from the client in list of NodeAction objects
             triaged_actions = self.node_action_client.find_triaged_failure(
                 node_name=node_name,
                 completed_time_ms=completedTime,
@@ -122,26 +122,15 @@ class StorageUtil:
         Works with both Kusto and PostgreSQL backends.
         
         Args:
-            retain_time (str): Retention window (e.g. '30d' for Kusto, '720' for PostgreSQL hours).
-                              For backward compatibility, converts '30d' to 720 hours for PostgreSQL.
+            retain_time (str): Retention window (e.g. '30d')
         Returns:
             pd.DataFrame: DataFrame of records with unknown category.
         """
         try:
-            # Convert retain_time to appropriate format for backend
-            if self.backend == 'postgresql':
-                # Convert Kusto-style time (e.g., '30d') to hours
-                retain_time_param = self._convert_retain_time(retain_time)
-                records = self.job_summary_client.query_unknown_category_records(
-                    retain_time_hours=retain_time_param,
-                    endpoint=self.endpoint
-                )
-            else:
-                # Kusto backend
-                records = self.job_summary_client.query_unknown_category_records(
-                    retain_time=retain_time,
-                    endpoint=self.endpoint
-                )
+            records = self.job_summary_client.query_unknown_category_records(
+                retain_time=retain_time,
+                endpoint=self.endpoint
+            )
             
             print(f"Querying unknown category records, result count: {len(records)}")
             return pd.DataFrame(records)
@@ -149,40 +138,21 @@ class StorageUtil:
             print(f"Error querying unknown category records: {e}")
             return pd.DataFrame()
     
-    def _convert_retain_time(self, retain_time):
-        """Convert Kusto-style time string to hours for PostgreSQL."""
-        if isinstance(retain_time, str) and retain_time.endswith('d'):
-            return int(retain_time[:-1]) * 24
-        elif isinstance(retain_time, str) and retain_time.endswith('h'):
-            return int(retain_time[:-1])
-        else:
-            return 720  # Default 30 days
-
     def query_unknown_react_records(self, retain_time):
         """
         Query records with missing reactTime within the retention window.
         Works with both Kusto and PostgreSQL backends.
-        
+            
         Args:
-            retain_time (str): Retention window (e.g. '30d' for Kusto, '720' for PostgreSQL hours).
-                              For backward compatibility, converts '30d' to 720 hours for PostgreSQL.
+            retain_time (str): Retention window (e.g. '30d')
         Returns:
             pd.DataFrame: DataFrame of records with missing reactTime.
         """
         try:
-            # Convert retain_time to appropriate format for backend
-            if self.backend == 'postgresql':
-                retain_time_param = self._convert_retain_time(retain_time)
-                records = self.job_react_client.query_unknown_react_records(
-                    retain_time_hours=retain_time_param,
-                    endpoint=self.endpoint
-                )
-            else:
-                # Kusto backend
-                records = self.job_react_client.query_unknown_react_records(
-                    retain_time=retain_time,
-                    endpoint=self.endpoint
-                )
+            records = self.job_react_client.query_unknown_react_records(
+                retain_time=retain_time,
+                endpoint=self.endpoint
+            )
             
             print(f"Querying unknown react records, result count: {len(records)}")
             return pd.DataFrame(records)

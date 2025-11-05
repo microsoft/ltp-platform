@@ -82,37 +82,3 @@ class JobReactTimeClient(KustoBaseClient):
         import pandas as pd
         df = pd.DataFrame(records)
         self.ingest_job_react_times(df)
-    
-    def update_job_react_time(self, job_id: str, react_time: Optional[float], endpoint: Optional[str] = None) -> None:
-        """
-        Update react time for a job by ingesting a new record.
-        Note: Kusto is append-only, so we ingest a new record with updated fields.
-        
-        Args:
-            job_id: Job identifier
-            react_time: New react time value
-            endpoint: Endpoint (cluster ID)
-        """
-        endpoint = endpoint or self.endpoint
-        
-        # Query existing record
-        query = f"""
-        {self.table_name}
-        | where jobId == '{job_id}'
-        | where Endpoint == '{endpoint}'
-        | summarize arg_max(timeGenerated, *) by jobId
-        """
-        
-        existing = self.execute_query(query)
-        
-        if not existing:
-            return
-        
-        # Update the react_time field
-        record = existing[0].copy()
-        record['reactTime'] = react_time
-        record['timeGenerated'] = pd.Timestamp.now().to_pydatetime()
-        
-        # Ingest the updated record
-        self.ingest_data([record])
-

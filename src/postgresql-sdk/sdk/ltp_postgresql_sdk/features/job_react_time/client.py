@@ -9,6 +9,7 @@ from sqlalchemy import select, and_
 from ...base import PostgreSQLBaseClient
 from ...models import JobReactTime as JobReactTimeModel
 from ltp_storage.data_schema.job_records import JobReactTimeRecord
+from ltp_storage.utils.time_util import parse_duration
 
 
 class JobReactTimeClient(PostgreSQLBaseClient):
@@ -224,21 +225,20 @@ class JobReactTimeClient(PostgreSQLBaseClient):
         finally:
             session.close()
     
-    def query_unknown_react_records(self, retain_time_hours: int = 720, endpoint: Optional[str] = None) -> List[Dict[str, Any]]:
+    def query_unknown_react_records(self, retain_time: str = "30d", endpoint: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Query records with missing reactTime within the retention window.
         
         Args:
-            retain_time_hours: Retention window in hours (default 30 days = 720 hours)
+            retain_time: Retention window (e.g. '30d')
             endpoint: Filter by endpoint (cluster ID)
             
         Returns:
             List of react time records with missing react_time
         """
-        from datetime import timedelta
         session = self.get_session()
         try:
-            cutoff_time = datetime.utcnow() - timedelta(hours=retain_time_hours)
+            cutoff_time = datetime.utcnow() - parse_duration(retain_time)
             
             query = select(JobReactTimeModel).where(
                 and_(
@@ -255,37 +255,3 @@ class JobReactTimeClient(PostgreSQLBaseClient):
             return [result.to_dict() for result in results]
         finally:
             session.close()
-    
-    def update_job_react_time(self, job_id: str, react_time: Optional[float], endpoint: Optional[str] = None) -> bool:
-        """
-        Update react time for a specific job.
-        
-        Args:
-            job_id: Job identifier
-            react_time: New react time value
-            endpoint: Filter by endpoint (cluster ID)
-            
-        Returns:
-            bool: True if updated, False if not found
-        """
-        session = self.get_session()
-        try:
-            # Get the latest record for this job_id
-            query = select(JobReactTimeModel).where(JobReactTimeModel.job_id == job_id)
-            
-            if endpoint:
-                query = query.where(JobReactTimeModel.endpoint == endpoint)
-            
-            query = query.order_by(JobReactTimeModel.time_generated.desc()).limit(1)
-            
-            job_react = session.execute(query).scalar_one_or_none()
-            
-            if not job_react:
-                return False
-            
-            job_react.react_time = react_time
-            session.commit()
-            return True
-        finally:
-            session.close()
-
