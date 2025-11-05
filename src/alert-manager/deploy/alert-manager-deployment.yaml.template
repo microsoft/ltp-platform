@@ -97,6 +97,12 @@ spec:
           value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
         - name: LTP_STORAGE_BACKEND_DEFAULT
           value: value: "{{ cluster_cfg['alert-manager']['alert-handler'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
+{% if cluster_cfg["alert-manager"]["node-issue-classifier"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
+        - name: POSTGRES_CONNECTION_STR
+          value: "{{ cluster_cfg['alert-manager']['postgresql']['connection-str'] }}"
+        - name: POSTGRES_SCHEMA
+          value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
+{% endif %}
         volumeMounts:
         - name: templates-volume
           mountPath: /etc/alerthandler/templates
