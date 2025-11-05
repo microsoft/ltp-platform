@@ -148,12 +148,13 @@ jobs:
             echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
             $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration < cluster_id 
             echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
-            # 
-            # Replace "webportal" with "webportal-dind"  if "webportal" is changed
+            # Replace "webportal" with "webportal-dind" if "webportal" is changed
             services_to_deploy="${{ steps.changes.outputs.folders }}"
-            if [[ " $services_to_deploy " == *"webportal "* ]]; then
-              services_to_deploy="${services_to_deploy//webportal/webportal-dind}"
-            fi
+            if [[ " $services_to_deploy " == *"webportal"* ]]; then
+              services_to_deploy="${services_to_deploy//webportal /}"
+              services_to_deploy="${services_to_deploy//webportal-dind /}"
+              services_to_deploy="$services_to_deploy webportal-dind"
+            fiW
             echo "Final services to deploy: $services_to_deploy"
             $GITHUB_WORKSPACE/paictl.py service start -n $services_to_deploy < cluster_id
             kubectl get pod
