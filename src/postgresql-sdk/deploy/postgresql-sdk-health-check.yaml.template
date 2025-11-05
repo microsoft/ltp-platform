@@ -31,7 +31,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: health-checker
-            image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}postgresql-sdk-service:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+            image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}postgresql-sdk:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
             imagePullPolicy: Always
             command: ["python", "/app/src/schema_manager.py", "check"]
             env:

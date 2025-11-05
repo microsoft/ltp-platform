@@ -14,6 +14,18 @@ from alembic.config import Config
 from alembic import command
 from sqlalchemy import create_engine, text
 
+from ltp_postgresql_sdk.database import Base, DatabaseManager
+# Import all model classes to register them with Base
+from ltp_postgresql_sdk.models import (
+    NodeAction,
+    NodeStatus,
+    JobSummary,
+    JobReactTime,
+    NodeStatusAttributes,
+    NodeActionAttributes,
+    AlertRecord,
+)  
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
@@ -35,7 +47,7 @@ class SchemaManager:
         """
         self.connection_str = connection_str or os.getenv(
             "POSTGRES_CONNECTION_STR",
-            "postgresql://root:rootpass@localhost:5432/openpai"
+            "postgresql://user:password@host:port/database",
         )
         self.schema = schema
         self.engine = create_engine(self.connection_str, pool_pre_ping=True)
@@ -135,23 +147,7 @@ class SchemaManager:
             # Ensure schema exists
             if not self.ensure_schema():
                 return False
-            
-            # Import models to register with Base
-            # SDK is in ../sdk/ltp_postgresql_sdk relative to this file
-            sdk_path = self.service_dir / "sdk"
-            if str(sdk_path) not in sys.path:
-                sys.path.insert(0, str(sdk_path))
-            from ltp_postgresql_sdk.database import Base, DatabaseManager
-            # Import all model classes to register them with Base
-            from ltp_postgresql_sdk.models import (
-                NodeAction,
-                NodeStatus,
-                JobSummary,
-                JobReactTime,
-                NodeStatusAttributes,
-                NodeActionAttributes,
-                AlertRecord,
-            )  
+        
             
             # Verify models are registered
             logger.info(f"Registered models: {list(Base.metadata.tables.keys())}")

@@ -215,8 +215,7 @@ class StorageUtil:
             print(f"Successfully ingested {len(df)} records to {table_name}")
         except Exception as e:
             print(f"Error ingesting job metrics: {e}")
-            raise
-    
+
     def _ingest_job_summaries(self, df):
         """Ingest job summaries to the configured backend."""
         # Both Kusto and PostgreSQL accept list of dicts - unified interface!

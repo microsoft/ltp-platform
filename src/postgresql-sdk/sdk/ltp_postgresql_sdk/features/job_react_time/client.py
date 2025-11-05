@@ -5,7 +5,7 @@
 
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func
 from ...base import PostgreSQLBaseClient
 from ...models import JobReactTime as JobReactTimeModel
 from ltp_storage.data_schema.job_records import JobReactTimeRecord
@@ -172,8 +172,6 @@ class JobReactTimeClient(PostgreSQLBaseClient):
         """
         session = self.get_session()
         try:
-            from sqlalchemy import func
-
             query = select(func.avg(JobReactTimeModel.react_time))
 
             filters = []

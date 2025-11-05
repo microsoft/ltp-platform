@@ -35,7 +35,7 @@ class DatabaseManager:
         """
         self.connection_str = connection_str or os.getenv(
             "POSTGRES_CONNECTION_STR",
-            "postgresql://root:rootpass@localhost:5432/openpai",
+            "postgresql://user:password@host:port/database",
         )
         self.schema = schema
 
