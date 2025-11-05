@@ -5,9 +5,12 @@ permissions:
 
 on:
   push:
-    branches: [main, dev, 'release/*']
+    branches: [main, 'release/*']
   pull_request:
     branches: [main, dev, 'release/*']
+  release:
+    types: [published]
+  workflow_dispatch:
 
 env:
   TAG: ${{ github.run_number }}
@@ -39,6 +42,7 @@ jobs:
         id: all
         run: |
           services=$(ls -1d src/* | awk -F'/' '{print $2}' | tr '\n' ' ')
+          skipped_services="base-image cleaning-image dev-box marketplace-db marketplace-restserver marketplace-webportal openpai-runtime utilization-reporter utilization-reporter"
           echo "All services: $services"
           echo "::set-output name=services::$services"
 
