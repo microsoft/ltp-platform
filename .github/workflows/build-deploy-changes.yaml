@@ -144,10 +144,15 @@ jobs:
             kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
             # Replace "webportal" with "webportal-dind" if "webportal" is changed
             services_to_deploy="${{ steps.changes.outputs.folders }}"
-            if [[ " $services_to_deploy " == *"webportal"* ]]; then
-              services_to_deploy="${services_to_deploy//webportal /}"
-              services_to_deploy="${services_to_deploy//webportal-dind /}"
-              services_to_deploy="$services_to_deploy webportal-dind"
+            if echo " $services_to_deploy " | grep -q " webportal "; then
+              tmp=""
+              for s in $services_to_deploy; do
+                [ "$s" = "webportal" ] && continue
+                [ "$s" = "webportal-dind" ] && continue
+                tmp="$tmp $s"
+              done
+              services_to_deploy="$tmp webportal-dind"
+              services_to_deploy=$(echo "$services_to_deploy" | xargs)
             fi
             echo "Final services to deploy: $services_to_deploy"
 
