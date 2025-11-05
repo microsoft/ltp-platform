@@ -43,6 +43,9 @@ jobs:
         run: |
           services=$(ls -1d src/* | awk -F'/' '{print $2}' | tr '\n' ' ')
           skipped_services="base-image cleaning-image dev-box marketplace-db marketplace-restserver marketplace-webportal openpai-runtime utilization-reporter utilization-reporter"
+          for skip in $skipped_services; do
+            services=$(echo $services | sed "s/\b$skip\b//g")
+          done
           echo "All services: $services"
           echo "::set-output name=services::$services"
 
