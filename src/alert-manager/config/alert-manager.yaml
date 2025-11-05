@@ -49,8 +49,6 @@ cluster-utilization:
   configured: False
 job-data-recorder:
   configured: False
-  run-interval: 3h  # How often to record job data
-  record-retain-time: 30d  # How long to keep records
 job-status-change-notification:
   # Max connection number to database in poller.
   configured: False
@@ -59,8 +57,6 @@ job-status-change-notification:
   db-poller-interval-second: 600
 node-issue-classifier:
   configured: False
-  classification-interval-minutes: 10
-  coccurred_hardware_failure_node_limit: 5
 node-recycler:
   configured: False
   icm:

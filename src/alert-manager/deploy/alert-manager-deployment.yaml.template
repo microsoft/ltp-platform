@@ -152,7 +152,7 @@ spec:
         - name: CLASSIFICATION_INTERVAL_MINUTES
           value: "{{ cluster_cfg["alert-manager"]["node-issue-classifier"]["classification-interval-minutes"] | default("10") }}"
         - name: COOCCURRED_HARDWARE_FAILURE_LIMIT
-          value: "{{ cluster_cfg["alert-manager"]["node-issue-classifier"]["coccurred_hardware_failure_node_limit"] | default("5") }}"
+          value: "{{ cluster_cfg["alert-manager"]["node-issue-classifier"]["coccurred-hardware-failure-node-limit"] | default("5") }}"
 {% if cluster_cfg["alert-manager"]["node-issue-classifier"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "kusto" %}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
           value: {{ cluster_cfg["alert-manager"]["kusto"]["kusto-user-assigned-client-id"] }}

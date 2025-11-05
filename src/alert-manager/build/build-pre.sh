@@ -10,6 +10,7 @@ cp -arfT "../../ltp-storage-common" "../src/node-recycler/ltp-storage-common"
 cp -arfT "../../ltp-storage-common" "../src/node-issue-classifier/ltp-storage-common"
 cp -arfT "../../ltp-storage-common" "../src/alert-parser/ltp-storage-common"
 cp -arfT "../../ltp-storage-common" "../src/job-data-recorder/ltp-storage-common"
+cp -arfT "../../ltp-storage-common" "../src/alert-handler/ltp-storage-common"
 
 # Copy SDKs (backend implementations)
 cp -arfT "../../kusto-sdk" "../src/node-recycler/kusto-sdk"
@@ -20,6 +21,7 @@ cp -arfT "../../kusto-sdk" "../src/alert-parser/kusto-sdk"
 cp -arfT "../../postgresql-sdk/sdk" "../src/alert-parser/postgresql-sdk"
 cp -arfT "../../kusto-sdk" "../src/job-data-recorder/kusto-sdk"
 cp -arfT "../../postgresql-sdk/sdk" "../src/job-data-recorder/postgresql-sdk"
+cp -arfT "../../postgresql-sdk/sdk" "../src/alert-handler/postgresql-sdk"
 
 # Copy other dependencies
 cp -arfT "../src/node-failure-detection/monitor/data_sources.py" "../src/job-data-recorder/data_sources.py"
