@@ -151,7 +151,7 @@ jobs:
             # 
             # Replace "webportal" with "webportal-dind"  if "webportal" is changed
             services_to_deploy="${{ steps.changes.outputs.folders }}"
-            if [[ " $services_to_deploy " == *" webportal "* ]]; then
+            if [[ " $services_to_deploy " == *"webportal "* ]]; then
               services_to_deploy="${services_to_deploy//webportal/webportal-dind}"
             fi
             echo "Final services to deploy: $services_to_deploy"
