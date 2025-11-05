@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// target job tag to identify model serving jobs
+// Required job configuration parameters for inference jobs
 var FORCED_PARAMETERS = []string{
 	"INTERNAL_SERVER_IP",
 	"INTERNAL_SERVER_PORT",
@@ -44,7 +44,7 @@ func GETRequest(url string, token string) ([]byte, error) {
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read jobs response: %w", err)
+		return nil, fmt.Errorf("failed to read response body of %s: %w", url, err)
 	}
 
 	return body, nil
