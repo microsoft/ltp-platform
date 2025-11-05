@@ -8,15 +8,13 @@ import ChatBox from "./ChatBox";
 import { useChatStore } from "../libs/state";
 import { Toaster } from "../components/sonner";
 
-export default function App({ restUrl, user, restToken, modelToken }:
-  { restUrl: string; user: string; restToken: string; modelToken: string }) {
+export default function App({ restUrl, user, restToken }:
+  { restUrl: string; user: string; restToken: string }) {
   // Initialize the chat store with the provided parameters
-  const { setRestServerPath, setUser, setRestServerToken, setJobServerToken } = useChatStore.getState();
+  const { setUser, setRestServerToken } = useChatStore.getState();
 
-  setRestServerPath(restUrl);
   setUser(user);
   setRestServerToken(restToken);
-  setJobServerToken(modelToken);
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
