@@ -103,18 +103,18 @@ jobs:
         run: |
           changed_services="${{ steps.changes.outputs.folders }}"
           echo "Building: $changed_services"
-          if [[ "$changed_services" == *"alter-manager"* ]]; then
-            echo "alter-manager is in the changed services"
-            changed_services=$(echo $changed_services | sed 's/alter-manager//g')
-            # build specific images in alter-manager
-            echo "Building specific alter-manager images"
+          if [[ "$changed_services" == *"alert-manager"* ]]; then
+            echo "alert-manager is in the changed services"
+            changed_services=$(echo $changed_services | sed 's/alert-manager//g')
+            # build specific images in alert-manager
+            echo "Building specific alert-manager images"
             $GITHUB_WORKSPACE/build/pai_build.py build \
               -c $GITHUB_WORKSPACE/config/cluster-configuration \
-              -s alter-manager
+              -s alert-manager
               -i abnormal-detector,alert-handler,alert-parser,cert-expiration-checker,cluster-utilization,job-data-recorder,job-status-change-notification,node-failure-detection,node-issue-classifier,nvidia-gpu-low-perf-fixer,redis-monitoring
           fi
 
-          echo "Changed services after removing alter-manager: $changed_services"
+          echo "Changed services after removing alert-manager: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py build \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
             -s $changed_services
@@ -133,13 +133,13 @@ jobs:
         run: |
           changed_services="${{ steps.changes.outputs.folders }}"
           echo "Pushing: $changed_services"
-          # check whether alter-manager is in the changed services
-          echo "Changed services before removing alter-manager: $changed_services"
-          if [[ "$changed_services" == *"alter-manager"* ]]; then
-            echo "alter-manager is in the changed services"
-            changed_services=$(echo $changed_services | sed 's/alter-manager//g')
-            # push specific images in alter-manager to GHCR
-            echo "Pushing specific alter-manager images to GHCR"
+          # check whether alert-manager is in the changed services
+          echo "Changed services before removing alert-manager: $changed_services"
+          if [[ "$changed_services" == *"alert-manager"* ]]; then
+            echo "alert-manager is in the changed services"
+            changed_services=$(echo $changed_services | sed 's/alert-manager//g')
+            # push specific images in alert-manager to GHCR
+            echo "Pushing specific alert-manager images to GHCR"
             $GITHUB_WORKSPACE/build/pai_build.py push \
               -c $GITHUB_WORKSPACE/config/cluster-configuration \
               -s alert-manager \
@@ -150,7 +150,7 @@ jobs:
               --docker-password ${{ secrets.GITHUB_TOKEN }}
           fi
 
-          echo "Changed services after removing alter-manager: $changed_services"
+          echo "Changed services after removing alert-manager: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
             -s $changed_services \

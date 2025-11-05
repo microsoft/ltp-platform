@@ -79,13 +79,13 @@ jobs:
           echo "--------------------------------"
           failed_services=""
           for service in $all_services; do
-            if [[ "$service" =~ alter-manager ]]; then
-              echo "alter-manager is in the changed services"
-              # Build specific images in alter-manager
-              echo "Building specific alter-manager images"
+            if [[ "$service" =~ alert-manager ]]; then
+              echo "alert-manager is in the changed services"
+              # Build specific images in alert-manager
+              echo "Building specific alert-manager images"
               $GITHUB_WORKSPACE/build/pai_build.py build \
                 -c $GITHUB_WORKSPACE/config/cluster-configuration \
-                -s alter-manager \
+                -s alert-manager \
                 -i abnormal-detector,alert-handler,alert-parser,cert-expiration-checker,cluster-utilization,job-data-recorder,job-status-change-notification,node-failure-detection,node-issue-classifier,nvidia-gpu-low-perf-fixer,redis-monitoring
             fi
             echo "Building service: $service"
