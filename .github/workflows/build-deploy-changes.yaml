@@ -79,8 +79,9 @@ jobs:
       - name: Install Package
         if: steps.check.outputs.has_changed == 'true'
         run: |
-          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip docker-cli ca-certificates curl apt-transport-https lsb-release gnupg parallel
+          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip ca-certificates curl apt-transport-https lsb-release gnupg parallel
           curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+          curl -fsSL https://get.docker.com | sh
 
       - name: Install python libs
         if: steps.check.outputs.has_changed == 'true'
