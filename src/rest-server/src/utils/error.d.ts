@@ -34,6 +34,8 @@ declare type Code =
     'ForbiddenKeyError' |
     'IncorrectPasswordError' |
     'InvalidParametersError' |
+    'InvalidImageError' |
+    'InvalidImageRegexError' |
     'NoApiError' |
     'NoJobError' |
     'NoJobConfigError' |
