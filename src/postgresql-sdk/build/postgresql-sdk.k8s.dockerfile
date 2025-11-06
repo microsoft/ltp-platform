@@ -15,7 +15,7 @@ WORKDIR /app
 
 # Copy SDK (embedded in service)
 COPY sdk /app/sdk
-RUN pip install -r /app/sdk/requirements.txt
+RUN cd /app/sdk && pip install -r requirements.txt
 RUN pip install --no-cache-dir -e /app/sdk
 RUN pip install pytest pytest-cov
 

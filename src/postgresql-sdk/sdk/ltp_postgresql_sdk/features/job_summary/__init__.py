@@ -4,7 +4,5 @@
 """Job summary feature module."""
 
 from .client import JobSummaryClient
-from .models import JobSummaryRecord
 
-__all__ = ["JobSummaryClient", "JobSummaryRecord"]
-
+__all__ = ["JobSummaryClient"]

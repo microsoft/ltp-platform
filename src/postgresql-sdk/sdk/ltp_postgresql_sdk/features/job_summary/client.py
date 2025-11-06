@@ -5,7 +5,7 @@
 
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func
 from ...base import PostgreSQLBaseClient
 from ...models import JobSummary as JobSummaryModel
 from ltp_storage.data_schema.job_records import JobSummaryRecord
@@ -15,7 +15,7 @@ from ltp_storage.utils.time_util import parse_duration
 class JobSummaryClient(PostgreSQLBaseClient):
     """Client for managing job summary records in PostgreSQL."""
 
-    def insert_job_summary(self, record: JobSummaryRecord) -> int:
+    def _insert_record(self, record: JobSummaryRecord) -> int:
         """
         Insert a job summary record.
 
@@ -68,21 +68,18 @@ class JobSummaryClient(PostgreSQLBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to insert job summary record: {str(e)}")
 
-    def insert_job_summaries_batch(self, records: List[Dict[str, Any]]) -> List[int]:
+    def insert_job_summaries_batch(self, records: List[Dict[str, Any]]) -> None:
         """
         Insert multiple job summary records in a batch.
 
         Args:
             records: List of job summary records as dictionaries
 
-        Returns:
-            List[int]: List of IDs of inserted records
-
         Raises:
             RuntimeError: If insertion fails
         """
         if not records:
-            return []
+            return
         
         try:
             # Convert dicts to JobSummaryRecord objects
@@ -123,15 +120,12 @@ class JobSummaryClient(PostgreSQLBaseClient):
                 ]
                 session.add_all(job_summaries)
                 session.commit()
-                for job_summary in job_summaries:
-                    session.refresh(job_summary)
-                return [job_summary.id for job_summary in job_summaries]
             finally:
                 session.close()
         except Exception as e:
             raise RuntimeError(f"Failed to insert job summary records: {str(e)}")
 
-    def query_job_summaries(
+    def _query_records(
         self,
         job_id: Optional[str] = None,
         user_name: Optional[str] = None,
@@ -184,7 +178,7 @@ class JobSummaryClient(PostgreSQLBaseClient):
         finally:
             session.close()
 
-    def get_job_summary(self, job_id: str) -> Optional[Dict[str, Any]]:
+    def _get_record(self, job_id: str) -> Optional[Dict[str, Any]]:
         """
         Get the latest job summary for a specific job ID.
 
@@ -205,52 +199,6 @@ class JobSummaryClient(PostgreSQLBaseClient):
         finally:
             session.close()
 
-    def count_job_summaries(
-        self,
-        user_name: Optional[str] = None,
-        job_state: Optional[str] = None,
-        virtual_cluster: Optional[str] = None,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-    ) -> int:
-        """
-        Count job summary records with filters.
-
-        Args:
-            user_name: Filter by user name
-            job_state: Filter by job state
-            virtual_cluster: Filter by virtual cluster
-            start_time: Filter by start submission time
-            end_time: Filter by end submission time
-
-        Returns:
-            Count of matching records
-        """
-        session = self.get_session()
-        try:
-            from sqlalchemy import func
-
-            query = select(func.count(JobSummaryModel.id))
-
-            filters = []
-            if user_name:
-                filters.append(JobSummaryModel.user_name == user_name)
-            if job_state:
-                filters.append(JobSummaryModel.job_state == job_state)
-            if virtual_cluster:
-                filters.append(JobSummaryModel.virtual_cluster == virtual_cluster)
-            if start_time:
-                filters.append(JobSummaryModel.submission_time >= start_time)
-            if end_time:
-                filters.append(JobSummaryModel.submission_time <= end_time)
-
-            if filters:
-                query = query.where(and_(*filters))
-
-            result = session.execute(query).scalar()
-            return result or 0
-        finally:
-            session.close()
     
     def query_last_completion_time(self, endpoint: Optional[str] = None) -> Optional[datetime]:
         """
@@ -264,8 +212,6 @@ class JobSummaryClient(PostgreSQLBaseClient):
         """
         session = self.get_session()
         try:
-            from sqlalchemy import func
-            
             query = select(func.max(JobSummaryModel.completion_time))
             
             if endpoint:
@@ -322,9 +268,6 @@ class JobSummaryClient(PostgreSQLBaseClient):
         
         session = self.get_session()
         try:
-            from sqlalchemy import func
-            from sqlalchemy.orm import aliased
-            
             # Subquery to get max time_generated for each job_id
             subquery = (
                 select(

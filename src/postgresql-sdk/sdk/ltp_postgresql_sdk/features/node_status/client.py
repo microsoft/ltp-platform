@@ -13,7 +13,7 @@ from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus, ST
 class NodeStatusClient(PostgreSQLBaseClient):
     """Client for managing node status records in PostgreSQL."""
     
-    def insert_status(self, record: NodeStatusRecord) -> int:
+    def _insert_record(self, record: NodeStatusRecord) -> int:
         """
         Insert a node status record.
 
@@ -45,7 +45,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to insert node status record: {str(e)}")
 
-    def insert_statuses_batch(self, records: List[NodeStatusRecord]) -> List[int]:
+    def _insert_records_batch(self, records: List[NodeStatusRecord]) -> List[int]:
         """
         Insert multiple node status records in a batch.
 
@@ -81,7 +81,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to insert node status records: {str(e)}")
 
-    def query_statuses(
+    def _query_records(
         self,
         hostname: Optional[str] = None,
         node_id: Optional[str] = None,
@@ -132,7 +132,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
         finally:
             session.close()
 
-    def get_latest_status(
+    def _get_latest_record(
         self, hostname: Optional[str] = None, node_id: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """
@@ -162,72 +162,6 @@ class NodeStatusClient(PostgreSQLBaseClient):
 
             result = session.execute(query).scalar_one_or_none()
             return result.to_dict() if result else None
-        finally:
-            session.close()
-
-    def get_status_history(
-        self,
-        hostname: Optional[str] = None,
-        node_id: Optional[str] = None,
-        limit: int = 100,
-    ) -> List[Dict[str, Any]]:
-        """
-        Get status history for a specific node.
-
-        Args:
-            hostname: Filter by hostname
-            node_id: Filter by node ID
-            limit: Maximum number of records to return
-
-        Returns:
-            List of status records ordered by timestamp descending
-        """
-        return self.query_statuses(
-            hostname=hostname, node_id=node_id, limit=limit
-        )
-
-    def count_statuses(
-        self,
-        hostname: Optional[str] = None,
-        node_id: Optional[str] = None,
-        status: Optional[str] = None,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-    ) -> int:
-        """
-        Count node status records with filters.
-
-        Args:
-            hostname: Filter by hostname
-            node_id: Filter by node ID
-            status: Filter by status
-            start_time: Filter by start timestamp
-            end_time: Filter by end timestamp
-
-        Returns:
-            Count of matching records
-        """
-        session = self.get_session()
-        try:
-            query = select(func.count(NodeStatusModel.id))
-
-            filters = []
-            if hostname:
-                filters.append(NodeStatusModel.hostname == hostname)
-            if node_id:
-                filters.append(NodeStatusModel.node_id == node_id)
-            if status:
-                filters.append(NodeStatusModel.status == status)
-            if start_time:
-                filters.append(NodeStatusModel.timestamp >= start_time)
-            if end_time:
-                filters.append(NodeStatusModel.timestamp <= end_time)
-
-            if filters:
-                query = query.where(and_(*filters))
-
-            result = session.execute(query).scalar()
-            return result or 0
         finally:
             session.close()
 
@@ -327,10 +261,10 @@ class NodeStatusClient(PostgreSQLBaseClient):
         try:
             if timestamp is None:
                 # Get latest status
-                result = self.get_latest_status(hostname=hostname)
+                result = self._get_latest_record(hostname=hostname)
             else:
                 # Get status at specific time
-                result_list = self.query_statuses(
+                result_list = self._query_records(
                     hostname=hostname,
                     end_time=timestamp,
                     limit=1
@@ -340,13 +274,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
             if not result:
                 return None
                 
-            return NodeStatusRecord(
-                Timestamp=result['timestamp'],
-                HostName=result['hostname'],
-                NodeId=result['node_id'],
-                Status=result['status'],
-                Endpoint=result.get('endpoint', '')
-            )
+            return NodeStatusRecord.from_record(result)
         except Exception as e:
             raise RuntimeError(f"Failed to get node status: {str(e)}")
 
@@ -377,12 +305,12 @@ class NodeStatusClient(PostgreSQLBaseClient):
             record = NodeStatusRecord(
                 Timestamp=timestamp,
                 HostName=hostname,
-                NodeId="",  # Will be filled by caller if needed
+                NodeId="",  # TODO:Will be filled by caller if needed
                 Status=to_status,
-                Endpoint=""  # Will be filled by caller if needed
+                Endpoint=self.endpoint
             )
             
-            self.insert_status(record)
+            self._insert_record(record)
             return to_status
         except Exception as e:
             raise RuntimeError(f"Failed to update node status: {str(e)}")
@@ -411,9 +339,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
             >>> current_cordoned_nodes = client.get_nodes_by_status('cordoned')
             >>> print(f"Found {len(current_cordoned_nodes)} nodes currently cordoned")
         """
-        try:
-            from sqlalchemy import func
-            
+        try:       
             session = self.get_session()
             try:
                 # Subquery to get latest timestamp for each hostname

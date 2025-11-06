@@ -36,13 +36,13 @@ def convert_timestamp(timestamp_str, format="timestamp"):
     Returns:
         Timestamp in requested format
     """
-    # Step 1: Convert input to epoch timestamp (int)
+    # Step 1: Convert input to epoch seconds (float to preserve sub-second precision)
     if isinstance(timestamp_str, (int, float)):
-        # For numeric inputs, use directly as epoch timestamp
-        epoch_timestamp = int(timestamp_str)
+        # For numeric inputs, use directly as epoch seconds
+        epoch_seconds = float(timestamp_str)
     elif isinstance(timestamp_str, datetime):
-        # For datetime objects, convert to epoch
-        epoch_timestamp = int(timestamp_str.timestamp())
+        # For datetime objects, convert to epoch seconds
+        epoch_seconds = timestamp_str.timestamp()
     elif isinstance(timestamp_str, str):
         # For string inputs, handle different formats
         if timestamp_str.endswith("Z"):
@@ -51,18 +51,23 @@ def convert_timestamp(timestamp_str, format="timestamp"):
             # Keep the T for ISO format which pd.to_datetime can handle
             pass
 
-        # Convert string to epoch timestamp
-        epoch_timestamp = int(pd.to_datetime(timestamp_str).timestamp())
+        # Convert string to epoch seconds
+        epoch_seconds = pd.to_datetime(timestamp_str).timestamp()
     else:
         raise ValueError(f"Invalid timestamp type: {type(timestamp_str)}")
 
     # Step 2: Convert epoch timestamp to requested output format
     if format == "timestamp":
-        return epoch_timestamp
+        return int(epoch_seconds)
     elif format == "datetime":
-        return datetime.fromtimestamp(epoch_timestamp, tz=timezone.utc)
+        return datetime.fromtimestamp(epoch_seconds, tz=timezone.utc)
     elif format == "str":
-        dt = datetime.fromtimestamp(epoch_timestamp, tz=timezone.utc)
+        dt = datetime.fromtimestamp(epoch_seconds, tz=timezone.utc)
         return dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    elif format == "datetime_naive":
+        return datetime.fromtimestamp(epoch_seconds, tz=timezone.utc).replace(tzinfo=None)
+    elif format == "str_naive":
+        dt = datetime.fromtimestamp(epoch_seconds, tz=timezone.utc).replace(tzinfo=None)
+        return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")
     else:
         raise ValueError(f"Invalid format type: {format}")

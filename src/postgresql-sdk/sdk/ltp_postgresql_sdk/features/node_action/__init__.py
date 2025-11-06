@@ -4,8 +4,5 @@
 """Node action feature module."""
 
 from .client import NodeActionClient
-from .models import NodeActionRecord
 
-__all__ = ["NodeActionClient", "NodeActionRecord"]
-
-
+__all__ = ["NodeActionClient"]

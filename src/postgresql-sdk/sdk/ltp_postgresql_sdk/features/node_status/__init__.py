@@ -4,8 +4,5 @@
 """Node status feature module."""
 
 from .client import NodeStatusClient
-from .models import NodeStatusRecord
 
-__all__ = ["NodeStatusClient", "NodeStatusRecord"]
-
-
+__all__ = ["NodeStatusClient"]

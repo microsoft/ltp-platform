@@ -15,7 +15,7 @@ from ltp_storage.utils.time_util import parse_duration
 class JobReactTimeClient(PostgreSQLBaseClient):
     """Client for managing job react time records in PostgreSQL."""
 
-    def insert_job_react_time(self, record: JobReactTimeRecord) -> int:
+    def _insert_record(self, record: JobReactTimeRecord) -> int:
         """
         Insert a job react time record.
 
@@ -47,21 +47,18 @@ class JobReactTimeClient(PostgreSQLBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to insert job react time record: {str(e)}")
 
-    def insert_job_react_times_batch(self, records: List[Dict[str, Any]]) -> List[int]:
+    def insert_job_react_times_batch(self, records: List[Dict[str, Any]]) -> None:
         """
         Insert multiple job react time records in a batch.
 
         Args:
             records: List of job react time records as dictionaries
 
-        Returns:
-            List[int]: List of IDs of inserted records
-
         Raises:
             RuntimeError: If insertion fails
         """
         if not records:
-            return []
+            return
         
         try:
             # Convert dicts to JobReactTimeRecord objects
@@ -81,15 +78,12 @@ class JobReactTimeClient(PostgreSQLBaseClient):
                 ]
                 session.add_all(job_react_times)
                 session.commit()
-                for job_react_time in job_react_times:
-                    session.refresh(job_react_time)
-                return [job_react_time.id for job_react_time in job_react_times]
             finally:
                 session.close()
         except Exception as e:
             raise RuntimeError(f"Failed to insert job react time records: {str(e)}")
 
-    def query_job_react_times(
+    def _query_records(
         self,
         job_id: Optional[str] = None,
         job_hash: Optional[str] = None,
@@ -134,7 +128,7 @@ class JobReactTimeClient(PostgreSQLBaseClient):
         finally:
             session.close()
 
-    def get_job_react_time(self, job_id: str) -> Optional[Dict[str, Any]]:
+    def _get_record(self, job_id: str) -> Optional[Dict[str, Any]]:
         """
         Get the latest react time for a specific job ID.
 
@@ -188,40 +182,6 @@ class JobReactTimeClient(PostgreSQLBaseClient):
         finally:
             session.close()
 
-    def count_job_react_times(
-        self,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-    ) -> int:
-        """
-        Count job react time records with filters.
-
-        Args:
-            start_time: Filter by start time
-            end_time: Filter by end time
-
-        Returns:
-            Count of matching records
-        """
-        session = self.get_session()
-        try:
-            from sqlalchemy import func
-
-            query = select(func.count(JobReactTimeModel.id))
-
-            filters = []
-            if start_time:
-                filters.append(JobReactTimeModel.time_generated >= start_time)
-            if end_time:
-                filters.append(JobReactTimeModel.time_generated <= end_time)
-
-            if filters:
-                query = query.where(and_(*filters))
-
-            result = session.execute(query).scalar()
-            return result or 0
-        finally:
-            session.close()
     
     def query_unknown_react_records(self, retain_time: str = "30d", endpoint: Optional[str] = None) -> List[Dict[str, Any]]:
         """

@@ -6,16 +6,19 @@
 import os
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from sqlalchemy import select, and_
+from datetime import datetime as dt
+from sqlalchemy import select, and_, func
 from ...base import PostgreSQLBaseClient
 from ...models import NodeAction as NodeActionModel, NodeActionAttributes as NodeActionAttributesModel
 from ltp_storage.data_schema.node_action import NodeAction as NodeActionRecord
+from ltp_storage.data_schema.node_status import NodeStatus, STATUS_METADATA
+from ltp_storage.utils.time_util import convert_timestamp
 
 
 class NodeActionClient(PostgreSQLBaseClient):
     """Client for managing node action records in PostgreSQL."""
 
-    def insert_action(self, record: NodeActionRecord) -> int:
+    def _insert_record(self, record: NodeActionRecord) -> int:
         """
         Insert a node action record.
 
@@ -50,7 +53,7 @@ class NodeActionClient(PostgreSQLBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to insert node action record: {str(e)}")
 
-    def insert_actions_batch(self, records: List[NodeActionRecord]) -> List[int]:
+    def _insert_records_batch(self, records: List[NodeActionRecord]) -> List[int]:
         """
         Insert multiple node action records in a batch.
 
@@ -89,7 +92,7 @@ class NodeActionClient(PostgreSQLBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to insert node action records: {str(e)}")
 
-    def query_actions(
+    def _query_records(
         self,
         hostname: Optional[str] = None,
         node_id: Optional[str] = None,
@@ -144,7 +147,7 @@ class NodeActionClient(PostgreSQLBaseClient):
         finally:
             session.close()
 
-    def get_latest_action(
+    def _get_latest_record(
         self, hostname: Optional[str] = None, node_id: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """
@@ -177,59 +180,7 @@ class NodeActionClient(PostgreSQLBaseClient):
         finally:
             session.close()
 
-    def count_actions(
-        self,
-        hostname: Optional[str] = None,
-        node_id: Optional[str] = None,
-        action: Optional[str] = None,
-        category: Optional[str] = None,
-        start_time: Optional[datetime] = None,
-        end_time: Optional[datetime] = None,
-    ) -> int:
-        """
-        Count node action records with filters.
-
-        Args:
-            hostname: Filter by hostname
-            node_id: Filter by node ID
-            action: Filter by action
-            category: Filter by category
-            start_time: Filter by start timestamp
-            end_time: Filter by end timestamp
-
-        Returns:
-            Count of matching records
-        """
-        session = self.get_session()
-        try:
-            from sqlalchemy import func
-
-            query = select(func.count(NodeActionModel.id))
-
-            filters = []
-            if hostname:
-                filters.append(NodeActionModel.hostname == hostname)
-            if node_id:
-                filters.append(NodeActionModel.node_id == node_id)
-            if action:
-                filters.append(NodeActionModel.action == action)
-            if category:
-                filters.append(NodeActionModel.category == category)
-            if start_time:
-                filters.append(NodeActionModel.timestamp >= start_time)
-            if end_time:
-                filters.append(NodeActionModel.timestamp <= end_time)
-
-            if filters:
-                query = query.where(and_(*filters))
-
-            result = session.execute(query).scalar()
-            return result or 0
-        finally:
-            session.close()
-
     # ===== Attribute Table Methods =====
-    
     def update_attribute_table(self) -> None:
         """
         Update the NodeActionAttributes table with action metadata.
@@ -237,9 +188,7 @@ class NodeActionClient(PostgreSQLBaseClient):
         
         The phase is determined from the action format (from_status-to_status).
         """
-        try:
-            from ltp_storage.data_schema.node_status import NodeStatus, STATUS_METADATA
-            
+        try:   
             session = self.get_session()
             try:
                 # Clear existing data
@@ -266,26 +215,6 @@ class NodeActionClient(PostgreSQLBaseClient):
                 session.close()
         except Exception as e:
             raise RuntimeError(f"Failed to update attribute table: {str(e)}")
-    
-    def get_action_phase(self, action: str) -> Optional[str]:
-        """
-        Get the phase for a given action from the attribute table.
-        
-        Args:
-            action: The action to query
-            
-        Returns:
-            str: The phase name, or None if not found
-        """
-        session = self.get_session()
-        try:
-            query = select(NodeActionAttributesModel.phase).where(
-                NodeActionAttributesModel.action == action
-            )
-            result = session.execute(query).scalar_one_or_none()
-            return result
-        finally:
-            session.close()
 
     # ===== Kusto-SDK Compatible Interface =====
 
@@ -310,31 +239,12 @@ class NodeActionClient(PostgreSQLBaseClient):
         """
         try:
             # Parse timestamps
-            from dateutil import parser as date_parser
-            
-            if isinstance(start_time, str):
-                start_dt = date_parser.parse(start_time)
-            else:
-                start_dt = start_time
-                
-            if isinstance(end_time, str):
-                end_dt = date_parser.parse(end_time)
-            else:
-                end_dt = end_time
+            start_dt = convert_timestamp(start_time, "datetime")
+            end_dt = convert_timestamp(end_time, "datetime")
             
             # Query using the existing method
-            results = self.query_actions(
-                hostname=node,
-                start_time=start_dt,
-                end_time=end_dt,
-                limit=10000  # Large limit for compatibility
-            )
-            
-            # Convert back to NodeActionRecord objects
-            return [
-                NodeActionRecord.from_record(r)
-                for r in results
-            ]
+            results = self._query_records(hostname=node, start_time=start_dt, end_time=end_dt)
+            return [NodeActionRecord.from_record(r) for r in results]
         except Exception as e:
             raise RuntimeError(f"Failed to get node actions: {str(e)}")
 
@@ -354,7 +264,7 @@ class NodeActionClient(PostgreSQLBaseClient):
             RuntimeError: If query fails
         """
         try:
-            result = self.get_latest_action(hostname=node)
+            result = self._get_latest_record(hostname=node)
             if not result:
                 return None
                 
@@ -388,7 +298,6 @@ class NodeActionClient(PostgreSQLBaseClient):
             RuntimeError: If update fails
         """
         try:
-            
             if not NodeActionRecord.is_valid_action(action):
                 raise ValueError(f"Invalid action: {action}")
             # Create record (use empty string for node_id and endpoint if not provided)
@@ -405,22 +314,19 @@ class NodeActionClient(PostgreSQLBaseClient):
                 }
             )
             
-            self.insert_action(record)
+            self._insert_record(record)
         except Exception as e:
             raise RuntimeError(f"Failed to update node action: {str(e)}")
 
     def get_last_update_time(self) -> datetime:
         """Get the last update time for the node action table"""
+        session = self.get_session()
         try:
-            query = f"""
-            SELECT MAX(timestamp) FROM {self.table_name} WHERE endpoint = '{self.endpoint}'
-            """
-            result = self.execute_query(query)
-            if result and len(result) > 0:
-                return datetime.fromisoformat(result[0]['timestamp'])
-            return None
-        except Exception as e:
-            raise RuntimeError(f"Failed to get last update time: {str(e)}")
+            query = select(func.max(NodeActionModel.timestamp)).where(NodeActionModel.endpoint == self.endpoint)
+            result = session.execute(query).scalar_one_or_none()
+            return convert_timestamp(result, "datetime") 
+        finally:
+            session.close()
     
     def find_triaged_failure(self, node_name: str, completed_time_ms: int, launched_time_ms: int) -> List[Dict[str, Any]]:
         """
@@ -438,12 +344,11 @@ class NodeActionClient(PostgreSQLBaseClient):
         """
         try:
             # Get node actions in time range
-            from datetime import datetime as dt
             start_time = dt.fromtimestamp(launched_time_ms / 1000)
             end_time = dt.fromtimestamp(completed_time_ms / 1000)
             
             # Query actions in time range
-            actions_dicts = self.query_actions(
+            actions_dicts = self._query_records(
                 hostname=node_name,
                 start_time=start_time,
                 end_time=end_time
@@ -476,7 +381,7 @@ class NodeActionClient(PostgreSQLBaseClient):
             for action in node_actions:
                 action_time = action.Timestamp
                 if isinstance(action_time, str):
-                    action_time = dt.fromisoformat(action_time.replace('Z', ''))
+                    action_time = convert_timestamp(action_time, "datetime")
                 
                 # Find next available action
                 if (action.Action.endswith('-available') and 
@@ -494,7 +399,7 @@ class NodeActionClient(PostgreSQLBaseClient):
             
             # Sort by timestamp
             triaged_actions.sort(key=lambda a: a.Timestamp if not isinstance(a.Timestamp, str) 
-                                else dt.fromisoformat(a.Timestamp.replace('Z', '')))
+                                else convert_timestamp(a.Timestamp, "datetime"))
             
             return triaged_actions
         

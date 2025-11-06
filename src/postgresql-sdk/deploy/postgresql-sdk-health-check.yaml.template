@@ -38,6 +38,6 @@ spec:
             - name: POSTGRES_CONNECTION_STR
               value: "postgresql://{{ cluster_cfg['postgresql']['user'] }}:{{ cluster_cfg['postgresql']['passwd'] }}@{{ cluster_cfg['postgresql']['host'] }}:{{ cluster_cfg['postgresql']['port'] }}/{{ cluster_cfg['postgresql']['db'] }}"
             - name: POSTGRES_SCHEMA
-              value: "{{ cluster_cfg['postgresql']['schema-name'] }}"
+              value: "{{ cluster_cfg['postgresql-sdk']['schema-name'] }}"
           imagePullSecrets:
           - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
