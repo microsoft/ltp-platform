@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Tuple, Any
 import pandas as pd
 
 from ...utils.node_util import Node
-from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus
+from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus, get_transition_action
 from ...utils.time_util import convert_timestamp
 from ...base import KustoBaseClient
 
@@ -124,7 +124,7 @@ class NodeStatusClient(KustoBaseClient):
 
     def get_transition_action(self, from_status: str, to_status: str) -> str:
         """Returns the action label for a transition from one status to another."""
-        return from_status + '-' + to_status
+        return get_transition_action(from_status, to_status)
 
     def get_status_group(self, status: str) -> str | None:
         """Get the group for a given status"""

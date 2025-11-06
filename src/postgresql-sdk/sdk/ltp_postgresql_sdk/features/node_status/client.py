@@ -5,10 +5,10 @@
 
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func
 from ...base import PostgreSQLBaseClient
 from ...models import NodeStatus as NodeStatusModel, NodeStatusAttributes as NodeStatusAttributesModel
-from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus, STATUS_METADATA
+from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus, STATUS_METADATA, get_transition_action
 
 class NodeStatusClient(PostgreSQLBaseClient):
     """Client for managing node status records in PostgreSQL."""
@@ -209,8 +209,6 @@ class NodeStatusClient(PostgreSQLBaseClient):
         """
         session = self.get_session()
         try:
-            from sqlalchemy import func
-
             query = select(func.count(NodeStatusModel.id))
 
             filters = []
@@ -305,7 +303,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
             >>> client.get_transition_action("available", "cordoned")
             'available-cordoned'
         """
-        return from_status + '-' + to_status
+        return get_transition_action(from_status, to_status)
 
     def get_node_status(
         self, hostname: str, timestamp: Optional[datetime] = None

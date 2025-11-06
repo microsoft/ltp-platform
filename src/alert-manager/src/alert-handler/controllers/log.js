@@ -3,6 +3,7 @@
 
 const logger = require('@alert-handler/common/logger');
 const { spawn } = require('child_process');
+const path = require('path');
 
 // log alerts
 const logAlerts = async (req, res) => {
@@ -62,61 +63,20 @@ const logAlerts = async (req, res) => {
 
 // Helper function to save alerts to PostgreSQL
 function saveAlertsToPostgreSQL(alerts) {
-  const pythonScript = `
-import sys
-import json
-import os
-from datetime import datetime
-
-try:
-    from ltp_storage.factory import create_alert_client
-    from ltp_storage.data_schema.alert_records import AlertRecordData
-except ImportError as e:
-    print(f"Import error: {e}", file=sys.stderr)
-    sys.exit(1)
-
-try:
-    alerts_json = sys.stdin.read()
-    alerts = json.loads(alerts_json)
-    
-    client = create_alert_client()
-    records = []
-    
-    for alert in alerts:
-        try:
-            # Parse timestamp
-            ts_str = alert['timestamp'].replace('Z', '+00:00')
-            timestamp = datetime.fromisoformat(ts_str)
-            
-            record = AlertRecordData(
-                timestamp=timestamp,
-                alertname=alert['alertname'],
-                severity=alert['severity'],
-                summary=alert['summary'],
-                node_name=alert.get('node_name'),
-                labels=alert.get('labels'),
-                annotations=alert.get('annotations'),
-                endpoint=alert['endpoint']
-            )
-            records.append(record)
-        except Exception as e:
-            print(f"Error parsing alert: {e}", file=sys.stderr)
-    
-    if records:
-        client.insert_alerts_batch(records)
-        print(f"Successfully saved {len(records)} alerts to PostgreSQL")
-    else:
-        print("No valid alerts to save", file=sys.stderr)
-        
-except Exception as e:
-    print(f"Failed to save alerts to PostgreSQL: {e}", file=sys.stderr)
-    sys.exit(1)
-`;
-
-  const python = spawn('python3', ['-c', pythonScript]);
-
-  python.stdin.write(JSON.stringify(alerts));
-  python.stdin.end();
+  const scriptPath = path.join(__dirname, 'save_alerts.py');
+  const payload = JSON.stringify(alerts);
+  // Always use an anonymous pipe on fd 3 to avoid argv limits and stdin collisions
+  const python = spawn('python3', [scriptPath], { stdio: ['ignore', 'pipe', 'pipe', 'pipe'] });
+  if (python.stdio && python.stdio[3]) {
+    try {
+      python.stdio[3].write(payload);
+      python.stdio[3].end();
+    } catch (err) {
+      logger.error(`Failed to write alerts to fd 3: ${err.message}`);
+    }
+  } else {
+    logger.error('Python child missing fd 3 for data pipe');
+  }
 
   python.stdout.on('data', (data) => {
     logger.info(`PostgreSQL: ${data.toString().trim()}`);

@@ -289,7 +289,7 @@ STATUS_METADATA = {
 # Helper functions for backward compatibility
 def get_transition_action(from_status: str, to_status: str) -> str:
     """Returns the action label for a transition from one status to another."""
-    return from_status + '-' + to_status
+    return NodeStatusRecord.get_transition_action(from_status, to_status)
 
 
 def can_transition(from_status: str, to_status: str) -> bool:

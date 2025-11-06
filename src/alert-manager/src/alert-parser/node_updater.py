@@ -25,7 +25,7 @@ import logging
 
 # Import from ltp_storage (shared package)
 from ltp_storage.factory import create_node_status_client, create_node_action_client
-
+from ltp_storage.data_schema.node_status import NodeStatus
 # set logger with timestamp
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class NodeRecordUpdater:
         status_updated = False
         if from_status == to_status:
             return False
-        if not self.node_status_client.can_transition(from_status, to_status):
+        if not NodeStatus.can_transition(from_status, to_status):
             logger.info(f"Invalid transition from {from_status} to {to_status} for node {node} on {timestamp}")
             return False
         action = self.node_status_client.get_transition_action(from_status, to_status)
