@@ -32,6 +32,8 @@ RUN mkdir -p /root/.ssh && \
     echo "* soft nofile 1048576\n* hard nofile 1048576" >> /etc/security/limits.conf && \
     echo "root soft nofile 1048576\nroot hard nofile 1048576" >> /etc/security/limits.conf
 
+RUN apt purge -y subversion && apt autoremove -y
+
 WORKDIR /usr/src/app
 COPY ./src .
 COPY --chmod=0755 ./bin/*.sh /usr/local/cluster-local-storage/

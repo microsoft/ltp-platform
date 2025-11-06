@@ -22,6 +22,8 @@ FROM alpine:3.21
 ENV INSTALL_DIR=/opt/hivedscheduler/hivedscheduler
 
 RUN apk update && apk add --no-cache bash
+RUN apk upgrade --no-cache
+
 COPY --from=builder ${INSTALL_DIR} ${INSTALL_DIR}
 WORKDIR ${INSTALL_DIR}
 
