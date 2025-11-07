@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Fabric, Stack, StackItem, Dropdown } from 'office-ui-fabric-react';
 import { isNil, isEmpty, get, cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
