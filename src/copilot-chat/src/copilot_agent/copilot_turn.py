@@ -21,6 +21,7 @@ from .utils import (
     set_thread_llm_session,
     SmartHelp
 )
+from .agent_flow import AgentFlow, websearch_agent, story_agent, calculator_agent
 
 
 class CoPilotTurn:
@@ -40,6 +41,7 @@ class CoPilotTurn:
         self.processor = LTP(self.llm_session)
         self.smart_help = SmartHelp(self.help_msg, self.llm_session)
         self.analyzer = GeneralAnalysis(self.llm_session)
+        self.agent_flow = AgentFlow([story_agent, websearch_agent, calculator_agent])
 
     # entry function, processes the list of messages and returns a dictionary with the results
     def process_turn(self, messages_list: list, skip_summary: bool = False, debugging: bool = False) -> dict:
@@ -92,7 +94,8 @@ class CoPilotTurn:
                 debug = {}
             elif obj.count('5') > 0:
                 push_frontend_event('<span class="text-gray-400 italic">🔬 Performing analysis...</span><br/>', replace=False)
-                answer = self.analyzer.generate(question, [last_response] if last_response else None)
+                #answer = self.analyzer.generate(question, [last_response] if last_response else None)
+                answer = self.agent_flow.async_execute_flow(question)
                 debug = {}
             else:
                 help_keys = ['unsupported_question']
