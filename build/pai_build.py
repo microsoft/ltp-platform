@@ -102,6 +102,7 @@ def main():
         '-i', '--imagelist',
         type=str,
         nargs='+',
+        default=None,
         help="The image list you want to build"
     )
     build_parser.set_defaults(func=build_service)
