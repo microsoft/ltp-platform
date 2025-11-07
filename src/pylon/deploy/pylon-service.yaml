@@ -11,3 +11,4 @@ spec:
   selector:
     app: pylon
   type: LoadBalancer
+  externalTrafficPolicy: Local

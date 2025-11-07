@@ -6,9 +6,9 @@ permissions:
 
 on:
   push:
-    branches: [main, dev, 'release/*']
+    branches: [main, dev, "release/*"]
   pull_request:
-    branches: [main, dev, 'release/*']
+    branches: [main, dev, "release/*"]
 
 env:
   TAG: ${{ github.run_number }}
@@ -55,9 +55,8 @@ jobs:
           changed_files=$(git diff --name-only "$base_sha" "$head_sha")
           echo "Changed files: $changed_files"
 
-          # extract service folders under src/, skip alert-manager
+          # extract service folders under src/
           folders=$(echo "$changed_files" | grep '^src/' \
-            | grep -v 'alert-manager' \
             |  awk -F'/' '{print $2}' \
             | sort -u | tr '\n' ' ')
           echo "Changed folders: $folders"
@@ -104,6 +103,18 @@ jobs:
         run: |
           changed_services="${{ steps.changes.outputs.folders }}"
           echo "Building: $changed_services"
+          if [[ "$changed_services" == *"alert-manager"* ]]; then
+            echo "alert-manager is in the changed services"
+            changed_services=$(echo $changed_services | sed 's/alert-manager//g')
+            # build specific images in alert-manager
+            echo "Building specific alert-manager images"
+            $GITHUB_WORKSPACE/build/pai_build.py build \
+              -c $GITHUB_WORKSPACE/config/cluster-configuration \
+              -s alert-manager
+              -i abnormal-detector,alert-handler,alert-parser,cert-expiration-checker,cluster-utilization,job-data-recorder,job-status-change-notification,node-failure-detection,node-issue-classifier,nvidia-gpu-low-perf-fixer,redis-monitoring
+          fi
+
+          echo "Changed services after removing alert-manager: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py build \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
             -s $changed_services
@@ -122,6 +133,24 @@ jobs:
         run: |
           changed_services="${{ steps.changes.outputs.folders }}"
           echo "Pushing: $changed_services"
+          # check whether alert-manager is in the changed services
+          echo "Changed services before removing alert-manager: $changed_services"
+          if [[ "$changed_services" == *"alert-manager"* ]]; then
+            echo "alert-manager is in the changed services"
+            changed_services=$(echo $changed_services | sed 's/alert-manager//g')
+            # push specific images in alert-manager to GHCR
+            echo "Pushing specific alert-manager images to GHCR"
+            $GITHUB_WORKSPACE/build/pai_build.py push \
+              -c $GITHUB_WORKSPACE/config/cluster-configuration \
+              -s alert-manager \
+              -i abnormal-detector,alert-handler,alert-parser,cert-expiration-checker,cluster-utilization,job-data-recorder,job-status-change-notification,node-failure-detection,node-issue-classifier,nvidia-gpu-low-perf-fixer,redis-monitoring \
+              --docker-registry ghcr.io \
+              --docker-namespace ${GITHUB_REPOSITORY_OWNER} \
+              --docker-username ${{ github.actor }} \
+              --docker-password ${{ secrets.GITHUB_TOKEN }}
+          fi
+
+          echo "Changed services after removing alert-manager: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
             -s $changed_services \
@@ -133,24 +162,24 @@ jobs:
       - name: Azure CLI get credentials and deploy
         if: steps.check.outputs.has_changed == 'true'
         run: |
-            az version
-            az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
-            az aks install-cli
-            az aks get-credentials \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --name ${{ secrets.KUBERNETES_CLUSTER }} \
-              --overwrite-existing
-            kubelogin convert-kubeconfig -l azurecli
-            kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
-            echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
-            echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
-            $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }} < cluster_id 
-            echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
-            $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration < cluster_id 
-            echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
-            $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }} < cluster_id 
-            kubectl get pod
-            kubectl get service
+          az version
+          az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
+          az aks install-cli
+          az aks get-credentials \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --name ${{ secrets.KUBERNETES_CLUSTER }} \
+            --overwrite-existing
+          kubelogin convert-kubeconfig -l azurecli
+          kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
+          echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
+          echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+          $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }} < cluster_id 
+          echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
+          $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration < cluster_id 
+          echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+          $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }} < cluster_id 
+          kubectl get pod
+          kubectl get service
 
   test:
     name: Test rest-server
@@ -169,4 +198,3 @@ jobs:
             exit 1
           fi
           echo "Virtual cluster info: $vc_info"
-

@@ -1,0 +1,43 @@
+{
+  "name": "cluster-local-storage-plugin",
+  "version": "0.0.1",
+  "description": "A web portal plugin to manage cluster local storage.",
+  "main": "src/index.ts",
+  "scripts": {
+    "prebuild": "tslint --project .",
+    "build": "webpack --mode=production",
+    "dev": "webpack-dev-server --mode=development",
+    "start": "webpack-dev-server --mode=production"
+  },
+  "author": "Microsoft Corporation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Microsoft/pai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/pai/issues"
+  },
+  "homepage": "https://github.com/Microsoft/pai#readme",
+  "license": "MIT",
+  "dependencies": {
+    "@microsoft/openpai-js-sdk": "^0.1.5",
+    "core-js": "^3.0.1",
+    "office-ui-fabric-react": "^6.162.1",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
+    "whatwg-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.7",
+    "@types/react-dom": "^16.8.2",
+    "node-sass": "^4.14.1",
+    "ts-loader": "^6.2.1",
+    "ts-node": "^8.0.3",
+    "tslint": "^5.20.1",
+    "tslint-react": "^3.6.0",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.1"
+  }
+}

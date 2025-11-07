@@ -1,0 +1,111 @@
+name: Build All Services
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, 'release/*']
+  pull_request:
+    branches: [main, dev, 'release/*']
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  TAG: ${{ github.run_number }}
+
+jobs:
+  build:
+    name: Build All
+    runs-on: [self-hosted, paicicd]
+    timeout-minutes: 120
+    environment: auto-test
+    container:
+      image: ubuntu:latest
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    steps:
+      - name: Install git
+        run: |
+          DEBIAN_FRONTEND=noninteractive apt update
+          DEBIAN_FRONTEND=noninteractive apt install -y git
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref_name }}
+
+      - name: Get All Services
+        id: all
+        run: |
+          services=$(ls -1d src/* | awk -F'/' '{print $2}' | tr '\n' ' ')
+          skipped_services="base-image cleaning-image dev-box marketplace-db marketplace-restserver marketplace-webportal utilization-reporter"
+          for skip in $skipped_services; do
+            services=$(echo $services | sed "s/\b$skip\b//g")
+          done
+          echo "All services: $services"
+          echo "services=$services" >> $GITHUB_OUTPUT
+
+      - name: Install Package
+        if: steps.all.outputs.services != ''
+        run: |
+          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip docker-cli ca-certificates curl apt-transport-https lsb-release gnupg parallel
+          curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+      - name: Install python libs
+        if: steps.all.outputs.services != ''
+        run: python -m pip install --break-system-packages pyyaml jinja2 paramiko etcd3 protobuf==3.20.3 kubernetes gitpython
+
+      - name: Decode and unzip config file
+        if: steps.all.outputs.services != ''
+        run: |
+          echo "${{ secrets.CONFIG_FILE_B64 }}" | base64 -d > config.zip
+          mkdir -p $GITHUB_WORKSPACE/config
+          unzip -o config.zip -d $GITHUB_WORKSPACE/config
+          ls -l $GITHUB_WORKSPACE/config
+
+      - name: Arrange Config Files
+        if: steps.all.outputs.services != ''
+        run: |
+          rm -rf /tmp/auth-configuration
+          mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
+          ls -l /tmp/auth-configuration
+
+      - name: Build Images of Services
+        if: steps.all.outputs.services != ''
+        run: |
+          all_services="${{ steps.all.outputs.services }}"
+          echo "Building: $all_services"
+          echo "--------------------------------"
+          failed_services=""
+          for service in $all_services; do
+            if [[ "$service" =~ alert-manager ]]; then
+              echo "alert-manager is in the changed services"
+              # Build specific images in alert-manager
+              echo "Building specific alert-manager images"
+              $GITHUB_WORKSPACE/build/pai_build.py build \
+                -c $GITHUB_WORKSPACE/config/cluster-configuration \
+                -s alert-manager \
+                -i abnormal-detector,alert-handler,alert-parser,cert-expiration-checker,cluster-utilization,job-data-recorder,job-status-change-notification,node-failure-detection,node-issue-classifier,nvidia-gpu-low-perf-fixer,redis-monitoring
+            fi
+            echo "Building service: $service"
+            if python3 $GITHUB_WORKSPACE/build/pai_build.py build \
+              -c $GITHUB_WORKSPACE/config/cluster-configuration \
+              -s $service; then
+              echo "✓ Successfully built: $service"
+            else
+              echo "✗ Failed to build: $service"
+              failed_services="$failed_services $service"
+            fi
+          done
+            
+          if [ -n "$failed_services" ]; then
+            echo "::error::Failed to build services:$failed_services"
+            echo "FAILED_SERVICES=$failed_services" 
+            exit 1
+          else
+            echo "All services built successfully"
+          fi

@@ -5,13 +5,14 @@
 
 import os
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import threading
 
 from .copilot_conversation import CoPilotConversation
 
 from .utils.logger import logger
 
-from .config import AGENT_PORT
+from .config import AGENT_PORT, AGENT_MODE_LOCAL
 
 
 # --- New CoPilotAPI class (Flask app setup and endpoints) ---
@@ -29,6 +30,14 @@ class CoPilotService:
         self.app = Flask(__name__)
         self.app.add_url_rule('/copilot/api/status', view_func=self.status, methods=['GET'])
         self.app.add_url_rule('/copilot/api/operation', view_func=self.instance_operation, methods=['POST'])
+
+        # If running in local agent mode, enable CORS to allow local testing from dev frontends.
+        if AGENT_MODE_LOCAL:
+            try:
+                CORS(self.app)
+                logger.info('CORS enabled for local testing (AGENT_MODE_LOCAL)')
+            except Exception as e:
+                logger.warning(f'Failed to enable CORS for local testing: {e}')
 
     def status(self):
         """GET endpoint for health/status check."""

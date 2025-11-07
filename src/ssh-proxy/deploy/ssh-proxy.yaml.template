@@ -81,3 +81,4 @@ spec:
     app: ssh-proxy
   sessionAffinity: None
   type: LoadBalancer
+  externalTrafficPolicy: Local

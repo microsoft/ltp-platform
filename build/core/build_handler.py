@@ -40,7 +40,7 @@ class BuildHandler:
         self.dependencyDir = 'dependency'
 
 
-    def build_single_component(self, service):
+    def build_single_component(self, service, imagelist=None):
 
         self.logger.info("Starts to build {0}".format(service.service_name))
 
@@ -53,7 +53,8 @@ class BuildHandler:
         for dockerfile_prefix in service.docker_files:
             image_name = os.path.splitext(dockerfile_prefix)[0]
             dockerfile = os.path.join(service.path, 'build/' + dockerfile_prefix + '.dockerfile')
-            self.docker_cli.docker_image_build(image_name, dockerfile, service.path)
+            if imagelist is None or image_name in imagelist:
+                self.docker_cli.docker_image_build(image_name, dockerfile, service.path)
 
         post_build = os.path.join(service.path, self.build_post)
         if os.path.exists(post_build):

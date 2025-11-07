@@ -42,6 +42,8 @@ webportal:
 cd pai/contrib/copilot-plugin
 npm install
 npm start
+npm run start:user1
+npm run start:user2
 ```
 
 Configure the plugin of webportal env file with the uri `http://localhost:9090/plugin.js`.
