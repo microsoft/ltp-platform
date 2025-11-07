@@ -86,6 +86,24 @@ const list = asyncHandler(async (req, res) => {
     if ('tagsNotContain' in req.query) {
       tagsNotContainFilter.name = req.query.tagsNotContain.split(',');
     }
+    if ('jobType' in req.query) {
+      // validate jobType values
+      const validJobTypes = ['inference', 'training', 'others'];
+      const requestedTypes = req.query.jobType.split(',');
+      const invalidTypes = requestedTypes.filter(type => !validJobTypes.includes(type));
+      if (invalidTypes.length > 0) {
+        throw createError(
+          'Bad Request',
+          'InvalidParametersError',
+          `Invalid job type(s): ${invalidTypes.join(', ')}`
+        );
+      }
+      if (Array.isArray(tagsContainFilter.name)) {
+        tagsContainFilter.name.push(...requestedTypes);
+      } else {
+        tagsContainFilter.name = requestedTypes;
+      }
+    }
     if ('keyword' in req.query) {
       // match text in username, jobname, or vc
       filters[Op.or] = [
@@ -199,6 +217,7 @@ const update = asyncHandler(async (req, res) => {
   const jobName = res.locals.protocol.name;
   const userName = req.user.username;
   const frameworkName = `${userName}~${jobName}`;
+  const jobType = res.locals.protocol.jobType || 'others';
 
   // check duplicate job
   try {
@@ -216,6 +235,7 @@ const update = asyncHandler(async (req, res) => {
     }
   }
   await job.put(frameworkName, res.locals.protocol, req.body);
+  await job.addTag(frameworkName, jobType);
   res.status(status('Accepted')).json({
     status: status('Accepted'),
     message: `Update job ${jobName} for user ${userName} successfully.`,
@@ -368,10 +388,10 @@ const getLogs = asyncHandler(async (req, res) => {
     throw error.code === 'NoTaskLogError'
       ? error
       : createError(
-          'Internal Server Error',
-          'UnknownError',
-          'Failed to get log list',
-        );
+        'Internal Server Error',
+        'UnknownError',
+        'Failed to get log list',
+      );
   }
 });
 

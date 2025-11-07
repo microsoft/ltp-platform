@@ -37,6 +37,7 @@ export class JobProtocol {
     const {
       name,
       jobRetryCount,
+      jobType,
       prerequisites,
       parameters,
       taskRoles,
@@ -53,6 +54,7 @@ export class JobProtocol {
     this.contributor = contributor || '';
     this.type = 'job';
     this.jobRetryCount = jobRetryCount || 0;
+    this.jobType = jobType || 'others';
     this.prerequisites = prerequisites || [];
     this.parameters = parameters || {};
     this.taskRoles = taskRoles || {};

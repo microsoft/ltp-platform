@@ -27,19 +27,21 @@ import { isEmpty, get } from 'lodash';
 
 export class JobBasicInfo {
   constructor(props) {
-    const { name, jobRetryCount, virtualCluster } = props;
+    const { name, jobRetryCount, virtualCluster, jobType } = props;
     this.name = name || '';
     this.jobRetryCount = jobRetryCount || 0;
     this.virtualCluster = virtualCluster || '';
+    this.jobType = jobType || '';
   }
 
   static fromProtocol(protocol) {
-    const { name, jobRetryCount } = protocol;
+    const { name, jobRetryCount, jobType } = protocol;
     const virtualCluster = get(protocol, 'defaults.virtualCluster', 'default');
     return new JobBasicInfo({
       name: name,
       jobRetryCount: jobRetryCount,
       virtualCluster: virtualCluster,
+      jobType: jobType,
     });
   }
 
@@ -59,6 +61,7 @@ export class JobBasicInfo {
       name: this.name,
       type: 'job',
       jobRetryCount: this.jobRetryCount,
+      jobType: this.jobType,
     };
   }
 }
