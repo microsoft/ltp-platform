@@ -29,6 +29,8 @@ spec:
             app: postgresql-sdk-health-check
         spec:
           restartPolicy: OnFailure
+          nodeSelector:
+            pai-master: "true"
           containers:
           - name: health-checker
             image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}postgresql-sdk:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}

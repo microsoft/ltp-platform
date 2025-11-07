@@ -26,6 +26,8 @@ spec:
         app: postgresql-sdk-sync
     spec:
       restartPolicy: OnFailure
+      nodeSelector:
+        pai-master: "true"
       initContainers:
       - name: wait-for-postgresql
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}postgresql:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
