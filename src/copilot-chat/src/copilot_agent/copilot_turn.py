@@ -94,6 +94,7 @@ class CoPilotTurn:
                 debug = {}
             elif obj.count('5') > 0:
                 push_frontend_event('<span class="text-gray-400 italic">🔬 Performing analysis...</span><br/>', replace=False)
+                push_frontend_event('<span style="color: #FACC15; font-style: italic;">⚠️ Please note this capability is still under development</span><br/>', replace=False)
                 #answer = self.analyzer.generate(question, [last_response] if last_response else None)
                 answer = self.agent_flow.async_execute_flow(question)
                 debug = {}

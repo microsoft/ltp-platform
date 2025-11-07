@@ -7,12 +7,6 @@ from agents import Agent, Runner, OpenAIChatCompletionsModel, OpenAIResponsesMod
 from langgraph.graph import StateGraph, END
 import sys
 from ..utils.push_frontend import push_frontend_event
-
-from .agent_tool import (
-    websearch_agent,
-    story_agent,
-    calculator_agent
-)
 from ..utils.logger import logger
 # Disable debug by replacing it with a no-op function
 logger.debug = lambda msg: None
@@ -290,16 +284,3 @@ class AgentFlow:
     def add_agent(self, agent: Agent):
         """Add a new agent to the available agents."""
         self.agent_dict[agent.name] = agent
-
-
-# Execute the main asynchronous function
-if __name__ == "__main__":
-    # Example usage of the refactored class
-    input_prompt = "first, calculate (8 * 9 + 50) * 100. second, search the web to find a company with that number of employees. third, generate a short story using that company name and the calculation process for a math lesson."
-    #input_prompt = "write a short story about a robot fighting aliens and wins."
-    #input_prompt = "what is 100 + 500?"
-    
-    # Method 2: Using the class directly
-    agents = [story_agent, websearch_agent, calculator_agent]
-    orchestrator = AgentFlow(agents)
-    result = orchestrator.async_execute_flow(input_prompt)
