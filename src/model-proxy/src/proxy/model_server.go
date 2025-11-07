@@ -235,13 +235,14 @@ func GetJobModelsMapping(req *http.Request, modelToken string) (map[string][]str
 		model        string
 		jobServerUrl string
 	}
-	results := make(chan modelMapping, len(jobIDs)*10) // Buffer for potential models
+	const concurrency = 10
+	results := make(chan modelMapping, concurrency) // Buffer for potential models
 
 	// Use a wait group to run jobs in parallel
 	var wg sync.WaitGroup
 
 	// Limit concurrent goroutines to avoid overwhelming the server
-	semaphore := make(chan struct{}, 10) // Allow up to 10 concurrent jobs
+	semaphore := make(chan struct{}, concurrency) // Allow up to `concurrency` concurrent goroutines
 
 	for _, jobId := range jobIDs {
 		if jobId == "" {
