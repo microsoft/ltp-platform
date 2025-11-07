@@ -7,6 +7,8 @@ RUN npm install -g npm@latest
 
 RUN apt update && apt upgrade -y
 
+RUN apt purge -y subversion && apt autoremove -y
+
 WORKDIR /database-controller
 
 COPY ./src ./src
