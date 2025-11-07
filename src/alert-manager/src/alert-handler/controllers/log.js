@@ -4,6 +4,8 @@
 const logger = require('@alert-handler/common/logger');
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 
 // log alerts
 const logAlerts = async (req, res) => {
@@ -65,36 +67,42 @@ const logAlerts = async (req, res) => {
 function saveAlertsToPostgreSQL(alerts) {
   const scriptPath = path.join(__dirname, 'save_alerts.py');
   const payload = JSON.stringify(alerts);
-  // Always use an anonymous pipe on fd 3 to avoid argv limits and stdin collisions
-  const python = spawn('python3', [scriptPath], { stdio: ['ignore', 'pipe', 'pipe', 'pipe'] });
-  if (python.stdio && python.stdio[3]) {
-    try {
-      python.stdio[3].write(payload);
-      python.stdio[3].end();
-    } catch (err) {
-      logger.error(`Failed to write alerts to fd 3: ${err.message}`);
-    }
-  } else {
-    logger.error('Python child missing fd 3 for data pipe');
+  
+  // Create a temporary file to pass alert data to Python script
+  // This avoids race conditions with pipes and argv limits
+  const tmpDir = os.tmpdir();
+  const tmpFile = path.join(tmpDir, `alerts_${Date.now()}_${Math.random().toString(36).substring(7)}.json`);
+  
+  try {
+    // Write payload to temp file synchronously to ensure it's ready before Python reads
+    fs.writeFileSync(tmpFile, payload, 'utf8');
+    
+    // Spawn Python process with temp file path as argument
+    // Python script will read the file and delete it after processing
+    const python = spawn('python3', [scriptPath, tmpFile], { 
+      stdio: ['ignore', 'pipe', 'pipe'] 
+    });
+
+    python.stdout.on('data', (data) => {
+      logger.info(`PostgreSQL: ${data.toString().trim()}`);
+    });
+
+    python.stderr.on('data', (data) => {
+      logger.error(`PostgreSQL error: ${data.toString().trim()}`);
+    });
+
+    python.on('error', (error) => {
+      logger.error(`Failed to spawn Python process: ${error.message}`);
+    });
+
+    python.on('close', (code) => {
+      if (code !== 0) {
+        logger.error(`Python script exited with code ${code}`);
+      }
+    });
+  } catch (error) {
+    logger.error(`Failed to create temp file or spawn Python process: ${error.message}`);
   }
-
-  python.stdout.on('data', (data) => {
-    logger.info(`PostgreSQL: ${data.toString().trim()}`);
-  });
-
-  python.stderr.on('data', (data) => {
-    logger.error(`PostgreSQL error: ${data.toString().trim()}`);
-  });
-
-  python.on('error', (error) => {
-    logger.error(`Failed to spawn Python process: ${error.message}`);
-  });
-
-  python.on('close', (code) => {
-    if (code !== 0) {
-      logger.error(`Python script exited with code ${code}`);
-    }
-  });
 }
 
 // module exports

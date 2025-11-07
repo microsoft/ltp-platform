@@ -11,7 +11,6 @@ import logging
 
 from ltp_storage.factory import create_alert_client
 from ltp_storage.utils.time_util import parse_duration, convert_timestamp
-from ltp_storage.data_schema.alert_records import AlertParser
 
 # set logger with timestamp
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

@@ -17,16 +17,12 @@ WORKDIR /app
 COPY sdk /app/sdk
 RUN cd /app/sdk && pip install -r requirements.txt
 RUN pip install --no-cache-dir -e /app/sdk
-RUN pip install pytest pytest-cov
-
 
 # Copy service code
 COPY src /app/src
 # Alembic config now at service root
 RUN mv /app/src/alembic.ini /app/
 COPY src/alembic /app/alembic
-COPY tests /app/tests
-
 
 # Default command (can be overridden)
 CMD ["python", "/app/src/schema_manager.py", "check"]

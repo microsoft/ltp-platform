@@ -1,4 +1,5 @@
 import sys
+import os
 import json
 from datetime import datetime
 
@@ -9,10 +10,26 @@ except ImportError as e:
     print(f"Import error: {e}", file=sys.stderr)
     sys.exit(1)
 
+# Get temp file path from command line argument
+if len(sys.argv) < 2:
+    print("Error: Temp file path argument is required", file=sys.stderr)
+    sys.exit(1)
+
+tmp_file_path = sys.argv[1]
+
 try:
-    fd3 = 3
-    with open(fd3, 'r', encoding='utf-8', closefd=False) as f:
-        alerts_json = f.read()
+    # Read alerts from temp file
+    if not os.path.exists(tmp_file_path):
+        print(f"Error: Temp file does not exist: {tmp_file_path}", file=sys.stderr)
+        sys.exit(1)
+    
+    try:
+        with open(tmp_file_path, 'r', encoding='utf-8') as f:
+            alerts_json = f.read()
+    except IOError as e:
+        print(f"Failed to read temp file {tmp_file_path}: {e}", file=sys.stderr)
+        sys.exit(1)
+    
     alerts = json.loads(alerts_json)
 
     client = create_alert_client()
@@ -46,5 +63,12 @@ try:
 except Exception as e:
     print(f"Failed to save alerts to PostgreSQL: {e}", file=sys.stderr)
     sys.exit(1)
+finally:
+    # Always delete the temp file after processing, even if there was an error
+    try:
+        if os.path.exists(tmp_file_path):
+            os.remove(tmp_file_path)
+    except OSError as e:
+        print(f"Warning: Failed to delete temp file {tmp_file_path}: {e}", file=sys.stderr)
 
 
