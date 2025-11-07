@@ -24,12 +24,16 @@ spec:
     {%- endif %}
             - name: PAI_BEARER_TOKEN
               value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+            {%- if "lucia" in cluster_cfg["alert-manager"] %}
             - name: LUCIA_URL
               value: "{{ cluster_cfg["alert-manager"]["lucia"]["url"] }}"
             - name: LUCIA_BEARER_TOKEN
               value: "{{ cluster_cfg["alert-manager"]["lucia"]["bearer-token"] }}"
+            {%- endif %}
+            {%- if "abnormal-detector" in cluster_cfg["alert-manager"] %}
             - name: LUCIA_DIAGNOSTIC_TIME_OFFSET
               value: "{{ cluster_cfg["alert-manager"]["abnormal-detector"]["diagnostic-time-offset"] }}"
+            {%- endif %}
           imagePullSecrets:
           - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
           restartPolicy: OnFailure
