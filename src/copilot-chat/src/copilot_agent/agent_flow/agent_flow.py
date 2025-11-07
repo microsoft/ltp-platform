@@ -100,6 +100,8 @@ class AgentFlow:
             instructions=(
                 "You are an expert planning agent. Your task is to analyze the user's request "
                 "and determine the exact sequence of agents needed to fulfill it, along with specific tasks for each agent. "
+                "User's request is provided with the tag [user question], and any additional context is provided with the tag [context message]. "
+                "You should ONLY use additional context if it is relevant to the user's request, otherwise ignore it. "
                 f"Available agents are: {list(self.agent_dict.keys())}.\n"
                 "**Your response MUST be a single JSON array of objects, where each object has 'agent' (agent name) and 'task' (specific instruction).** "
                 "Use **DOUBLE quotes** for all strings. Do NOT include any other text, reasoning, or markdown (like ```json). "
