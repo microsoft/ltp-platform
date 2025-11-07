@@ -121,7 +121,8 @@ const protocolValidate = (protocolYAML) => {
     }
   }
 
-  // check Inference job parameters
+  // check jobType
+  if ('jobType' in protocolObj) {
     if (protocolObj.jobType === 'inference') {
       // check parameters for inference job
       if (!('parameters' in protocolObj)) {
