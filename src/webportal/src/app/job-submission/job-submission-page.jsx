@@ -250,7 +250,7 @@ export const JobSubmissionPage = ({
             break;
           }
         }
-      } catch {} // ignore all exceptions here
+      } catch { } // ignore all exceptions here
       if (!isEmpty(defaultStorageConfig)) {
         const storagePlugin = {
           plugin: STORAGE_PLUGIN,
@@ -385,6 +385,33 @@ export const JobSubmissionPage = ({
       })
       .catch(alert);
   }, [jobInformation.virtualCluster]);
+
+  useEffect(() => {
+    if (jobInformation.jobType === 'inference') {
+      const hasApiKey = parameters.find(param => param.key === 'API_KEY');
+      const hasInternalServerIp = parameters.find(param => param.key === 'INTERNAL_SERVER_IP');
+      const hasInternalServerPort = parameters.find(param => param.key === 'INTERNAL_SERVER_PORT');
+      if (!hasApiKey || !hasInternalServerIp || !hasInternalServerPort) {
+        const newParameters = [...parameters];
+        if (!hasInternalServerIp) {
+          // set fixed INTERNAL_SERVER_IP
+          newParameters.push({ key: 'INTERNAL_SERVER_IP', value: '$PAI_HOST_IP_taskrole_0' });
+        }
+        if (!hasInternalServerPort) {
+          // set fixed INTERNAL_SERVER_PORT
+          newParameters.push({ key: 'INTERNAL_SERVER_PORT', value: '$PAI_PORT_LIST_taskrole_0_http' });
+        }
+        if (!hasApiKey) {
+          {
+            // set a random generated api key
+            const randomKey = crypto.randomUUID();
+            newParameters.push({ key: 'API_KEY', value: randomKey });
+          }
+        }
+        setParameters(newParameters);
+      }
+    }
+  }, [jobInformation.jobType]);
 
   const onTemplateChange = useCallback((_, item) => {
     if (item.key === 'No') {
