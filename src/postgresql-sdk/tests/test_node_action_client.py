@@ -134,8 +134,6 @@ def test_update_attribute_table(client):
 def test_get_node_actions(client):
     """Test Kusto-compatible get_node_actions interface."""
     start = datetime.utcnow()
-    print(start)
-    print(start.isoformat())
     recs = [
         NodeActionRecord(
             Timestamp=start,

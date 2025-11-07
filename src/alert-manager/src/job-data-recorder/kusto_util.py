@@ -204,7 +204,7 @@ class StorageUtil:
                 df['Endpoint'] = self.endpoint
             
             # Determine which client to use based on table name
-            is_react_table = (table_name == self.job_react_table)
+            is_react_table = table_name == os.getenv('KUSTO_REACT_TABLE', 'JobReactTime') if os.getenv('KUSTO_REACT_TABLE', 'JobReactTime') else False
             
             # Ingest using appropriate client (factory already handles backend)
             if is_react_table:
