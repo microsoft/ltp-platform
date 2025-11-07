@@ -121,17 +121,7 @@ const protocolValidate = (protocolYAML) => {
     }
   }
 
-  // check jobType
-  if ("jobType" in protocolObj) {
-    const validJobTypes = ['inference', 'training', 'others'];
-    if (!validJobTypes.includes(protocolObj.jobType)) {
-      throw createError(
-        'Bad Request',
-        'InvalidProtocolError',
-        `Job type ${protocolObj.jobType} is not valid.`,
-      );
-    }
-
+  // check Inference job parameters
     if (protocolObj.jobType === 'inference') {
       // check parameters for inference job
       if (!('parameters' in protocolObj)) {

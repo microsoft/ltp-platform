@@ -87,10 +87,21 @@ const list = asyncHandler(async (req, res) => {
       tagsNotContainFilter.name = req.query.tagsNotContain.split(',');
     }
     if ('jobType' in req.query) {
+      // validate jobType values
+      const validJobTypes = ['inference', 'training', 'others'];
+      const requestedTypes = req.query.jobType.split(',');
+      const invalidTypes = requestedTypes.filter(type => !validJobTypes.includes(type));
+      if (invalidTypes.length > 0) {
+        throw createError(
+          'Bad Request',
+          'InvalidParametersError',
+          `Invalid job type(s): ${invalidTypes.join(', ')}`
+        );
+      }
       if (Array.isArray(tagsContainFilter.name)) {
-        tagsContainFilter.name.push(...req.query.jobType.split(','));
+        tagsContainFilter.name.push(...requestedTypes);
       } else {
-        tagsContainFilter.name = req.query.jobType.split(',');
+        tagsContainFilter.name = requestedTypes;
       }
     }
     if ('keyword' in req.query) {
@@ -206,7 +217,6 @@ const update = asyncHandler(async (req, res) => {
   const jobName = res.locals.protocol.name;
   const userName = req.user.username;
   const frameworkName = `${userName}~${jobName}`;
-
   const jobType = res.locals.protocol.jobType || 'others';
 
   // check duplicate job
