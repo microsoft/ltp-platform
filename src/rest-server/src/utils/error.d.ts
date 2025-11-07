@@ -33,10 +33,11 @@ declare type Code =
     'ForbiddenUserError' |
     'ForbiddenKeyError' |
     'IncorrectPasswordError' |
-    'InvalidParametersError' |
     'InvalidImageError' |
     'InvalidImageRegexError' |
+    'InvalidParametersError' |
     'NoApiError' |
+    'NoDockerImageError' |
     'NoJobError' |
     'NoJobConfigError' |
     'NoJobSshInfoError' |
