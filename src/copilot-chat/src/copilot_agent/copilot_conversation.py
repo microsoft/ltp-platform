@@ -302,7 +302,7 @@ class CoPilotConversation:
             ingest_status = KQL.ingest_dataframe_to_kusto(df)
             logger.info(f"data collection: ingesting data into {k_table} table: {ingest_status}.")
         except Exception as e:
-            logger.error(f"Exception during Kusto analytics collection: {e}", exc_info=True)
+            logger.error(f"Exception during Kusto analytics collection: {e}")
 
     @staticmethod
     def _make_skip_response(user_id, conv_id, turn_id, type_str):

@@ -38,6 +38,9 @@ class KustoExecutor:
     def execute_query(self, query):
         """Execute Kusto query with proper authentication based on environment."""
         if AGENT_MODE_LOCAL:
+            if not self.token:
+                logger.warning("KUSTO_KEY environment variable is not set or empty. Cannot authenticate with Kusto in local mode.")
+                return {"error": "Authentication token not available for local mode"}
             kcsb = KustoConnectionStringBuilder.with_aad_user_token_authentication(self.cluster, self.token)
         elif self.env != "prod":
             kcsb = KustoConnectionStringBuilder.with_aad_device_authentication(self.cluster)
@@ -222,6 +225,9 @@ class KustoExecutor:
 
             # Determine the authentication method for ingestion
             if AGENT_MODE_LOCAL:
+                if not self.token:
+                    logger.warning("KUSTO_KEY environment variable is not set or empty. Cannot authenticate with Kusto in local mode.")
+                    return False
                 kcsb_ingest = KustoConnectionStringBuilder.with_aad_user_token_authentication(self.cluster, self.token)
             elif self.env != "prod":
                 kcsb_ingest = KustoConnectionStringBuilder.with_aad_device_authentication(self.cluster)
