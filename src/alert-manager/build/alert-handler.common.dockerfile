@@ -7,6 +7,8 @@ RUN npm install -g npm@latest
 
 RUN apt update && apt upgrade -y
 
+RUN apt purge -y subversion && apt autoremove -y
+
 WORKDIR /usr/src/app
 
 ENV NODE_ENV=production

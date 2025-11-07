@@ -12,38 +12,20 @@ export type ChatMessage = {
   reasoning?: string; // Optional field for reasoning support
 };
 
-export type Job = {
-  id: string;
-  name: string;
-  username: string;
-  status: Status;
-  ip: string;
-  port: number;
-}
-
 interface State {
 
   paiuser: string;
-  restServerPath: string;
-  jobServerPath: string;
+  modelProxyPath: string;
   restServerToken: string;
-  jobServerToken: string;
 
-  allJobs: Job[];
-  currentJob: Job | null;
-  allModelsInCurrentJob: string[];
+  allModels: string[];
   currentModel: string | null;
 
   chatMsgs: ChatMessage[];
 
   setUser: (paiuser: string) => void;
-  setRestServerPath: (path: string) => void;
-  setJobServerPath: (path: string) => void;
   setRestServerToken: (token: string) => void;
-  setJobServerToken: (token: string) => void;
-  setAllJobs: (jobs: Job[]) => void;
-  setCurrentJob: (job: Job | null) => void;
-  setAllModelsInCurrentJob: (models: string[]) => void;
+  setAllModels: (models: string[]) => void;
   setCurrentModel: (model: string | null) => void;
   addChatMessage: (chat: ChatMessage) => void;
   updateLastChatMessage: (lastChat: ChatMessage) => void;
@@ -53,25 +35,18 @@ interface State {
 
 export const useChatStore = create<State>((set) => ({
   paiuser: "MSR",
-  restServerPath: "rest-server",
-  jobServerPath: "job-server",
+  modelProxyPath: "model-proxy",
   restServerToken: "",
-  jobServerToken: "",
-  allJobs: [],
-  currentJob: null,
-  allModelsInCurrentJob: [],
+
+  allModels: [],
   currentModel: null,
 
   chatMsgs: [],
 
   setUser: (paiuser) => set({ paiuser }),
-  setRestServerPath: (path) => set({ restServerPath: path }),
-  setJobServerPath: (path) => set({ jobServerPath: path }),
   setRestServerToken: (token) => set({ restServerToken: token }),
-  setJobServerToken: (token) => set({ jobServerToken: token }),
-  setAllJobs: (jobs) => set({ allJobs: jobs }),
-  setCurrentJob: (job) => set({ currentJob: job }),
-  setAllModelsInCurrentJob: (models) => set({ allModelsInCurrentJob: models }),
+
+  setAllModels: (models) => set({ allModels: models }),
   setCurrentModel: (model) => set({ currentModel: model }),
 
   addChatMessage: (log) => set((state) => ({ chatMsgs: [...state.chatMsgs, log] })),
