@@ -87,7 +87,7 @@ const list = asyncHandler(async (req, res) => {
     if ('tagsNotContain' in req.query) {
       tagsNotContainFilter.name = req.query.tagsNotContain.split(',');
     }
-    if ('jobType' in req.query){
+    if ('jobType' in req.query) {
       if (Array.isArray(tagsContainFilter.name)) {
         tagsContainFilter.name.push(...req.query.jobType.split(','));
       } else {
@@ -209,7 +209,7 @@ const update = asyncHandler(async (req, res) => {
   const frameworkName = `${userName}~${jobName}`;
 
   const jobType = res.locals.protocol.jobType || 'others';
-  
+
   // check duplicate job
   try {
     const data = await job.get(frameworkName);
@@ -379,10 +379,10 @@ const getLogs = asyncHandler(async (req, res) => {
     throw error.code === 'NoTaskLogError'
       ? error
       : createError(
-          'Internal Server Error',
-          'UnknownError',
-          'Failed to get log list',
-        );
+        'Internal Server Error',
+        'UnknownError',
+        'Failed to get log list',
+      );
   }
 });
 

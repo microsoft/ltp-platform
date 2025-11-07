@@ -121,7 +121,7 @@ const protocolValidate = (protocolYAML) => {
     }
   }
 
-  // check jobType 
+  // check jobType
   if ("jobType" in protocolObj) {
     const validJobTypes = ['inference', 'training', 'others'];
     if (!validJobTypes.includes(protocolObj.jobType)) {
