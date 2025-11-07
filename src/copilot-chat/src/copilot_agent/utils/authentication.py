@@ -39,7 +39,7 @@ class AuthenticationManager:
         if AGENT_MODE_LOCAL:
             if username == "admin":
                 return True, []
-            if username == "gooduser" or username == "dev.ben":
+            if username == "gooduser" or username == "dev.ben" or username == "dev.eva":
                 return False, ["superuser"]
             if username == "baduser":
                 return False, ["temp"]

@@ -51,7 +51,7 @@ from .sql import (
 )
 from .summary import gen_summary
 from .time import get_current_unix_timestamp
-from .types import DCW, AdditionalData, Benchmark, BList, Default_dcw_parser, Design, HardwareSpec, SystemData
+from .types import DCW, Customer, Design
 from .utils import (
     extract_all_json,
     extract_json_dict,
@@ -63,12 +63,8 @@ from .utils import (
 __all__ = [
     'DCW',
     'AuthenticationManager',
-    'AdditionalData',
-    'BList',
-    'Benchmark',
-    'Default_dcw_parser',
+    'Customer',
     'Design',
-    'HardwareSpec',
     'KustoExecutor',
     'LLMSession',
     'LTPReportProcessor',
@@ -76,7 +72,6 @@ __all__ = [
     'QuestionClassifier',
     'QueryGeneratorRAG',
     'SQLManager',
-    'SystemData',
     'RestAPIClient',
     'contextualize_question',
     'dcw_parser',

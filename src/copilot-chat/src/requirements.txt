@@ -1,7 +1,6 @@
 colorama>=0.4.6
 faiss-cpu>=1.9.0
 transformers>=4.46.1
-langchain_community>=0.3.4
 matplotlib>=3.9.2
 scipy>=1.11.1
 scikit-learn>=1.5.2
@@ -15,6 +14,7 @@ virtualenv>=20.26.6
 eval_type_backport>=0.2.2
 pandas>=2.2.2
 flask>=3.1.2
+flask-cors>=4.1.2
 openai>=1.106.1
 azure-kusto-data>=5.0.5
 llama-index-core>=0.13.5
