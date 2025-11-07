@@ -173,6 +173,11 @@ const protocolSchema = {
       },
       minItems: 1,
     },
+    jobType: {
+      type: 'string',
+      enum: ['inference', 'training', 'others'],
+      default: 'others',
+    },
     parameters: {
       type: 'object',
       additionalProperties: true,
