@@ -47,7 +47,7 @@ jobs:
             services=$(echo $services | sed "s/\b$skip\b//g")
           done
           echo "All services: $services"
-          echo "::set-output name=services::$services"
+          echo "services=$services" >> $GITHUB_OUTPUT
 
       - name: Install Package
         if: steps.all.outputs.services != ''
