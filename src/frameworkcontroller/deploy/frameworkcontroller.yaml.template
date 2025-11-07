@@ -34,6 +34,7 @@ spec:
       containers:
       - name: frameworkcontroller
         image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}frameworkcontroller:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
       {%- if cluster_cfg['cluster']['common']['k8s-rbac'] != 'true' %}
         env:
         - name: KUBE_APISERVER_ADDRESS

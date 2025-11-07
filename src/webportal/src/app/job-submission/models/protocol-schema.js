@@ -173,6 +173,7 @@ export const jobProtocolSchema = Joi.object().keys({
   version: [Joi.string(), Joi.number()],
   contributor: Joi.string(),
   description: Joi.string(),
+  jobType: Joi.string().valid(['others', 'training', 'inference']).default('others'),
 
   prerequisites: Joi.array()
     .items(prerequisitesSchema)

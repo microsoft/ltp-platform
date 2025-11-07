@@ -19,6 +19,7 @@ spec:
         app: cluster-local-storage-worker
     spec:
       hostNetwork: true
+      priorityClassName: pai-daemon-priority
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       containers:

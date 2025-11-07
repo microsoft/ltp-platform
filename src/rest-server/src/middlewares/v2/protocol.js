@@ -171,6 +171,34 @@ const protocolValidate = (protocolYAML) => {
       }
     }
   }
+
+  // check jobType
+  if ('jobType' in protocolObj) {
+    if (protocolObj.jobType === 'inference') {
+      // check parameters for inference job
+      if (!('parameters' in protocolObj)) {
+        throw createError(
+          'Bad Request',
+          'InvalidProtocolError',
+          `The following parameters must be specified for inference job:
+INTERNAL_SERVER_IP=$PAI_HOST_IP_taskrole_0
+INTERNAL_SERVER_PORT=$PAI_PORT_LIST_taskrole_0_http
+API_KEY=[any string]`,
+        );
+      }
+      const requiredParams = ['INTERNAL_SERVER_IP', 'INTERNAL_SERVER_PORT', 'API_KEY'];
+      for (const param of requiredParams) {
+        if (!(param in protocolObj.parameters)) {
+          throw createError(
+            'Bad Request',
+            'InvalidProtocolError',
+            `Parameter ${param} must be specified for inference job.`,
+          );
+        }
+      }
+    }
+  }
+
   for (const taskRole of Object.keys(protocolObj.taskRoles)) {
     for (const field of prerequisiteFields) {
       if (
@@ -245,7 +273,7 @@ const protocolRender = (protocolObj) => {
         ],
       $output:
         protocolObj.prerequisites.output[
-          protocolObj.taskRoles[taskRole].output
+        protocolObj.taskRoles[taskRole].output
         ],
       $data:
         protocolObj.prerequisites.data[protocolObj.taskRoles[taskRole].data],
