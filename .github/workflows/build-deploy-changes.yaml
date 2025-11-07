@@ -171,13 +171,27 @@ jobs:
             --overwrite-existing
           kubelogin convert-kubeconfig -l azurecli
           kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
+            # Replace "webportal" with "webportal-dind" if "webportal" is changed
+            services_to_deploy="${{ steps.changes.outputs.folders }}"
+            if echo " $services_to_deploy " | grep -q " webportal "; then
+              tmp=""
+              for s in $services_to_deploy; do
+                [ "$s" = "webportal" ] && continue
+                [ "$s" = "webportal-dind" ] && continue
+                tmp="$tmp $s"
+              done
+              services_to_deploy="$tmp webportal-dind"
+              services_to_deploy=$(echo "$services_to_deploy" | xargs)
+            fi
+            echo "Final services to deploy: $services_to_deploy"
+
           echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
-          echo "Stopping changed pai services \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
-          $GITHUB_WORKSPACE/paictl.py service stop -n ${{ steps.changes.outputs.folders }} < cluster_id 
+          echo "Stopping changed pai services $services_to_deploy on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+          $GITHUB_WORKSPACE/paictl.py service stop -n $services_to_deploy < cluster_id
           echo "Pushing config to cluster \"${{ secrets.PAI_CLUSTER_NAME }}\" ..."
-          $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration < cluster_id 
-          echo "Starting to update \"${{ steps.changes.outputs.folders }}\" on ${{ secrets.PAI_CLUSTER_NAME }} ..."
-          $GITHUB_WORKSPACE/paictl.py service start -n ${{ steps.changes.outputs.folders }} < cluster_id 
+          $GITHUB_WORKSPACE/paictl.py config push -m service -p $GITHUB_WORKSPACE/config/cluster-configuration < cluster_id
+          echo "Starting to update $services_to_deploy on ${{ secrets.PAI_CLUSTER_NAME }} ..."
+          $GITHUB_WORKSPACE/paictl.py service start -n $services_to_deploy < cluster_id
           kubectl get pod
           kubectl get service
 

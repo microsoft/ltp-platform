@@ -5,12 +5,16 @@ permissions:
 
 on:
   push:
-    branches: [main, 'release/*']
-  pull_request:
-    branches: [main, dev, 'release/*']
+    branches: ['release/*']
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'The branch name or tag to run the workflow on'
+        required: true
+        default: 'main'
+        type: string
 
 env:
   TAG: ${{ github.run_number }}
@@ -36,7 +40,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: false
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref_name }}
+          ref: ${{ github.event.inputs.branch || github.ref }}
 
       - name: Get All Services
         id: all

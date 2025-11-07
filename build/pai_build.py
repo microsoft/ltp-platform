@@ -39,7 +39,7 @@ def load_build_config(config_dir):
 
 
 def build_service(args, config_model):
-    pai_build = build_center.BuildCenter(config_model, args.service, 'k8s')
+    pai_build = build_center.BuildCenter(config_model, args.service, 'k8s', args)
     pai_build.set_build_cache_type(args.nocache)
     pai_build.build_center()
 
@@ -97,6 +97,13 @@ def main():
         '-n', '--nocache',
         action='store_true',
         help="Build the service using cache or not"
+    )
+    build_parser.add_argument(
+        '-i', '--imagelist',
+        type=str,
+        nargs='+',
+        default=None,
+        help="The image list you want to build"
     )
     build_parser.set_defaults(func=build_service)
 

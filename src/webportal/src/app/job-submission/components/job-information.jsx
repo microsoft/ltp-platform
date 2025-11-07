@@ -29,6 +29,7 @@ import { FormTextField } from './form-text-field';
 import { FormPage } from './form-page';
 import { FormSpinButton } from './form-spin-button';
 import { VirtualCluster } from './virtual-cluster';
+import { JobType } from './job-type';
 import Card from '../../components/card';
 import { JobBasicInfo } from '../models/job-basic-info';
 import { PROTOCOL_TOOLTIPS } from '../utils/constants';
@@ -37,7 +38,7 @@ const JOB_NAME_REGX = /^[A-Za-z0-9\-._~]+$/;
 
 export const JobInformation = React.memo(
   ({ jobInformation, onChange, advanceFlag }) => {
-    const { name, virtualCluster, jobRetryCount } = jobInformation;
+    const { name, virtualCluster, jobRetryCount, jobType } = jobInformation;
 
     const onChangeProp = useCallback(
       (type, value) => {
@@ -56,6 +57,11 @@ export const JobInformation = React.memo(
 
     const onVirtualClusterChange = useCallback(
       virtualCluster => onChangeProp('virtualCluster', virtualCluster),
+      [onChangeProp],
+    );
+
+    const onJobTypeChange = useCallback(
+      jobType => onChangeProp('jobType', jobType),
       [onChangeProp],
     );
 
@@ -89,6 +95,10 @@ export const JobInformation = React.memo(
               onChange={onRetryCountChange}
             />
           )}
+          <JobType
+            onChange={onJobTypeChange}
+            jobType={jobType}
+          />
         </FormPage>
       </Card>
     );

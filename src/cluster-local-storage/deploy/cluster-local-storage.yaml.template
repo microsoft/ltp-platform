@@ -24,6 +24,7 @@ spec:
         app: cluster-local-storage-sts-{{ vc }}
     spec:
       hostNetwork: true
+      priorityClassName: pai-daemon-priority
       serviceAccountName: cluster-local-storage-account
       nodeSelector:
         pai-master: "true"
@@ -78,5 +79,10 @@ spec:
             port: {{ vcport }}
           initialDelaySeconds: 10
           periodSeconds: 60
+      tolerations:
+      - key: node.kubernetes.io/memory-pressure
+        operator: "Exists"
+      - key: node.kubernetes.io/disk-pressure
+        operator: "Exists"
 {%- endfor %}
 {%- endif %}
