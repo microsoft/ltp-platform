@@ -46,6 +46,11 @@ class AgentFlow:
             azure_deployment: Azure OpenAI deployment name (defaults to env var)
             azure_api_version: API version to use
         """
+        max_turn = os.environ.get("AZURE_OPENAI_AGENTSDK_MAX_TURNS", 50)
+        if max_turn.isdigit():
+            self.max_turns = int(max_turn)
+        else:
+            self.max_turns = 50
         self._load_config(azure_key, azure_endpoint, azure_deployment, azure_api_version)
         self._setup_agent_config()
         self._setup_agents(agents)
@@ -178,7 +183,7 @@ class AgentFlow:
             
             logger.debug(f'[execution input]\n{execution_input}')
             
-            step_result = await Runner.run(agent, input=execution_input)
+            step_result = await Runner.run(agent, input=execution_input, max_turns=self.max_turns)
             output = step_result.final_output
             
             logger.debug(f"[{agent_name} Output]: \n{output}")
@@ -294,7 +299,7 @@ class AgentFlow:
         
         logger.debug(f'[Summary Input]\n{summary_input}')
         
-        summary_result = await Runner.run(self.summary_agent, input=summary_input)
+        summary_result = await Runner.run(self.summary_agent, input=summary_input, max_turns=self.max_turns)
         summary_output = summary_result.final_output
         
         logger.debug(f"[Summary Output]: \n{summary_output}")
@@ -342,7 +347,8 @@ class AgentFlow:
             push_frontend_event(f'<span class="text-gray-400 italic">🔍 Step 0: Generating Execution Plan...</span><br/>', replace=False)
             plan_result = await Runner.run(
                 self.flow_generator_agent,
-                input=f"Analyze this request and generate the flow: {input_prompt}"
+                input=f"Analyze this request and generate the flow: {input_prompt}",
+                max_turns=self.max_turns
             )
             push_frontend_event(f'<span class="text-gray-400 italic">🔍 Flow Generator Output\n{plan_result.final_output}</span><br/>', replace=False)
             
