@@ -9,6 +9,8 @@ WORKDIR /usr/src/app
 
 RUN apt update && apt upgrade -y
 
+RUN apt purge -y subversion && apt autoremove -y
+
 ENV NODE_ENV=production
 
 COPY ./src/job-status-change-notification .
