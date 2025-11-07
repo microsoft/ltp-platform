@@ -227,7 +227,7 @@ const protocolRender = (protocolObj) => {
       $parameters: protocolObj.parameters,
       $script:
         protocolObj.prerequisites.script[
-        protocolObj.taskRoles[taskRole].script
+          protocolObj.taskRoles[taskRole].script
         ],
       $output:
         protocolObj.prerequisites.output[

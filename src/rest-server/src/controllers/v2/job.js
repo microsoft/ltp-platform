@@ -25,7 +25,6 @@ const logger = require('@pai/config/logger');
 const { Op } = require('sequelize');
 const { userProperty } = require('@pai/config/token');
 const userController = require('@pai/controllers/v2/user');
-const { filter } = require('lodash');
 
 const list = asyncHandler(async (req, res) => {
   // ?keyword=<keyword filter>&username=<username1>,<username2>&vc=<vc1>,<vc2>
