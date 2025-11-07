@@ -22,8 +22,6 @@ type Server struct {
 	Port int `json:"port"`
 	// MaxRetries is the max retries for the request
 	MaxRetries int `json:"retry"`
-	// ModelKey is the model key for the proxy server to access the model server
-	ModelKey string `json:"model_key"`
 }
 
 // Log is the config for log

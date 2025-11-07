@@ -10,9 +10,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"modelproxy/types"
 )
 
 // Required job configuration parameters for inference jobs
@@ -151,7 +154,7 @@ func GetJobServerUrl(url string, restServerToken string, jobId string) (string, 
 }
 
 // return model names list
-func listModels(jobServerUrl string, token string) ([]string, error) {
+func listModels(jobServerUrl string, modelApiKey string) ([]string, error) {
 	if jobServerUrl == "" {
 		return nil, fmt.Errorf("empty jobServerUrl")
 	}
@@ -159,7 +162,7 @@ func listModels(jobServerUrl string, token string) ([]string, error) {
 	jobServerUrl = strings.TrimRight(jobServerUrl, "/")
 	url := fmt.Sprintf("%s/v1/models", jobServerUrl)
 
-	body, err := GETRequest(url, token)
+	body, err := GETRequest(url, modelApiKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list models from %s: %w", url, err)
 	}
@@ -210,8 +213,9 @@ func listModels(jobServerUrl string, token string) ([]string, error) {
 }
 
 // return JobURL => models
-func GetJobModelsMapping(req *http.Request, modelToken string) (map[string][]string, error) {
-	mapping := make(map[string][]string)
+func GetJobModelsMapping(req *http.Request) (map[string][]*types.BaseSpec, error) {
+	// modelName to job server url list
+	mapping := make(map[string][]*types.BaseSpec)
 
 	if req == nil || req.Host == "" {
 		return mapping, fmt.Errorf("invalid request or empty host")
@@ -232,10 +236,14 @@ func GetJobModelsMapping(req *http.Request, modelToken string) (map[string][]str
 
 	// Channel to collect results
 	type modelMapping struct {
-		model        string
-		jobServerUrl string
+		modelName    string
+		modelService *types.BaseSpec
 	}
-	const concurrency = 10
+	concurrency, err := strconv.Atoi(os.Getenv("FETCH_JOB_CONCURRENCY"))
+	if err != nil {
+		log.Printf("[-] Error: invalid FETCH_JOB_CONCURRENCY value: %s\n", err)
+		concurrency = 10 // default value
+	}
 	results := make(chan modelMapping, concurrency) // Buffer for potential models
 
 	// Use a wait group to run jobs in parallel
@@ -281,7 +289,13 @@ func GetJobModelsMapping(req *http.Request, modelToken string) (map[string][]str
 
 			// Send results to channel
 			for _, model := range models {
-				results <- modelMapping{model: model, jobServerUrl: jobServerUrl}
+				results <- modelMapping{
+					modelName: model,
+					modelService: &types.BaseSpec{
+						URL: jobServerUrl,
+						Key: apiKey,
+					},
+				}
 			}
 		}(jobId)
 	}
@@ -294,10 +308,10 @@ func GetJobModelsMapping(req *http.Request, modelToken string) (map[string][]str
 
 	// Collect results from channel
 	for result := range results {
-		if _, ok := mapping[result.model]; !ok {
-			mapping[result.model] = []string{}
+		if _, ok := mapping[result.modelName]; !ok {
+			mapping[result.modelName] = make([]*types.BaseSpec, 0)
 		}
-		mapping[result.model] = append(mapping[result.model], result.jobServerUrl)
+		mapping[result.modelName] = append(mapping[result.modelName], result.modelService)
 	}
 
 	return mapping, nil

@@ -15,14 +15,12 @@ var (
 	port       int
 	maxRetries int = 5 // default value
 	logFileDir string
-	modelKey   string
 )
 
 func init() {
 	flag.IntVar(&port, "port", 9999, "port for the proxy server")
 	flag.IntVar(&maxRetries, "retry", 5, "max retries for the request to the model server")
 	flag.StringVar(&logFileDir, "logdir", "./logs", "path to the log file directory")
-	flag.StringVar(&modelKey, "modelkey", "", "model key for requesting model serving jobs")
 }
 
 func main() {
@@ -33,7 +31,6 @@ func main() {
 			Host:       "0.0.0.0",
 			Port:       port,
 			MaxRetries: maxRetries,
-			ModelKey:   modelKey,
 		},
 		Log: &types.Log{
 			LogStorage: &types.LogStorage{
