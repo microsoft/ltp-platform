@@ -1000,33 +1000,43 @@ const list = async (
     Object.keys(tagsContainFilter).length !== 0 ||
     Object.keys(tagsNotContainFilter).length !== 0
   ) {
-    filters.name = {};
-    // tagsContain
+    // Build name filters by querying Tag table directly to avoid using QueryGenerator
+    const nameFilter = {};
+
+    // tagsContain -> include frameworks whose name appears in Tag rows matched by tagsContainFilter
     if (Object.keys(tagsContainFilter).length !== 0) {
-      const queryContainFrameworkName = databaseModel.sequelize.dialect.QueryGenerator.selectQuery(
-        'tags',
-        {
-          attributes: ['frameworkName'],
-          where: tagsContainFilter,
-        },
-      );
-      filters.name[Sequelize.Op.in] = Sequelize.literal(`
-          (${queryContainFrameworkName.slice(0, -1)})
-      `);
+      const containRows = await databaseModel.Tag.findAll({
+        attributes: ['frameworkName'],
+        where: tagsContainFilter,
+        raw: true,
+      });
+      const containNames = [...new Set(containRows.map((r) => r.frameworkName))];
+      // if no tags match, result is empty
+      if (containNames.length === 0) {
+        if (withTotalCount) {
+          return { totalCount: 0, data: [] };
+        } else {
+          return [];
+        }
+      }
+      nameFilter[Sequelize.Op.in] = containNames;
     }
-    // tagsNotContain
+
+    // tagsNotContain -> exclude frameworks whose name appears in Tag rows matched by tagsNotContainFilter
     if (Object.keys(tagsNotContainFilter).length !== 0) {
-      const queryNotContainFrameworkName = databaseModel.sequelize.dialect.QueryGenerator.selectQuery(
-        'tags',
-        {
-          attributes: ['frameworkName'],
-          where: tagsNotContainFilter,
-        },
-      );
-      filters.name[Sequelize.Op.notIn] = Sequelize.literal(`
-          (${queryNotContainFrameworkName.slice(0, -1)})
-      `);
+      const notContainRows = await databaseModel.Tag.findAll({
+        attributes: ['frameworkName'],
+        where: tagsNotContainFilter,
+        raw: true,
+      });
+      const notContainNames = [...new Set(notContainRows.map((r) => r.frameworkName))];
+      if (notContainNames.length > 0) {
+        nameFilter[Sequelize.Op.notIn] = notContainNames;
+      }
     }
+
+    // merge with any existing name filter
+    filters.name = Object.assign({}, filters.name || {}, nameFilter);
   }
 
   frameworks = await databaseModel.Framework.findAll({
