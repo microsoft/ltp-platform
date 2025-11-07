@@ -55,17 +55,6 @@ class JobReactTimeClient(KustoBaseClient):
         
         return self.execute_query(query)
     
-    def ingest_job_react_times(self, df: pd.DataFrame) -> None:
-        """
-        Ingest a DataFrame of job react times into Kusto.
-        
-        Args:
-            df: DataFrame containing job react time records
-        """
-        df['timeGenerated'] = pd.Timestamp.now().to_pydatetime()
-        df['Endpoint'] = self.endpoint
-        self.ingest_data(df.to_dict('records'))
-    
     def insert_job_react_times_batch(self, records: List[Dict[str, Any]]) -> None:
         """
         Insert multiple job react time records in a batch.
@@ -79,6 +68,5 @@ class JobReactTimeClient(KustoBaseClient):
             return
         
         # Convert list of dicts to DataFrame for Kusto ingestion
-        import pandas as pd
         df = pd.DataFrame(records)
-        self.ingest_job_react_times(df)
+        self._ingest_data(df)

@@ -103,17 +103,6 @@ class JobSummaryClient(KustoBaseClient):
         
         return self.execute_query(query)
     
-    def ingest_job_summaries(self, df: pd.DataFrame) -> None:
-        """
-        Ingest a DataFrame of job summaries into Kusto.
-        
-        Args:
-            df: DataFrame containing job summary records
-        """
-        df['timeGenerated'] = pd.Timestamp.now().to_pydatetime()
-        df['Endpoint'] = self.endpoint
-        self.ingest_data(df.to_dict('records'))
-    
     def insert_job_summaries_batch(self, records: List[Dict[str, Any]]) -> None:
         """
         Insert multiple job summary records in a batch.
@@ -128,4 +117,4 @@ class JobSummaryClient(KustoBaseClient):
         
         # Convert list of dicts to DataFrame for Kusto ingestion
         df = pd.DataFrame(records)
-        self.ingest_job_summaries(df)
+        self._ingest_data(df)
