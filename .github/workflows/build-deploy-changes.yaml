@@ -101,6 +101,11 @@ jobs:
           mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
           ls -l /tmp/auth-configuration
 
+      - name: Login to GHCR
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build Images of Changed Services
         if: steps.check.outputs.has_changed == 'true'
         run: |
