@@ -80,6 +80,14 @@ spec:
 {%- endif %}
         - name: LOG_LEVEL
           value: {{ cluster_cfg["alert-manager"]["alert-handler"]["log-level"] }}
+        - name: LTP_STORAGE_BACKEND_DEFAULT
+          value: "{{ cluster_cfg['alert-manager']['alert-handler'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
+{% if cluster_cfg["alert-manager"]["alert-handler"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
+        - name: POSTGRES_CONNECTION_STR
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
+        - name: POSTGRES_SCHEMA
+          value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
+{% endif %}
 {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
         - name: EMAIL_CONFIGS_ADMIN_RECEIVER
           value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["admin-receiver"] }}
@@ -93,14 +101,6 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["smtp-auth-username"] }}
         - name: EMAIL_CONFIGS_SMTP_AUTH_PASSWORD
           value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["smtp-auth-password"] }}
-        - name: LTP_STORAGE_BACKEND_DEFAULT
-          value: "{{ cluster_cfg['alert-manager']['alert-handler'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
-{% if cluster_cfg["alert-manager"]["node-issue-classifier"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
-        - name: POSTGRES_CONNECTION_STR
-          value: "{{ cluster_cfg['alert-manager']['postgresql']['connection-str'] }}"
-        - name: POSTGRES_SCHEMA
-          value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
-{% endif %}
         volumeMounts:
         - name: templates-volume
           mountPath: /etc/alerthandler/templates
@@ -168,7 +168,7 @@ spec:
           value: "{{ cluster_cfg['alert-manager']['node-issue-classifier'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
 {% if cluster_cfg["alert-manager"]["node-issue-classifier"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
         - name: POSTGRES_CONNECTION_STR
-          value: "{{ cluster_cfg['alert-manager']['postgresql']['connection-str'] }}"
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
         - name: POSTGRES_SCHEMA
           value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
 {% endif %}
@@ -227,7 +227,7 @@ spec:
           value: "{{ cluster_cfg['alert-manager']['alert-parser'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
 {% if cluster_cfg["alert-manager"]["alert-parser"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
         - name: POSTGRES_CONNECTION_STR
-          value: "{{ cluster_cfg['alert-manager']['postgresql']['connection-str'] }}"
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
         - name: POSTGRES_SCHEMA
           value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
 {% endif %}
@@ -293,7 +293,7 @@ spec:
           value: "{{ cluster_cfg['alert-manager']['node-recycler'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
 {% if cluster_cfg["alert-manager"]["node-recycler"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
         - name: POSTGRES_CONNECTION_STR
-          value: "{{ cluster_cfg['alert-manager']['postgresql']['connection-str'] }}"
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
         - name: POSTGRES_SCHEMA
           value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
 {% endif %}
@@ -427,7 +427,7 @@ spec:
           value: "{{ cluster_cfg['alert-manager']['job-data-recorder'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
 {% if cluster_cfg["alert-manager"]["job-data-recorder"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
         - name: POSTGRES_CONNECTION_STR
-          value: "{{ cluster_cfg['alert-manager']['postgresql']['connection-str'] }}"
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
         - name: POSTGRES_SCHEMA
           value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
 {% endif %}

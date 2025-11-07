@@ -88,7 +88,7 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
 
     def _get_node(self, data=True, num=None, write_file=False):
         status = NodeStatus.AVAILABLE if data else NodeStatus.AVAILABLE_NODATA
-        hostnames = [n["HostName"] for n in self.status_client.get_nodes_by_status(status.value)] if self.status_client else []
+        hostnames = [n.HostName for n in self.status_client.get_nodes_by_status(status.value)] if self.status_client else []
         hostnames = list(filter(self.cluster_hostname_regex.search, hostnames))
         logger.debug(f"Queried {len(hostnames)} {status.value} nodes: {','.join(hostnames)}")
         if write_file:

@@ -13,9 +13,6 @@ kubectl delete job postgresql-sdk-sync --ignore-not-found=true
 # Apply Job template
 kubectl apply -f postgresql-sdk-service.yaml || exit $?
 
-# Apply Health Check CronJob template
-kubectl apply -f postgresql-sdk-health-check.yaml || exit $?
-
 # Wait for sync to complete
 echo "Waiting for schema sync to complete..."
 kubectl wait --for=condition=complete --timeout=300s job/postgresql-sdk-sync || {

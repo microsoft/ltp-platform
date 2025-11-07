@@ -135,7 +135,7 @@ class NodeAvailabilityMonitor:
         nodes_changed, nodes_unschedulable, node_schedulable = self.query_availability_changes(end_time, time_offset)
         nodes_validating = self.node_updater.get_nodes_by_status(NodeStatus.VALIDATING.value, end_time)
         nodes_available = self.node_updater.get_nodes_by_status(NodeStatus.AVAILABLE.value, end_time)
-        nodes_available = [node['HostName'] for node in nodes_available if node['HostName'] not in nodes_changed and node['HostName'] not in nodes_unschedulable]
+        nodes_available = [node.HostName for node in nodes_available if node.HostName not in nodes_changed and node.HostName not in nodes_unschedulable]
         nodes_scheduable_but_not_in_available = [node for node in node_schedulable if node not in nodes_available]
         node_status_changes = {}
         # Handle changed nodes in update interval
@@ -160,9 +160,9 @@ class NodeAvailabilityMonitor:
         
         # Handle validating nodes changed from validating to available during service down
         for node_stauts in nodes_validating:
-            node = node_stauts['HostName']
+            node = node_stauts.HostName
             if node not in node_status_changes and node not in nodes_unschedulable:
-                time_offset = int(end_time - convert_timestamp(node_stauts['Timestamp'], format="timestamp"))
+                time_offset = int(end_time - convert_timestamp(node_stauts.Timestamp, format="timestamp"))
                 changes, raw_values = self.get_node_status_changes(node, end_time, f'{time_offset}s')
                 if changes:
                     node_status_changes[node] = changes

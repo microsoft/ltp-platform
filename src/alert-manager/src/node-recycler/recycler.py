@@ -67,25 +67,14 @@ class NodeRecycler:
 
         created = []
         if not node_faults and status_client and action_client:
-            query = """
-            {table_name}
-            | where Action endswith '{state}'
-            | where HostName == '{hostname}' and NodeId == '{node_id}'
-            | top 1 by Timestamp desc
-            """
             node_faults = []
             for node in status_client.get_nodes_by_status(from_state):
                 try:
-                    hostname, node_id = node["HostName"], node["NodeId"]
-                    result = action_client.execute_query(query.format(
-                        table_name=action_client.table_name,
-                        state=from_state,
-                        hostname=hostname,
-                        node_id=node_id,
-                    ))
+                    hostname, node_id = node.HostName, node.NodeId
+                    result = action_client.get_latest_action_by_state(hostname, node_id, from_state)
                     logger.info(f"INFO: Querying node {hostname} with node id {node_id} in state {from_state}")
-                    if result and "Action" in result[0] and "Detail" in result[0]:
-                        action, detail = result[0]["Action"], result[0]["Detail"]
+                    if result and result.Action and result.Detail:
+                        action, detail = result.Action, result.Detail
                         if action.endswith(from_state):
                             try:
                                 detail_json = json.loads(detail)
@@ -229,7 +218,7 @@ class NodeRecycler:
             raise ValueError(f"Unsupported operation: {operation}")
 
         if not hostnames and status_client:
-            hostnames = [n["HostName"] for n in status_client.get_nodes_by_status(from_state)]
+            hostnames = [n.HostName for n in status_client.get_nodes_by_status(from_state)]
         if not hostnames:
             return []
         logger.info(f"Operating on {hostnames} hostnames in VMSS {vmss_id} with operation {op}")
@@ -322,7 +311,7 @@ class NodeRecycler:
         if not filter_state:
             filter_state = NodeStatus.ALLOCATED_UA.value
         if not hostnames and status_client:
-            hostnames = [n["HostName"] for n in status_client.get_nodes_by_status(filter_state)]
+            hostnames = [n.HostName for n in status_client.get_nodes_by_status(filter_state)]
         if not hostnames:
             return
 

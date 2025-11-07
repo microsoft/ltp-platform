@@ -188,7 +188,7 @@ def test_get_nodes_by_status(client):
 
     result = client.get_nodes_by_status("cordoned")
     assert isinstance(result, list)
-    hosts = {r["hostname"] for r in result}
+    hosts = {r.HostName for r in result}
     assert "test-worker-gbs-1" in hosts and "test-worker-gbs-2" in hosts
 
 

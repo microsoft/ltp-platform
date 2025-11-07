@@ -132,8 +132,10 @@ class NodeActionClient(PostgreSQLBaseClient):
             if category:
                 filters.append(NodeActionModel.category == category)
             if start_time:
+                start_time = convert_timestamp(start_time, "datetime")
                 filters.append(NodeActionModel.timestamp >= start_time)
             if end_time:
+                end_time = convert_timestamp(end_time, "datetime")
                 filters.append(NodeActionModel.timestamp <= end_time)
 
             if filters:
@@ -298,6 +300,7 @@ class NodeActionClient(PostgreSQLBaseClient):
             RuntimeError: If update fails
         """
         try:
+            timestamp = convert_timestamp(timestamp, "datetime")
             if not NodeActionRecord.is_valid_action(action):
                 raise ValueError(f"Invalid action: {action}")
             # Create record (use empty string for node_id and endpoint if not provided)
@@ -318,16 +321,71 @@ class NodeActionClient(PostgreSQLBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to update node action: {str(e)}")
 
-    def get_last_update_time(self) -> datetime:
+    def get_last_update_time(self) -> datetime or None:
         """Get the last update time for the node action table"""
         session = self.get_session()
         try:
             query = select(func.max(NodeActionModel.timestamp)).where(NodeActionModel.endpoint == self.endpoint)
             result = session.execute(query).scalar_one_or_none()
+            if not result:
+                return None
             return convert_timestamp(result, "datetime") 
         finally:
             session.close()
     
+    def get_latest_action_by_state(
+        self,
+        hostname: str,
+        node_id: str,
+        state: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Get the latest action that ends with the specified state for a given hostname and node_id.
+        
+        This method provides compatibility with kusto-sdk interface for querying actions
+        that end with a specific state (e.g., "cordoned", "available").
+        
+        Args:
+            hostname: Hostname of the node
+            node_id: Node ID
+            state: The state that the action should end with (e.g., "cordoned", "available")
+            
+        Returns:
+            Dict containing Action and Detail fields, or None if not found
+            
+        Example:
+            >>> client = NodeActionClient()
+            >>> result = client.get_latest_action_by_state("worker-01", "node-001", "cordoned")
+            >>> if result:
+            ...     print(f"Action: {result['Action']}, Detail: {result['Detail']}")
+        """
+        try:
+            session = self.get_session()
+            try:
+                # Query for actions that end with the specified state
+                query = (
+                    select(NodeActionModel)
+                    .where(
+                        and_(
+                            NodeActionModel.hostname == hostname,
+                            NodeActionModel.node_id == node_id,
+                            NodeActionModel.action.like(f'%-{state}')
+                        )
+                    )
+                    .order_by(NodeActionModel.timestamp.desc())
+                    .limit(1)
+                )
+                
+                result = session.execute(query).scalar_one_or_none()
+                if not result:
+                    return None
+                
+                return NodeActionRecord.from_record(result.to_dict())
+            finally:
+                session.close()
+        except Exception as e:
+            raise RuntimeError(f"Failed to get latest action by state: {str(e)}")
+
     def find_triaged_failure(self, node_name: str, completed_time_ms: int, launched_time_ms: int) -> List[Dict[str, Any]]:
         """
         Find triaged actions for a node between job launch and completion.

@@ -33,7 +33,6 @@ kusto:
 # PostgreSQL Configuration
 # Only required if using PostgreSQL backend (storage-backend: postgresql)
 postgresql:
-  connection-str: ""  # e.g., postgresql://user:password@host:5432/database
   schema: ltp_sdk  # Default schema name
 
 # ============================================================================

@@ -195,6 +195,47 @@ class NodeActionClient(KustoBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to get last update time: {str(e)}")
     
+    def get_latest_action_by_state(
+        self,
+        hostname: str,
+        node_id: str,
+        state: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Get the latest action that ends with the specified state for a given hostname and node_id.
+        
+        This method provides compatibility for querying actions that end with a specific state
+        (e.g., "cordoned", "available").
+        
+        Args:
+            hostname: Hostname of the node
+            node_id: Node ID
+            state: The state that the action should end with (e.g., "cordoned", "available")
+            
+        Returns:
+            Dict containing Action and Detail fields, or None if not found
+            
+        Example:
+            >>> client = NodeActionClient()
+            >>> result = client.get_latest_action_by_state("worker-01", "node-001", "cordoned")
+            >>> if result:
+            ...     print(f"Action: {result['Action']}, Detail: {result['Detail']}")
+        """
+        try:
+            query = f"""
+            {self.table_name}
+            | where Action endswith '{state}'
+            | where HostName == '{hostname}' and NodeId == '{node_id}'
+            | top 1 by Timestamp desc
+            """
+            results = self.execute_query(query)
+            if not results or len(results) == 0:
+                return None
+            
+            return NodeAction.from_record(results[0])
+        except Exception as e:
+            raise RuntimeError(f"Failed to get latest action by state: {str(e)}")
+
     def find_triaged_failure(self, node_name: str, completed_time_ms: int, launched_time_ms: int) -> List[NodeAction]:
         """
         Find triaged actions for a node between job launch and completion.

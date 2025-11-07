@@ -12,8 +12,4 @@ echo "Stopping PostgreSQL SDK Service..."
 # Delete sync job if it exists
 kubectl delete job postgresql-sdk-sync --ignore-not-found=true
 
-# Delete health check CronJob
-kubectl delete cronjob postgresql-sdk-health-check --ignore-not-found=true
-
-
 popd > /dev/null

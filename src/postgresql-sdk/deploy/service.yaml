@@ -24,7 +24,6 @@ prerequisite:
 
 template-list:
   - postgresql-sdk-service.yaml
-  - postgresql-sdk-health-check.yaml
 
 start-script: start.sh
 stop-script: stop.sh

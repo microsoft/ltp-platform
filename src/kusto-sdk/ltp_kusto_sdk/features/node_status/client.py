@@ -185,7 +185,7 @@ class NodeStatusClient(KustoBaseClient):
     def get_nodes_by_status(
             self,
             status: str,
-            as_of_time: Optional[datetime] = None) -> List[Dict[str, Any]]:
+            as_of_time: Optional[datetime] = None) -> List[NodeStatusRecord]:
         """Get all nodes whose latest/current status is exactly the specified status.
         
         Args:
@@ -194,7 +194,7 @@ class NodeStatusClient(KustoBaseClient):
                                           If not provided, uses current time.
                                           
         Returns:
-            List[Dict[str, Any]]: List of node records whose latest status matches.
+            List[NodeStatusRecord]: List of node records whose latest status matches.
                                 Each record contains Timestamp, HostName, Status, NodeId, and Endpoint.
                                 
         Example:
@@ -224,7 +224,7 @@ class NodeStatusClient(KustoBaseClient):
             """
 
             results = self.execute_query(query)
-            return results if results else []
+            return [NodeStatusRecord.from_record(result) for result in results] if results else []
 
         except Exception as e:
             raise RuntimeError(f"Failed to get nodes by status: {str(e)}")

@@ -9,6 +9,7 @@ from sqlalchemy import select, and_, func
 from ...base import PostgreSQLBaseClient
 from ...models import NodeStatus as NodeStatusModel, NodeStatusAttributes as NodeStatusAttributesModel
 from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus, STATUS_METADATA, get_transition_action
+from ltp_storage.utils.time_util import convert_timestamp
 
 class NodeStatusClient(PostgreSQLBaseClient):
     """Client for managing node status records in PostgreSQL."""
@@ -117,8 +118,10 @@ class NodeStatusClient(PostgreSQLBaseClient):
             if status:
                 filters.append(NodeStatusModel.status == status)
             if start_time:
+                start_time = convert_timestamp(start_time, "datetime")
                 filters.append(NodeStatusModel.timestamp >= start_time)
             if end_time:
+                end_time = convert_timestamp(end_time, "datetime")
                 filters.append(NodeStatusModel.timestamp <= end_time)
 
             if filters:
@@ -264,6 +267,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
                 result = self._get_latest_record(hostname=hostname)
             else:
                 # Get status at specific time
+                timestamp = convert_timestamp(timestamp, "datetime")
                 result_list = self._query_records(
                     hostname=hostname,
                     end_time=timestamp,
@@ -302,6 +306,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
         """
         try:
             # Create new status record (kusto-sdk compatible)
+            timestamp = convert_timestamp(timestamp, "datetime")
             record = NodeStatusRecord(
                 Timestamp=timestamp,
                 HostName=hostname,
@@ -319,7 +324,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
         self,
         status: str,
         as_of_time: Optional[datetime] = None
-    ) -> List[Dict[str, Any]]:
+    ) -> List[NodeStatusRecord]:
         """
         Get all nodes whose latest/current status is exactly the specified status.
         
@@ -331,7 +336,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
                        If not provided, uses current time.
                        
         Returns:
-            List[Dict[str, Any]]: List of node records whose latest status matches.
+            List[NodeStatusRecord]: List of node records whose latest status matches.
                                 Each record contains timestamp, hostname, status, node_id.
                                 
         Example:
@@ -344,6 +349,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
             try:
                 # Subquery to get latest timestamp for each hostname
                 if as_of_time:
+                    as_of_time = convert_timestamp(as_of_time, "datetime")
                     subquery = (
                         select(
                             NodeStatusModel.hostname,
@@ -377,7 +383,7 @@ class NodeStatusClient(PostgreSQLBaseClient):
                 )
                 
                 results = session.execute(query).scalars().all()
-                return [result.to_dict() for result in results]
+                return [NodeStatusRecord.from_record(result.to_dict()) for result in results]
                 
             finally:
                 session.close()
