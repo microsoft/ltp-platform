@@ -19,6 +19,7 @@ class AgentFlowState(TypedDict):
     aggregated_output: str
     last_output: str
     step_count: int
+    all_outputs: List[Dict[str, str]]  # Track all agent outputs with metadata
 
 
 class AgentFlow:
@@ -103,9 +104,31 @@ class AgentFlow:
                 "User's request is provided with the tag [user question], and any additional context is provided with the tag [context message]. "
                 "You should ONLY use additional context if it is relevant to the user's request, otherwise ignore it. "
                 f"Available agents are: {list(self.agent_dict.keys())}.\n"
-                "**Your response MUST be a single JSON array of objects, where each object has 'agent' (agent name) and 'task' (specific instruction).** "
+                "**Your response MUST be a single JSON array of objects, where each object has 'agent' (agent name), 'task' (specific instruction), and 'needs_summary' (boolean).** "
+                "Set 'needs_summary' to true when:\n"
+                "- User asks for comparison between multiple items\n"
+                "- User asks for the same information about multiple subjects\n"
+                "- User asks questions that require combining/synthesizing outputs from multiple agents\n"
+                "- Multiple search or data-gathering agents are used\n"
+                "Set 'needs_summary' to false for single-step tasks or when the last agent's output directly answers the question.\n"
                 "Use **DOUBLE quotes** for all strings. Do NOT include any other text, reasoning, or markdown (like ```json). "
-                "Example: [{\"agent\": \"Calculator Agent\", \"task\": \"Calculate (8 * 9 + 50) * 100\"}, {\"agent\": \"Web Search Agent\", \"task\": \"Find a company with approximately employees in the calculated result\"}, {\"agent\": \"Story agent\", \"task\": \"Write a short math teaching story using the company name\"}]"
+                "Examples:\n"
+                "- Compare companies: [{\"agent\": \"Web Search Agent\", \"task\": \"Search for Apple's revenue\", \"needs_summary\": true}, {\"agent\": \"Web Search Agent\", \"task\": \"Search for Google's revenue\", \"needs_summary\": true}]\n"
+                "- Simple calculation: [{\"agent\": \"Calculator Agent\", \"task\": \"Calculate 10 * 20\", \"needs_summary\": false}]"
+            ),
+            model=self.chat_model_config,
+            output_type=str
+        )
+        
+        # Summary agent for combining multiple outputs
+        self.summary_agent = Agent(
+            name="SummaryAgent",
+            instructions=(
+                "You are a summary agent. Your task is to analyze all the outputs from previous agents "
+                "and create a comprehensive, coherent response that directly answers the user's original question. "
+                "You will receive the original user question and all agent outputs. "
+                "Create a well-structured summary that combines the information effectively. "
+                "Focus on directly answering what the user asked for, whether it's a comparison, compilation, or synthesis."
             ),
             model=self.chat_model_config,
             output_type=str
@@ -130,13 +153,16 @@ class AgentFlow:
             for step in flow_plan:
                 if not isinstance(step, dict) or 'agent' not in step or 'task' not in step:
                     raise ValueError("Each step must be a dict with 'agent' and 'task' keys.")
+                # Set default value for needs_summary if not provided
+                if 'needs_summary' not in step:
+                    step['needs_summary'] = False
                 
             return flow_plan
             
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON format: {e}")
     
-    async def _create_agent_node(self, agent: Agent, agent_name: str):
+    async def _create_agent_node(self, agent: Agent, agent_name: str, step_info: Dict[str, str]):
         """Create a LangGraph node function for an agent."""
         async def node_fn(state: AgentFlowState) -> AgentFlowState:
             push_frontend_event(f'<span class="text-gray-400 italic">🔍 Step {state["step_count"]}: Executing {agent_name}</span><br/>', replace=False)
@@ -157,12 +183,24 @@ class AgentFlow:
             
             logger.debug(f"[{agent_name} Output]: \n{output}")
             
+            # Track this output with metadata
+            output_entry = {
+                "agent": agent_name,
+                "task": state["current_task"],
+                "output": output,
+                "step": state["step_count"],
+                "needs_summary": step_info.get("needs_summary", False)
+            }
+            
+            updated_all_outputs = state.get("all_outputs", []) + [output_entry]
+            
             return {
                 "input_prompt": state["input_prompt"],
                 "current_task": state["current_task"],
                 "aggregated_output": state["aggregated_output"] + output,
                 "last_output": output,
-                "step_count": state["step_count"] + 1
+                "step_count": state["step_count"] + 1,
+                "all_outputs": updated_all_outputs
             }
         
         return node_fn
@@ -174,7 +212,8 @@ class AgentFlow:
             "current_task": first_task,
             "aggregated_output": "",
             "last_output": "",
-            "step_count": 1
+            "step_count": 1,
+            "all_outputs": []
         }
 
     async def _build_sequential_workflow(self, flow_plan: List[Dict[str, str]]):
@@ -190,7 +229,7 @@ class AgentFlow:
                 raise ValueError(f"Agent '{agent_name}' not found.")
             
             node_name = f"step_{i}_{agent_name.replace(' ', '_')}"
-            node_fn = await self._create_agent_node(agent, agent_name)
+            node_fn = await self._create_agent_node(agent, agent_name, step)
             workflow.add_node(node_name, node_fn)
             node_names.append(node_name)
             node_functions.append(node_fn)
@@ -213,6 +252,55 @@ class AgentFlow:
             state = await node_functions[i](state)
         return state
     
+    def _should_summarize(self, flow_plan: List[Dict[str, str]], final_state: AgentFlowState) -> bool:
+        """Determine if summarization is needed based on flow plan and execution results."""
+        # Check if any step explicitly requested summarization
+        needs_summary_flags = [step.get('needs_summary', False) for step in flow_plan]
+        if any(needs_summary_flags):
+            return True
+            
+        # Check if multiple agents of the same type were executed (heuristic for similar data gathering)
+        agent_types = [step['agent'] for step in flow_plan]
+        if len(agent_types) != len(set(agent_types)) and len(flow_plan) > 1:
+            return True
+            
+        # Check if there are multiple web search or data gathering steps
+        data_gathering_agents = ['Web Search Agent', 'Search Agent', 'Data Agent']
+        data_gathering_count = sum(1 for step in flow_plan if any(agent in step['agent'] for agent in data_gathering_agents))
+        if data_gathering_count > 1:
+            return True
+            
+        return False
+    
+    async def _create_summary(self, input_prompt: str, final_state: AgentFlowState) -> str:
+        """Create a summary of all agent outputs."""
+        push_frontend_event(f'<span class="text-gray-400 italic">🔍 Creating comprehensive summary...</span><br/>', replace=False)
+        
+        # Prepare summary input
+        all_outputs_text = ""
+        for i, output_entry in enumerate(final_state["all_outputs"], 1):
+            all_outputs_text += f"\n--- Step {i}: {output_entry['agent']} ---\n"
+            all_outputs_text += f"Task: {output_entry['task']}\n"
+            all_outputs_text += f"Output: {output_entry['output']}\n"
+        
+        summary_input = f"""
+        Original User Question: {input_prompt}
+
+        All Agent Outputs:
+        {all_outputs_text}
+
+        Please create a comprehensive summary that directly answers the user's original question by combining and synthesizing all the information above.
+        """
+        
+        logger.debug(f'[Summary Input]\n{summary_input}')
+        
+        summary_result = await Runner.run(self.summary_agent, input=summary_input)
+        summary_output = summary_result.final_output
+        
+        logger.debug(f"[Summary Output]: \n{summary_output}")
+        
+        return summary_output
+
     async def _execute_flow_plan_with_langgraph(self, flow_plan: List[Dict[str, str]], input_prompt: str) -> str:
         """Orchestrate building and running the LangGraph workflow."""
         try:
@@ -223,7 +311,12 @@ class AgentFlow:
         
         state = self._init_state(input_prompt, flow_plan[0]['task'])
         final_state = await self._run_sequential(workflow, node_names, node_functions, flow_plan, state)
-        return final_state["last_output"]
+        
+        # Decide whether to return last output or create a summary
+        if self._should_summarize(flow_plan, final_state):
+            return await self._create_summary(input_prompt, final_state)
+        else:
+            return final_state["last_output"]
     
     async def execute_flow(self, input_prompt: str) -> str:
         """
