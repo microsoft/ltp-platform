@@ -118,6 +118,7 @@ class SchemaManager:
             script = ScriptDirectory.from_config(alembic_cfg)
             
             with self.engine.connect() as conn:
+                conn.execute(text(f"SET search_path TO {self.schema}, public"))
                 context = MigrationContext.configure(conn)
                 current_rev = context.get_current_revision()
             
@@ -465,9 +466,17 @@ def main():
             logger.info("Tables exist but no version tracking, stamping to head...")
             success = manager.stamp_head()
         else:
-            # Tables and version exist, do upgrade
-            logger.info("Schema exists with version tracking, running upgrade...")
-            success = manager.upgrade()
+            # Tables and version exist, determine current revision state
+            rev_info = manager.get_current_revision() or {}
+            current_rev = rev_info.get("current")
+            head_rev = rev_info.get("head")
+
+            if current_rev is None and head_rev is not None:
+                logger.info("Version table present but no revision recorded, stamping to head...")
+                success = manager.stamp_head()
+            else:
+                logger.info("Schema exists with version tracking, running upgrade...")
+                success = manager.upgrade()
     
     if success:
         logger.info("Operation completed successfully")

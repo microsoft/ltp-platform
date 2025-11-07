@@ -4,7 +4,7 @@
 """Tests for NodeActionClient."""
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 from ltp_postgresql_sdk.features.node_action.client import NodeActionClient
@@ -177,9 +177,21 @@ def test_get_latest_node_action(client):
         Endpoint="e1",
     )
     client._insert_record(rec)
+    rec = NodeActionRecord(
+        Timestamp=datetime.utcnow() - timedelta(hours=1),
+        HostName="test-worker-glna",
+        NodeId="node-glna",
+        Action="cordoned-available",
+        Reason="triaged",
+        Detail="triaged detail",
+        Category="test",
+        Endpoint="e1",
+    )
+    client._insert_record(rec)
     latest = client.get_latest_node_action("test-worker-glna")
     assert latest is not None
     assert latest.HostName == "test-worker-glna"
+    assert latest.Action == "available-cordoned"
 
 
 def test_update_node_action(client):
@@ -205,8 +217,9 @@ def test_get_last_update_time():
         schema=_os.environ["POSTGRES_SCHEMA"],
     )
     try:
+        time = datetime.utcnow()
         rec = NodeActionRecord(
-            Timestamp=datetime.utcnow(),
+            Timestamp=time,
             HostName="test-worker-glut",
             NodeId="node-glut",
             Action="available-cordoned",
@@ -217,7 +230,7 @@ def test_get_last_update_time():
         )
         local_client._insert_record(rec)
         last = local_client.get_last_update_time()
-        assert last is None or isinstance(last, datetime)
+        assert last is not None and isinstance(last, datetime) and last.timestamp() == time.timestamp()
     finally:
         # cleanup
         try:

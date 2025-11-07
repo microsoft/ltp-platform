@@ -179,9 +179,6 @@ for action in results:
 # Batch insert
 records = [NodeActionRecord(...), NodeActionRecord(...)]
 record_ids = client.insert_actions_batch(records)
-
-# Count records
-count = client.count_actions(category="maintenance")
 ```
 
 ### Available Clients
@@ -343,7 +340,7 @@ When you modify the models in `sdk/ltp_postgresql_sdk/models.py`:
 1. **Generate the migration**:
    ```bash
    # In the test container or locally with the SDK
-    kubectl exec -it <postgresql-sdk-sync-pod> -c test -- python /app/src/schema_manager.py generate --message "remove metadata and previous_status from node_status"
+    kubectl exec -it <postgresql-sdk-test-pod> -- python /app/src/schema_manager.py generate --message "remove metadata and previous_status from node_status"
    ```
 
 2. **Review the generated file**:

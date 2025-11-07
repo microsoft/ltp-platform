@@ -12,7 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from ltp_storage.data_schema.node_action import NodeActionClient
 from ltp_storage.data_schema.node_action import NodeAction
-from ltp_kusto_sdk.utils.time_util import convert_timestamp
+from ltp_storage.utils.time_util import convert_timestamp
 
 
 @pytest.fixture(scope="session")

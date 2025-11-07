@@ -67,7 +67,7 @@ class NodeAvailabilityMonitor:
                     nodes_continuous_unschedulable.append(node_name)
         
         query = ('query?query=avg by (node_name) (pai_node_count{unschedulable="false",node_name!~"aks-.*"})'
-                + f"[{time_offset}:{interval}] @ {end_time}")
+                + f"[{interval}:{interval}] @ {end_time}")
         result = RequestUtil.prometheus_query(query=query, data={}, uri=self.rest_server_uri)
         if result is not None:
             result = result["result"]
@@ -201,6 +201,8 @@ class NodeAvailabilityMonitor:
             if from_status == NodeStatus.AVAILABLE:
                 logger.info(f"Node {node} is already available. No action taken.")
             else:
+              start_time_timestamp = convert_timestamp(start_time, format="timestamp")
+              if timestamp - start_time_timestamp > self.tolerance_time:
                 to_status = NodeStatus.AVAILABLE.value
                 reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
                 self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)

@@ -93,8 +93,6 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["smtp-auth-username"] }}
         - name: EMAIL_CONFIGS_SMTP_AUTH_PASSWORD
           value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["smtp-auth-password"] }}
-        - name: CLUSTER_ID
-          value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
         - name: LTP_STORAGE_BACKEND_DEFAULT
           value: "{{ cluster_cfg['alert-manager']['alert-handler'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
 {% if cluster_cfg["alert-manager"]["node-issue-classifier"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
