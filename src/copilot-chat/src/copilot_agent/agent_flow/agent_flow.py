@@ -270,8 +270,15 @@ class AgentFlow:
             logger.debug(f'Final Output: \n{final_output}')
             return final_output
 
-    def async_execute_flow(self, input_prompt: str) -> str:
+    def async_execute_flow(self, question: str, context_message: list | None) -> str:
         """Synchronous wrapper to run the async execute_flow method."""
+        question_prompt = f'[user question]\n {question} \n\n'
+        if context_message:
+            context_prompt = f'[context message]\n {" ".join(context_message)} \n\n'
+        else:
+            context_prompt = ''
+        input_prompt = (question_prompt + context_prompt)
+        logger.info(f'[async_execute_flow] input_prompt: {input_prompt}')
         answer = asyncio.run(self.execute_flow(input_prompt))
         push_frontend_event(f'<span class="text-gray-400 italic">✅ Analysis result</span><br/>', replace=False)
         push_frontend_event(f'<span class="text-black">{answer}</span><br/>', replace=False)
