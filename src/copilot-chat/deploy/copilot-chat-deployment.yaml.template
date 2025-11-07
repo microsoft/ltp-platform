@@ -93,6 +93,14 @@ spec:
           value: {{ cluster_cfg["copilot-chat"]["collect-dst-kusto-database-name"] }}
         - name: CLUSTER_ID
           value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
+        - name: AZURE_OPENAI_ENDPOINT
+          value: {{ cluster_cfg["copilot-chat"]["llm-endpoint"] }}
+        - name: AZURE_OPENAI_DEPLOYMENT
+          value: {{ cluster_cfg["copilot-chat"]["llm-model"] }}
+        - name: AZURE_OPENAI_API_VERSION
+          value: {{ cluster_cfg["copilot-chat"]["llm-version"] }}
+        - name: AZURE_OPENAI_AGENTSDK_MAX_TURNS
+          value: {{ cluster_cfg["copilot-chat"]["agentsdk_max_turn"] }}
         ports:
         - containerPort: {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
           hostPort:  {{ cluster_cfg["copilot-chat"]["agent-port"]  | default("50000") }}
