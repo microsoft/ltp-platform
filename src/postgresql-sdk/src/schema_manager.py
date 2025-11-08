@@ -153,6 +153,17 @@ class SchemaManager:
             # Verify models are registered
             logger.info(f"Registered models: {list(Base.metadata.tables.keys())}")
             
+            # If force=True, explicitly drop alembic_version table as well
+            # (Base.metadata.drop_all() doesn't drop it since it's not a model table)
+            if force:
+                logger.info("Force mode: dropping all tables including alembic_version...")
+                with self.engine.connect() as conn:
+                    # Drop alembic_version table if it exists
+                    conn.execute(text(
+                        f"DROP TABLE IF EXISTS {self.schema}.alembic_version CASCADE"
+                    ))
+                    conn.commit()
+            
             # Initialize database
             db_manager = DatabaseManager(
                 connection_str=self.connection_str,
