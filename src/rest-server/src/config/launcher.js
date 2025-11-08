@@ -84,6 +84,7 @@ const k8sLauncherConfigSchema = Joi.object()
     jobRestrictionGitScriptName: Joi.string().required(),
     clstoreHostPath: Joi.string().empty(''),
     clstoreJobPath: Joi.string().empty(''),
+    imageRegex: Joi.string().empty(''),
   })
   .required();
 
@@ -156,6 +157,7 @@ if (launcherType === 'k8s') {
     jobRestrictionGitScriptName: process.env.JOB_RESTRICTION_GIT_SCRIPT_NAME || 'unset',
     clstoreHostPath: process.env.CLUSTER_LOCAL_STORAGE_HOST_PATH,
     clstoreJobPath: process.env.CLUSTER_LOCAL_STORAGE_JOB_PATH,
+    imageRegex: process.env.IMAGE_REGEX || '',
   };
 
   const { error, value } = k8sLauncherConfigSchema.validate(launcherConfig);

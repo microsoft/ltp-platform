@@ -9,108 +9,33 @@ from datetime import datetime
 import os
 import logging
 
-from ltp_kusto_sdk.base import KustoBaseClient
-from ltp_kusto_sdk.utils.time_util import parse_duration, convert_timestamp
+from ltp_storage.factory import create_alert_client
+from ltp_storage.utils.time_util import parse_duration, convert_timestamp
 
 # set logger with timestamp
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Get Kusto configuration from environment variables
-KUSTO_ALERT_CLUSTER = os.getenv('KUSTO_ALERT_CLUSTER', 'https://ltp-kusto-alerts.westus2.kusto.windows.net')
-KUSTO_ALERT_DATABASE = os.getenv('KUSTO_ALERT_DATABASE', 'DefaultWorkspace-id-westus2')
+LTP_STORAGE_BACKEND_DEFAULT = os.getenv('LTP_STORAGE_BACKEND_DEFAULT', 'kusto')
 
-class AlertParser:
-    """Parser for alert log messages"""
-    
-    @staticmethod
-    def parse_message(log):
-        """Parse a single alert log message"""
-        pattern = r"\[(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)\] alert-handler received alerts: Alertname: (?P<alertname>[^,]+), Severity: (?P<severity>[^,]+), Summary: (?P<summary>.+), Labels: (?P<labels>\{.*?\}), Annotations: (?P<annotations>.*?)"
-        match = re.search(pattern, log)
-        if match:
-            timestamp = match.group("timestamp")
-            alertname = match.group("alertname")
-            severity = match.group("severity")
-            summary = match.group("summary")
-            if 'segfault' in summary:
-                summary = "Segfault"
-            labels = json.loads(match.group("labels"))
-            annotations = match.group("annotations")
-            if alertname == "undefined" and "report_type" in labels:
-                alertname = labels["report_type"]
-            return {
-                "timestamp": timestamp,
-                "alertname": alertname,
-                "severity": severity,
-                "summary": summary,
-                "labels": labels,
-                "annotations": annotations,
-            }
-        else:
-            logger.info(f"Failed to parse log message: {log}")
-            return None
-
-    @staticmethod
-    def generate_row(alert):
-        """Generate a standardized alert row"""
-        keys = [
-            "severity",
-            "summary",
-            "alertname",
-            "node_name",
-            "labels",
-            "annotations",
-            "timestamp",
-        ]
-        alert = AlertParser.parse_message(alert)
-        for key in keys:
-            if key not in alert:
-                if key in alert["labels"]:
-                    alert[key] = alert["labels"][key]
-                else:
-                    alert[key] = ""
-        return alert
 
 class AlertFetcher:
     """Fetches and processes alerts from Kusto"""
     
     def __init__(self):
-        self.client = KustoBaseClient(
-            cluster=KUSTO_ALERT_CLUSTER,
-            database=KUSTO_ALERT_DATABASE
-        )
+        self.endpoint = os.getenv("CLUSTER_ID")
+        self.client = create_alert_client(endpoint=self.endpoint)
 
-    def fetch_logs(self, end_time_stamp, time_offset):
+    def fetch_logs(self, end_time_stamp, time_offset, nodes=None):
         """Fetch raw alert logs from Kusto"""
         end_time = datetime.fromtimestamp(end_time_stamp)
         time_offset_delta = parse_duration(time_offset)
         start_time = end_time - time_offset_delta
-        # TODO: fix bug of NodeFilesystemUsage, NodeGpuCountChanged, NodeUnschedulable and remove them from the query
-        query = (
-            f"ContainerLogV2| "
-            f'where ContainerName contains "alerthandler" | '
-            f'where LogMessage contains "alert-handler received alerts" and '
-            f'LogMessage !contains "NodeFilesystemUsage" and LogMessage !contains "NodeGpuCountChanged" and LogMessage !contains "NodeUnschedulable" | '
-            f"where TimeGenerated between(datetime({start_time})..datetime({end_time})) | "
-            f"project TimeGenerated, PodName, LogMessage | "
-            f"sort by TimeGenerated asc")
-        
-        records = self.client.execute_query(query)
+        records = self.client.query_alerts(start_time=start_time, end_time=end_time, nodes=nodes)
         logger.info(f"Fetched {len(records)} alert logs from Kusto.")
         return records if records else None
 
-    def process_alerts(self, alerts_data, nodes=None):
-        """Process raw alert data"""
-        alerts = [AlertParser.generate_row(row["LogMessage"]) for row in alerts_data]
-        alerts_df = pd.DataFrame(alerts)
-        if nodes is not None:
-            alerts_df = alerts_df[alerts_df["node_name"].isin(nodes)]
-        if alerts_df.empty:
-            logger.info("No alerts found for the specified nodes.")
-            return []
-        alerts_df["timestamp"] = pd.to_datetime(alerts_df["timestamp"], errors="coerce")
-        return alerts_df
     
     def shrink_alerts(self, alerts_df):
         """Shrink alerts DataFrame to essential columns"""
@@ -158,15 +83,14 @@ class AlertFetcher:
         
         return result_df
         
-
     def get_node_alert_records(self, end_time_stamp, time_offset, tolerent_duration="15m", endpoint="wcu", nodes=None):
         """Get processed alert records for nodes"""
         print(f"Fetching alerts from Kusto for nodes: {nodes} with time offset: {time_offset} and end time: {end_time_stamp}")
-        alerts_data = self.fetch_logs(end_time_stamp, time_offset)
+        alerts_data = self.fetch_logs(end_time_stamp, time_offset, nodes=nodes)
         if alerts_data is None:
             return None
 
-        return self.process_alerts(alerts_data, nodes=nodes)
+        return pd.DataFrame(alerts_data)
 
     def find_node_alerts(self, alerts, node, end_time_stamp, start_time_stamp):
         """Find alerts for a specific node in a time period"""

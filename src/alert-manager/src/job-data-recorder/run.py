@@ -100,10 +100,10 @@ def process_job_data(time_offset=None):
 
         # Ingest records to Kusto
         try:
-            logger.info(f"Ingesting metrics to Kusto table: {metrics_table}")
+            logger.info(f"Ingesting metrics to table: {metrics_table}")
             KustoUtil().ingest_job_metrics_to_kusto(metrics_df, metrics_table)
             logger.info("Successfully ingested metrics to Kusto")
-            logger.info(f"Ingesting react times to Kusto table: {react_table}")
+            logger.info(f"Ingesting react times to table: {react_table}")
             KustoUtil().ingest_job_metrics_to_kusto(react_df, react_table)
             logger.info("Successfully ingested react times to Kusto")
         except Exception as kusto_error:

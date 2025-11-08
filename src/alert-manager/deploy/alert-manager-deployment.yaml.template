@@ -80,6 +80,14 @@ spec:
 {%- endif %}
         - name: LOG_LEVEL
           value: {{ cluster_cfg["alert-manager"]["alert-handler"]["log-level"] }}
+        - name: LTP_STORAGE_BACKEND_DEFAULT
+          value: "{{ cluster_cfg['alert-manager']['alert-handler'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
+{% if cluster_cfg["alert-manager"]["alert-handler"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
+        - name: POSTGRES_CONNECTION_STR
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
+        - name: POSTGRES_SCHEMA
+          value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
+{% endif %}
 {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
         - name: EMAIL_CONFIGS_ADMIN_RECEIVER
           value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["admin-receiver"] }}
@@ -141,23 +149,28 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["log-level"] | default(cluster_cfg["alert-manager"]["log-level"]) | default("INFO") }}
         - name: CLASSIFICATION_INTERVAL_MINUTES
           value: "{{ cluster_cfg["alert-manager"]["node-issue-classifier"]["classification-interval-minutes"] | default("10") }}"
-{% if cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto"] %}
-        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
-          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
-        - name: LTP_KUSTO_CLUSTER_URI
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
-        - name: LTP_KUSTO_DATABASE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
-        - name: KUSTO_NODE_STATUS_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["node-status-table"]
-                    | default(cluster_cfg["alert-manager"]["node-status-table"])
-                    | default("NodeStatusRecord") }}
-        - name: KUSTO_NODE_ACTION_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"]["node-action-table"]
-                    | default(cluster_cfg["alert-manager"]["node-action-table"])
-                    | default("NodeActionRecord") }}
         - name: COOCCURRED_HARDWARE_FAILURE_LIMIT
-          value: "{{ cluster_cfg["alert-manager"]["node-issue-classifier"]["coccurred_hardware_failure_node_limit"] | default("5") }}"
+          value: "{{ cluster_cfg["alert-manager"]["node-issue-classifier"]["coccurred-hardware-failure-node-limit"] | default("5") }}"
+{% if cluster_cfg["alert-manager"]["node-issue-classifier"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "kusto" %}
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["kusto"]["kusto-user-assigned-client-id"] }}
+        - name: LTP_KUSTO_CLUSTER_URI
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"].get("kusto-cluster", cluster_cfg["alert-manager"]["kusto"]["kusto-cluster"]) }}
+        - name: LTP_KUSTO_DATABASE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"].get("kusto-database", cluster_cfg["alert-manager"]["kusto"]["kusto-database"]) }}
+        - name: KUSTO_NODE_STATUS_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"].get("node-status-table", cluster_cfg["alert-manager"]["kusto"]["node-status-table"]) }}
+        - name: KUSTO_NODE_ACTION_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["node-issue-classifier"].get("node-action-table", cluster_cfg["alert-manager"]["kusto"]["node-action-table"]) }}
+{% endif %}
+        # Storage backend selection
+        - name: LTP_STORAGE_BACKEND_DEFAULT
+          value: "{{ cluster_cfg['alert-manager']['node-issue-classifier'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
+{% if cluster_cfg["alert-manager"]["node-issue-classifier"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
+        - name: POSTGRES_CONNECTION_STR
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
+        - name: POSTGRES_SCHEMA
+          value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
 {% endif %}
         resources:
           requests:
@@ -187,30 +200,37 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["uri"] | default(cluster_cfg["alert-manager"]["prometheus-uri"]) }}
         - name: PAI_TOKEN
           value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+{% if cluster_cfg["alert-manager"]["alert-parser"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "kusto" %}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
-          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
+          value: {{ cluster_cfg["alert-manager"]["kusto"]["kusto-user-assigned-client-id"] }}
         - name: LTP_KUSTO_CLUSTER_URI
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"].get("kusto-cluster", cluster_cfg["alert-manager"]["kusto"]["kusto-cluster"]) }}
         - name: LTP_KUSTO_DATABASE_NAME
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"].get("kusto-database", cluster_cfg["alert-manager"]["kusto"]["kusto-database"]) }}
         - name: KUSTO_NODE_STATUS_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-status-table"]
-                    | default(cluster_cfg["alert-manager"]["node-status-table"])
-                    | default("NodeStatusRecord") }}
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"].get("node-status-table", cluster_cfg["alert-manager"]["kusto"]["node-status-table"]) }}
         - name: KUSTO_NODE_ACTION_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["node-action-table"]
-                    | default(cluster_cfg["alert-manager"]["node-action-table"])
-                    | default("NodeActionRecord") }}
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"].get("node-action-table", cluster_cfg["alert-manager"]["kusto"]["node-action-table"]) }}
         - name: KUSTO_ALERT_CLUSTER
-          value: "{{ cluster_cfg['alert-manager']['alert-parser']['alert-kusto-cluster'] | default('https://ltp-kusto-alerts.westus2.kusto.windows.net') }}"
+          value: "{{ cluster_cfg['alert-manager']['alert-parser'].get('alert-kusto-cluster', 'https://ltp-kusto-alerts.westus2.kusto.windows.net') }}"
         - name: KUSTO_ALERT_DATABASE
-          value: "{{ cluster_cfg['alert-manager']['alert-parser']['alert-kusto-database'] | default('DefaultWorkspace-id-westus2') }}"
+          value: "{{ cluster_cfg['alert-manager']['alert-parser'].get('alert-kusto-database', 'DefaultWorkspace-id-westus2') }}"
         - name: LTP_KUSTO_VM_INFO_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["kusto-vm-table"] | default(cluster_cfg["alert-manager"]["kusto-vm-table"]) }}
+          value: {{ cluster_cfg["alert-manager"]["alert-parser"].get("kusto-vm-table", cluster_cfg["alert-manager"]["kusto"].get("kusto-vm-table", "")) }}
+{% endif %}
         - name: LTP_VMSS_IDS
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["vmss_ids"] | default(cluster_cfg["alert-manager"]["vmss_ids"]) }}
         - name: AZURE_CLIENT_ID
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["vmss_client_id"] | default(cluster_cfg["alert-manager"]["vmss_client_id"]) }}
+        # Storage backend selection
+        - name: LTP_STORAGE_BACKEND_DEFAULT
+          value: "{{ cluster_cfg['alert-manager']['alert-parser'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
+{% if cluster_cfg["alert-manager"]["alert-parser"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
+        - name: POSTGRES_CONNECTION_STR
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
+        - name: POSTGRES_SCHEMA
+          value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
+{% endif %}
         resources:
           requests:
             memory: "2Gi"
@@ -232,21 +252,17 @@ spec:
           value: {{ cluster_cfg["cluster"]["common"]["cluster-id"] }}
         - name: ENVIRONMENT
           value: {{ cluster_cfg["alert-manager"]["node-recycler"]["environment"] | default("prod") }}
-{% if cluster_cfg["alert-manager"]["node-recycler"]["kusto"] %}
+{% if cluster_cfg["alert-manager"]["node-recycler"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "kusto" %}
         - name: KUSTO_USER_ASSIGNED_CLIENT_ID
-          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
+          value: {{ cluster_cfg["alert-manager"]["kusto"]["kusto-user-assigned-client-id"] }}
         - name: LTP_KUSTO_CLUSTER_URI
-          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"].get("kusto-cluster", cluster_cfg["alert-manager"]["kusto"]["kusto-cluster"]) }}
         - name: LTP_KUSTO_DATABASE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"].get("kusto-database", cluster_cfg["alert-manager"]["kusto"]["kusto-database"]) }}
         - name: KUSTO_NODE_STATUS_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["node-status-table"]
-                    | default(cluster_cfg["alert-manager"]["node-status-table"])
-                    | default("NodeStatusRecord") }}
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"].get("node-status-table", cluster_cfg["alert-manager"]["kusto"]["node-status-table"]) }}
         - name: KUSTO_NODE_ACTION_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["node-action-table"]
-                    | default(cluster_cfg["alert-manager"]["node-action-table"])
-                    | default("NodeActionRecord") }}
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"].get("node-action-table", cluster_cfg["alert-manager"]["kusto"]["node-action-table"]) }}
 {% endif %}
 {% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
         - name: ICM_HOST
@@ -272,6 +288,15 @@ spec:
           value: {{ cluster_cfg["rest-server"]["uri"] }}
         - name: REST_SERVER_TOKEN
           value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+        # Storage backend selection
+        - name: LTP_STORAGE_BACKEND_DEFAULT
+          value: "{{ cluster_cfg['alert-manager']['node-recycler'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
+{% if cluster_cfg["alert-manager"]["node-recycler"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
+        - name: POSTGRES_CONNECTION_STR
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
+        - name: POSTGRES_SCHEMA
+          value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
+{% endif %}
         resources:
           requests:
             memory: "1Gi"
@@ -377,26 +402,35 @@ spec:
           value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["run-interval"] | default("3h") }}"
         - name: RECORD_RETAIN_TIME
           value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["record-retain-time"] | default("30d") }}"
-        - name: KUSTO_METRICS_TABLE
-          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["kusto-metrics-table"] | default("JobSummary") }}"
-        - name: KUSTO_REACT_TABLE
-          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"]["kusto-react-table"] | default("JobReactTime") }}"
-        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
-          value: {{ cluster_cfg["alert-manager"]["kusto-user-assigned-client-id"] }}
-        - name: LTP_KUSTO_CLUSTER_URI
-          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["kusto-cluster"] | default(cluster_cfg["alert-manager"]["kusto-cluster"]) }}
-        - name: LTP_KUSTO_DATABASE_NAME
-          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["kusto-database"] | default(cluster_cfg["alert-manager"]["kusto-database"]) }}
         - name: REST_SERVER_URI
           value: {{ cluster_cfg["rest-server"]["uri"] }}
         - name: PROMETHEUS_SERVER_URI
           value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["prometheus-uri"] | default(cluster_cfg["alert-manager"]["prometheus-uri"]) }}
-        - name: KUSTO_NODE_ACTION_TABLE_NAME
-          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["node-action-table"]
-                    | default(cluster_cfg["alert-manager"]["node-action-table"])
-                    | default("NodeActionRecord") }}
         - name: PAI_TOKEN
           value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
+{% if cluster_cfg["alert-manager"]["job-data-recorder"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "kusto" %}
+        - name: KUSTO_METRICS_TABLE
+          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"].get("kusto-metrics-table", "JobSummary") }}"
+        - name: KUSTO_REACT_TABLE
+          value: "{{ cluster_cfg["alert-manager"]["job-data-recorder"].get("kusto-react-table", "JobReactTime") }}"
+        - name: KUSTO_USER_ASSIGNED_CLIENT_ID
+          value: {{ cluster_cfg["alert-manager"]["kusto"]["kusto-user-assigned-client-id"] }}
+        - name: LTP_KUSTO_CLUSTER_URI
+          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"].get("kusto-cluster", cluster_cfg["alert-manager"]["kusto"]["kusto-cluster"]) }}
+        - name: LTP_KUSTO_DATABASE_NAME
+          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"].get("kusto-database", cluster_cfg["alert-manager"]["kusto"]["kusto-database"]) }}
+        - name: KUSTO_NODE_ACTION_TABLE_NAME
+          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"].get("node-action-table", cluster_cfg["alert-manager"]["kusto"]["node-action-table"]) }}
+{% endif %}
+        # Storage backend selection
+        - name: LTP_STORAGE_BACKEND_DEFAULT
+          value: "{{ cluster_cfg['alert-manager']['job-data-recorder'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
+{% if cluster_cfg["alert-manager"]["job-data-recorder"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "postgresql" %}
+        - name: POSTGRES_CONNECTION_STR
+          value: "{{ cluster_cfg['postgresql']['connection-str'] }}"
+        - name: POSTGRES_SCHEMA
+          value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
+{% endif %}
         resources:
           requests:
             memory: "2Gi"

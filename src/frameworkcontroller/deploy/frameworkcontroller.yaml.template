@@ -51,3 +51,5 @@ spec:
       - name: frameworkcontroller-config
         configMap:
           name: frameworkcontroller-config
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}

@@ -11,9 +11,9 @@ from datetime import datetime
 from typing import Dict, List, Tuple, Optional
 import logging
 
-from ltp_kusto_sdk.utils.request_util import RequestUtil
-from ltp_kusto_sdk.utils.time_util import convert_timestamp, parse_duration
-from ltp_kusto_sdk.features.node_status.models import NodeStatus, NodeStatusRecord
+from ltp_storage.utils.request_util import RequestUtil
+from ltp_storage.utils.time_util import convert_timestamp, parse_duration
+from ltp_storage.data_schema.node_status import NodeStatus, NodeStatusRecord
 from utils.alert_util import AlertFetcher, AlertMapper
 from node_updater import NodeRecordUpdater
 
@@ -67,7 +67,7 @@ class NodeAvailabilityMonitor:
                     nodes_continuous_unschedulable.append(node_name)
         
         query = ('query?query=avg by (node_name) (pai_node_count{unschedulable="false",node_name!~"aks-.*"})'
-                + f"[{time_offset}:{interval}] @ {end_time}")
+                + f"[{interval}:{interval}] @ {end_time}")
         result = RequestUtil.prometheus_query(query=query, data={}, uri=self.rest_server_uri)
         if result is not None:
             result = result["result"]
@@ -135,7 +135,7 @@ class NodeAvailabilityMonitor:
         nodes_changed, nodes_unschedulable, node_schedulable = self.query_availability_changes(end_time, time_offset)
         nodes_validating = self.node_updater.get_nodes_by_status(NodeStatus.VALIDATING.value, end_time)
         nodes_available = self.node_updater.get_nodes_by_status(NodeStatus.AVAILABLE.value, end_time)
-        nodes_available = [node['HostName'] for node in nodes_available if node['HostName'] not in nodes_changed and node['HostName'] not in nodes_unschedulable]
+        nodes_available = [node.HostName for node in nodes_available if node.HostName not in nodes_changed and node.HostName not in nodes_unschedulable]
         nodes_scheduable_but_not_in_available = [node for node in node_schedulable if node not in nodes_available]
         node_status_changes = {}
         # Handle changed nodes in update interval
@@ -160,9 +160,9 @@ class NodeAvailabilityMonitor:
         
         # Handle validating nodes changed from validating to available during service down
         for node_stauts in nodes_validating:
-            node = node_stauts['HostName']
+            node = node_stauts.HostName
             if node not in node_status_changes and node not in nodes_unschedulable:
-                time_offset = int(end_time - convert_timestamp(node_stauts['Timestamp'], format="timestamp"))
+                time_offset = int(end_time - convert_timestamp(node_stauts.Timestamp, format="timestamp"))
                 changes, raw_values = self.get_node_status_changes(node, end_time, f'{time_offset}s')
                 if changes:
                     node_status_changes[node] = changes
@@ -201,6 +201,8 @@ class NodeAvailabilityMonitor:
             if from_status == NodeStatus.AVAILABLE:
                 logger.info(f"Node {node} is already available. No action taken.")
             else:
+              start_time_timestamp = convert_timestamp(start_time, format="timestamp")
+              if timestamp - start_time_timestamp > self.tolerance_time:
                 to_status = NodeStatus.AVAILABLE.value
                 reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
                 self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)

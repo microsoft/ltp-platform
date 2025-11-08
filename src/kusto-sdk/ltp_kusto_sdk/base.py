@@ -3,8 +3,8 @@
 
 import json
 from typing import Optional, Dict, Any, List
-from ltp_kusto_sdk.utils.kusto_client import KustoManageClient
-import os
+import pandas as pd
+from ltp_kusto_sdk.utils.kusto_client import KustoIngestionClient, KustoManageClient
 
 
 class KustoBaseClient:
@@ -85,3 +85,13 @@ class KustoBaseClient:
                     raise RuntimeError(f"Failed to insert record: {result}")
         except Exception as e:
             raise RuntimeError(f"Failed to insert record: {str(e)}")
+    
+    def _ingest_data(self, df: pd.DataFrame) -> None:
+        """
+        Ingest a DataFrame of data into Kusto.
+        
+        Args:
+            df: DataFrame containing data to ingest
+        """
+        ingestion_client = KustoIngestionClient(self.cluster, self.database)
+        ingestion_client.ingest_to_kusto(self.table_name, df)

@@ -8,13 +8,12 @@ import os
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 from ...base import KustoBaseClient
-from .models import NodeAction
+from ltp_storage.data_schema.node_action import NodeAction
 from ...utils.time_util import convert_timestamp
 from ...utils.node_util import Node
-from ..node_status.models import NodeStatus
 
 # Constants for environment variables and defaults
-DEFAULT_CLUSTER_ID = "wcu"
+DEFAULT_CLUSTER_ID = "test-cluster"
 DEFAULT_KUSTO_CLUSTER = "https://your-kusto-cluster.kusto.windows.net"
 DEFAULT_KUSTO_DATABASE = "Test"
 DEFAULT_ACTION_TABLE = "NodeActionRecord"
@@ -103,36 +102,6 @@ class NodeActionClient(KustoBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to create attribute table: {str(e)}")
 
-    def is_valid_action(self, action: str) -> bool:
-        """
-        Checks if an action is valid and verifies the status transition if applicable.
-        
-        Args:
-            action: The action to validate
-            
-        Returns:
-            bool: True if the action is valid and represents a valid transition
-            
-        Raises:
-            RuntimeError: If there's an error validating the action
-        """
-        try:
-            current_status, target_status = NodeAction.get_before_after_status(
-                action)
-            if current_status is None or target_status is None:
-                return False
-
-            # Verify both statuses are valid
-            if not hasattr(NodeStatus, current_status.upper()) or not hasattr(
-                    NodeStatus, target_status.upper()):
-                return False
-
-            # Check if the transition is valid
-            return NodeStatus.can_transition(current_status, target_status)
-
-        except Exception as e:
-            raise RuntimeError(f"Failed to validate action: {str(e)}")
-
     def update_node_action(self, node: str, action: str, timestamp: str,
                            reason: str, detail: str, category: str) -> None:
         """
@@ -154,7 +123,7 @@ class NodeActionClient(KustoBaseClient):
             timestamp = convert_timestamp(timestamp, "datetime")
 
             # Validate the action
-            if not self.is_valid_action(action):
+            if not NodeAction.is_valid_action(action):
                 raise ValueError(f"Invalid action: {action}")
 
             # Get node ID using Node utility
@@ -211,3 +180,114 @@ class NodeActionClient(KustoBaseClient):
             return NodeAction.from_record(results[0]) if results else None
         except Exception as e:
             raise RuntimeError(f"Failed to get latest node action: {str(e)}")
+
+    def get_last_update_time(self) -> Optional[datetime]:
+        """Get the last update time for the node action table"""
+        try:  
+            query = f"""
+            {self.table_name}
+            | where Endpoint == '{self.endpoint}'
+            | summarize arg_max(Timestamp, *) by HostName
+            | top 1 by Timestamp desc
+            """
+            results = self.execute_query(query)
+            return results[0]['Timestamp'] if results else None
+        except Exception as e:
+            raise RuntimeError(f"Failed to get last update time: {str(e)}")
+    
+    def get_latest_action_by_state(
+        self,
+        hostname: str,
+        node_id: str,
+        state: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Get the latest action that ends with the specified state for a given hostname and node_id.
+        
+        This method provides compatibility for querying actions that end with a specific state
+        (e.g., "cordoned", "available").
+        
+        Args:
+            hostname: Hostname of the node
+            node_id: Node ID
+            state: The state that the action should end with (e.g., "cordoned", "available")
+            
+        Returns:
+            Dict containing Action and Detail fields, or None if not found
+            
+        Example:
+            >>> client = NodeActionClient()
+            >>> result = client.get_latest_action_by_state("worker-01", "node-001", "cordoned")
+            >>> if result:
+            ...     print(f"Action: {result['Action']}, Detail: {result['Detail']}")
+        """
+        try:
+            query = f"""
+            {self.table_name}
+            | where Action endswith '{state}'
+            | where HostName == '{hostname}' and NodeId == '{node_id}'
+            | top 1 by Timestamp desc
+            """
+            results = self.execute_query(query)
+            if not results or len(results) == 0:
+                return None
+            
+            return NodeAction.from_record(results[0])
+        except Exception as e:
+            raise RuntimeError(f"Failed to get latest action by state: {str(e)}")
+
+    def find_triaged_failure(self, node_name: str, completed_time_ms: int, launched_time_ms: int) -> List[NodeAction]:
+        """
+        Find triaged actions for a node between job launch and completion.
+        
+        Returns actions that occurred after the node was cordoned but before it became available again.
+        
+        Args:
+            node_name: Node hostname
+            completed_time_ms: Job completed time (timestamp in milliseconds)
+            launched_time_ms: Job launched time (timestamp in milliseconds)
+            
+        Returns:
+            List of NodeAction records for triaged actions, or empty list if none found
+        """
+        try:
+            # Get node actions in time range
+            start_time = convert_timestamp(launched_time_ms / 1000, "str")
+            end_time = convert_timestamp(completed_time_ms / 1000, "str")
+            
+            node_actions = self.get_node_actions(node_name, start_time, end_time)
+            
+            # Check if there's available-cordoned action
+            cordoned_timestamp = None
+            for action in node_actions:
+                if action.Action == 'available-cordoned':
+                    cordoned_timestamp = action.Timestamp
+                    print(f"Node {node_name} cordoned at {cordoned_timestamp}, checking for triaged actions")
+                    break
+            
+            if not cordoned_timestamp:
+                return []
+            
+            # Query triaged actions using KQL
+            query = f"""
+            let node_name = '{node_name}';
+            let cordoned_ts = datetime({cordoned_timestamp});
+            let next_available_ts = toscalar(
+                {self.table_name}
+                | where HostName == node_name
+                | where Action endswith '-available' and Action != 'available-cordoned'
+                | where Timestamp > cordoned_ts
+                | summarize min(Timestamp)
+            );
+            {self.table_name}
+            | where HostName == node_name
+            | where Timestamp >= cordoned_ts
+            | where isnull(next_available_ts) or Timestamp <= next_available_ts
+            | where Action in ('cordoned-triaged_platform', 'cordoned-triaged_hardware', 'cordoned-triaged_user', 'cordoned-triaged_unknown')
+            | order by Timestamp asc
+            """
+            
+            results = self.execute_query(query)
+            return [NodeAction.from_record(record) for record in results] if results else []
+        except Exception as e:
+            raise RuntimeError(f"Failed to find triaged actions: {str(e)}")

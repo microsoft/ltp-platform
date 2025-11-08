@@ -12,8 +12,8 @@ import logging
 from datetime import datetime
 from classifier import NodeIssueClassifier
 
-from ltp_kusto_sdk.features.node_status.models import NodeStatus
-from ltp_kusto_sdk.features.node_action.client import NodeAction
+from ltp_storage.data_schema.node_status import NodeStatus, NodeStatusRecord
+from ltp_storage.data_schema.node_action import NodeAction
 
 from node_recorder_helper import NodeRecordUpdater
 
@@ -63,7 +63,7 @@ class NodeIssueClassifierScheduler:
         finally:
             self.is_running = False
             
-    def update_node_after_classification(self, node_name: str, node_status: Dict, 
+    def update_node_after_classification(self, node_name: str, node_status: NodeStatusRecord, 
                                         issue: str, category: str, to_status: str, detail: str) -> bool:
         """
         Update node status and action after classification
@@ -84,7 +84,7 @@ class NodeIssueClassifierScheduler:
             current_time = time.time()
             success = self.node_record_updater.update_status_action(
                 node=node_name,
-                from_status=node_status['Status'],
+                from_status=node_status.Status,
                 to_status=to_status,
                 timestamp=current_time,
                 reason=issue,
@@ -120,7 +120,7 @@ class NodeIssueClassifierScheduler:
             results = {}
             nodes_to_update = []
             for node_status in cordoned_nodes:
-                node_name = node_status['HostName']
+                node_name = node_status.HostName
                 logger.info(f"Processing cordoned node: {node_name}")
                 
                 # Get the latest node action to get the detail

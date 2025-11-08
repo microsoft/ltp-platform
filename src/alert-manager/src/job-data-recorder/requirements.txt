@@ -6,4 +6,6 @@ requests
 apscheduler
 numpy
 PyYAML
+./ltp-storage-common
 ./kusto-sdk
+./postgresql-sdk

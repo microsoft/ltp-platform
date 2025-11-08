@@ -1,30 +1,39 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+"""
+Environment Variables:
+    - `CLUSTER_ID`: Current cluster/endpoint identifier.
+    - `LTP_STORAGE_BACKEND_DEFAULT`: Default backend ('kusto' or 'postgresql')
+    
+    Kusto envs (when backend=kusto):
+        - `LTP_KUSTO_CLUSTER_URI`: Kusto cluster URI.
+        - `LTP_KUSTO_DATABASE_NAME`: Kusto database name.
+        - `KUSTO_NODE_STATUS_TABLE_NAME`: (Optional) Node status table.
+        - `KUSTO_NODE_ACTION_TABLE_NAME`: (Optional) Node action table.
+    
+    PostgreSQL envs (when backend=postgresql):
+        - `POSTGRES_CONNECTION_STR`: PostgreSQL connection string
+        - `POSTGRES_SCHEMA`: Schema name (default: ltp_sdk)
+"""
+
 import os
-from ltp_kusto_sdk import NodeStatusClient, NodeActionClient
-from ltp_kusto_sdk.features.node_status.models import NodeStatus
 import time
 import logging
 
-# - `LTP_KUSTO_CLUSTER_URI`: Kusto cluster URI.
-# - `LTP_KUSTO_DATABASE_NAME`: Kusto database name.
-# - `CLUSTER_ID`: Current cluster/endpoint identifier.
-# - `KUSTO_NODE_STATUS_TABLE_NAME`: (Optional) Node status table (default: `NodeStatusRecord`).
-# - `KUSTO_NODE_STATUS_ATTRIBUTE_TABLE_NAME`: (Optional) Status attributes table (default: `NodeStatusAttributes`).
-# - `KUSTO_NODE_ACTION_TABLE_NAME`: (Optional) Node action table (default: `NodeActionRecord`).
-# - `KUSTO_NODE_ACTION_ATTRIBUTE_TABLE_NAME`: (Optional) Action attributes table (default: `NodeActionAttributes`).
-# - `ENVIRONMENT=dev/prod`: (Optional) For integration tests.
+from ltp_storage.factory import create_node_status_client, create_node_action_client
+from ltp_storage.data_schema.node_status import NodeStatus
 
 # set logger with timestamp
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+
 class NodeRecordUpdater:
     def __init__(self):
         self.endpoint = os.getenv("CLUSTER_ID")
-        self.node_status_client = NodeStatusClient()
-        self.node_action_client = NodeActionClient()
+        self.node_status_client = create_node_status_client(self.endpoint)
+        self.node_action_client = create_node_action_client(self.endpoint)
         self.retries = 3
         
     def get_node_latest_status(self, node):

@@ -9,7 +9,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
-from ltp_kusto_sdk.features.node_action.models import NodeAction
+from ltp_storage.data_schema.node_action import NodeAction
 
 TEST_ENDPOINT = "test-wcu"
 

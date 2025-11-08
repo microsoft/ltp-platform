@@ -24,6 +24,8 @@ const hived = require('@pai/middlewares/v2/hived');
 const { enabledHived } = require('@pai/config/launcher');
 const protocolSchema = require('@pai/config/v2/protocol');
 const asyncHandler = require('@pai/middlewares/v2/asyncHandler');
+const logger = require('@pai/config/logger');
+const launcherConfig = require('@pai/config/launcher'); 
 
 const mustacheWriter = new mustache.Writer();
 
@@ -51,6 +53,19 @@ const render = (template, dict, tags = ['<%', '%>']) => {
     }
   }
   return result.trim();
+};
+
+const getImageName = (prerequisites) => { 
+  if (
+    typeof prerequisites !== 'object' ||
+    typeof prerequisites.dockerimage !== 'object'
+  ) {
+    return null;
+  }
+
+  const dockerImages = Object.values(prerequisites.dockerimage);
+  const img = dockerImages.find(p => p.type === 'dockerimage' && p.uri);
+  return img?.uri ?? null;
 };
 
 const protocolValidate = (protocolYAML) => {
@@ -85,6 +100,42 @@ const protocolValidate = (protocolYAML) => {
       } else {
         prerequisites[item.type][item.name] = item;
         prerequisiteSet.add(item.name);
+      }
+    }
+    const imageRegexPattern = launcherConfig.imageRegex;
+    let imageRegex;
+
+    try {
+      if (imageRegexPattern && imageRegexPattern.length > 0) {
+        imageRegex = new RegExp(imageRegexPattern);
+      }
+    } catch (error) {
+      logger.info(`Invalid imageRegex pattern: ${imageRegexPattern}. Error: ${error.message}`);
+      throw createError(
+          'Internal Server Error',
+          'InvalidImageRegexError',
+          `The provided imageRegex pattern "${imageRegexPattern}" is invalid.`
+      );
+    }
+
+    if (imageRegex) {
+      const imageName = getImageName(protocolObj.prerequisites);
+      // Check if the imageName matches the imageRegex
+      if (!imageName) {
+        throw createError(
+            'Bad Request',
+            'NoDockerImageError',
+            'No valid docker image found in prerequisites.'
+        );
+      }
+      // Check if the imageName matches the imageRegex
+      const match = imageRegex.test(imageName);
+      if (!match) {
+        throw createError(
+            'Bad Request',
+            'InvalidImageError',
+            `The image ${imageName} is not allowed.`
+        );
       }
     }
   }

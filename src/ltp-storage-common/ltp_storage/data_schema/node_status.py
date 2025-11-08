@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional
-from ...utils.time_util import convert_timestamp
+from ..utils.time_util import convert_timestamp
 
 
 class StatusGroup(str, Enum):
@@ -95,14 +95,23 @@ class NodeStatusRecord:
 
     @classmethod
     def from_record(cls, record: dict):
-        """Converts a record dictionary to a NodeStatusRecord instance."""
-        timestamp = record['Timestamp']
+        """
+        Converts a record dictionary to a NodeStatusRecord instance.
+        Supports both PascalCase (Kusto) and snake_case (PostgreSQL) keys.
+        """
+        # Handle both PascalCase (from Kusto) and snake_case (from PostgreSQL)
+        timestamp = record.get('Timestamp') or record.get('timestamp')
+        if timestamp is None:
+            raise KeyError("Timestamp/timestamp required")
+        
         timestamp_str = convert_timestamp(timestamp, format="str")
-        return cls(Timestamp=timestamp_str,
-                   HostName=record['HostName'],
-                   Status=record['Status'],
-                   NodeId=record.get('NodeId', ''),
-                   Endpoint=record.get('Endpoint', ''))
+        return cls(
+            Timestamp=timestamp_str,
+            HostName=record.get('HostName') or record.get('hostname', ''),
+            Status=record.get('Status') or record.get('status', ''),
+            NodeId=record.get('NodeId') or record.get('node_id', ''),
+            Endpoint=record.get('Endpoint') or record.get('endpoint', '')
+        )
 
     def to_dict(self) -> dict:
         """Converts the NodeStatusRecord instance to a dictionary."""
@@ -274,4 +283,22 @@ STATUS_METADATA = {
                        NodeStatus.DEALLOCATED_PLATFORM.value,
                        NodeStatus.DEALLOCATED_CAPACITY.value
                    ])
+}
+
+
+# Helper functions for backward compatibility
+def get_transition_action(from_status: str, to_status: str) -> str:
+    """Returns the action label for a transition from one status to another."""
+    return NodeStatusRecord.get_transition_action(from_status, to_status)
+
+
+def can_transition(from_status: str, to_status: str) -> bool:
+    """Check if transition between statuses is allowed."""
+    return NodeStatus.can_transition(from_status, to_status)
+
+
+# Create ALLOWED_TRANSITIONS dict for backward compatibility
+ALLOWED_TRANSITIONS = {
+    status: metadata.allowed_transitions
+    for status, metadata in STATUS_METADATA.items()
 }
