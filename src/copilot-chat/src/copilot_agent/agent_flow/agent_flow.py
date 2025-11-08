@@ -4,6 +4,7 @@ import json
 from typing import TypedDict, Dict, List, Optional
 from openai import AsyncAzureOpenAI
 from agents import Agent, Runner, OpenAIChatCompletionsModel, OpenAIResponsesModel, trace
+from agents.exceptions import MaxTurnsExceeded
 from langgraph.graph import StateGraph, END
 import sys
 from ..utils.push_frontend import push_frontend_event
@@ -189,8 +190,11 @@ class AgentFlow:
             
             logger.debug(f'[execution input]\n{execution_input}')
             
-            step_result = await Runner.run(agent, input=execution_input, max_turns=self.max_turns)
-            output = step_result.final_output
+            try:
+                step_result = await Runner.run(agent, input=execution_input, max_turns=self.max_turns)
+                output = step_result.final_output
+            except MaxTurnsExceeded:
+                output = f"Max turns exceeded for {agent_name}. Please try a simpler request."
             
             logger.debug(f"[{agent_name} Output]: \n{output}")
             
@@ -348,15 +352,21 @@ class AgentFlow:
         
         logger.debug(f'[Summary Input]\n{summary_input}')
         
-        summary_result = await Runner.run(self.summary_agent, input=summary_input, max_turns=self.max_turns)
-        summary_output = summary_result.final_output
+        try:
+            summary_result = await Runner.run(self.summary_agent, input=summary_input, max_turns=self.max_turns)
+            summary_output = summary_result.final_output
+            
+            # Convert any file paths in the final summary output
+            summary_output = self._convert_file_paths_to_markdown(summary_output)
+            
+            logger.debug(f"[Summary Output]: \n{summary_output}")
+            
+            return summary_output
         
-        # Also convert any file paths in the final summary output
-        summary_output = self._convert_file_paths_to_markdown(summary_output)
+        except MaxTurnsExceeded:
+            return final_state["last_output"] if final_state["last_output"] else "Summary unavailable due to max turns exceeded."
         
-        logger.debug(f"[Summary Output]: \n{summary_output}")
-        
-        return summary_output
+
 
     async def _execute_flow_plan_with_langgraph(self, flow_plan: List[Dict[str, str]], input_prompt: str) -> str:
         """Orchestrate building and running the LangGraph workflow."""
@@ -398,24 +408,33 @@ class AgentFlow:
         with trace("DynamicFlow"):
             # 1. Generate the Flow Plan (The sequence of agents)
             push_frontend_event(f'<span class="text-gray-400 italic">🔍 Step 0: Generating Execution Plan...</span><br/>', replace=False)
-            plan_result = await Runner.run(
-                self.flow_generator_agent,
-                input=f"Analyze this request and generate the flow: {input_prompt}",
-                max_turns=self.max_turns
-            )
-            push_frontend_event(f'<span class="text-gray-400 italic">🔍 Flow Generator Output\n{plan_result.final_output}</span><br/>', replace=False)
+            
+            try:
+                plan_result = await Runner.run(
+                    self.flow_generator_agent,
+                    input=f"Analyze this request and generate the flow: {input_prompt}",
+                    max_turns=self.max_turns
+                )
+                plan_result_output = plan_result.final_output
+                push_frontend_event(f'<span class="text-gray-400 italic">🔍 Flow Generator Output\n{plan_result_output}</span><br/>', replace=False)
+                
+            except MaxTurnsExceeded:
+                # Use first available agent as fallback
+                available_agents = list(self.agent_dict.keys())
+                plan_result_output = f'[{{"agent": "{available_agents[0]}", "task": "{input_prompt}", "needs_summary": false}}]' if available_agents else "[]"
+                push_frontend_event(f'<span class="text-gray-400 italic">⚠️ Flow generation exceeded max turns. Using fallback plan: {plan_result_output}</span><br/>', replace=False)
             
             # Parse the JSON output from the Flow Generator Agent
             try:
-                flow_plan = self.parse_flow_plan(plan_result.final_output)
+                flow_plan = self.parse_flow_plan(plan_result_output)
                 logger.debug(f"Generated Flow Plan: {flow_plan}")
 
                 if not flow_plan:
                     return "No suitable workflow could be generated with the available agents. Please ensure the required agents are available for your request."
                     
             except ValueError as e:
-                logger.error(f"Error parsing flow plan: {e}. Output was: {plan_result.final_output}")
-                return ""
+                logger.error(f"Error parsing flow plan: {e}. Output was: {plan_result_output}")
+                return f"Unable to parse execution plan. Please try rephrasing your request or check agent availability."
                 
             # 2. Execute the Flow Plan with LangGraph
             final_output = await self._execute_flow_plan_with_langgraph(flow_plan, input_prompt)
