@@ -25,6 +25,7 @@ prerequisite:
 template-list:
   - start.sh
   - delete.sh
+  - device-plugin.yaml
 
 start-script: start.sh
 stop-script: stop.sh
