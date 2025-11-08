@@ -10,6 +10,7 @@ from ..utils.push_frontend import push_frontend_event
 from ..utils.logger import logger
 # Disable debug by replacing it with a no-op function
 logger.debug = lambda msg: None
+from ..config import DATA_DIR
 
 # --- State Type Definition ---
 class AgentFlowState(TypedDict):
@@ -54,6 +55,7 @@ class AgentFlow:
         self._load_config(azure_key, azure_endpoint, azure_deployment, azure_api_version)
         self._setup_agent_config()
         self._setup_agents(agents)
+        self.data_dir = DATA_DIR
     
     def _load_config(self, azure_key: Optional[str], azure_endpoint: Optional[str], 
                     azure_deployment: Optional[str], azure_api_version: str):
@@ -133,7 +135,11 @@ class AgentFlow:
                 "and create a comprehensive, coherent response that directly answers the user's original question. "
                 "You will receive the original user question and all agent outputs. "
                 "Create a well-structured summary that combines the information effectively. "
-                "Focus on directly answering what the user asked for, whether it's a comparison, compilation, or synthesis."
+                "Focus on directly answering what the user asked for, whether it's a comparison, compilation, or synthesis.\n\n"
+                "IMPORTANT: If any agent output contains a file path ending with '.png', '.jpg', '.jpeg', '.gif', or '.svg', "
+                "convert it to markdown image format: ![Image Description](file_path) "
+                "Place the image markdown in the appropriate context within your summary. "
+                "For plots and charts, include a brief description of what the visualization shows."
             ),
             model=self.chat_model_config,
             output_type=str
@@ -277,6 +283,45 @@ class AgentFlow:
             
         return False
     
+    def _convert_file_paths_to_markdown(self, text: str) -> str:
+        """Convert file paths to markdown image syntax."""
+        import re
+        import os
+        
+        # Pattern to match file paths ending with image extensions
+        image_extensions = r'\.(png|jpg|jpeg|gif|svg|webp)'
+        
+        # Pattern 1: Match absolute paths containing data/img/
+        pattern1 = rf'([^\s\)]*data/img/[^\s\)]*{image_extensions})'
+        
+        # Pattern 2: Match paths that start with ./ and contain data/img/
+        pattern2 = rf'(\./[^\s\)]*data/img/[^\s\)]*{image_extensions})'
+        
+        def replace_with_markdown(match):
+            file_path = match.group(1)
+            # Extract just the filename from the path
+            filename = file_path.split('/')[-1]
+            
+            # Check if we're in local development mode
+            agent_mode = os.getenv('AGENT_MODE', '').lower()
+            agent_host = os.getenv('AGENT_HOST', '127.0.0.1')
+            agent_port = os.getenv('AGENT_PORT', '60000')
+            
+            if agent_mode == 'local':
+                # Use absolute URL for local development to avoid frontend/backend port conflicts
+                web_path = f'http://{agent_host}:{agent_port}/copilot/static/img/{filename}'
+            else:
+                # Use relative path for production
+                web_path = f'/copilot/static/img/{filename}'
+            
+            return f'![Generated Plot]({web_path})'
+        
+        # Apply both patterns
+        text = re.sub(pattern1, replace_with_markdown, text, flags=re.IGNORECASE)
+        text = re.sub(pattern2, replace_with_markdown, text, flags=re.IGNORECASE)
+        
+        return text
+    
     async def _create_summary(self, input_prompt: str, final_state: AgentFlowState) -> str:
         """Create a summary of all agent outputs."""
         push_frontend_event(f'<span class="text-gray-400 italic">🔍 Creating comprehensive summary...</span><br/>', replace=False)
@@ -284,9 +329,12 @@ class AgentFlow:
         # Prepare summary input
         all_outputs_text = ""
         for i, output_entry in enumerate(final_state["all_outputs"], 1):
+            # Convert file paths to markdown images in the output
+            processed_output = self._convert_file_paths_to_markdown(output_entry['output'])
+            
             all_outputs_text += f"\n--- Step {i}: {output_entry['agent']} ---\n"
             all_outputs_text += f"Task: {output_entry['task']}\n"
-            all_outputs_text += f"Output: {output_entry['output']}\n"
+            all_outputs_text += f"Output: {processed_output}\n"
         
         summary_input = f"""
         Original User Question: {input_prompt}
@@ -295,12 +343,16 @@ class AgentFlow:
         {all_outputs_text}
 
         Please create a comprehensive summary that directly answers the user's original question by combining and synthesizing all the information above.
+        If any outputs contain markdown images (![...](...))), include them in your summary in the appropriate context.
         """
         
         logger.debug(f'[Summary Input]\n{summary_input}')
         
         summary_result = await Runner.run(self.summary_agent, input=summary_input, max_turns=self.max_turns)
         summary_output = summary_result.final_output
+        
+        # Also convert any file paths in the final summary output
+        summary_output = self._convert_file_paths_to_markdown(summary_output)
         
         logger.debug(f"[Summary Output]: \n{summary_output}")
         
@@ -321,7 +373,8 @@ class AgentFlow:
         if self._should_summarize(flow_plan, final_state):
             return await self._create_summary(input_prompt, final_state)
         else:
-            return final_state["last_output"]
+            # Convert file paths to markdown images even for single agent outputs
+            return self._convert_file_paths_to_markdown(final_state["last_output"])
     
     async def execute_flow(self, input_prompt: str) -> str:
         """

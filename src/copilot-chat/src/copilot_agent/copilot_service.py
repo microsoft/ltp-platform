@@ -4,7 +4,7 @@
 """CoPilot Service (Flask app and endpoints)"""
 
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import threading
 from flask import Response, stream_with_context
@@ -16,7 +16,7 @@ from .copilot_conversation import CoPilotConversation
 from .utils.logger import logger
 from .utils.llmsession import LLMSession
 
-from .config import AGENT_PORT, AGENT_MODE_LOCAL
+from .config import AGENT_PORT, AGENT_MODE_LOCAL, DATA_DIR
 
 
 # --- New CoPilotAPI class (Flask app setup and endpoints) ---
@@ -31,10 +31,17 @@ class CoPilotService:
         """
         self.sessions = {}
         self.host = os.getenv('AGENT_HOST', '127.0.0.1')
+        
+        # Set up static files directory
+        self.static_dir = str(DATA_DIR)
+        os.makedirs(os.path.join(self.static_dir, 'img'), exist_ok=True)
+        
         self.app = Flask(__name__)
         self.app.add_url_rule('/copilot/api/status', view_func=self.status, methods=['GET'])
         self.app.add_url_rule('/copilot/api/operation', view_func=self.instance_operation, methods=['POST'])
         self.app.add_url_rule('/copilot/api/stream', view_func=self.stream_operation, methods=['POST'])
+        # Add static file serving endpoint
+        self.app.add_url_rule('/copilot/static/<path:filename>', view_func=self.serve_static_file, methods=['GET'])
 
         # If running in local agent mode, enable CORS to allow local testing from dev frontends.
         if AGENT_MODE_LOCAL:
@@ -47,6 +54,13 @@ class CoPilotService:
     def status(self):
         """GET endpoint for health/status check."""
         return jsonify({"status": "running"})
+
+    def serve_static_file(self, filename):
+        """Serve static files (images) from the data directory."""
+        try:
+            return send_from_directory(self.static_dir, filename)
+        except FileNotFoundError:
+            return jsonify({"error": "File not found"}), 404
 
     def get_or_create_session(self, user_id, conv_id):
         """Retrieve or create a copilot_conversation for the given userId and convId, reusing its LLMSession.

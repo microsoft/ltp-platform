@@ -147,6 +147,16 @@ const CustomMarkdown: React.FC<{ content: string }> = ({ content }) => {
                 )}
               </pre>
             );
+          },
+          img({ node, ...props }: any) {
+            return (
+              <img 
+                {...props} 
+                className="max-w-full h-auto rounded-md shadow-sm my-4 mx-auto block" 
+                style={{ maxWidth: '500px', width: '100%' }}
+                loading="lazy"
+              />
+            );
           }
         }}
       >
