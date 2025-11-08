@@ -66,7 +66,7 @@ func NewProxyHandler(config *types.Config) *ProxyHandler {
 	}
 
 	return &ProxyHandler{
-		authenticator:    NewRestServerAuthenticator(nil, config.Server.ModelKey),
+		authenticator:    NewRestServerAuthenticator(),
 		port:             config.Server.Port,
 		maxRetries:       config.Server.MaxRetries,
 		traceRelatedKeys: traceRelatedKeys,
@@ -89,7 +89,7 @@ func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Reque
 	// handle /v1/models
 	if r.URL.Path == "/v1/models" {
 		log.Printf("[*] receive a models list request from %s\n", r.RemoteAddr)
-		model2Url, err := GetJobModelsMapping(r, ph.authenticator.modelKey)
+		model2Service, err := GetJobModelsMapping(r)
 		if err != nil {
 			log.Printf("[-] Error: failed to get models mapping: %v\n", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -98,11 +98,11 @@ func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Reque
 		// Update the ph.authenticator
 		token := r.Header.Get("Authorization")
 		token = strings.Replace(token, "Bearer ", "", 1)
-		ph.authenticator.UpdateTokenModels(token, model2Url)
+		ph.authenticator.UpdateTokenModels(token, model2Service)
 
 		// convert models list to OpenAI style list and write it to w
-		ids := make([]string, 0, len(model2Url))
-		for id := range model2Url {
+		ids := make([]string, 0, len(model2Service))
+		for id := range model2Service {
 			ids = append(ids, id)
 		}
 		sort.Strings(ids)
@@ -141,7 +141,7 @@ func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Reque
 	rawReqBody, newReqBody, data, shouldTraced := ph.requestBodyFilter(r)
 
 	// check the key of the request
-	ok, modelUrls := ph.authenticator.AuthenticateReq(r, data)
+	ok, modelServices := ph.authenticator.AuthenticateReq(r, data)
 
 	if !ok {
 		log.Printf("[-] Error: unauthorized request from %s\n", r.RemoteAddr)
@@ -150,7 +150,7 @@ func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	// get the url poller to generate and poll the destination url
-	urlPoller := NewUrlPollerWithKey(r.URL.String(), modelUrls, ph.authenticator.modelKey)
+	urlPoller := NewUrlPollerWithKey(r.URL.String(), modelServices)
 	if urlPoller == nil {
 		log.Printf("[-] Error: cannot get the url poller: \n\trawReqBody: %s\n\tURL: %s\n", rawReqBody, r.URL.String())
 		proxy := &httputil.ReverseProxy{Director: func(req *http.Request) {}}

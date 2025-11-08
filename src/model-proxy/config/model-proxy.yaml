@@ -5,4 +5,4 @@ service_type: "common"
 
 port: 9999
 retry: 5
-modelkey: "123"
+concurrency: 10

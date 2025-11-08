@@ -28,16 +28,16 @@ func NewUrlPoller(url string, bsl types.BaseSpecList) *UrlPoller {
 	}
 }
 
-func NewUrlPollerWithKey(url string, modelUrls []string, modelKey string) *UrlPoller {
-	if len(modelUrls) == 0 {
+func NewUrlPollerWithKey(url string, modelServices []*types.BaseSpec) *UrlPoller {
+	if len(modelServices) == 0 {
 		return nil
 	}
-	bsl := make(types.BaseSpecList, 0, len(modelUrls))
-	for _, v := range modelUrls {
+	bsl := make(types.BaseSpecList, 0, len(modelServices))
+	for _, v := range modelServices {
 		bsl = append(bsl, &types.BaseSpecStatistic{
 			BaseSpec: &types.BaseSpec{
-				URL: v,
-				Key: modelKey,
+				URL: v.URL,
+				Key: v.Key,
 			},
 		})
 	}

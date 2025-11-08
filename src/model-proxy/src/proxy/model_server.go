@@ -10,25 +10,30 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
+
+	"modelproxy/types"
 )
 
-// target job tag to identify model serving jobs
-const TARGET_JOB_TAG = "model-serving"
+// Required job configuration parameters for inference jobs
+var FORCED_PARAMETERS = []string{
+	"INTERNAL_SERVER_IP",
+	"INTERNAL_SERVER_PORT",
+	"API_KEY",
+}
 
 var httpClient = &http.Client{Timeout: 120 * time.Second}
 
-// ListModelServingJobs returns a list of model serving jobs with the given request
-func ListModelServingJobs(restServerUrl string, restServerToken string) ([]string, error) {
-	url := fmt.Sprintf("%s/api/v2/jobs?state=RUNNING", restServerUrl)
-
+func GETRequest(url string, token string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
-	restServerToken = strings.TrimPrefix(restServerToken, "Bearer ")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", restServerToken))
+	token = strings.TrimPrefix(token, "Bearer ")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
@@ -40,10 +45,21 @@ func ListModelServingJobs(restServerUrl string, restServerToken string) ([]strin
 		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("non-2xx response from %s: %d - %s", url, resp.StatusCode, string(body))
 	}
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read jobs response: %w", err)
+		return nil, fmt.Errorf("failed to read response body of %s: %w", url, err)
+	}
+
+	return body, nil
+}
+
+// ListInferenceJobs returns a list of model serving jobs with the given request
+func ListInferenceJobs(restServerUrl string, restServerToken string) ([]string, error) {
+	url := fmt.Sprintf("%s/api/v2/jobs?state=RUNNING&jobType=inference", restServerUrl)
+
+	body, err := GETRequest(url, restServerToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed to GET jobs from %s: %w", url, err)
 	}
 
 	// Expected: array of jobs with fields { name, username }
@@ -58,53 +74,43 @@ func ListModelServingJobs(restServerUrl string, restServerToken string) ([]strin
 
 	result := make([]string, 0, len(jobs))
 	for _, j := range jobs {
-		if j.Name == "" {
-			continue
-		}
-		if strings.Contains(j.Name, TARGET_JOB_TAG) {
-			// Use the same identifier as TS: username~name
-			jobId := fmt.Sprintf("%s~%s", j.Username, j.Name)
-			result = append(result, jobId)
-		}
+
+		jobId := fmt.Sprintf("%s~%s", j.Username, j.Name)
+		result = append(result, jobId)
 	}
 
 	return result, nil
 }
 
-// return the job server url
-func GetJobServerUrl(restServerUrl string, restServerToken string, jobId string) (string, error) {
-	if restServerUrl == "" {
-		return "", fmt.Errorf("empty restServerUrl")
-	}
-	if jobId == "" {
-		return "", fmt.Errorf("empty jobId")
-	}
-
-	// Ensure restServerUrl doesn't end with slash
-	restServerUrl = strings.TrimRight(restServerUrl, "/")
-	url := fmt.Sprintf("%s/api/v2/jobs/%s", restServerUrl, jobId)
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+// get the forced parameters of inference job: INTERNAL_SERVER_IP, INTERNAL_SERVER_PORT, API_KEY
+func GetJobParameters(url string, restServerToken string) (string, string, string, error) {
+	body, err := GETRequest(url, restServerToken)
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		return "", "", "", fmt.Errorf("failed to GET job config from %s: %w", url, err)
 	}
-	restServerToken = strings.TrimPrefix(restServerToken, "Bearer ")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", restServerToken))
 
-	resp, err := httpClient.Do(req)
+	var jobConfig struct {
+		Parameters map[string]string `json:"parameters"`
+	}
+
+	if err := json.Unmarshal(body, &jobConfig); err != nil {
+		return "", "", "", fmt.Errorf("failed to parse job config JSON: %w", err)
+	}
+
+	for _, para := range FORCED_PARAMETERS {
+		if _, ok := jobConfig.Parameters[para]; !ok {
+			return "", "", "", fmt.Errorf("missing forced parameter %s in job config", para)
+		}
+	}
+	return jobConfig.Parameters["INTERNAL_SERVER_IP"], jobConfig.Parameters["INTERNAL_SERVER_PORT"], jobConfig.Parameters["API_KEY"], nil
+}
+
+// return the job server url
+func GetJobServerUrl(url string, restServerToken string, jobId string) (string, error) {
+
+	body, err := GETRequest(url, restServerToken)
 	if err != nil {
 		return "", fmt.Errorf("failed to GET job details from %s: %w", url, err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("non-2xx response from %s: %d - %s", url, resp.StatusCode, string(body))
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read job details response: %w", err)
 	}
 
 	// Parse expected job details:
@@ -148,7 +154,7 @@ func GetJobServerUrl(restServerUrl string, restServerToken string, jobId string)
 }
 
 // return model names list
-func listModels(jobServerUrl string, token string) ([]string, error) {
+func listModels(jobServerUrl string, modelApiKey string) ([]string, error) {
 	if jobServerUrl == "" {
 		return nil, fmt.Errorf("empty jobServerUrl")
 	}
@@ -156,26 +162,9 @@ func listModels(jobServerUrl string, token string) ([]string, error) {
 	jobServerUrl = strings.TrimRight(jobServerUrl, "/")
 	url := fmt.Sprintf("%s/v1/models", jobServerUrl)
 
-	req, err := http.NewRequest("GET", url, nil)
+	body, err := GETRequest(url, modelApiKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request for %s: %w", url, err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to GET models from %s: %w", url, err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("non-2xx response from %s: %d - %s", url, resp.StatusCode, string(body))
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read models response: %w", err)
+		return nil, fmt.Errorf("failed to list models from %s: %w", url, err)
 	}
 
 	// Try the expected shape: { data: [{ id: "model1" }, ...] }
@@ -224,45 +213,105 @@ func listModels(jobServerUrl string, token string) ([]string, error) {
 }
 
 // return JobURL => models
-func GetJobModelsMapping(req *http.Request, modelToken string) (map[string][]string, error) {
-	mapping := make(map[string][]string)
+func GetJobModelsMapping(req *http.Request) (map[string][]*types.BaseSpec, error) {
+	// modelName to job server url list
+	mapping := make(map[string][]*types.BaseSpec)
 
 	if req == nil || req.Host == "" {
 		return mapping, fmt.Errorf("invalid request or empty host")
 	}
 	// get rest server base url from the os environment variable
-	restBase := os.Getenv("REST_SERVER_URI")
-	if restBase == "" {
+	restServerUrl := os.Getenv("REST_SERVER_URI")
+	if restServerUrl == "" {
 		return mapping, fmt.Errorf("REST_SERVER_URI environment variable is not set")
 	}
+	// Ensure restServerUrl doesn't end with slash
+	restServerUrl = strings.TrimRight(restServerUrl, "/")
 
 	restServerToken := req.Header.Get("Authorization")
-	jobIDs, err := ListModelServingJobs(restBase, restServerToken)
+	jobIDs, err := ListInferenceJobs(restServerUrl, restServerToken)
 	if err != nil {
 		return mapping, fmt.Errorf("failed to list model serving jobs: %w", err)
 	}
 
+	// Channel to collect results
+	type modelMapping struct {
+		modelName    string
+		modelService *types.BaseSpec
+	}
+	concurrency, err := strconv.Atoi(os.Getenv("FETCH_JOB_CONCURRENCY"))
+	if err != nil {
+		log.Printf("[-] Error: invalid FETCH_JOB_CONCURRENCY value: %s\n", err)
+		concurrency = 10 // default value
+	}
+	results := make(chan modelMapping, concurrency) // Buffer for potential models
+
+	// Use a wait group to run jobs in parallel
+	var wg sync.WaitGroup
+
+	// Limit concurrent goroutines to avoid overwhelming the server
+	semaphore := make(chan struct{}, concurrency) // Allow up to `concurrency` concurrent goroutines
+
 	for _, jobId := range jobIDs {
-		jobServerUrl, err := GetJobServerUrl(restBase, restServerToken, jobId)
-		if err != nil {
-			// skip this job but continue with others
-			log.Printf("[-] Error: failed to get job server URL for job %s: %s\n", jobId, err)
+		if jobId == "" {
 			continue
 		}
-		//
-		models, err := listModels(jobServerUrl, modelToken)
-		if err != nil {
-			// skip if cannot list models
-			log.Printf("[-] Error: failed to list models for job %s: %s\n", jobId, err)
-			continue
-		}
-		for _, model := range models {
-			// map model name -> [jobServerUrl]
-			if _, ok := mapping[model]; !ok {
-				mapping[model] = []string{}
+
+		wg.Add(1)
+		go func(jobId string) {
+			defer wg.Done()
+
+			// Acquire semaphore
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			jobStatusQueryUrl := fmt.Sprintf("%s/api/v2/jobs/%s", restServerUrl, jobId)
+			jobServerUrl, err := GetJobServerUrl(jobStatusQueryUrl, restServerToken, jobId)
+			if err != nil {
+				// skip this job but continue with others
+				log.Printf("[-] Error: failed to get job server URL for job %s: %s\n", jobId, err)
+				return
 			}
-			mapping[model] = append(mapping[model], jobServerUrl)
+			jobConfigQueryUrl := fmt.Sprintf("%s/api/v2/jobs/%s/config", restServerUrl, jobId)
+			_, _, apiKey, err := GetJobParameters(jobConfigQueryUrl, restServerToken)
+			if err != nil {
+				// skip this job but continue with others
+				log.Printf("[-] Error: failed to get job parameters for job %s: %s\n", jobId, err)
+				return
+			}
+			// list models from the job server
+			models, err := listModels(jobServerUrl, apiKey)
+			if err != nil {
+				// skip if cannot list models
+				log.Printf("[-] Error: failed to list models for job %s: %s\n", jobId, err)
+				return
+			}
+
+			// Send results to channel
+			for _, model := range models {
+				results <- modelMapping{
+					modelName: model,
+					modelService: &types.BaseSpec{
+						URL: jobServerUrl,
+						Key: apiKey,
+					},
+				}
+			}
+		}(jobId)
+	}
+
+	// Close the results channel when all goroutines are done
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	// Collect results from channel
+	for result := range results {
+		if _, ok := mapping[result.modelName]; !ok {
+			mapping[result.modelName] = make([]*types.BaseSpec, 0)
 		}
+		mapping[result.modelName] = append(mapping[result.modelName], result.modelService)
 	}
 
 	return mapping, nil
