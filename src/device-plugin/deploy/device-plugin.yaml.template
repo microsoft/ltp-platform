@@ -29,16 +29,15 @@ spec:
       name: k8s-host-device-plugin-ds
   template:
     metadata:
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ""
       labels:
         name: k8s-host-device-plugin-ds
     spec:
+      priorityClassName: pai-daemon-priority
       tolerations:
       - key: CriticalAddonsOnly
         operator: Exists
       containers:
-      - image: luciaopenai.azurecr.io/luciaopenai/k8s-host-device-plugin:latest
+      - image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}k8s-host-device-plugin:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         name: k8s-host-device-plugin-ctr
         securityContext:
           privileged: true
@@ -62,3 +61,5 @@ spec:
             items:
             - key: config.json
               path: config.json
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}

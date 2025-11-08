@@ -53,6 +53,8 @@ spec:
       - name: hivedscheduler-config
         configMap:
           name: hivedscheduler-config
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
 
 {%- for vc in cluster_cfg['hivedscheduler']['structured-config']['virtualClusters'] %}
 ---
@@ -96,4 +98,6 @@ spec:
       - name: hivedscheduler-config
         configMap:
           name: hivedscheduler-config
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
 {%- endfor %}

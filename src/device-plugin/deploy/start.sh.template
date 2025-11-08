@@ -29,15 +29,19 @@ pushd $(dirname "$0") > /dev/null
 # Begin: NVIDIA GPU device plugin
 {% if 'nvidia.com/gpu' in cluster_cfg['device-plugin']['devices'] %}
 
-curl -s https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.15.0/deployments/static/nvidia-device-plugin.yml \
-| sed 's|nvcr.io/nvidia/k8s-device-plugin|luciaopenai.azurecr.io/luciaopenai/nvidia/k8s-device-plugin|' \
+{ curl -s https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.15.0/deployments/static/nvidia-device-plugin.yml \
+| sed 's|nvcr.io/nvidia/k8s-device-plugin:v0.15.0|{{ cluster_cfg['cluster']['docker-registry']['prefix'] }}k8s-nvidia-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|' \
 | sed -E '/^[[:space:]]*allowPrivilegeEscalation: false/ {
     h
     s/^([[:space:]]*)allowPrivilegeEscalation: false.*$/\1privileged: false/
     G
     s/(^[[:space:]]*allowPrivilegeEscalation: false.*)\n([[:space:]]*privileged: false)/\1\n\2/
-}' \
-    | kubectl apply --overwrite=true -f - || exit $?
+}';
+  cat <<'YAML'
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+YAML
+} | kubectl apply --overwrite=true -f - || exit $?
 
 {% endif %}
 # End: NVIDIA GPU device plugin
@@ -45,9 +49,13 @@ curl -s https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.15.0/deplo
 # Begin: AMD GPU device plugin
 {% if 'amd.com/gpu' in cluster_cfg['device-plugin']['devices'] %}
 
-curl -s https://raw.githubusercontent.com/ROCm/k8s-device-plugin/master/k8s-ds-amdgpu-dp.yaml \
-| sed 's|rocm/k8s-device-plugin|luciaopenai.azurecr.io/luciaopenai/rocm/k8s-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|' \
-    | kubectl apply --overwrite=true -f - || exit $?
+{ curl -s https://raw.githubusercontent.com/ROCm/k8s-device-plugin/master/k8s-ds-amdgpu-dp.yaml \
+| sed 's|rocm/k8s-device-plugin|{{ cluster_cfg['cluster']['docker-registry']['prefix'] }}k8s-rocm-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|';
+  cat <<'YAML'
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+YAML
+} | kubectl apply --overwrite=true -f - || exit $?
 
 {% endif %}
 # End: AMD GPU device plugin
@@ -75,9 +83,13 @@ kubectl apply --overwrite=true -f device-plugin.yaml || exit $?
 {% if 'rdma/hca' in cluster_cfg['device-plugin']['devices'] %}
 
 kubectl apply --overwrite=true -f rdma-devices.yaml || exit $?
-curl -s https://raw.githubusercontent.com/Mellanox/k8s-rdma-shared-dev-plugin/v1.4.0/deployment/k8s/base/daemonset.yaml \
-    | sed 's|ghcr.io/mellanox/k8s-rdma-shared-dev-plugin|luciaopenai.azurecr.io/luciaopenai/k8s-rdma-shared-dev-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|' \
-    | kubectl apply --overwrite=true -f - || exit $?
+{ curl -s https://raw.githubusercontent.com/Mellanox/k8s-rdma-shared-dev-plugin/v1.4.0/deployment/k8s/base/daemonset.yaml \
+| sed 's|ghcr.io/mellanox/k8s-rdma-shared-dev-plugin|{{ cluster_cfg['cluster']['docker-registry']['prefix'] }}k8s-rdma-shared-dev-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|';
+  cat <<'YAML'
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+YAML
+} | kubectl apply --overwrite=true -f - || exit $?
 
 {% endif %}
 

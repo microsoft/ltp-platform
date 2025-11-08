@@ -17,6 +17,8 @@
 
 
 FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04
+
+ARG TARGETARCH
 # Register the ROCM package repository, and install rocm-dev package
 ARG ROCM_VERSION=6.2.2
 ARG AMDGPU_VERSION=6.2.2
@@ -25,8 +27,8 @@ RUN echo "$APT_PREF" > /etc/apt/preferences.d/rocm-pin-600
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl libnuma-dev gnupg \
   && curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - \
-  && printf "deb [arch=amd64] https://repo.radeon.com/rocm/apt/$ROCM_VERSION/ jammy main" | tee /etc/apt/sources.list.d/rocm.list \
-  && printf "deb [arch=amd64] https://repo.radeon.com/amdgpu/$AMDGPU_VERSION/ubuntu jammy main" | tee /etc/apt/sources.list.d/amdgpu.list \
+  && printf "deb https://repo.radeon.com/rocm/apt/$ROCM_VERSION/ jammy main" | tee /etc/apt/sources.list.d/rocm.list \
+  && printf "deb https://repo.radeon.com/amdgpu/$AMDGPU_VERSION/ubuntu jammy main" | tee /etc/apt/sources.list.d/amdgpu.list \
   && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   sudo \
   libelf1 \
@@ -74,13 +76,12 @@ COPY build/update-dcgm.py .
 # For the job exporter
 ENV NERDCTL_VERSION=2.1.3
 RUN apt-get update && apt-get install --no-install-recommends -y wget ca-certificates
-RUN wget https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz && \
+RUN wget -O /tmp/nerdctl.tar.gz https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-${TARGETARCH}.tar.gz && \
     mkdir -p /tmp/nerdctl && \
-    tar -xzvf nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz -C /tmp/nerdctl && \
+    tar -xzvf /tmp/nerdctl.tar.gz -C /tmp/nerdctl && \
     mv /tmp/nerdctl/nerdctl /usr/local/bin/nerdctl && \
     mkdir -p /job_exporter && \
-    rm -rf /tmp/nerdctl && \
-    rm -rf nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz
+    rm -rf /tmp/nerdctl*
 
 COPY requirements.txt /job_exporter/
 RUN pip3 install -r /job_exporter/requirements.txt

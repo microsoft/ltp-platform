@@ -64,6 +64,7 @@ WORKDIR /kube-runtime/src
 COPY src/src ./
 COPY src/requirements.txt ./
 
+#TODO: update the hardcode image for arm64
 COPY --from=frameworkcontroller/frameworkbarrier:v1.0.0 $BARRIER_DIR/frameworkbarrier ./init.d
 COPY --from=builder ${INSTALL_DIR}/* ./runtime.d/
 
