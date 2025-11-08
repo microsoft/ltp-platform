@@ -67,6 +67,12 @@ def multiplier_tool(a: float, b: float) -> float:
     return a * b
 
 @function_tool
+def power_tool(base: float, exponent: float) -> float:
+    """Raise base to the power of exponent and return the result."""
+    print(f'[tool][power]\nbase: {base}, exponent: {exponent}')
+    return base ** exponent
+
+@function_tool
 def python_code_executor(code: str) -> str:
     """
     Execute Python code and return the result as a string.
@@ -152,7 +158,7 @@ calculator_agent = Agent(
     name="Calculator Agent",
     instructions="You are a accurate calculator, you should always use tools to calculate, and you should always output the processes taken to arrive at the final result.",
     model=chat_model_config,
-    tools=[adder_tool, multiplier_tool],
+    tools=[adder_tool, multiplier_tool, power_tool],
     output_type=str
 )
 
