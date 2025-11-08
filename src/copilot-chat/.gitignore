@@ -8,3 +8,4 @@ src/requirements.lock
 
 # Ignore the copied tables folder
 src/copilot_agent/data/demoM3_LTP/tables
+src/copilot_agent/data/img

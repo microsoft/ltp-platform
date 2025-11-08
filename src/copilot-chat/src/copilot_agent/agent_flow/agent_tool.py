@@ -4,9 +4,11 @@ import json
 import subprocess
 import tempfile
 import sys
+import uuid
 from typing import TypedDict, Annotated
 from openai import AsyncAzureOpenAI
 from agents import Agent, Runner, OpenAIChatCompletionsModel, OpenAIResponsesModel, function_tool
+from ..config import DATA_DIR
 
 
 # --- 1. Configuration Variables ---
@@ -126,6 +128,13 @@ def python_code_executor(code: str) -> str:
                 pass
         return f"Error executing code: {str(e)}"
 
+@function_tool
+def uuid_v4_generator() -> str:
+    """Generate a UUID v4 string."""
+    generated_uuid = str(uuid.uuid4())
+    print(f'[tool][uuid_v4_generator]\nGenerated UUID: {generated_uuid}')
+    return generated_uuid
+
 websearch_agent = Agent(
     name="Web Search Agent",
     instructions="You are a fake web search agent. Provide a fake search result to the query.",
@@ -172,4 +181,40 @@ python_coder_agent = Agent(
     output_type=str
 )
 
-agents_list = [websearch_agent, story_agent, calculator_agent, python_coder_agent]
+plotter_agent = Agent(
+    name="Plotter Agent",
+    instructions=f"""You are a specialized plotting agent that creates data visualizations and saves them as PNG files.
+
+    Your workflow should always be:
+    1. First, use the uuid_v4_generator tool to generate a unique filename
+    2. Write Python code to create the plot/chart using matplotlib, seaborn, or other plotting libraries
+    3. In your Python code, save the plot as a PNG file to: {DATA_DIR}/img/{{uuid}}.png
+    4. Use python_code_executor to run the plotting code
+    5. Return only the full file path as a string: {DATA_DIR}/img/{{uuid}}.png
+    
+    Important guidelines:
+    - Always generate a UUID first before writing any plotting code
+    - Save plots with high DPI (e.g., dpi=300) for good quality
+    - Use plt.tight_layout() to ensure proper spacing
+    - Always use plt.savefig() to save the file before plt.show() or plt.close()
+    - Handle any required data generation or processing within your Python code
+    - Return ONLY the file path, nothing else
+    
+    You can create various types of plots:
+    - Line plots, bar charts, scatter plots
+    - Histograms, box plots, violin plots  
+    - Heatmaps, contour plots
+    - Statistical plots and data analysis visualizations
+    - Any other matplotlib/seaborn/plotly visualizations
+    
+    Example workflow:
+    1. Generate UUID: "abc123-def456-..."
+    2. Create Python code that saves to: {DATA_DIR}/img/abc123-def456-....png
+    3. Execute the code
+    4. Return: "{DATA_DIR}/img/abc123-def456-....png" """,
+    model=chat_model_config,
+    tools=[python_code_executor, uuid_v4_generator],
+    output_type=str
+)
+
+agents_list = [websearch_agent, story_agent, calculator_agent, python_coder_agent, plotter_agent]
