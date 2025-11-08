@@ -12,7 +12,7 @@ from typing import Generator
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
 from node_updater import NodeRecordUpdater
-from ltp_kusto_sdk.features.node_status.models import NodeStatus, NodeStatusRecord
+from ltp_storage.data_schema.node_status import NodeStatus, NodeStatusRecord
 
 
 @pytest.fixture(scope="session")

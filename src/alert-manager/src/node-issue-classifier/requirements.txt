@@ -1,3 +1,5 @@
+./ltp-storage-common
 ./kusto-sdk
+./postgresql-sdk
 schedule
 pytest

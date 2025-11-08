@@ -1,2 +1,4 @@
+./ltp-storage-common
 ./kusto-sdk
+./postgresql-sdk
 kubernetes

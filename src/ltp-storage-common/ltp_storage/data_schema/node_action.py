@@ -6,7 +6,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Any, Tuple, Optional
-from ...utils.time_util import convert_timestamp
+from ..utils.time_util import convert_timestamp
+from .node_status import NodeStatus
 
 
 @dataclass
@@ -37,6 +38,7 @@ class NodeAction:
     def from_record(cls, record: Dict[str, Any]) -> "NodeAction":
         """
         Creates a NodeAction instance from a dictionary record.
+        Supports both PascalCase (Kusto) and snake_case (PostgreSQL) keys.
         
         Args:
             record: Dictionary containing the node action data
@@ -48,16 +50,23 @@ class NodeAction:
             KeyError: If required fields are missing from the record
         """
         try:
-            timestamp = convert_timestamp(record["Timestamp"], "datetime")
+            # Handle both PascalCase (from Kusto) and snake_case (from PostgreSQL)
+            timestamp_value = record.get("Timestamp") or record.get("timestamp")
+            if timestamp_value is None:
+                raise KeyError("Timestamp/timestamp")
+            
+            timestamp = convert_timestamp(timestamp_value, "datetime")
                 
-            return cls(Timestamp=timestamp,
-                       HostName=record["HostName"],
-                       NodeId=record["NodeId"],
-                       Action=record["Action"],
-                       Reason=record["Reason"],
-                       Detail=record["Detail"],
-                       Category=record["Category"],
-                       Endpoint=record["Endpoint"])
+            return cls(
+                Timestamp=timestamp,
+                HostName=record.get("HostName") or record.get("hostname", ""),
+                NodeId=record.get("NodeId") or record.get("node_id", ""),
+                Action=record.get("Action") or record.get("action", ""),
+                Reason=record.get("Reason") or record.get("reason", ""),
+                Detail=record.get("Detail") or record.get("detail", ""),
+                Category=record.get("Category") or record.get("category", ""),
+                Endpoint=record.get("Endpoint") or record.get("endpoint", "")
+            )
         except KeyError as e:
             raise KeyError(f"Missing required field in record: {e}")
 
@@ -99,3 +108,34 @@ class NodeAction:
         target_status = parts[1].lower()
 
         return current_status, target_status
+    
+    @staticmethod
+    def is_valid_action(action: str) -> bool:
+        """
+        Checks if an action is valid and verifies the status transition if applicable.
+        
+        Args:
+            action: The action to validate
+            
+        Returns:
+            bool: True if the action is valid and represents a valid transition
+            
+        Raises:
+            RuntimeError: If there's an error validating the action
+        """
+        try:
+            current_status, target_status = NodeAction.get_before_after_status(
+                action)
+            if current_status is None or target_status is None:
+                return False
+
+            # Verify both statuses are valid
+            if not hasattr(NodeStatus, current_status.upper()) or not hasattr(
+                    NodeStatus, target_status.upper()):
+                return False
+
+            # Check if the transition is valid
+            return NodeStatus.can_transition(current_status, target_status)
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to validate action: {str(e)}")

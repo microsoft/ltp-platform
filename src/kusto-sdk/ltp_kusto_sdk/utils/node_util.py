@@ -9,7 +9,7 @@ from azure.identity import DefaultAzureCredential
 from azure.mgmt.compute import ComputeManagementClient
 
 from ltp_kusto_sdk.utils.kusto_client import KustoManageClient, KustoIngestionClient
-from ltp_kusto_sdk.utils.time_util import convert_timestamp
+from ltp_storage.utils.time_util import convert_timestamp
 import pandas as pd
 
 

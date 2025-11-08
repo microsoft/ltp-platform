@@ -11,13 +11,12 @@ from typing import Dict, List, Optional, Tuple, Any
 import pandas as pd
 
 from ...utils.node_util import Node
-from .models import NodeStatus, NodeStatusRecord, StatusGroup
+from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus, get_transition_action
 from ...utils.time_util import convert_timestamp
 from ...base import KustoBaseClient
-from ...utils.request_util import RequestUtil
 
 # Constants for environment variables and defaults
-DEFAULT_CLUSTER_ID = "wcu"
+DEFAULT_CLUSTER_ID = "test-cluster"
 DEFAULT_KUSTO_CLUSTER = "https://your-kusto-cluster.kusto.windows.net"
 DEFAULT_KUSTO_DATABASE = "Test"
 DEFAULT_STATUS_TABLE = "NodeStatusRecord"
@@ -125,7 +124,7 @@ class NodeStatusClient(KustoBaseClient):
 
     def get_transition_action(self, from_status: str, to_status: str) -> str:
         """Returns the action label for a transition from one status to another."""
-        return from_status + '-' + to_status
+        return get_transition_action(from_status, to_status)
 
     def get_status_group(self, status: str) -> str | None:
         """Get the group for a given status"""
@@ -186,7 +185,7 @@ class NodeStatusClient(KustoBaseClient):
     def get_nodes_by_status(
             self,
             status: str,
-            as_of_time: Optional[datetime] = None) -> List[Dict[str, Any]]:
+            as_of_time: Optional[datetime] = None) -> List[NodeStatusRecord]:
         """Get all nodes whose latest/current status is exactly the specified status.
         
         Args:
@@ -195,7 +194,7 @@ class NodeStatusClient(KustoBaseClient):
                                           If not provided, uses current time.
                                           
         Returns:
-            List[Dict[str, Any]]: List of node records whose latest status matches.
+            List[NodeStatusRecord]: List of node records whose latest status matches.
                                 Each record contains Timestamp, HostName, Status, NodeId, and Endpoint.
                                 
         Example:
@@ -225,7 +224,7 @@ class NodeStatusClient(KustoBaseClient):
             """
 
             results = self.execute_query(query)
-            return results if results else []
+            return [NodeStatusRecord.from_record(result) for result in results] if results else []
 
         except Exception as e:
             raise RuntimeError(f"Failed to get nodes by status: {str(e)}")

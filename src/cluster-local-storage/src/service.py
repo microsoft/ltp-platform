@@ -19,8 +19,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from kubernetes import client, config
 
-from ltp_kusto_sdk import NodeStatusClient, NodeActionClient
-from ltp_kusto_sdk.features.node_status.models import NodeStatus
+from ltp_storage.factory import create_node_status_client, create_node_action_client
+from ltp_storage.data_schema.node_status import NodeStatus
 
 logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -40,8 +40,8 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
         self.state = "idle"
         self.sync_interval = int(os.getenv("CLUSTER_LOCAL_STORAGE_SYNC_INTERVAL", sync_interval))
 
-        self.status_client = NodeStatusClient() if os.getenv("LTP_KUSTO_CLUSTER_URI") else None
-        self.action_client = NodeActionClient() if os.getenv("LTP_KUSTO_CLUSTER_URI") else None
+        self.status_client = create_node_status_client() if os.getenv("LTP_STORAGE_BACKEND_DEFAULT") else None
+        self.action_client = create_node_action_client() if os.getenv("LTP_STORAGE_BACKEND_DEFAULT") else None
 
         try:
             config.load_incluster_config()
@@ -88,7 +88,7 @@ class ClusterLocalStorageService(http.server.ThreadingHTTPServer):
 
     def _get_node(self, data=True, num=None, write_file=False):
         status = NodeStatus.AVAILABLE if data else NodeStatus.AVAILABLE_NODATA
-        hostnames = [n["HostName"] for n in self.status_client.get_nodes_by_status(status.value)] if self.status_client else []
+        hostnames = [n.HostName for n in self.status_client.get_nodes_by_status(status.value)] if self.status_client else []
         hostnames = list(filter(self.cluster_hostname_regex.search, hostnames))
         logger.debug(f"Queried {len(hostnames)} {status.value} nodes: {','.join(hostnames)}")
         if write_file:

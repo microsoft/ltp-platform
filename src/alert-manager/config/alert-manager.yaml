@@ -12,6 +12,32 @@ actions-available:
 - drain-nodes
 - fix-nvidia-gpu-low-perf
 - cert-expiration-checker
+
+# ============================================================================
+# Storage Backend Configuration
+# ============================================================================
+# Global storage backend setting (applies to all services unless overridden)
+# Options: 'kusto' or 'postgresql'
+storage-backend: kusto
+
+# Kusto (Azure Data Explorer) Configuration
+# Only required if using Kusto backend (storage-backend: kusto)
+kusto:
+  kusto-cluster: ""  # e.g., https://your-cluster.kusto.windows.net
+  kusto-database: ""  # e.g., YourDatabase
+  kusto-user-assigned-client-id: ""  # For managed identity authentication
+  node-status-table: NodeStatusRecord
+  node-action-table: NodeActionRecord
+  kusto-vm-table: ""  # VM info table name
+
+# PostgreSQL Configuration
+# Only required if using PostgreSQL backend (storage-backend: postgresql)
+postgresql:
+  schema: ltp_sdk  # Default schema name
+
+# ============================================================================
+# Service Configuration
+# ============================================================================
 alert-handler:
   log-level: 'info'
   port: 9095
@@ -30,10 +56,8 @@ job-status-change-notification:
   db-poller-interval-second: 600
 node-issue-classifier:
   configured: False
-  kusto: False
 node-recycler:
   configured: False
-  kusto: False
   icm:
     host: prod.microsofticm.com
     crt_name: cert.pem

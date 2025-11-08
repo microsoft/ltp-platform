@@ -47,7 +47,7 @@ Ensure environment variables are set.
 
 ```python
 from ltp_kusto_sdk import NodeStatusClient, NodeActionClient
-from ltp_kusto_sdk.features.node_status.models import NodeStatus # For status enums
+from ltp_storage.data_schema.node_status import NodeStatus # For status enums
 from datetime import datetime, timedelta
 
 status_client = NodeStatusClient()

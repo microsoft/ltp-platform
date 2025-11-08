@@ -9,8 +9,8 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
-from ltp_kusto_sdk.features.node_action.client import NodeActionClient
-from ltp_kusto_sdk.features.node_action.models import NodeAction
+from ltp_storage.data_schema.node_action import NodeActionClient
+from ltp_storage.data_schema.node_action import NodeAction
 from ltp_kusto_sdk.utils.node_util import Node
 
 # Test constants

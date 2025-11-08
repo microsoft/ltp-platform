@@ -1,4 +1,6 @@
+./ltp-storage-common
 ./kusto-sdk
+./postgresql-sdk
 ./python-icm
 azure-identity
 azure-mgmt-compute

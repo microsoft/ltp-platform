@@ -18,4 +18,8 @@ COPY ./src/alert-handler .
 RUN corepack enable && corepack install -g yarn@4.2.2
 RUN yarn install
 
+# install python and dependencies
+RUN apt-get install -y python3-pip
+RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
+
 ENTRYPOINT ["npm", "start"]

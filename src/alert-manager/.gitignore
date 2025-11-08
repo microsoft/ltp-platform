@@ -3,4 +3,6 @@ node_modules/
 
 deploy/icm-certs/
 
+**/postgresql-sdk/
 **/kusto-sdk/
+**/ltp-storage-common/

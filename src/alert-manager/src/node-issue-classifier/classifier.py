@@ -8,9 +8,8 @@ import time
 import logging
 from typing import Dict, Tuple
 
-from ltp_kusto_sdk.features.node_status.models import NodeStatus
-from ltp_kusto_sdk import NodeAction
-
+from ltp_storage.data_schema.node_status import NodeStatus, NodeStatusRecord
+from ltp_storage.data_schema.node_action import NodeAction
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -190,7 +189,7 @@ class NodeIssueClassifier:
             
         return json.dumps(detail_info) if detail_info else ''
 
-    def classify_node_issue(self, node_name: str, node_status: Dict, node_action: Dict) -> Tuple[str, str, str, str]:
+    def classify_node_issue(self, node_name: str, node_status: NodeStatusRecord, node_action: NodeAction) -> Tuple[str, str, str, str]:
         """
         Classify issues for a single node
         
@@ -202,18 +201,15 @@ class NodeIssueClassifier:
             Tuple containing (issue, category, to_status, detail)
         """
         try:
-            cordoned_node_id = node_status['NodeId']
+            cordoned_node_id = node_status.NodeId
             
-            if not isinstance(node_action, dict):
-                node_action = node_action.to_dict()
-            
-            if not node_action or not node_action.get('Detail'):
+            if not node_action or not node_action.Detail:
                 logger.warning(f"No action detail found for node {node_name}")
                 issue = NodeFailure.UnknownIssue
                 category = NodeFailureCategory.unknown
             else:
                 # Classify the issue based on action detail
-                issue, category = self.classify_issue_from_cordon_detail(node_action['Detail'])
+                issue, category = self.classify_issue_from_cordon_detail(node_action.Detail)
                 logger.info(f"Classified node {node_name}: issue={issue}, category={category}")
             
             # Get target status based on category
