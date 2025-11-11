@@ -178,12 +178,17 @@ class AgentFlow:
         """Create a LangGraph node function for an agent."""
         async def node_fn(state: AgentFlowState) -> AgentFlowState:
             push_frontend_event(f'<span class="text-gray-400 italic">🔍 Step {state["step_count"]}: Executing {agent_name}</span><br/>', replace=False)
+            logger.debug(f'[agent flow execution]: Executing {agent_name}')
             
-            # Construct input based on whether this is the first step
+            # Construct input based on whether this is the first step, first agent in the flow needs to know the original ask and context
             if state["step_count"] == 1:
-                execution_input = state["current_task"]
+                execution_input = (
+                    f"The original ask and context: \n{state['input_prompt']}\n\n"
+                    f"Your Task: {state['current_task']}"
+                )
             else:
                 execution_input = (
+                    f"The original ask and context: \n{state['input_prompt']}\n\n"
                     f"Previous Step Result: \n{state['aggregated_output']}\n\n"
                     f"Your Task: {state['current_task']}"
                 )
