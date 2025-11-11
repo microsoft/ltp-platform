@@ -35,7 +35,7 @@ const getUserVCs = async (username) => {
   return [...virtualClusters];
 };
 
-const getUserHistoryVCs = async (username) => {
+const getUserHistoryVCsFromUserInfo = async (username) => {
   const userInfo = await userModel.getUser(username);
   return userInfo.history_vclist || [];
 };
@@ -816,5 +816,5 @@ module.exports = {
   updateUserPassword,
   createUser,
   getUserVCs,
-  getUserHistoryVCs,
+  getUserHistoryVCsFromUserInfo,
 };
