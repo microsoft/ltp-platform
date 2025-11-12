@@ -57,7 +57,7 @@ async function getHistoryVCs(name, grouplist, retrieveFromHistory=true) {
     try {
       return await groupModel.getGroupVCs(group);
     } catch (error) {
-      console.error(`Failed to fetch VCs for group ${group}:`, error);
+      logger.error(`Failed to fetch VCs for group ${group}:`, error);
       return []; // Return an empty array on failure
     }
   });

@@ -283,18 +283,13 @@ const list = asyncHandler(async (req, res) => {
 });
 
 const get = asyncHandler(async (req, res) => {
-  let data;
-  try {
-    data = await retrieveJobInfo(
-      req.params.frameworkName,
-      req.params.jobAttemptId ? Number(req.params.jobAttemptId) : undefined,
-      req[userProperty].username,
-      req[userProperty].admin,
-      req[userProperty].vcadmins || [],
-    );
-  } catch (error) {
-    throw error;
-  }
+  const data = await retrieveJobInfo(
+    req.params.frameworkName,
+    req.params.jobAttemptId ? Number(req.params.jobAttemptId) : undefined,
+    req[userProperty].username,
+    req[userProperty].admin,
+    req[userProperty].vcadmins || [],
+  );
   res.json(data);
 });
 
@@ -369,22 +364,13 @@ const execute = asyncHandler(async (req, res) => {
 });
 
 const getConfig = asyncHandler(async (req, res) => {
-  try {
-    await retrieveJobInfo(
-      req.params.frameworkName,
-      undefined,
-      req[userProperty].username,
-      req[userProperty].admin,
-      req[userProperty].vcadmins || [],
-    );
-  }
-  catch (error) {
-      throw createError(
-        'Forbidden',
-        'ForbiddenUserError',
-        `User ${req[userProperty].username} is not allowed to access the config file for job ${req.params.frameworkName}.`,
-      );
-  }
+  await retrieveJobInfo(
+    req.params.frameworkName,
+    undefined,
+    req[userProperty].username,
+    req[userProperty].admin,
+    req[userProperty].vcadmins || [],
+  );
 
   try {
     const data = await job.getConfig(req.params.frameworkName);
