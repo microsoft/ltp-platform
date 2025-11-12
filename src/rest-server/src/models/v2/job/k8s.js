@@ -1572,9 +1572,6 @@ const listVCsFromJob = async (username) => {
     // Remove limit: 0 so it fetches all records, and optionally add a sensible order
     const frameworks = await databaseModel.Framework.findAll({
       attributes: [
-      'name',
-      'jobName',
-      'userName',
       'virtualCluster',
       ],
       where: { userName: username },
