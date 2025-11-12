@@ -430,22 +430,13 @@ const deleteTag = asyncHandler(async (req, res) => {
 });
 
 const getEvents = asyncHandler(async (req, res) => {
-  try {
-    await retrieveJobInfo(
-      req.params.frameworkName,
-      undefined,
-      req[userProperty].username,
-      req[userProperty].admin,
-      req[userProperty].vcadmins || [],
-    );
-  }
-  catch (error) {
-      throw createError(
-        'Forbidden',
-        'ForbiddenUserError',
-        `User ${req[userProperty].username} is not allowed to access the events for job ${req.params.frameworkName}.`,
-      );
-  }
+  await retrieveJobInfo(
+    req.params.frameworkName,
+    undefined,
+    req[userProperty].username,
+    req[userProperty].admin,
+    req[userProperty].vcadmins || [],
+  );
 
   const filters = {};
   if (req.query) {
@@ -478,22 +469,13 @@ const getEvents = asyncHandler(async (req, res) => {
 });
 
 const getLogs = asyncHandler(async (req, res) => {
-  try {
-    await retrieveJobInfo(
-      req.params.frameworkName,
-      undefined,
-      req[userProperty].username,
-      req[userProperty].admin,
-      req[userProperty].vcadmins || [],
-    );
-  }
-  catch (error) {
-      throw createError(
-        'Forbidden',
-        'ForbiddenUserError',
-        `User ${req[userProperty].username} is not allowed to access the logs for job ${req.params.frameworkName}.`,
-      );
-  }
+  await retrieveJobInfo(
+    req.params.frameworkName,
+    undefined,
+    req[userProperty].username,
+    req[userProperty].admin,
+    req[userProperty].vcadmins || [],
+  );
 
   try {
     const data = await log.getLogListFromLogServer(
