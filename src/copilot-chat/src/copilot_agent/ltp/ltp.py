@@ -25,7 +25,7 @@ from ..utils.utils import get_prompt_from
 from .ltp_dashboard import query_generation_kql
 
 
-class LTP:
+class LTPQueryEngine:
     """LTP Query Engine for handling various LTP-related queries."""
 
     SUB_FEATURE = 'ltp'
@@ -265,9 +265,9 @@ class LTP:
         Recursively converts non-JSON serializable objects within a data structure.
         """
         if isinstance(data, (list, tuple)):
-            return [LTP._make_json_serializable(item) for item in data]
+            return [LTPQueryEngine._make_json_serializable(item) for item in data]
         elif isinstance(data, dict):
-            return {key: LTP._make_json_serializable(value) for key, value in data.items()}
+            return {key: LTPQueryEngine._make_json_serializable(value) for key, value in data.items()}
         elif isinstance(data, datetime.timedelta):
             # Convert timedelta to total seconds (a float)
             return data.total_seconds()

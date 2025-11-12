@@ -3,8 +3,8 @@
 
 """Init file for LTP module."""
 
-from .ltp import LTP
+from .ltp import LTPQueryEngine
 
 __all__ = [
-    'LTP'
+    'LTPQueryEngine'
 ]

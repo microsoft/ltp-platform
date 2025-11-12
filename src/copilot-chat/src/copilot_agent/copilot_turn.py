@@ -9,7 +9,7 @@ import os
 from .utils.logger import logger
 
 from .config import COPILOT_VERSION, DATA_DIR, PROMPT_DIR
-from .ltp import LTP
+from .ltp import LTPQueryEngine
 from .utils import (
     Contextualizer,
     LLMSession,
@@ -36,7 +36,7 @@ class CoPilotTurn:
         self.system_prompt_answer_general = get_prompt_from(os.path.join(PROMPT_DIR, 'gen_smart_help_prompt_general.txt'))
         self.classifier = QuestionClassifier(self._version, self.llm_session)
         self.contextualizer = Contextualizer(self.llm_session)
-        self.processor = LTP(self.llm_session)
+        self.processor = LTPQueryEngine(self.llm_session)
         self.smart_help = SmartHelp(self.help_msg, self.llm_session)
 
     # entry function, processes the list of messages and returns a dictionary with the results
