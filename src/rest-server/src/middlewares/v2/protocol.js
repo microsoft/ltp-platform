@@ -119,7 +119,7 @@ const protocolValidate = (protocolYAML) => {
     }
 
     if (imageRegex) {
-      const imageName = getImageName(protocolObj.prerequisites);
+      const imageName = getImageName(prerequisites);
       // Check if the imageName matches the imageRegex
       if (!imageName) {
         throw createError(

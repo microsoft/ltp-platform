@@ -75,7 +75,7 @@ class RestServer:
             'schedule-port-start', 'schedule-port-end', 'sql-max-connection',
             'hived-computing-device-envs', 'log-server', 'log_azure_storage_account',
             'log_azure_storage_account_key', 'log_azure_storage_container_name',
-            'code-restriction'
+            'code-restriction', 'image-regex'
         ]:
             service_object_model[k] = self.service_configuration[k]
 
