@@ -105,7 +105,7 @@ class LTPQueryEngine:
         """Query job metadata from OpenPAI backend."""
         # generate query
         logger.info('Generating Query: LTP, Metadata')
-        query = 'restserver/jobs?offset=0&limit=49999&withTotalCount=true&order=completionTime'
+        query = 'restserver/jobs?offset=0&withTotalCount=true&order=completionTime'
 
         if self.feature_skipped:
             logger.info('Skipping job metadata query execution.')
