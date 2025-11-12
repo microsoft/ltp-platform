@@ -96,8 +96,7 @@ const list = asyncHandler(async (req, res) => {
     let myvcs = await userController.getUserHistoryVCsFromUserInfo(username);
     if (!myvcs || myvcs.length === 0) {
       myvcs = [...currentvcs];
-    }
-    else {
+    } else {
       myvcs = Array.from(new Set([...myvcs, ...currentvcs]));
     }
 
