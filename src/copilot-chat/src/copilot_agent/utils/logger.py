@@ -10,11 +10,35 @@ from colorama import Fore, Style, init
 # Initialize colorama for cross-platform colored terminal text and force colors
 init(autoreset=True, strip=False)
 
+class ColoredFormatter(logging.Formatter):
+    """Custom formatter to add colors to log levels"""
+    
+    COLORS = {
+        'DEBUG': Fore.CYAN,
+        'INFO': Fore.GREEN,
+        'WARNING': Fore.YELLOW,
+        'ERROR': Fore.RED,
+        'CRITICAL': Fore.MAGENTA,
+    }
+
+    def format(self, record):
+        # Get the original formatted message
+        message = super().format(record)
+        
+        # Add color to the level name
+        levelname = record.levelname
+        if levelname in self.COLORS:
+            colored_levelname = f"{self.COLORS[levelname]}[{levelname}]{Style.RESET_ALL}"
+            # Replace the levelname in the formatted message
+            message = message.replace(f" - {levelname} - ", f" - {colored_levelname} - ")
+        
+        return message
+
 # Define a function to set up the logging configuration
 def setup_logging():
     """
     Configures the root logger for the application.
-    Messages of INFO level and higher will be printed to stderr (console).
+    Messages of INFO level and higher will be printed to stdout (console).
     """
     # Get the root logger
     root_logger = logging.getLogger()
@@ -24,14 +48,14 @@ def setup_logging():
 
     # Prevent adding multiple handlers if setup_logging is called multiple times
     if not root_logger.handlers:
-        # Create a StreamHandler to output logs to the console (stderr by default)
-        console_handler = logging.StreamHandler(sys.stderr)
+        # Create a StreamHandler to output logs to stdout (so tee can capture them)
+        console_handler = logging.StreamHandler(sys.stdout)
         
         # Set the level for this specific handler
         console_handler.setLevel(logging.INFO)
 
-        # Create a formatter for the log messages
-        formatter = logging.Formatter(
+        # Create a colored formatter for the log messages
+        formatter = ColoredFormatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         )
         
@@ -41,36 +65,8 @@ def setup_logging():
         # Add the console handler to the root logger
         root_logger.addHandler(console_handler)
 
-        # Optional: Add a FileHandler for logging to a file
-        # file_handler = logging.FileHandler('app.log')
-        # file_handler.setLevel(logging.DEBUG)
-        # file_handler.setFormatter(formatter)
-        # root_logger.addHandler(file_handler)
-
 # Call setup_logging when this module is imported
 setup_logging()
 
-# Expose the root logger so all modules use the same logger instance
-class SimpleLogger:
-    def info(self, msg):
-        try:
-            print(f"{Fore.GREEN}[INFO]{Style.RESET_ALL} {msg}", flush=True)
-        except (BrokenPipeError, OSError):
-            logging.getLogger().info(msg)
-    def error(self, msg):
-        try:
-            print(f"{Fore.RED}[ERROR]{Style.RESET_ALL} {msg}", flush=True)
-        except (BrokenPipeError, OSError):
-            logging.getLogger().error(msg)
-    def debug(self, msg):
-        try:
-            print(f"{Fore.CYAN}[DEBUG]{Style.RESET_ALL} {msg}", flush=True)
-        except (BrokenPipeError, OSError):
-            logging.getLogger().debug(msg)
-    def warning(self, msg):
-        try:
-            print(f"{Fore.YELLOW}[WARNING]{Style.RESET_ALL} {msg}", flush=True)
-        except (BrokenPipeError, OSError):
-            logging.getLogger().warning(msg)
-
-logger = SimpleLogger()
+# Expose a proper logger instance
+logger = logging.getLogger(__name__)
