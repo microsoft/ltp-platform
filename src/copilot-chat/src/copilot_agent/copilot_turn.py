@@ -25,6 +25,20 @@ from .utils import (
 class CoPilotTurn:
     """CoPilot Turn, handles each inquiry/response turn."""
 
+    # Object type classification codes
+    OBJECT_LTP = '8'           # Lucia Training Platform related questions
+    OBJECT_GENERAL = '3'       # General questions
+    OBJECT_PERSONA = '9'       # Persona-related questions
+    
+    # Concern types classification codes
+    CONCERN_METRICS = '1'               # Performance metrics and analytics, LTP
+    CONCERN_METADATA = '2'              # Data structure and metadata, LTP
+    CONCERN_USER_MANUAL = '3'           # User manual and documentation, LTP
+    CONCERN_POWERBI = '4'               # PowerBI dashboard related, LTP
+    CONCERN_AUTO_REJECT = '5'           # Questions to be automatically rejected, LTP
+    CONCERN_HUMAN_INTERVENTION = '6'    # Questions requiring human intervention, LTP
+    CONCERN_OTHERS = '0'                # Other concerns
+
     def __init__(self, llm_session: LLMSession, verbose: bool = False) -> None:
         """Initialize."""
         self.verbose = verbose
@@ -55,8 +69,8 @@ class CoPilotTurn:
             push_frontend_event('<span class="text-gray-400 italic">🧠 Copilot is understanding your request...</span><br/>', replace=False)
             question_type = self.classifier.parse_question(this_inquiry, last_inquiry)
             question = question_type.get('new_question', this_inquiry)
-            obj = question_type.get('lv0_object', '3. [general]')
-            con = question_type.get('lv1_concern', '0. [others]')
+            obj = question_type.get('lv0_object', f'{self.OBJECT_GENERAL}. [general]')
+            con = question_type.get('lv1_concern', f'{self.CONCERN_OTHERS}. [others]')
         else:
             # get contextualized question from this and last user inquiry
             push_frontend_event('<span class="text-gray-400 italic">🤔 Copilot is understanding your request...</span><br/>', replace=False)
@@ -64,7 +78,7 @@ class CoPilotTurn:
             # classify the question to determine the solution source and method
             push_frontend_event('<span class="text-gray-400 italic">🔍 Copilot is finding the right the data source...</span><br/>', replace=False)
             question_type = self.classifier.classify_question(question)
-            obj, con = question_type.get('lv0_object', '3. [general]'), question_type.get('lv1_concern', '0. [others]')
+            obj, con = question_type.get('lv0_object', f'{self.OBJECT_GENERAL}. [general]'), question_type.get('lv1_concern', f'{self.CONCERN_OTHERS}. [others]')
 
         # verion f3, f4, resolves objective 8 (Lucia Training Platform)
         push_frontend_event('<span class="text-gray-400 italic">⏳ Copilot is processing your inquiry...</span><br/>', replace=False)
@@ -75,12 +89,12 @@ class CoPilotTurn:
                 help_keys = ['unsupported_question']
                 answer = self.smart_help.generate(question, help_keys, True)
                 debug = {}
-            elif obj.count('8') > 0:
+            elif obj.count(self.OBJECT_LTP) > 0:  # LTP-related questions
                 answer, debug = self.query_ltp(question, con, skip_summary)
-            elif obj.count('3') > 0:
+            elif obj.count(self.OBJECT_GENERAL) > 0:  # General questions
                 answer = self.gen_answer_general(question)
                 debug = {}
-            elif obj.count('9') > 0:
+            elif obj.count(self.OBJECT_PERSONA) > 0:  # Persona-related questions
                 help_keys = ['feature']
                 answer = self.smart_help.generate(question, help_keys, True)
                 debug = {}
@@ -102,12 +116,12 @@ class CoPilotTurn:
         # Mapping concern codes to handler functions  
         # Updated to pass llm_session to prevent singleton blocking
         handlers = {
-            '1': lambda: self.processor.query_metrics(question, self.help_msg, skip_summary),
-            '2': lambda: self.processor.query_metadata(question, self.help_msg, skip_summary),
-            '3': lambda: self.processor.query_user_manual(question, self.help_msg),
-            '4': lambda: self.processor.query_powerbi(question, self.help_msg),
-            '5': lambda: self.processor.auto_reject(question, self.help_msg),
-            '6': lambda: self.processor.human_intervention(question, self.help_msg),
+            self.CONCERN_METRICS: lambda: self.processor.query_metrics(question, self.help_msg, skip_summary),
+            self.CONCERN_METADATA: lambda: self.processor.query_metadata(question, self.help_msg, skip_summary),
+            self.CONCERN_USER_MANUAL: lambda: self.processor.query_user_manual(question, self.help_msg),
+            self.CONCERN_POWERBI: lambda: self.processor.query_powerbi(question, self.help_msg),
+            self.CONCERN_AUTO_REJECT: lambda: self.processor.auto_reject(question, self.help_msg),
+            self.CONCERN_HUMAN_INTERVENTION: lambda: self.processor.human_intervention(question, self.help_msg),
         }
         for code, handler in handlers.items():
             if con.count(code) > 0:
