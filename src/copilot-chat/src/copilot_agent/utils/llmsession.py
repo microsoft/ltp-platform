@@ -36,10 +36,19 @@ class LLMSession:
         
         # Per-instance stream callback to avoid cross-user contamination
         self._instance_stream_callback = None
-        retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
-        adapter = HTTPAdapter(max_retries=retries)
-        self.session.mount('https://', adapter)
-        self.session.headers.update({"Authorization": f"Bearer {self.openai_api_key or self.azure_api_key}"})
+        try:
+            retries = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+            adapter = HTTPAdapter(max_retries=retries)
+            self.session.mount('https://', adapter)
+            self.session.headers.update({"Authorization": f"Bearer {self.openai_api_key or self.azure_api_key}"})
+        except Exception as e:
+            logger.error(f"Failed to configure HTTP session: {e}")
+            # Continue with basic session without retries
+            if self.openai_api_key or self.azure_api_key:
+                try:
+                    self.session.headers.update({"Authorization": f"Bearer {self.openai_api_key or self.azure_api_key}"})
+                except Exception as header_error:
+                    logger.error(f"Failed to set authorization header: {header_error}")
 
         if self.provider == "openai":
             self.model = openai.OpenAI(
@@ -174,20 +183,15 @@ class LLMSession:
         for attempt in range(max_retries):
             try:
                 # Start streaming from the provider. The SDK returns an iterator of events.
-                if self.provider == "azure":
-                    stream = self.model.chat.completions.create(
-                        model=self.model_name,
-                        messages=msg,
-                        max_completion_tokens=10000,
-                        stream=True
-                    )
-                elif self.provider == "openai":
-                    stream = self.model.chat.completions.create(
-                        model=self.model_name,
-                        messages=msg,
-                        max_tokens=10000,
-                        stream=True
-                    )
+                if self.provider in ["azure", "openai"]:
+                    token_param = "max_completion_tokens" if self.provider == "azure" else "max_tokens"
+                    params = {
+                        "model": self.model_name,
+                        "messages": msg,
+                        token_param: 10000,
+                        "stream": True
+                    }
+                    stream = self.model.chat.completions.create(**params)
                 else:
                     logger.error(f"Unsupported LLM provider in stream_chat: {self.provider}")
                     break

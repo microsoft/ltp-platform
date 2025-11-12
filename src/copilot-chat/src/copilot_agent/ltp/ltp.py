@@ -40,7 +40,11 @@ class LTPQueryEngine:
         """
         self.llm_session = llm_session
         self.feature_skipped = True
-        self.ltp_documentation = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'ltp_documentation.txt'))
+        try:
+            self.ltp_documentation = get_prompt_from(os.path.join(PROMPT_DIR, self.SUB_FEATURE, 'ltp_documentation.txt'))
+        except Exception as e:
+            logger.warning(f'Failed to load LTP documentation: {e}')
+            self.ltp_documentation = 'Documentation not available.'
 
     def query_metrics(self, question: str, help_msg, skip_summary: bool = False):
         """Query cluster or job metrics from Prometheus backend."""
@@ -58,7 +62,7 @@ class LTPQueryEngine:
             query, end_time_stamp, parallel, param = gen_promql_query(self.SUB_FEATURE, question, self.llm_session)
 
             if not query:
-                logger.info(f'No query found in the response, query is {query}')
+                logger.warning(f'No query found in the response, query is {query}')
                 answer = 'Query generation failed, no query found.'
                 return answer, None
             # execute
@@ -158,15 +162,21 @@ class LTPQueryEngine:
         k_table = ''
         if query_gen_status == 0:
             push_frontend_event('<span class="text-gray-400 italic">📥 Copilot is collecting the information...</span><br/>', replace=False)
-            KQL = KustoExecutor(k_cluster, k_db, k_table)
-            # Replace placeholders
-            query_gen_res = query_gen_res.format(
-                cluster_url=k_cluster,
-                database_name=k_db
-            )
-            response, response_status = KQL.execute_return_data(query_gen_res)
-            response_long = {"query_generated": query_gen_res, "response_from_query_execution": response}
-            logger.info(f'Kusto Query execution result: {response}')
+            try:
+                KQL = KustoExecutor(k_cluster, k_db, k_table)
+                # Replace placeholders
+                query_gen_res = query_gen_res.format(
+                    cluster_url=k_cluster,
+                    database_name=k_db
+                )
+                response, response_status = KQL.execute_return_data(query_gen_res)
+                response_long = {"query_generated": query_gen_res, "response_from_query_execution": response}
+                logger.info(f'Kusto Query execution result: {response}')
+            except Exception as e:
+                logger.error(f'KustoExecutor operation failed: {e}')
+                response = {"error": f"Query execution failed: {str(e)}"}
+                response_long = {"query_generated": query_gen_res, "response_from_query_execution": response}
+                response_status = -1
         else:
             response = {}
             response_long = {"query_generated": "query generation failed, please perform manual investigation", "response_from_query_execution": response}

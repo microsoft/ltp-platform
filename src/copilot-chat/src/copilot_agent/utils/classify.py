@@ -14,30 +14,35 @@ class QuestionClassifier:
     def __init__(self, version, model):
         self.version = version
         self.model = model
-        if self.version == 'f3':
-            self.lv0_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv0.txt'))
-            self.lv1_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv1.txt'))
-        elif self.version == 'f4':
-            self.lv0_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f4/classify.txt'))
-            self.lv1_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f4/examples.txt'))
-        else:
-            self.lv0_system_prompt = None
-            self.lv1_system_prompt = None
+        try:
+            if self.version == 'f3':
+                self.lv0_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv0.txt'))
+                self.lv1_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f3/lv1.txt'))
+            elif self.version == 'f4':
+                self.lv0_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f4/classify.txt'))
+                self.lv1_system_prompt = get_prompt_from(os.path.join(PROMPT_DIR, 'classification/f4/examples.txt'))
+            else:
+                self.lv0_system_prompt = ''
+                self.lv1_system_prompt = ''
+        except Exception as e:
+            logger.warning(f'Failed to load {self.version} classification prompts: {e}')
+            self.lv0_system_prompt = ''
+            self.lv1_system_prompt = ''
 
     def classify_question(self, question: str) -> dict:
         """Classify the question and return a dictionary with the results."""
         question_type = {'lv0_object': None, 'lv1_concern': None}
         # classify the question, by 'Object'
-        qc_resp = self.classifier_lv0(question)
+        qc_resp = self._classifier_lv0(question)
         logger.info(f'Question Classification, object: {qc_resp}')
         question_type['lv0_object'] = qc_resp
         # classify the question, by 'Concern'
-        qc_resp = self.classifier_lv1(question)
+        qc_resp = self._classifier_lv1(question)
         logger.info(f'Question Classification, concern: {qc_resp}')
         question_type['lv1_concern'] = qc_resp
         return question_type
 
-    def classifier_lv0(self, question: str) -> str:
+    def _classifier_lv0(self, question: str) -> str:
         """Classify the user question into several categories."""
         if self.version == 'f3':
             resp = self.model.chat(self.lv0_system_prompt, question)
@@ -45,7 +50,7 @@ class QuestionClassifier:
             resp = '3'  # default to 3
         return resp
 
-    def classifier_lv1(self, question: str) -> str:
+    def _classifier_lv1(self, question: str) -> str:
         """Classify the user question into several categories."""
         if self.version == 'f3':
             resp = self.model.chat(self.lv1_system_prompt, question)
@@ -65,4 +70,4 @@ class QuestionClassifier:
                 question_struct['lv1_concern'] = resp_dict.get('lv1_concern', None)
         logger.info(f'Parsed question structure: {question_struct}')
         return question_struct
-    
+

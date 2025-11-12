@@ -50,7 +50,6 @@ class CoPilotService:
 
     def get_or_create_session(self, user_id, conv_id):
         """Retrieve or create a copilot_conversation for the given userId and convId, reusing its LLMSession.
-
         A new LLMSession is created ONLY when the conversation is first seen; subsequent requests reuse
         the existing session to avoid repeated client/session setup overhead. This helps reduce per-request
         latency (~hundreds of ms) previously incurred by constructing new OpenAI/Azure clients.

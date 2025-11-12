@@ -47,12 +47,10 @@ class CoPilotTurn:
         set_thread_llm_session(self.llm_session)
 
         # get from message list
-
         this_inquiry = messages_list[-1]['content']
         last_inquiry = messages_list[-3]['content'] if len(messages_list) > 2 else None
 
-        # debug only
-        
+        # parse (classify and contextualize) the question
         if self._version == 'f4':
             push_frontend_event('<span class="text-gray-400 italic">🧠 Copilot is understanding your request...</span><br/>', replace=False)
             question_type = self.classifier.parse_question(this_inquiry, last_inquiry)
