@@ -32,7 +32,7 @@ class AlertFetcher:
         end_time = datetime.fromtimestamp(end_time_stamp)
         time_offset_delta = parse_duration(time_offset)
         start_time = end_time - time_offset_delta
-        records = self.client.query_alerts(start_time=start_time, end_time=end_time, nodes=nodes)
+        records = self.client.query_alerts(start_time=start_time, end_time=end_time, nodes=nodes, severity="error")
         logger.info(f"Fetched {len(records)} alert logs from Kusto.")
         return records if records else None
 
@@ -85,7 +85,7 @@ class AlertFetcher:
         
     def get_node_alert_records(self, end_time_stamp, time_offset, tolerent_duration="15m", endpoint="wcu", nodes=None):
         """Get processed alert records for nodes"""
-        print(f"Fetching alerts from Kusto for nodes: {nodes} with time offset: {time_offset} and end time: {end_time_stamp}")
+        logger.info(f"Fetching alerts from Kusto for nodes: {nodes} with time offset: {time_offset} and end time: {end_time_stamp}")
         alerts_data = self.fetch_logs(end_time_stamp, time_offset, nodes=nodes)
         if alerts_data is None:
             return None
@@ -96,19 +96,19 @@ class AlertFetcher:
         """Find alerts for a specific node in a time period"""
         start_time = convert_timestamp(start_time_stamp, format="datetime")
         end_time = convert_timestamp(end_time_stamp, format="datetime")
-        if isinstance(alerts, list):
-            alerts = pd.DataFrame(alerts)
-        if start_time >= end_time:
-            return pd.DataFrame()
         logger.info(f"Finding alerts for node {node} between {start_time} and {end_time}"
                     )
-        logger.info(alerts.head())
-        if alerts.empty:
+        if isinstance(alerts, list):
+            alerts = pd.DataFrame(alerts)
+        if start_time >= end_time or alerts is None or alerts.empty:
             logger.info(f"No alerts found for node {node} in the specified time range.")
             return pd.DataFrame()
         alerts =  alerts[(alerts['timestamp'] >= start_time)
                      & (alerts['timestamp'] <= end_time) &
                      (alerts['node_name'] == node)]
+        if len(alerts) > 0:
+            logger.info(f"Found {len(alerts)} alerts for node {node} in the specified time range.")
+            logger.info(alerts.to_csv(index=False))
         return alerts
 
 class AlertMapper:

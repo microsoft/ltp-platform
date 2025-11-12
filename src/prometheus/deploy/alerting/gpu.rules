@@ -34,7 +34,7 @@ groups:
         expr: rocmsmi_status{error!="ok"} > 0 
         for: 5m
         labels:
-          severity: fatal
+          severity: error
         annotations:
           summary: "smi failed in node_name: {{$labels.node_name}} instance: {{$labels.instance}}, error is: {{$labels.error}}"
       
@@ -42,7 +42,7 @@ groups:
         expr: system_dmesg_status{error!="ok",node_name!~"aks.*"} > 0 
         keep_firing_for: 5m
         labels:
-          severity: fatal
+          severity: error
         annotations:
           summary: "Found temperary GPU error in node_name: {{$labels.node_name}} instance: {{$labels.instance}}, error is: {{$labels.error}}"
 
@@ -50,7 +50,7 @@ groups:
         expr: nvidiasmi_ecc_error_count{type="double"} > 0 or rocmsmi_ecc_error_count{type="double"} > 0
         for: 5m
         labels:
-          severity: fatal
+          severity: error
         annotations:
           summary: "GPU from node_name: {{$labels.node_name}} instance: {{$labels.instance}} minor number {{$labels.minor_number}} has {{$labels.type}} ecc error, count {{$value}}"
 
@@ -58,7 +58,7 @@ groups:
         expr: nvidiasmi_memory_leak_count > 0
         for: 5m
         labels:
-          severity: error
+          severity: warn
         annotations:
           summary: "found nvidia memory leak from instance: {{$labels.instance}} minor number {{$labels.minor_number}}"
 
@@ -90,7 +90,7 @@ groups:
         expr: node:gpu_utilization:count != on (instance) configured_gpu_count
         for: 5m
         labels:
-          severity: fatal
+          severity: error
         annotations:
           summary: "found gpu count changes in instance: {{$labels.instance}}"
 
@@ -106,7 +106,7 @@ groups:
         expr: task_ib_port_physical_state < 0
         for: 1m
         labels:
-          severity: fatal
+          severity: error
         annotations:
           summary: "Abnormal IB port detected on node: {{$labels.node_name}}, instance: {{$labels.instance}}, state: {{$value}}"
 
@@ -114,7 +114,7 @@ groups:
         expr: count_over_time((task_ib_port_physical_state == 0)[10m:1m]) > 8 or count_over_time(count_over_time((task_ib_port_physical_state == 0)[10m:1m])[30m:10m]) > 1
         for: 1m
         labels:
-          severity: fatal
+          severity: error
         annotations:
           summary: "Frequent IB link flapping on node: {{$labels.node_name}}, instance: {{$labels.instance}} — flap count: {{$value}} in last 10 minutes"
 
@@ -122,6 +122,6 @@ groups:
         expr: task_ib_port_physical_state == 0
         keep_firing_for: 1m
         labels:
-          severity: warn
+          severity: error
         annotations:
           summary: "IB port temporarily down on node: {{$labels.node_name}}, instance: {{$labels.instance}}, state: {{$value}}"
