@@ -63,19 +63,26 @@ class CoPilotService:
                 self.sessions[session_key] = CoPilotConversation(LLMSession())
             return self.sessions[session_key]
 
+    def _extract_session_info(self, data):
+        """Extract and validate user_id and conv_id from request data."""
+        if not data or 'data' not in data or 'messageInfo' not in data['data']:
+            raise KeyError("Missing required fields: data.messageInfo")
+        
+        message_info = data['data']['messageInfo']
+        user_id = message_info.get('userId')
+        conv_id = message_info.get('convId')
+        
+        if not user_id or not conv_id:
+            raise ValueError("Missing required fields: userId or convId")
+        
+        return user_id, conv_id
+
     def instance_operation(self):
         """POST endpoint to handle copilot operations."""
         logger.info("Received request at /copilot/api/operation")
         try:
             data = request.get_json()
-            # Validate required keys
-            if not data or 'data' not in data or 'messageInfo' not in data['data']:
-                return jsonify({"status": "error", "message": "Missing required fields: data.messageInfo"}), 400
-            message_info = data['data']['messageInfo']
-            user_id = message_info.get('userId')
-            conv_id = message_info.get('convId')
-            if not user_id or not conv_id:
-                return jsonify({"status": "error", "message": "Missing required fields: userId or convId"}), 400
+            user_id, conv_id = self._extract_session_info(data)
             copilot_conversation = self.get_or_create_session(user_id, conv_id)
             
             in_parameters = copilot_conversation.build_in_parameters(data)
@@ -85,6 +92,8 @@ class CoPilotService:
                 "data": out_parameters.__dict__
             }
             return jsonify(response), 200
+        except (KeyError, ValueError) as e:
+            return jsonify({"status": "error", "message": str(e)}), 400
         except Exception as e:
             logger.info(f"Error handling copilot/api/operation: {e}")
             return jsonify({"status": "error", "message": str(e)}), 500
@@ -107,15 +116,14 @@ class CoPilotService:
         
         try:
             data = request.get_json()
-            user_id = data['data']['messageInfo']['userId']
-            conv_id = data['data']['messageInfo']['convId']
+            user_id, conv_id = self._extract_session_info(data)
             copilot_conversation = self.get_or_create_session(user_id, conv_id)
             llm_session = copilot_conversation.llm_session
             # Attach streaming callback to existing session (no new session creation)
             llm_session.set_instance_stream_callback(on_chunk)
-        except KeyError as e:
-            logger.error(f"Missing key in JSON body for stream_operation: {e}")
-            return jsonify({"status": "error", "message": f"Missing key: {e}"}), 400
+        except (KeyError, ValueError) as e:
+            logger.error(f"Missing or invalid fields in JSON body for stream_operation: {e}")
+            return jsonify({"status": "error", "message": str(e)}), 400
         except Exception as e:
             logger.error(f"Failed to parse JSON body for stream_operation: {e}")
             return jsonify({"status": "error", "message": "invalid json"}), 400
