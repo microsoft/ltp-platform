@@ -279,7 +279,7 @@ class NodeAvailabilityMonitor:
                 return 
             # fetch alerts for the node
             alerts = self.alert_fetcher.get_node_alert_records(
-                end_time, f"{time_offset}s", endpoint=self.endpoint, nodes=[node]
+                end_time, f"{time_offset}s", nodes=[node], severity="error"
             )
 
             sorted_changes = sorted(changes.items(), key=lambda x: x[0])

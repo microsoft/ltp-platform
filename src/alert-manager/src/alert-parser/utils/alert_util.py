@@ -27,12 +27,16 @@ class AlertFetcher:
         self.endpoint = os.getenv("CLUSTER_ID")
         self.client = create_alert_client(endpoint=self.endpoint)
 
-    def fetch_logs(self, end_time_stamp, time_offset, nodes=None):
+    def fetch_logs(self, end_time_stamp, time_offset, nodes=None, severity=None):
         """Fetch raw alert logs from Kusto"""
         end_time = datetime.fromtimestamp(end_time_stamp)
         time_offset_delta = parse_duration(time_offset)
         start_time = end_time - time_offset_delta
-        records = self.client.query_alerts(start_time=start_time, end_time=end_time, nodes=nodes, severity="error")
+        records = []
+        if severity is None:
+            records = self.client.query_alerts(start_time=start_time, end_time=end_time, nodes=nodes, endpoint=self.endpoint)
+        else:
+            records = self.client.query_alerts(start_time=start_time, end_time=end_time, nodes=nodes, severity=severity, endpoint=self.endpoint)
         logger.info(f"Fetched {len(records)} alert logs from Kusto.")
         return records if records else None
 
@@ -83,10 +87,10 @@ class AlertFetcher:
         
         return result_df
         
-    def get_node_alert_records(self, end_time_stamp, time_offset, tolerent_duration="15m", endpoint="wcu", nodes=None):
+    def get_node_alert_records(self, end_time_stamp, time_offset, nodes=None, severity=None):
         """Get processed alert records for nodes"""
         logger.info(f"Fetching alerts from Kusto for nodes: {nodes} with time offset: {time_offset} and end time: {end_time_stamp}")
-        alerts_data = self.fetch_logs(end_time_stamp, time_offset, nodes=nodes)
+        alerts_data = self.fetch_logs(end_time_stamp, time_offset, nodes=nodes, severity=severity)
         if alerts_data is None:
             return None
 
