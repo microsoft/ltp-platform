@@ -44,7 +44,7 @@ def gen_summary(
             logger.info('Bypass summary: False')
             # try stream chat, if fail, fall back to chat
             if llm_session is None:
-                raise ValueError("llm_session is required when skip_summary is False")
+                raise ValueError("llm_session is required for summary generation")
             summary = llm_session.try_stream_fallback_chat(sys_prompt, user_prompt)
         else:
             logger.info('Bypass summary: True')
