@@ -285,7 +285,7 @@ class LLMSession:
                 last = ''
                 for snapshot in self.stream_chat(system_prompt, user_prompt):
                     if snapshot:
-                        last = snapshot
+                        last += snapshot
                 return last
             else:
                 logger.info('LLMSession: non-streaming via try_stream_fallback_chat')
