@@ -92,7 +92,14 @@ export default function ChatBox() {
         let sepIndex;
         while ((sepIndex = buffer.indexOf('\n\n')) !== -1) {
           const rawEvent = buffer.slice(0, sepIndex);
-          buffer = buffer.slice(sepIndex + 2);
+          const newBuffer = buffer.slice(sepIndex + 2);
+          
+          // Safety check: ensure buffer is actually being modified to prevent infinite loops
+          if (newBuffer.length >= buffer.length) {
+            console.warn('Buffer not decreasing, breaking to prevent infinite loop');
+            break;
+          }
+          buffer = newBuffer;
 
           // Extract data: lines and join with newline to preserve original formatting
           const lines = rawEvent.split(/\n/);
