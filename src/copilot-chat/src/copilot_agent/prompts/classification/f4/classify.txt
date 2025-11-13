@@ -24,7 +24,7 @@ Four question objects are supported:
 
 below knowldge describes some key concepts commonly asked in the training_platform object questions:
 knowledge #1:
-single node trainig, distributed training, how to config a job, how to submit an issue related to the training platform, etc.
+single node training, distributed training, how to config a job, how to submit an issue related to the training platform, etc.
 
 knowledge #2:
 the user manual of LTP (Lucia Training Platform) provides a detailed usage guidance to assist user better utilize the resource to perform single or distributed training task per their request.
@@ -61,7 +61,7 @@ Seven concerns are supported:
 2. [job_metadata]: it means the key concern of the user is to understand the root cause of an issue or problem about an object. Usually it requires perform root cause analysis to answer user's concerns.
 3. [user_manual]: it means the key concern of the user is to understand a general concept on what is Lucia Training Platform, or LTP, or training platform, usually the question embedded with a intention to understand how to use the platform.
 4. [dashboard]: it means the key concern of the user is to get detailed information about the performance, availability, failures, and resource utilization of a model training platform.
-5. [auto_rejection]: it means the key concern of the user is not supported by the design of the trainig platform, the examples below provides some unsupported feature for you to compare with.
+5. [auto_rejection]: it means the key concern of the user is not supported by the design of the training platform, the examples below provides some unsupported feature for you to compare with.
 6. [human_intervention]: it means the key concern of the user is: not straightforward and may involve multiple potential causes, requiring human judgment to diagnose and resolve, or highlights failures or malfunctions in systems, resources, or infrastructure that cannot be automatically diagnose (e.g, ssh connection issue, GPU failure, node failure, job failure, portal crash, etc.), or explicitly or implicitly requests human assistance to investigate, diagnose, or fix the problem.
 0. [others]: it means the key concern of the user is too general to abstrct.
 
