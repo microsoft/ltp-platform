@@ -12,6 +12,9 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from ..utils.logger import logger
 
+# ASSUMPTION: This system assumes that environment variables are static after the
+# initial configuration load. If environment variables are modified at runtime,
+# the cached configuration will become stale and will NOT reflect the changes.
 class LLMSession:
     """A thread-safe class for interacting with the Azure OpenAI model."""
     _global_stream_callback = None  # Class-level attribute for backward compatibility

@@ -10,6 +10,7 @@ This document describes the configuration and deployment structure for the Copil
 - [Directory Structure](#directory-structure)
 - [Troubleshooting](#troubleshooting)
 - [Sample Questions](#sample-questions)
+- [Developer Notes](#developer-notes)
 
 ## Overview
 
@@ -234,3 +235,14 @@ These questions focus on evaluating and monitoring cluster availability and reli
 | f3c4idx33 | What is the weekly failure ratio in week 30? | dashboard |
 | f3c4idx34 | How many failures are attribute to hardware for endpoint pai-scu on July 30th? | dashboard |
 | f3c4idx35 | What are the cluster names in pai-wcu endpoint? | dashboard |
+
+## Developer Notes
+
+### Behavior in Minimal Mode
+
+- Minimal Mode is enabled by setting environment variable `AGENT_MINIMAL="on"`
+- In minimal mode, there will not be any database query or ingestion operations
+
+### LLMSession
+
+- ASSUMPTION: This system assumes that environment variables are static after the initial configuration load. If environment variables are modified at runtime, the cached configuration will become stale and will NOT reflect the changes.
