@@ -30,6 +30,7 @@ class CoPilotService:
             copilot: Instance of CoPilot business logic class.
         """
         self.sessions = {}
+        self.sessions_lock = threading.Lock()  # Add lock for thread-safe access
         self.host = os.getenv('AGENT_HOST', '127.0.0.1')
         self.app = Flask(__name__)
         self.app.add_url_rule('/copilot/api/status', view_func=self.status, methods=['GET'])
@@ -55,9 +56,12 @@ class CoPilotService:
         latency (~hundreds of ms) previously incurred by constructing new OpenAI/Azure clients.
         """
         session_key = f"{user_id}_{conv_id}"
-        if session_key not in self.sessions:
-            self.sessions[session_key] = CoPilotConversation(LLMSession())
-        return self.sessions[session_key]
+        
+        # Use lock to ensure thread-safe access to sessions dictionary
+        with self.sessions_lock:
+            if session_key not in self.sessions:
+                self.sessions[session_key] = CoPilotConversation(LLMSession())
+            return self.sessions[session_key]
 
     def instance_operation(self):
         """POST endpoint to handle copilot operations."""
