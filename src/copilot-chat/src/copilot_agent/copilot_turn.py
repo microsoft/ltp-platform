@@ -53,10 +53,24 @@ class CoPilotTurn:
         self.processor = LTPQueryEngine(self.llm_session)
         self.smart_help = SmartHelp(self.help_msg, self.llm_session)
 
+    def _update_component_sessions(self, llm_session: LLMSession) -> None:
+        """Update llm_session for all components to ensure thread-safe operation.
+        
+        This is necessary when the same CoPilotTurn instance is used across
+        multiple threads with different LLMSession instances.
+        """
+        self.llm_session = llm_session
+        self.classifier.llm_session = llm_session
+        self.contextualizer.llm_session = llm_session
+        self.processor.llm_session = llm_session
+        self.smart_help.llm_session = llm_session
+
     # entry function, processes the list of messages and returns a dictionary with the results
     def process_turn(self, messages_list: list, skip_summary: bool = False, debugging: bool = False) -> dict:
         """Process the list of messages and return a dictionary with the results."""
-
+        # Ensure all components use the current thread's LLM session
+        self._update_component_sessions(self.llm_session)
+        
         # Set thread-local session for push_frontend functions to use correct callback
         set_thread_llm_session(self.llm_session)
 
@@ -82,7 +96,6 @@ class CoPilotTurn:
 
         # verion f3, f4, resolves objective 8 (Lucia Training Platform)
         push_frontend_event('<span class="text-gray-400 italic">⏳ Copilot is processing your inquiry...</span><br/>', replace=False)
-        self.smart_help.llm_session = self.llm_session  # ensure processor uses the current llm_session
         if self._version in ['f3', 'f4']:
             # If classification failed, treat as unsupported.
             if obj is None or con is None:
@@ -112,9 +125,8 @@ class CoPilotTurn:
 
     def query_ltp(self, question: str, con: str, skip_summary: bool) -> tuple[str, dict]:
         """Query about Lucia Training Platform."""
-        self.processor.llm_session = self.llm_session  # ensure processor uses the current llm_session
         # Mapping concern codes to handler functions  
-        # Updated to pass llm_session to prevent singleton blocking
+        # Pass llm_session to methods to ensure correct session usage
         handlers = {
             self.CONCERN_METRICS: lambda: self.processor.query_metrics(question, self.help_msg, skip_summary),
             self.CONCERN_METADATA: lambda: self.processor.query_metadata(question, self.help_msg, skip_summary),
