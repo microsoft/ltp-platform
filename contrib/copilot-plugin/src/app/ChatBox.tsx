@@ -67,6 +67,8 @@ export default function ChatBox() {
       
       // Create assistant placeholder and attach the same messageInfo (turnId) so feedback maps to this response
       useChatStore.getState().addChat({ role: "assistant", message: "", timestamp: new Date(), messageInfo });
+      let assistantMessageCreated = true;
+      
       const response = await fetch(REMOTE_SERVER_URL, {
         method: "POST",
         headers: {
@@ -171,6 +173,15 @@ export default function ChatBox() {
 
       // After the streaming loop, do not alter the assembled markdown so newlines are preserved
     } catch (err) {
+      // Remove the empty placeholder assistant message on error
+      if (assistantMessageCreated) {
+        const store = useChatStore.getState();
+        const msgs = store.chatMsgs;
+        const lastMsg = msgs[msgs.length - 1];
+        if (lastMsg && lastMsg.role === 'assistant' && (lastMsg.message === '' || !lastMsg.message)) {
+          store.removeLastMessage();
+        }
+      }
       toast.error("Failed to get response from remote server");
     }
     setLoading(false);
