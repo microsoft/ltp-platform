@@ -64,8 +64,14 @@ class CoPilotService:
         logger.info("Received request at /copilot/api/operation")
         try:
             data = request.get_json()
-            user_id = data['data']['messageInfo']['userId']
-            conv_id = data['data']['messageInfo']['convId']
+            # Validate required keys
+            if not data or 'data' not in data or 'messageInfo' not in data['data']:
+                return jsonify({"status": "error", "message": "Missing required fields: data.messageInfo"}), 400
+            message_info = data['data']['messageInfo']
+            user_id = message_info.get('userId')
+            conv_id = message_info.get('convId')
+            if not user_id or not conv_id:
+                return jsonify({"status": "error", "message": "Missing required fields: userId or convId"}), 400
             copilot_conversation = self.get_or_create_session(user_id, conv_id)
             
             in_parameters = copilot_conversation.build_in_parameters(data)
