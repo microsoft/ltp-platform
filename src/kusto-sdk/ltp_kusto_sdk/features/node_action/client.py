@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any, List
 from ...base import KustoBaseClient
 from ltp_storage.data_schema.node_action import NodeAction
-from ...utils.time_util import convert_timestamp
+from ltp_storage.utils.time_util import convert_timestamp
 from ...utils.node_util import Node
 
 # Constants for environment variables and defaults

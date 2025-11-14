@@ -108,7 +108,7 @@ class AlertFetcher:
             logger.info(f"No alerts found for node {node} in the specified time range.")
             return pd.DataFrame()
         # Ensure timestamp column is datetime for comparison
-        if 'timestamp' in alerts.columns:
+        if 'timestamp' in alerts.columns and isinstance(alerts['timestamp'], str) and len(alerts['timestamp']) > 0:
             alerts['timestamp'] = pd.to_datetime(alerts['timestamp'], errors='coerce')
         alerts =  alerts[(alerts['timestamp'] >= start_time)
                      & (alerts['timestamp'] <= end_time) &

@@ -12,7 +12,7 @@ import pandas as pd
 
 from ...utils.node_util import Node
 from ltp_storage.data_schema.node_status import NodeStatusRecord, NodeStatus, get_transition_action
-from ...utils.time_util import convert_timestamp
+from ltp_storage.utils.time_util import convert_timestamp
 from ...base import KustoBaseClient
 
 # Constants for environment variables and defaults
