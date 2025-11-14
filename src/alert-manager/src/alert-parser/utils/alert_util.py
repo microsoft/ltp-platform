@@ -112,7 +112,7 @@ class AlertFetcher:
                      (alerts['node_name'] == node)]
         if len(alerts) > 0:
             logger.info(f"Found {len(alerts)} alerts for node {node} in the specified time range.")
-            logger.info(alerts.to_csv(index=False))
+            logger.info(alerts.head().to_csv(index=False))
         return alerts
 
 class AlertMapper:
