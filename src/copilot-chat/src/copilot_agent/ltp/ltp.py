@@ -259,6 +259,7 @@ class LTPQueryEngine:
         return job_metadatas
 
     @staticmethod
+    # This is temporary solution and must be replaced with a more robust job metadata list reduce method
     def _get_brief_job_metadata(resp):
         """Get brief job metadata."""
         if isinstance(resp, dict) and 'data' in resp:
