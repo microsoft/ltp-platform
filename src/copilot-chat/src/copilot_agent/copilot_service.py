@@ -143,12 +143,24 @@ class CoPilotService:
                 q.put(json.dumps({'error': str(e)}))
             finally:
                 # Clear streaming callback to avoid affecting subsequent non-stream requests
+                # Wrap in separate try-except to ensure it doesn't prevent stream termination
                 try:
                     llm_session.clear_instance_stream_callback()
-                except Exception:
-                    logger.debug('Failed to clear instance stream callback')
-                # signal end of stream
-                q.put(None)
+                except Exception as e:
+                    logger.error(f'Failed to clear instance stream callback: {e}')
+                
+                # Always signal end of stream, even if callback cleanup failed
+                # Wrap in separate try-except to ensure this critical operation always happens
+                try:
+                    q.put(None)
+                except Exception as e:
+                    logger.error(f'Failed to signal end of stream: {e}')
+                    # If we can't put None, the stream will hang, so this is critical
+                    # Try one more time with a timeout to avoid indefinite blocking
+                    try:
+                        q.put(None, timeout=1)
+                    except Exception:
+                        logger.critical('Stream termination failed - client may hang')
 
         def event_stream():
             # start worker thread
