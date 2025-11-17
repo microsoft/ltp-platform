@@ -67,7 +67,7 @@ class AlertClient(KustoBaseClient):
             f"ContainerLogV2 "
             f'| where ContainerName contains "alerthandler" '
             f'| where LogMessage contains "alert-handler received alerts" and '
-            f'LogMessage !contains "NodeFilesystemUsage" and LogMessage !contains "NodeGpuCountChanged" and LogMessage !contains "NodeUnschedulable" '
+            f'LogMessage !contains "NodeUnschedulable" '
             f"| where TimeGenerated between(datetime({start_time})..datetime({end_time})) "
             f"| project TimeGenerated, PodName, LogMessage "
             f"| sort by TimeGenerated asc")
@@ -79,10 +79,12 @@ class AlertClient(KustoBaseClient):
             query += f' | where LogMessage contains "Alertname: {alertname}"'
         if severity:
             query += f' | where LogMessage contains "Severity: {severity}"'
-        
+        if nodes is not None and len(nodes) > 0:
+            nodes_filter = " or ".join([f'LogMessage contains "{node}"' for node in nodes])
+            query += f' | where {nodes_filter}'
+        logger.info(f"Executing Kusto query to fetch alert logs: {query}")
         
         # Execute query and parse results
-        logger.info(f"Executing query: {query}")
         raw_results = self.execute_query(query)
         
         if not raw_results:

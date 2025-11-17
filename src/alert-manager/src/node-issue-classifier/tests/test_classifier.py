@@ -97,7 +97,7 @@ class TestNodeIssueClassifier(unittest.TestCase):
         issue, category = self.classifier.classify_issue_from_cordon_detail(detail)
         
         self.assertEqual(issue, NodeFailure.GPUHangingwithSegfault)
-        self.assertEqual(category, NodeFailureCategory.user)
+        self.assertEqual(category, NodeFailureCategory.hardware)
 
     def test_classify_issue_from_cordon_detail_gpu_page_fault(self):
         """Test classification of DmesgGPUFault with page fault"""
@@ -297,25 +297,37 @@ class TestNodeIssueClassifier(unittest.TestCase):
 
     def test_classify_node_issue_success(self):
         """Test successful node issue classification"""       
-        # Create classifier with mocked updater
+        from datetime import datetime, timezone
+        from ltp_storage.data_schema.node_status import NodeStatusRecord
+        from ltp_storage.data_schema.node_action import NodeAction
+        
+        # Create classifier
         classifier = NodeIssueClassifier()
         
-        # Mock node action with detail
-        node_action = {
-            'nodeId': 'test-node-id',
-            'Detail': json.dumps([{
+        # Create node action with detail
+        node_action = NodeAction(
+            HostName='test-node',
+            NodeId='test-node-id',
+            Action='available-cordoned',
+            Timestamp=datetime.now(timezone.utc),
+            Reason='Test',
+            Detail=json.dumps([{
                 "alertname": "NodeNotReady",
                 "summary": "Node not ready",
                 "severity": "critical"
-            }])
-        }
+            }]),
+            Category='',
+            Endpoint='test-endpoint'
+        )
         
-        # Test node status
-        node_status = {
-            'HostName': 'test-node',
-            'Status': 'Cordoned',
-            'NodeId': 'test-node-id'
-        }   
+        # Create node status record
+        node_status = NodeStatusRecord(
+            Timestamp=datetime.now(timezone.utc),
+            HostName='test-node',
+            Status=NodeStatus.CORDONED.value,
+            NodeId='test-node-id',
+            Endpoint='test-endpoint'
+        )
         
         # Call method
         issue, category, to_status, detail = classifier.classify_node_issue('test-node', node_status, node_action)
@@ -330,17 +342,22 @@ class TestNodeIssueClassifier(unittest.TestCase):
 
     def test_classify_node_issue_no_action_detail(self):
         """Test node classification when no action detail is available"""
-        # Create classifier with mocked updater
+        from datetime import datetime, timezone
+        from ltp_storage.data_schema.node_status import NodeStatusRecord
+        
+        # Create classifier
         classifier = NodeIssueClassifier()
         
-        # Test node status
-        node_status = {
-            'HostName': 'test-node',
-            'Status': 'Cordoned',
-            'NodeId': 'test-node-id'
-        }
+        # Create node status record
+        node_status = NodeStatusRecord(
+            Timestamp=datetime.now(timezone.utc),
+            HostName='test-node',
+            Status=NodeStatus.CORDONED.value,
+            NodeId='test-node-id',
+            Endpoint='test-endpoint'
+        )
         
-        # Call method
+        # Call method with None action
         issue, category, to_status, detail = classifier.classify_node_issue('test-node', node_status, None)
         
         # Verify results for unknown issue

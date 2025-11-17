@@ -196,8 +196,8 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["log-level"] | default(cluster_cfg["alert-manager"]["log-level"]) | default("INFO") }}
         - name: UPDATE_INTERVAL
           value: "{{ cluster_cfg["alert-manager"]["alert-parser"]["update-interval"] | default("10") }}"
-        - name: REST_SERVER_URI
-          value: {{ cluster_cfg["alert-manager"]["alert-parser"]["uri"] | default(cluster_cfg["alert-manager"]["prometheus-uri"]) }}
+        - name: PROMETHEUS_SERVER_URI
+          value: {{ cluster_cfg["prometheus"]["url"] }}
         - name: PAI_TOKEN
           value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
 {% if cluster_cfg["alert-manager"]["alert-parser"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "kusto" %}
@@ -217,11 +217,11 @@ spec:
           value: "{{ cluster_cfg['alert-manager']['alert-parser'].get('alert-kusto-database', 'DefaultWorkspace-id-westus2') }}"
         - name: LTP_KUSTO_VM_INFO_TABLE_NAME
           value: {{ cluster_cfg["alert-manager"]["alert-parser"].get("kusto-vm-table", cluster_cfg["alert-manager"]["kusto"].get("kusto-vm-table", "")) }}
-{% endif %}
         - name: LTP_VMSS_IDS
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["vmss_ids"] | default(cluster_cfg["alert-manager"]["vmss_ids"]) }}
         - name: AZURE_CLIENT_ID
           value: {{ cluster_cfg["alert-manager"]["alert-parser"]["vmss_client_id"] | default(cluster_cfg["alert-manager"]["vmss_client_id"]) }}
+{% endif %}
         # Storage backend selection
         - name: LTP_STORAGE_BACKEND_DEFAULT
           value: "{{ cluster_cfg['alert-manager']['alert-parser'].get('storage-backend', cluster_cfg['alert-manager'].get('storage-backend', 'kusto')) }}"
@@ -332,7 +332,7 @@ spec:
         - name: LOG_LEVEL
           value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["log-level"] | default("INFO") }}
         - name: PROMETHEUS_SERVER_URI
-          value: {{ cluster_cfg["alert-manager"]["node-failure-detection"]["monitor"]["prometheus-server-uri"] }}
+          value: {{ cluster_cfg["prometheus"]["url"] }}
         - name: REST_SERVER_URI
           value: {{ cluster_cfg["rest-server"]["uri"] }}
         - name: PAI_TOKEN
@@ -405,7 +405,7 @@ spec:
         - name: REST_SERVER_URI
           value: {{ cluster_cfg["rest-server"]["uri"] }}
         - name: PROMETHEUS_SERVER_URI
-          value: {{ cluster_cfg["alert-manager"]["job-data-recorder"]["prometheus-uri"] | default(cluster_cfg["alert-manager"]["prometheus-uri"]) }}
+          value: {{ cluster_cfg["prometheus"]["url"] }}
         - name: PAI_TOKEN
           value: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
 {% if cluster_cfg["alert-manager"]["job-data-recorder"].get("storage-backend", cluster_cfg["alert-manager"].get("storage-backend", "kusto")) == "kusto" %}

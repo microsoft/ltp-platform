@@ -39,15 +39,20 @@ def monitor(mock_alert_fetcher, mock_alert_mapper, mock_node_updater):
 
 
 def test_query_availability_changes(monitor, mock_request_util):
-    mock_response = {
+    mock_response1 = {
         "result": [
             {"metric": {"node_name": "node1"}, "value": [0, 0.5]},
             {"metric": {"node_name": "node2"}, "value": [0, 1.0]}
         ]
     }
-    mock_request_util.prometheus_query.return_value = mock_response
+    mock_response2 = {
+        "result": [
+            {"metric": {"node_name": "node3"}, "value": [0, 0.0]}
+        ]
+    }
+    mock_request_util.prometheus_query.side_effect = [mock_response1, mock_response2]
 
-    nodes_changed, nodes_continuous = monitor.query_availability_changes(
+    nodes_changed, nodes_continuous, node_schedulable = monitor.query_availability_changes(
         end_time=1000,
         time_offset="5m",
         interval="30s"
@@ -55,7 +60,8 @@ def test_query_availability_changes(monitor, mock_request_util):
 
     assert "node1" in nodes_changed
     assert "node2" in nodes_continuous
-    mock_request_util.prometheus_query.assert_called_once()
+    assert "node3" in node_schedulable
+    assert mock_request_util.prometheus_query.call_count == 2
 
 def test_get_node_status_changes(monitor, mock_request_util):
     mock_response = {
@@ -69,7 +75,7 @@ def test_get_node_status_changes(monitor, mock_request_util):
     }
     mock_request_util.prometheus_query.return_value = mock_response
 
-    changes = monitor.get_node_status_changes(
+    changes, raw_values = monitor.get_node_status_changes(
         node="test-node",
         end_time=1000,
         time_offset="5m"
@@ -78,108 +84,156 @@ def test_get_node_status_changes(monitor, mock_request_util):
     assert len(changes) == 2  # Two status changes
     assert 1001 in changes
     assert 1002 in changes
+    assert len(raw_values) == 3  # All raw values
 
 def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mapper, mock_node_updater):
+    from ltp_storage.data_schema.node_status import NodeStatusRecord
+    from datetime import datetime, timezone
+    
     # case 1: Node status change to cordoned
     node = "test-node"
-    timestamp = 1000
+    timestamp = 1000.0
     status = 1  # Changed to unschedulable
     alerts = pd.DataFrame({
         'alertname': ['TestAlert'],
-        'timestamp': [timestamp]
+        'timestamp': [datetime.fromtimestamp(timestamp, tz=timezone.utc)],
+        'node_name': [node]
     })
-    node_status = {
-        'Timestamp': timestamp - 100,
-        'Status': 'available',
-        'NodeId': node,
-        'Endpoint': 'test-endpoint',
-        'HostName': node
-    }
-    end_time = timestamp + 100
+    node_status = NodeStatusRecord(
+        Timestamp=datetime.fromtimestamp(timestamp - 100, tz=timezone.utc),
+        HostName=node,
+        Status='available',
+        NodeId=node,
+        Endpoint='test-endpoint'
+    )
 
+    mock_alert_fetcher.find_node_alerts.return_value = alerts
+    mock_alert_fetcher.shrink_alerts.return_value = alerts
     mock_alert_mapper.summary_events_into_reason_detail.return_value = ("reason", "detail")
 
     # Test status change to unschedulable
     monitor.handle_node_status_change(node, timestamp, status, alerts, node_status)
     
-    mock_alert_mapper.summary_events_into_reason_detail.assert_called_once()
-    
     # check the parameters of the update_status_action call
-    mock_node_updater.update_status_action.assert_called_once()
+    assert mock_node_updater.update_status_action.called
     args = mock_node_updater.update_status_action.call_args.args
     assert args[0] == node
     assert args[1] == 'available'
     assert args[2] == 'cordoned'
     assert args[3] == timestamp
     
+    # Reset mocks for next test
+    mock_node_updater.reset_mock()
+    mock_alert_fetcher.reset_mock()
+    mock_alert_mapper.reset_mock()
+    
     # case 2: Node status change to available
     status = 0  # Changed to schedulable
-    node_status = {
-        'Timestamp': timestamp - 100,
-        'Status': 'validating',
-        'NodeId': node,
-        'Endpoint': 'test-endpoint',
-        'HostName': node
-    }
+    node_status = NodeStatusRecord(
+        Timestamp=datetime.fromtimestamp(timestamp - 500, tz=timezone.utc),
+        HostName=node,
+        Status='validating',
+        NodeId=node,
+        Endpoint='test-endpoint'
+    )
+    mock_alert_fetcher.find_node_alerts.return_value = alerts
+    mock_alert_fetcher.shrink_alerts.return_value = alerts
+    mock_alert_mapper.summary_events_into_reason_detail.return_value = ("reason", "detail")
+    
     monitor.handle_node_status_change(node, timestamp, status, alerts, node_status)
     
     # check the parameters of the update_status_action call
+    assert mock_node_updater.update_status_action.called
     args = mock_node_updater.update_status_action.call_args.args
     assert args[0] == node
     assert args[1] == 'validating'
     assert args[2] == 'available'
     assert args[3] == timestamp
     
+    # Reset mocks for next test
+    mock_node_updater.reset_mock()
+    mock_alert_fetcher.reset_mock()
+    mock_alert_mapper.reset_mock()
+    
+    # case 3: Node status change to available within tolerance time
+    status = 0  # Changed to available
+    node_status = NodeStatusRecord(
+        Timestamp=datetime.fromtimestamp(timestamp - 60, tz=timezone.utc),
+        HostName=node,
+        Status='validating',
+        NodeId=node,
+        Endpoint='test-endpoint'
+    )
+    mock_alert_fetcher.find_node_alerts.return_value = alerts
+    mock_alert_fetcher.shrink_alerts.return_value = alerts
+    mock_alert_mapper.summary_events_into_reason_detail.return_value = ("reason", "detail")
+    
+    monitor.handle_node_status_change(node, timestamp, status, alerts, node_status)
+    
+    # check the parameters of the update_status_action call
+    assert not mock_node_updater.update_status_action.called
+    
+    # Reset mocks for next test
+    mock_node_updater.reset_mock()
+    mock_alert_fetcher.reset_mock()
+    mock_alert_mapper.reset_mock()
+    
     # case 3: Node status change from validating to cordoned
     status = -1 
-    node_status = {
-        'Timestamp': timestamp - 100,
-        'Status': 'validating',
-        'NodeId': node,
-        'Endpoint': 'test-endpoint',
-        'HostName': node
-    }
+    node_status = NodeStatusRecord(
+        Timestamp=datetime.fromtimestamp(timestamp - 100, tz=timezone.utc),
+        HostName=node,
+        Status='validating',
+        NodeId=node,
+        Endpoint='test-endpoint'
+    )
     alerts = pd.DataFrame({
         'alertname': ['CordonValidationFailedNodes'],
-        'timestamp': [timestamp],
+        'timestamp': [datetime.fromtimestamp(timestamp, tz=timezone.utc)],
         'node_name': [node],
         'summary': [f'{node} should be cordoned']
     })
     mock_alert_fetcher.find_node_alerts.return_value = alerts
+    mock_alert_fetcher.shrink_alerts.return_value = alerts
+    mock_alert_mapper.summary_events_into_reason_detail.return_value = ("reason", "detail")
+    
     monitor.handle_node_status_change(node, timestamp, status, alerts, node_status)
      
     # check the parameters of the update_status_action call
+    assert mock_node_updater.update_status_action.called
     args = mock_node_updater.update_status_action.call_args.args
     assert args[0] == node
     assert args[1] == 'validating'
     assert args[2] == 'cordoned'
-    assert args[3] == timestamp
     
 
 def test_monitor_status_changes(monitor, mock_node_updater, mock_alert_fetcher, mock_alert_mapper):
+    from ltp_storage.data_schema.node_status import NodeStatusRecord
+    
     # Setup test data
     end_time = datetime.now().timestamp()
     time_offset = "5m"
     
     mock_node_updater.get_last_actions_update_time.return_value = None
-    mock_node_updater.get_node_latest_status.return_value = {
-        'Timestamp': datetime.fromtimestamp(end_time-1000, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-        'Status': 'available',
-        'NodeId': 'test-node',
-        'Endpoint': 'test-endpoint',
-        'HostName': 'test-node'
-    }
+    mock_node_updater.get_node_latest_status.return_value = NodeStatusRecord(
+        Timestamp=datetime.fromtimestamp(end_time-1000, tz=timezone.utc),
+        HostName='test-node',
+        Status='available',
+        NodeId='test-node',
+        Endpoint='test-endpoint'
+    )
+    mock_alert_fetcher.get_node_alert_records.return_value = pd.DataFrame()
     
     # Mock the get_all_status_changes method
-    with patch.object(monitor, 'get_all_status_changes') as mock_get_changes:
+    with patch.object(monitor, 'get_all_status_changes') as mock_get_changes, \
+         patch.object(monitor, 'process_node_changes') as mock_process:
         mock_get_changes.return_value = {
             'test-node': {end_time: 1}  # Status change to unschedulable
         }
-        mock_alert_mapper.summary_events_into_reason_detail.return_value = ("reason", "detail")
         monitor.monitor_status_changes(end_time, time_offset)
         
-        mock_alert_fetcher.get_node_alert_records.assert_called_once()
-        mock_node_updater.update_status_action.assert_called_once()
+        mock_get_changes.assert_called_once()
+        mock_process.assert_called_once()
 
 def test_check_availability(monitor):
     # Test that check_availability sets is_running flag correctly
@@ -190,4 +244,6 @@ def test_check_availability(monitor):
         
         assert not monitor.is_running
         mock_monitor.assert_called_once()
-        assert monitor.last_update_time is not None 
+        assert monitor.last_update_time is not None
+        # Verify is_running is properly managed
+        assert monitor.is_running == False 

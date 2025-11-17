@@ -14,7 +14,9 @@ import pytest
 # Add the parent directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
-from utils.alert_util import AlertParser, AlertFetcher, AlertMapper
+from ltp_storage.data_schema.alert_records import AlertParser
+from utils.alert_util import AlertFetcher, AlertMapper
+from ltp_storage.utils.time_util import convert_timestamp
 
 
 class TestAlertParser(unittest.TestCase):
@@ -91,11 +93,20 @@ class TestAlertFetcher(unittest.TestCase):
         self.test_data = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data/alert_data.csv'))
         
     def test_shrink_alerts(self):
-        # Create test alerts DataFrame
-        alerts = self.fetcher.process_alerts(self.test_data.to_dict(orient='records'))
+        # Parse log messages to create alerts DataFrame
+        alerts_list = []
+        for _, row in self.test_data.iterrows():
+            alert = AlertParser.generate_row(row['LogMessage'])
+            if alert:
+                alerts_list.append(alert)
+        alerts = pd.DataFrame(alerts_list)
+        
+        # Convert timestamp strings to datetime for processing
+        alerts['timestamp'] = pd.to_datetime(alerts['timestamp'])
+        
         test_node = 'mi300-00007n'
-        start_time = alerts['timestamp'].min()
-        end_time = alerts['timestamp'].max()
+        start_time = convert_timestamp(alerts['timestamp'].min(), format="timestamp")
+        end_time = convert_timestamp(alerts['timestamp'].max(), format="timestamp")
         node_alerts = self.fetcher.find_node_alerts(alerts, test_node, end_time, start_time)
         self.assertIsNotNone(node_alerts)
         self.assertGreater(len(node_alerts), 0)
@@ -109,12 +120,17 @@ class TestAlertFetcher(unittest.TestCase):
 
 @pytest.fixture(scope='module')
 def mock_kusto_client():
-    """Mock KustoBaseClient for testing purposes"""
-    with patch('utils.alert_util.KustoBaseClient') as mock:
-        # Configure the mock to return a specific DataFrame when execute_query is called
-        alerts = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data/alert_data.csv')).to_dict(orient='records')
+    """Mock alert client for testing purposes"""
+    with patch('utils.alert_util.create_alert_client') as mock:
+        # Parse log messages to create alert records
+        test_data = pd.read_csv(os.path.join(os.path.dirname(__file__), 'data/alert_data.csv'))
+        alerts_list = []
+        for _, row in test_data.iterrows():
+            alert = AlertParser.generate_row(row['LogMessage'])
+            if alert:
+                alerts_list.append(alert)
         mock_client = MagicMock()
-        mock_client.execute_query.return_value = alerts
+        mock_client.query_alerts.return_value = alerts_list
         mock.return_value = mock_client
         yield mock_client
 
