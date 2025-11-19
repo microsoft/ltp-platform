@@ -53,11 +53,16 @@ class DockerClient:
         execute_shell(shell_cmd)
 
 
-    def docker_image_build(self, image_name, dockerfile_path, build_path):
+    def docker_image_build(self, image_name, dockerfile_path, build_path, build_args=None):
         if self.build_nocache:
             cmd = "docker build --no-cache -t {0} -f {1} {2}".format(image_name, dockerfile_path, build_path)
         else:
             cmd = "docker build -t {0} -f {1} {2}".format(image_name, dockerfile_path, build_path)
+        
+        if build_args is not None:
+            for key, value in build_args.items():
+                cmd += " --build-arg {0}={1}".format(key, value)
+        
         execute_shell(cmd)
 
 
@@ -122,3 +127,4 @@ def load_yaml_config(config_path):
         cluster_data = yaml.safe_load(f)
 
     return cluster_data
+

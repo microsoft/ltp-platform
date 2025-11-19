@@ -140,7 +140,12 @@ class BuildCenter:
                     for inedge in self.graph.services[item].inedges:
                         build_worker.copy_dependency_folder(os.path.join(self.codeDir,inedge),
                         os.path.join(self.graph.services[item].path,self.dependencyDir+inedge))
-                    build_worker.build_single_component(self.graph.services[item], self.arg_config.imagelist)
+                    
+                    build_args = {
+                        'TAG': self.build_config['dockerRegistryInfo']['dockerTag'],
+                        'REGISTRY': f"{self.build_config['dockerRegistryInfo']['dockerRegistryDomain']}/{self.build_config['dockerRegistryInfo']['dockerNameSpace']}"
+                    }
+                    build_worker.build_single_component(self.graph.services[item], self.arg_config.imagelist, build_args=build_args)
             self.logger.info("Build all components succeed")
 
         except Exception as e:
@@ -178,3 +183,4 @@ class BuildCenter:
                 self.docker_cli.docker_image_tag(image,self.build_config['dockerRegistryInfo']['dockerTag'])
                 self.docker_cli.docker_image_push(image,self.build_config['dockerRegistryInfo']['dockerTag'])
                 self.logger.info("Push image:{0} successfully".format(image))
+
