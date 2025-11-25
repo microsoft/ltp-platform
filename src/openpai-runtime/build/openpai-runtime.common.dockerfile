@@ -17,13 +17,6 @@
 
 # Package Cache Data Layer Starts
 
-ARG TAG=v1.0.0
-ARG REGISTRY=frameworkcontroller
-ARG BARRIER_DIR=/opt/frameworkcontroller/frameworkbarrier
-
-# Stage to pull the frameworkbarrier image
-FROM ${REGISTRY}/frameworkbarrier:${TAG} AS barrier
-
 FROM ubuntu:20.04 AS ubuntu_20_04_cache
 
 WORKDIR /src
@@ -71,8 +64,8 @@ WORKDIR /kube-runtime/src
 COPY src/src ./
 COPY src/requirements.txt ./
 
-# Copy from the named stage instead of directly from image
-COPY --from=barrier $BARRIER_DIR/frameworkbarrier ./init.d
+#TODO: update the hardcode image for arm64
+COPY --from=frameworkcontroller/frameworkbarrier:v1.0.0 $BARRIER_DIR/frameworkbarrier ./init.d
 COPY --from=builder ${INSTALL_DIR}/* ./runtime.d/
 
 RUN pip install -r requirements.txt
