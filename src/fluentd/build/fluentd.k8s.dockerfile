@@ -4,6 +4,8 @@
 FROM fluent/fluentd:v1.17.1-debian-1.0
 
 USER root
+
+# workaround different system page sizes by disabling jemalloc
 ENV LD_PRELOAD="" \
     DEBIAN_FRONTEND=noninteractive
 
@@ -25,7 +27,7 @@ RUN gem install fluent-plugin-concat && \
     gem install bundler -v 2.3.27 && \
     gem install rake && \
     gem install pg -v 1.5.9 && \
-    gem install bigdecimal --no-document || true
+    gem install bigdecimal --no-document
 
 # Build fluent-plugin-pgjson from scratch
 # Original fluent-plugin-pgjson is from https://github.com/fluent-plugins-nursery/fluent-plugin-pgjson
@@ -43,6 +45,6 @@ RUN cd /fluent-plugin-pgjson && \
 RUN gem sources --clear-all && \
     rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem && \
     apt-get purge -y --auto-remove build-essential make gcc libc6-dev libpq-dev && \
-    apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+    apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 COPY build/fluent.conf /fluentd/etc/
