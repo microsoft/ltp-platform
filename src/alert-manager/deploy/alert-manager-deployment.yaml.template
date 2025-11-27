@@ -42,6 +42,7 @@ spec:
       containers:
       - name: alertmanager
         image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}alertmanager:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
+        imagePullPolicy: Always
         args:
           - '--config.file=/etc/alertmanager/config.yml'
           - '--storage.path=/alertmanager'
