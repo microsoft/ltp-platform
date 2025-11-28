@@ -50,6 +50,18 @@ RUN wget https://untroubled.org/daemontools-encore/daemontools-encore-1.10.tar.g
 RUN cd daemontools-encore-1.10 && sed -i 's/gcc -s/gcc -s -static/g' conf-ld && make -j && \
   cp multilog ${INSTALL_DIR}
 
+FROM golang:1.24.2-alpine3.21 as barrier-builder
+
+ENV GOPATH=/go
+ENV PROJECT_DIR=/src
+ENV INSTALL_DIR=/opt/frameworkcontroller/frameworkbarrier
+
+RUN apk update && apk add --no-cache bash && \
+  mkdir -p ${PROJECT_DIR} ${INSTALL_DIR}
+COPY src/frameworkcontroller ${PROJECT_DIR}
+RUN ${PROJECT_DIR}/build/frameworkbarrier/go-build.sh && \
+  mv ${PROJECT_DIR}/dist/frameworkbarrier/* ${INSTALL_DIR}
+
 FROM python:3.10-alpine
 
 RUN mkdir -p /opt/package_cache
@@ -64,8 +76,7 @@ WORKDIR /kube-runtime/src
 COPY src/src ./
 COPY src/requirements.txt ./
 
-#TODO: update the hardcode image for arm64
-COPY --from=frameworkcontroller/frameworkbarrier:v1.0.0 $BARRIER_DIR/frameworkbarrier ./init.d
+COPY --from=barrier-builder $BARRIER_DIR/frameworkbarrier ./init.d
 COPY --from=builder ${INSTALL_DIR}/* ./runtime.d/
 
 RUN pip install -r requirements.txt
