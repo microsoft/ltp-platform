@@ -70,12 +70,12 @@ end
 
 local log_path = log_dir..log_name
 local use_remote_log_dir = false
-if path.isdir(log_path) and util.is_directory_empty(log_path) then
+if path.isdir(log_path) and util.is_directory_empty(log_path) and remote_log_dir then
   ngx.log(ngx.INFO, "falling back to remote log directory")
   log_path = remote_log_dir..log_name
   log_dir = remote_log_dir
   use_remote_log_dir = true
-elseif not path.exists(log_path) then
+elseif not path.exists(log_path) and remote_log_dir then
   ngx.log(ngx.INFO, "path not exist, falling back to remote log directory")
   log_path = remote_log_dir..log_name
   log_dir = remote_log_dir
@@ -119,4 +119,5 @@ if use_remote_log_dir then
 else
   ngx.req.set_uri("/~/current/"..string.sub(path.abspath(log_path), string.len(file_prefix) + 1), true)
 end
+
 

@@ -5,7 +5,9 @@ permissions:
 
 on:
   push:
-    branches: ['release/*']
+    branches: ["release/*"]
+  pull_request:
+    branches: ["release/*"]
   release:
     types: [published]
   workflow_dispatch:
