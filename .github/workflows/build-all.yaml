@@ -56,8 +56,9 @@ jobs:
       - name: Install Package
         if: steps.all.outputs.services != ''
         run: |
-          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip docker-cli ca-certificates curl apt-transport-https lsb-release gnupg parallel
+          DEBIAN_FRONTEND=noninteractive apt install -y python3 python-is-python3 pip git unzip ca-certificates curl apt-transport-https lsb-release gnupg parallel
           curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+          curl -fsSL https://get.docker.com | sh
 
       - name: Install python libs
         if: steps.all.outputs.services != ''
@@ -78,6 +79,9 @@ jobs:
           mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
           ls -l /tmp/auth-configuration
 
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Build Images of Services
         if: steps.all.outputs.services != ''
         run: |
@@ -86,7 +90,7 @@ jobs:
           echo "--------------------------------"
           failed_services=""
           for service in $all_services; do
-            if [[ "$service" =~ alert-manager ]]; then
+            if echo "$service" | grep -q "alert-manager"; then
               echo "alert-manager is in the changed services"
               # Build specific images in alert-manager
               echo "Building specific alert-manager images"
