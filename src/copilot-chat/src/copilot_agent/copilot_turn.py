@@ -21,7 +21,7 @@ from .utils import (
     set_thread_llm_session,
     SmartHelp
 )
-from .agent_flow import AgentFlow, agents_list
+from .agent_flow import AgentFlow, agents_list, AgentOrchestrate
 
 
 class CoPilotTurn:
@@ -42,6 +42,7 @@ class CoPilotTurn:
         self.smart_help = SmartHelp(self.help_msg, self.llm_session)
         self.analyzer = GeneralAnalysis(self.llm_session)
         self.agent_flow = AgentFlow(agents_list)
+        #self.agent_flow = AgentOrchestrate(agents_list) # feature under development
 
     # entry function, processes the list of messages and returns a dictionary with the results
     def process_turn(self, messages_list: list, skip_summary: bool = False, debugging: bool = False) -> dict:

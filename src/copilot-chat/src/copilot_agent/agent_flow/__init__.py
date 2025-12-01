@@ -5,8 +5,10 @@
 
 from .agent_flow import AgentFlow
 from .agent_tool import agents_list
+from .agent_orchastrate import AgentOrchestrate
 
 __all__ = [
     'AgentFlow',
-    'agents_list'
+    'agents_list',
+    'AgentOrchestrate'
 ]
