@@ -101,6 +101,8 @@ spec:
         securityContext:
           runAsUser: 0
           runAsGroup: 0
+      imagePullSecrets:
+      - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
       volumes:
       - name: copilot-chat-logs
         emptyDir: {}

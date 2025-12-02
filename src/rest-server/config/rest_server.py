@@ -75,9 +75,10 @@ class RestServer:
             'schedule-port-start', 'schedule-port-end', 'sql-max-connection',
             'hived-computing-device-envs', 'log-server', 'log_azure_storage_account',
             'log_azure_storage_account_key', 'log_azure_storage_container_name',
-            'code-restriction'
+            'code-restriction', 'image-regex'
         ]:
-            service_object_model[k] = self.service_configuration[k]
+            if k in self.service_configuration:
+                service_object_model[k] = self.service_configuration[k]
 
         # default-computing-device-type only works in default scheduler.
         # If hived scheduler is enabled, it will be ignored.

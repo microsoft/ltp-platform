@@ -34,7 +34,7 @@ class NodeAvailabilityMonitor:
         """
         self.endpoint = os.getenv("CLUSTER_ID")
         self.update_interval = int(os.getenv("UPDATE_INTERVAL", 10))  # Default to 10 minutes
-        self.rest_server_uri = os.getenv("REST_SERVER_URI", "http://localhost:8080")
+        self.prometheus_uri = os.getenv("PROMETHEUS_SERVER_URI", "http://localhost:8080")
         self.is_running = False
         self.last_update_time = None
         self.tolerance_time = int(os.getenv("TOLERANCE_TIME", 300))
@@ -54,7 +54,7 @@ class NodeAvailabilityMonitor:
             'query?query=(avg_over_time(avg by (node_name) (pai_node_count{unschedulable="true",node_name!~"aks-.*"} or pai_node_count{unschedulable="false",node_name!~"aks-.*"}*0)'
             + f"[{time_offset}:{interval}] @ {end_time} )) >0")
             
-        result = RequestUtil.prometheus_query(query=query, data={}, uri=self.rest_server_uri)
+        result = RequestUtil.prometheus_query(query=query, data={}, uri=f"{self.prometheus_uri}/prometheus")
         
         if result is not None:
             result = result["result"]
@@ -68,7 +68,7 @@ class NodeAvailabilityMonitor:
         
         query = ('query?query=avg by (node_name) (pai_node_count{unschedulable="false",node_name!~"aks-.*"})'
                 + f"[{interval}:{interval}] @ {end_time}")
-        result = RequestUtil.prometheus_query(query=query, data={}, uri=self.rest_server_uri)
+        result = RequestUtil.prometheus_query(query=query, data={}, uri=f"{self.prometheus_uri}/prometheus")
         if result is not None:
             result = result["result"]
             for node_result in result:
@@ -84,7 +84,7 @@ class NodeAvailabilityMonitor:
                 f'unschedulable="false",node_name="{node}"' + "}*0) " +
                 f"[{time_offset}:{interval}] @ {end_time}")
                 
-        result = RequestUtil.prometheus_query(query=query, data={}, uri=self.rest_server_uri)
+        result = RequestUtil.prometheus_query(query=query, data={}, uri=f"{self.prometheus_uri}/prometheus")
         status_changes = {}
         raw_values = {}
         
@@ -279,7 +279,7 @@ class NodeAvailabilityMonitor:
                 return 
             # fetch alerts for the node
             alerts = self.alert_fetcher.get_node_alert_records(
-                end_time, f"{time_offset}s", endpoint=self.endpoint, nodes=[node]
+                end_time, f"{time_offset}s", nodes=[node], severity="error"
             )
 
             sorted_changes = sorted(changes.items(), key=lambda x: x[0])
