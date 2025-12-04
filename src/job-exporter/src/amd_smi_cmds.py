@@ -1,10 +1,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-import amdsmi
 import logging
+import platform
 
 LOGGER = logging.getLogger(__name__)
+
+if platform.uname().machine == "x86_64":
+    import amdsmi
+else:
+    LOGGER.warning("AMD SMI does not support arm64 or aarch64, skipped import")
+
 
 def init_amd_smi():
     try:

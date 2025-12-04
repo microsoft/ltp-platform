@@ -25,51 +25,51 @@ ARG AMDGPU_VERSION=6.2.2
 ARG APT_PREF="Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600"
 RUN echo "$APT_PREF" > /etc/apt/preferences.d/rocm-pin-600
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl libnuma-dev gnupg \
-  && curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - \
-  && printf "deb https://repo.radeon.com/rocm/apt/$ROCM_VERSION/ jammy main" | tee /etc/apt/sources.list.d/rocm.list \
-  && printf "deb https://repo.radeon.com/amdgpu/$AMDGPU_VERSION/ubuntu jammy main" | tee /etc/apt/sources.list.d/amdgpu.list \
-  && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-  sudo \
-  libelf1 \
-  ibverbs-utils \
-  bash \
-  kmod \
-  file \
-  python3-dev \
-  python3-pip \
-  rocm-dev \
-  g++ \
-  numactl \
-  unzip \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   autoconf \
-  libtool \
-  pkg-config \
+  automake \
+  bash \
+  build-essential \
+  cmake \
+  curl \
+  file \
+  g++ \
+  git \
+  gnupg \
+  ibverbs-utils \
+  kmod \
+  libc++-dev \
+  libcap-dev \
+  libelf1 \
   libgflags-dev \
   libgtest-dev \
-  libc++-dev \
-  curl \
-  libcap-dev \
-  git \
-  cmake \
-  automake \
-  build-essential && \
-  apt-get clean && \
-  rm -rf /var/lib/apt/lists/*
-
-RUN apt update && apt upgrade -y
+  libnuma-dev \
+  libtool \
+  numactl \
+  pkg-config \
+  python3-dev \
+  python3-pip \
+  sudo \
+  unzip && \
+  if [ "$TARGETARCH" = "amd64" ]; then \
+    curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
+    echo "deb https://repo.radeon.com/rocm/apt/$ROCM_VERSION/ jammy main" | tee /etc/apt/sources.list.d/rocm.list && \
+    echo "deb https://repo.radeon.com/amdgpu/$AMDGPU_VERSION/ubuntu jammy main" | tee /etc/apt/sources.list.d/amdgpu.list && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rocm-dev; \
+  fi
 
 COPY src/Moneo /Moneo
 
 # Install RDC
-RUN sudo bash Moneo/src/worker/install/amd.sh
+RUN if [ "$TARGETARCH" = "amd64" ]; then sudo bash Moneo/src/worker/install/amd.sh; fi
 
 # Install DCGM
 RUN sed -i 's/systemctl --now enable nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
     sed -i 's/systemctl start nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
     sudo bash Moneo/src/worker/install/nvidia.sh
 
-ENV PATH "${PATH}:/opt/rocm/bin"
+ENV PATH="${PATH}:/opt/rocm/bin"
 COPY build/moneo-*-exporter_entrypoint.sh ./
 COPY build/update-dcgm.py .
 
