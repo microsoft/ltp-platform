@@ -17,9 +17,10 @@ RUN git clone --branch v1.31.0.7 --single-branch https://github.com/ROCm/k8s-dev
 
 COPY ./build/k8s-rocm-device-plugin-patches/0001-update-toolchain-to-1.24-with-package-updates.patch /go/src/github.com/ROCm/k8s-device-plugin
 
-WORKDIR /go/src/github.com/ROCm/k8s-device-plugin/cmd/k8s-device-plugin
-
+WORKDIR /go/src/github.com/ROCm/k8s-device-plugin
 RUN git apply ./0001-update-toolchain-to-1.24-with-package-updates.patch
+
+WORKDIR /go/src/github.com/ROCm/k8s-device-plugin/cmd/k8s-device-plugin
 
 RUN go mod vendor
 
