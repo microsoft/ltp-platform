@@ -9,6 +9,8 @@ ARG TARGETARCH
 ARG GOOS=${TARGETOS}
 ARG GOARCH=${TARGETARCH}
 
+RUN apk add --no-cache git make
+
 RUN git clone --branch v1.5.3 --single-branch https://github.com/Mellanox/k8s-rdma-shared-dev-plugin.git /usr/src/k8s-rdma-shared-dp
 
 ENV HTTP_PROXY $http_proxy
