@@ -36,20 +36,32 @@
   "dependencies": {
     "@kubernetes/client-node": "1.2.0",
     "axios": "^1.12.0",
-    "body-parser": "^2.2.0",
+    "body-parser": "^2.2.1",
     "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
     "email-templates": "^12.0.2",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "express-bearer-token": "^3.0.0",
     "joi": "^17.13.3",
     "module-alias": "^2.2.3",
-    "nodemailer": "^7.0.7",
+    "nodemailer": "^7.0.11",
     "winston": "2",
     "ws": "^8.18.2"
   },
+  "overrides": {
+    "express@*": "5.2.1",
+    "body-parser@*": "2.2.1",
+    "nodemailer@*": "7.0.11",
+    "@messageformat/runtime@*": "3.0.2",
+    "js-yaml@*": "4.1.1",
+    "@messageformat/core@* > @messageformat/runtime": "3.0.2",
+    "express@* > body-parser": "2.2.1",
+    "@eslint/eslintrc@* > js-yaml": "4.1.1",
+    "@kubernetes/client-node@* > js-yaml": "4.1.1",
+    "@messageformat/core@3.4.0 > @messageformat/runtime": "3.0.2"
+  },
   "resolutions": {
-    "nodemailer": "^7.0.7",
+    "nodemailer": "^7.0.11",
     "tar-fs": "^3.1.1",
     "@eslint/plugin-kit": "^0.3.3",
     "form-data": "^4.0.4"
