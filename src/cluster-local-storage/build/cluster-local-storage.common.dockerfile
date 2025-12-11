@@ -40,6 +40,7 @@ COPY ./src .
 COPY ./bin/* /usr/local/cluster-local-storage/
 RUN chmod -R 0755 /usr/local/cluster-local-storage/
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install --upgrade pip3
+RUN pip3 install -r requirements.txt && pip3 install --no-cache-dir --upgrade "urllib3>=2.5.0"
 
 ENTRYPOINT ["/bin/bash", "-c", "/usr/local/cluster-local-storage/init.sh && python3 service.py"]
