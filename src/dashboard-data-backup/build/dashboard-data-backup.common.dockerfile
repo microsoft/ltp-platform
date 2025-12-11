@@ -8,6 +8,8 @@ RUN apt-get purge -y subversion && apt-get autoremove -y
 # Set working directory
 WORKDIR /app
 
+RUN pip install --upgrade pip
+
 # Copy requirements and install dependencies
 COPY src/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
