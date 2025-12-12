@@ -12,8 +12,9 @@ RUN apt-get update && \
 RUN apt-get -y install build-essential python3 python3-pip
 RUN pip3 install jinja2
 
+ENV FRP_VERSION=0.65.0
 # Download the binary from its GitHub releases
-RUN curl -L -o proxy.tar.gz https://github.com/fatedier/frp/releases/download/v0.63.0/frp_0.63.0_linux_amd64.tar.gz && \
+RUN curl -L -o proxy.tar.gz https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_${FRP_VERSION}_linux_amd64.tar.gz && \
     tar -zxvf proxy.tar.gz --strip-components=1 -C /app && \
     mv frpc proxy-client && \
     rm proxy.tar.gz && \
