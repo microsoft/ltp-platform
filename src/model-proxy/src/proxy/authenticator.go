@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"modelproxy/types"
 )
@@ -19,9 +20,13 @@ func obfuscateToken(token string) string {
 	return token[:3] + "***" + token[len(token)-3:]
 }
 
+const RefreshIntervalSeconds = 600 // 10 minutes
+
 type RestServerAuthenticator struct {
 	// rest-server token => model names => model service list
-	tokenToModels map[string]map[string][]*types.BaseSpec
+	tokenToModels    map[string]map[string][]*types.BaseSpec
+	tokenToJobModels map[string]map[string][]*types.BaseSpec
+	tokenUpdatedTime map[string]int64
 }
 
 func NewRestServerAuthenticator() *RestServerAuthenticator {
@@ -36,6 +41,7 @@ func (ra *RestServerAuthenticator) UpdateTokenModels(token string, model2Service
 		ra.tokenToModels = make(map[string]map[string][]*types.BaseSpec)
 	}
 	ra.tokenToModels[token] = model2Service
+	ra.tokenUpdatedTime[token] = time.Now().Unix()
 }
 
 // Check if the request is authenticated and return the available model urls
@@ -49,15 +55,20 @@ func (ra *RestServerAuthenticator) AuthenticateReq(req *http.Request, reqBody ma
 		return false, nil
 	}
 	availableModels, ok := ra.tokenToModels[token]
-	if !ok {
+	tokenLastUpdated, timeOk := ra.tokenUpdatedTime[token]
+
+	// If the token is not found or the token info is older than RefreshIntervalSeconds, refresh it
+	if !ok || !timeOk || time.Now().Unix()-tokenLastUpdated > RefreshIntervalSeconds {
 		// request to RestServer to get the models
 		log.Printf("[-] Error: token %s not found in the authenticator\n", obfuscateToken(token))
-		availableModels, err := GetJobModelsMapping(req)
+		availableModels, err := ListJobModelsMapping(req)
 		if err != nil {
 			log.Printf("[-] Error: failed to get models for token %s: %v\n", obfuscateToken(token), err)
 			return false, nil
 		}
 		ra.tokenToModels[token] = availableModels
+		ra.tokenUpdatedTime[token] = time.Now().Unix()
+		log.Printf("[*] Refreshed models for token %s: %v\n", obfuscateToken(token), availableModels)
 	}
 	if len(availableModels) == 0 {
 		log.Printf("[-] Error: no models found")
