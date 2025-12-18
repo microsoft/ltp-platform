@@ -236,7 +236,6 @@ func ListJobModelsMapping(req *http.Request) (map[string][]*types.BaseSpec, erro
 	// Channel to collect results
 	type ModelEndpoint struct {
 		modelName    string
-		jobID        string
 		modelService *types.BaseSpec
 	}
 	concurrency, err := strconv.Atoi(os.Getenv("FETCH_JOB_CONCURRENCY"))
