@@ -92,7 +92,7 @@ chmod +x /usr/local/bin/modprobe
 mkdir -p /etc/supervisor/conf.d
 cat <<EOF > /etc/supervisor/conf.d/dockerd.conf
 [program:dockerd]
-command=/usr/local/bin/dockerd -storage-driver=vfs
+command=/usr/local/bin/dockerd --storage-driver=vfs --data-root=/var/lib/docker-vfs
 autostart=true
 autorestart=true
 stderr_logfile=/var/log/dockerd.err.log
