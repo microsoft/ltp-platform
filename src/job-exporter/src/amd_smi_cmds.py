@@ -9,7 +9,7 @@ LOGGER = logging.getLogger(__name__)
 if platform.uname().machine == "x86_64":
     import amdsmi
 else:
-    LOGGER.warning("AMD SMI does not support arm64 or aarch64, skipped import")
+    LOGGER.warning("AMD SMI does not support arm64, aarch64, or other archs, skipped import")
 
 
 def init_amd_smi():
