@@ -36,7 +36,8 @@ pushd $(dirname "$0") > /dev/null
     s/^([[:space:]]*)allowPrivilegeEscalation: false.*$/\1privileged: false/
     G
     s/(^[[:space:]]*allowPrivilegeEscalation: false.*)\n([[:space:]]*privileged: false)/\1\n\2/
-}';
+}' \
+| sed '/^[[:space:]]*tolerations:/i\      nodeSelector:\n        vendor: nvidia';
   cat <<'YAML'
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
@@ -50,7 +51,8 @@ YAML
 {% if 'amd.com/gpu' in cluster_cfg['device-plugin']['devices'] %}
 
 { curl -s https://raw.githubusercontent.com/ROCm/k8s-device-plugin/master/k8s-ds-amdgpu-dp.yaml \
-| sed 's|rocm/k8s-device-plugin|{{ cluster_cfg['cluster']['docker-registry']['prefix'] }}k8s-rocm-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|';
+| sed 's|rocm/k8s-device-plugin|{{ cluster_cfg['cluster']['docker-registry']['prefix'] }}k8s-rocm-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|' \
+| sed '/^[[:space:]]*tolerations:/i\      nodeSelector:\n        vendor: amd';
   cat <<'YAML'
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
