@@ -52,7 +52,11 @@ YAML
 
 { curl -s https://raw.githubusercontent.com/ROCm/k8s-device-plugin/master/k8s-ds-amdgpu-dp.yaml \
 | sed 's|rocm/k8s-device-plugin|{{ cluster_cfg['cluster']['docker-registry']['prefix'] }}k8s-rocm-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|' \
-| sed '/^[[:space:]]*tolerations:/i\      nodeSelector:\n        vendor: amd';
+| sed -E '/^[[:space:]]*nodeSelector:[[:space:]]*$/{
+    n
+    s/^([[:space:]]*)(.*)$/\1vendor: amd\
+\1\2/
+}';
   cat <<'YAML'
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
