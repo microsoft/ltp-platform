@@ -85,6 +85,9 @@ RUN wget -O /tmp/nerdctl.tar.gz https://github.com/containerd/nerdctl/releases/d
 COPY requirements.txt /job_exporter/
 RUN pip3 install -r /job_exporter/requirements.txt
 
+# For DCGM missing logger module
+RUN pip3 install logger
+
 RUN apt update && apt upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY src/*.py /job_exporter/
