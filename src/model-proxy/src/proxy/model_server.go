@@ -74,7 +74,6 @@ func ListInferenceJobs(restServerUrl string, restServerToken string) ([]string, 
 
 	result := make([]string, 0, len(jobs))
 	for _, j := range jobs {
-
 		jobId := fmt.Sprintf("%s~%s", j.Username, j.Name)
 		result = append(result, jobId)
 	}
@@ -213,17 +212,17 @@ func listModels(jobServerUrl string, modelApiKey string) ([]string, error) {
 }
 
 // return JobURL => models
-func GetJobModelsMapping(req *http.Request) (map[string][]*types.BaseSpec, error) {
+func ListJobModelsMapping(req *http.Request) (map[string][]*types.BaseSpec, error) {
 	// modelName to job server url list
-	mapping := make(map[string][]*types.BaseSpec)
+	modelJobMapping := make(map[string][]*types.BaseSpec)
 
 	if req == nil || req.Host == "" {
-		return mapping, fmt.Errorf("invalid request or empty host")
+		return modelJobMapping, fmt.Errorf("invalid request or empty host")
 	}
 	// get rest server base url from the os environment variable
 	restServerUrl := os.Getenv("REST_SERVER_URI")
 	if restServerUrl == "" {
-		return mapping, fmt.Errorf("REST_SERVER_URI environment variable is not set")
+		return modelJobMapping, fmt.Errorf("REST_SERVER_URI environment variable is not set")
 	}
 	// Ensure restServerUrl doesn't end with slash
 	restServerUrl = strings.TrimRight(restServerUrl, "/")
@@ -231,11 +230,11 @@ func GetJobModelsMapping(req *http.Request) (map[string][]*types.BaseSpec, error
 	restServerToken := req.Header.Get("Authorization")
 	jobIDs, err := ListInferenceJobs(restServerUrl, restServerToken)
 	if err != nil {
-		return mapping, fmt.Errorf("failed to list model serving jobs: %w", err)
+		return modelJobMapping, fmt.Errorf("failed to list model serving jobs: %w", err)
 	}
 
 	// Channel to collect results
-	type modelMapping struct {
+	type ModelEndpoint struct {
 		modelName    string
 		modelService *types.BaseSpec
 	}
@@ -244,7 +243,7 @@ func GetJobModelsMapping(req *http.Request) (map[string][]*types.BaseSpec, error
 		log.Printf("[-] Error: invalid FETCH_JOB_CONCURRENCY value: %s\n", err)
 		concurrency = 10 // default value
 	}
-	results := make(chan modelMapping, concurrency) // Buffer for potential models
+	allModelEndpoints := make(chan ModelEndpoint, concurrency) // Buffer for potential models
 
 	// Use a wait group to run jobs in parallel
 	var wg sync.WaitGroup
@@ -287,13 +286,17 @@ func GetJobModelsMapping(req *http.Request) (map[string][]*types.BaseSpec, error
 				return
 			}
 
+			userName := strings.Split(jobId, "~")[0]
+			jobName := strings.Split(jobId, "~")[1]
 			// Send results to channel
 			for _, model := range models {
-				results <- modelMapping{
+				allModelEndpoints <- ModelEndpoint{
 					modelName: model,
 					modelService: &types.BaseSpec{
-						URL: jobServerUrl,
-						Key: apiKey,
+						URL:      jobServerUrl,
+						Key:      apiKey,
+						JobName:  jobName,
+						UserName: userName,
 					},
 				}
 			}
@@ -303,16 +306,23 @@ func GetJobModelsMapping(req *http.Request) (map[string][]*types.BaseSpec, error
 	// Close the results channel when all goroutines are done
 	go func() {
 		wg.Wait()
-		close(results)
+		close(allModelEndpoints)
 	}()
 
 	// Collect results from channel
-	for result := range results {
-		if _, ok := mapping[result.modelName]; !ok {
-			mapping[result.modelName] = make([]*types.BaseSpec, 0)
+	for result := range allModelEndpoints {
+		if _, ok := modelJobMapping[result.modelName]; !ok {
+			modelJobMapping[result.modelName] = make([]*types.BaseSpec, 0)
 		}
-		mapping[result.modelName] = append(mapping[result.modelName], result.modelService)
+		modelJobMapping[result.modelName] = append(modelJobMapping[result.modelName], result.modelService)
+		jobModelName := fmt.Sprintf("%s@%s", result.modelService.JobName, result.modelName)
+
+		// Also map jobName@modelName to the model service which allows users to specify the job name in the model field
+		if _, ok := modelJobMapping[jobModelName]; !ok {
+			modelJobMapping[jobModelName] = make([]*types.BaseSpec, 0)
+		}
+		modelJobMapping[jobModelName] = append(modelJobMapping[jobModelName], result.modelService)
 	}
 
-	return mapping, nil
+	return modelJobMapping, nil
 }

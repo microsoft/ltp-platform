@@ -19,3 +19,4 @@ openai>=1.106.1
 azure-kusto-data>=5.0.5
 llama-index-core>=0.13.5
 azure-kusto-ingest>=5.0.5
+fonttools>=4.60.2

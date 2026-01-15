@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -73,6 +74,50 @@ func NewProxyHandler(config *types.Config) *ProxyHandler {
 	}
 }
 
+// listAllModels list all models from the rest server and return the models in OpenAI style response
+func (ph *ProxyHandler) listAllModels(r *http.Request) ([]byte, error) {
+	log.Printf("[*] receive a models list request from %s\n", r.RemoteAddr)
+	model2Service, internalErr := ListJobModelsMapping(r)
+	if internalErr != nil {
+		errorMsg := fmt.Sprintf("[-] Error: failed to list models: %v\n", internalErr)
+		internalErr = errors.New(errorMsg)
+		return nil, internalErr
+	}
+	// Update the ph.authenticator
+	token := r.Header.Get("Authorization")
+	token = strings.Replace(token, "Bearer ", "", 1)
+	ph.authenticator.UpdateTokenModels(token, model2Service)
+
+	// convert models list to OpenAI style list and write it to w
+	ids := make([]string, 0, len(model2Service))
+	for id := range model2Service {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+
+	list := map[string]interface{}{
+		"object": "list",
+		"data":   make([]map[string]interface{}, 0, len(ids)),
+	}
+	for _, id := range ids {
+		item := map[string]interface{}{
+			"id":     id,
+			"object": "model",
+			// intentionally not including created or owned_by
+		}
+		list["data"] = append(list["data"].([]map[string]interface{}), item)
+	}
+
+	out, internalErr := json.Marshal(list)
+	if internalErr != nil {
+		errorMsg := fmt.Sprintf("[-] Error: failed to marshal models list: %v\n", internalErr)
+		internalErr = errors.New(errorMsg)
+		return nil, internalErr
+	}
+
+	return out, nil
+}
+
 // ReverseProxyHandler act as a reverse proxy, it will redirect the request to the destination website and return the response
 func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Request) (string, []string, bool) {
 	log.Printf("[*] receive a request: %s %s\n", r.Method, r.URL.String())
@@ -88,48 +133,15 @@ func (ph *ProxyHandler) ReverseProxyHandler(w http.ResponseWriter, r *http.Reque
 
 	// handle /v1/models
 	if r.URL.Path == "/v1/models" {
-		log.Printf("[*] receive a models list request from %s\n", r.RemoteAddr)
-		model2Service, err := GetJobModelsMapping(r)
+		output, err := ph.listAllModels(r)
 		if err != nil {
-			log.Printf("[-] Error: failed to get models mapping: %v\n", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return "", nil, false
-		}
-		// Update the ph.authenticator
-		token := r.Header.Get("Authorization")
-		token = strings.Replace(token, "Bearer ", "", 1)
-		ph.authenticator.UpdateTokenModels(token, model2Service)
-
-		// convert models list to OpenAI style list and write it to w
-		ids := make([]string, 0, len(model2Service))
-		for id := range model2Service {
-			ids = append(ids, id)
-		}
-		sort.Strings(ids)
-
-		list := map[string]interface{}{
-			"object": "list",
-			"data":   make([]map[string]interface{}, 0, len(ids)),
-		}
-		for _, id := range ids {
-			item := map[string]interface{}{
-				"id":     id,
-				"object": "model",
-				// intentionally not including created or owned_by
-			}
-			list["data"] = append(list["data"].([]map[string]interface{}), item)
-		}
-
-		out, err := json.Marshal(list)
-		if err != nil {
-			log.Printf("[-] Error: failed to marshal models list: %v\n", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return "", nil, false
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		if _, err := w.Write(out); err != nil {
+		if _, err := w.Write(output); err != nil {
 			log.Printf("[-] Error: failed to write response: %v\n", err)
 		}
 		// We've handled the response, do not continue proxying this request

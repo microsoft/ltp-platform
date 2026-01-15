@@ -48,9 +48,11 @@ type AzureStorage struct {
 
 // BaseSpec is the base spec for azure and openai
 type BaseSpec struct {
-	URL     string `json:"url"`
-	Key     string `json:"key"`
-	Version string `json:"version,omitempty"`
+	URL      string `json:"url"`
+	Key      string `json:"key"`
+	Version  string `json:"version,omitempty"`
+	JobName  string `json:"job_name,omitempty"`
+	UserName string `json:"user_name,omitempty"`
 }
 
 // ParseConfig parse the config file into Config struct

@@ -21,6 +21,7 @@ cluster-type:
 
 template-list:
   - secret.yaml
+  - write-etc-hosts.yaml
   - host-configuration/host-configuration.yaml
   - gpu-configuration/gpu-configuration.yml
   - gpu-configuration/gpu-configuration.json
