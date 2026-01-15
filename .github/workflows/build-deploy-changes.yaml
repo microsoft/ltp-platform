@@ -25,7 +25,6 @@ jobs:
         - /var/run/docker.sock:/var/run/docker.sock
     env:
       DOCKER_BUILDKIT: "1"
-      CLUSTER_LOCAL_STORAGE_IPOIB_NUM: "0"
     steps:
       - name: Install git
         run: |
@@ -198,6 +197,9 @@ jobs:
               services_to_deploy=$(echo "$services_to_deploy" | xargs)
             fi
             echo "Final services to deploy: $services_to_deploy"
+          if echo " $services_to_deploy " | grep -q " cluster-local-storage-worker "; then
+            sed -i '42s/value: "8"/value: "0"/' $GITHUB_WORKSPACE/src/cluster-local-storage-worker/deploy/cluster-local-storage-worker.yaml.template
+          fi
 
           echo "${{ secrets.PAI_CLUSTER_NAME }}" > cluster_id
           echo "Stopping changed pai services $services_to_deploy on ${{ secrets.PAI_CLUSTER_NAME }} ..."
