@@ -1,4 +1,4 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM registry.k8s.io/kube-scheduler:v1.28.9
+FROM registry.k8s.io/kube-scheduler:v1.33.1

@@ -22,7 +22,7 @@ spec:
                 path: k8s-etc-hosts.txt
       containers:
         - name: writer
-          image: alpine:3.18
+          image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}alpine:3.21
           securityContext:
             runAsUser: 0
             privileged: true

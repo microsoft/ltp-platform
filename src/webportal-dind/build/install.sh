@@ -7,9 +7,9 @@
 set -eux
 
 DOCKER_CHANNEL="stable"
-DOCKER_VERSION="28.3.3"
-DOCKER_COMPOSE_VERSION="v2.39.2"
-BUILDX_VERSION="v0.27.0-rc1"
+DOCKER_VERSION="29.1.2"
+DOCKER_COMPOSE_VERSION="v5.0.0"
+BUILDX_VERSION="v0.30.1"
 
 # Logging functions
 function log_info() {
@@ -92,7 +92,7 @@ chmod +x /usr/local/bin/modprobe
 mkdir -p /etc/supervisor/conf.d
 cat <<EOF > /etc/supervisor/conf.d/dockerd.conf
 [program:dockerd]
-command=/usr/local/bin/dockerd
+command=/usr/local/bin/dockerd --storage-driver=vfs --data-root=/var/lib/docker-vfs
 autostart=true
 autorestart=true
 stderr_logfile=/var/log/dockerd.err.log
