@@ -5,6 +5,7 @@ import fileinput
 
 #!/usr/bin/env python3
 
+DCGM_TARGET_VERSION = "1:4.4.1-1"
 
 def get_dcgm_version():
     try:
@@ -72,8 +73,10 @@ def install_latest_dcgm():
         )
         subprocess.run(
             [
-                "apt-get", "install", "--yes", "--install-recommends",
-                "datacenter-gpu-manager-4-cuda12"
+                "apt-get", "install", "--yes",
+                f"datacenter-gpu-manager-4-cuda12={DCGM_TARGET_VERSION}",
+                f"datacenter-gpu-manager-4-core={DCGM_TARGET_VERSION}",
+                f"datacenter-gpu-manager-4-proprietary-cuda12={DCGM_TARGET_VERSION}"
             ],
             check=True
         )
