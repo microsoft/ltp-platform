@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM docker.io/golang:1.24.3-alpine3.21 as builder
+FROM docker.io/golang:1.24.11-alpine3.21 as builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -15,10 +15,21 @@ RUN apk --no-cache add hwloc-dev --repository=http://dl-cdn.alpinelinux.org/alpi
 RUN mkdir -p /go/src/github.com/ROCm/k8s-device-plugin
 RUN git clone --branch v1.31.0.7 --single-branch https://github.com/ROCm/k8s-device-plugin.git /go/src/github.com/ROCm/k8s-device-plugin
 
-COPY ./build/k8s-rocm-device-plugin-patches/0001-update-toolchain-to-1.24-with-package-updates.patch /go/src/github.com/ROCm/k8s-device-plugin
-
 WORKDIR /go/src/github.com/ROCm/k8s-device-plugin
-RUN git apply ./0001-update-toolchain-to-1.24-with-package-updates.patch
+
+RUN go mod edit -go=1.24 -toolchain=go1.24.11
+
+RUN go mod edit \
+    -require=github.com/go-logr/logr@v1.4.3 \
+    -require=github.com/golang/glog@v1.2.5 \
+    -require=golang.org/x/net@v0.40.0 \
+    -require=google.golang.org/grpc@v1.72.2 \
+    -require=google.golang.org/protobuf@v1.36.6 \
+    -require=k8s.io/api@v0.33.1 \
+    -require=k8s.io/apimachinery@v0.33.1 \
+    -require=k8s.io/kubelet@v0.33.1 \
+    -require=sigs.k8s.io/controller-runtime@v0.21.0
+RUN go mod tidy -go=1.24.11
 
 WORKDIR /go/src/github.com/ROCm/k8s-device-plugin/cmd/k8s-device-plugin
 
