@@ -1566,6 +1566,33 @@ const getEvents = async (frameworkName, attributes, filters) => {
   }
 };
 
+const listVCsFromJob = async (username) => {
+  try {
+    logger.info(`Start to list jobs for user ${username}`);
+    // Remove limit: 0 so it fetches all records, and optionally add a sensible order
+    const frameworks = await databaseModel.Framework.findAll({
+      attributes: [
+      'virtualCluster',
+      ],
+      where: { userName: username },
+    });
+
+    const vcsSet = new Set();
+    frameworks.forEach((framework) => {
+      if (framework.virtualCluster) {
+        vcsSet.add(framework.virtualCluster);
+      }
+    });
+    const vcs = Array.from(vcsSet);
+
+    logger.info(`User ${username} has accessed historical virtual clusters: ${vcs}`);
+    return vcs;
+  } catch (error) {
+    logger.error(`Failed to get historical virtual clusters for user ${username}: ${error}`);
+    return [];
+  }
+};
+
 // module exports
 module.exports = {
   list,
@@ -1577,4 +1604,5 @@ module.exports = {
   addTag,
   deleteTag,
   getEvents,
+  listVCsFromJob,
 };

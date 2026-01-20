@@ -35,6 +35,11 @@ const getUserVCs = async (username) => {
   return [...virtualClusters];
 };
 
+const getUserHistoryVCsFromUserInfo = async (username) => {
+  const userInfo = await userModel.getUser(username);
+  return userInfo.history_vclist || [];
+};
+
 const getUser = async (req, res, next) => {
   try {
     const username = req.params.username;
@@ -134,6 +139,7 @@ const createUserIfUserNotExist = async (req, res, next) => {
       password: userData.oid,
       grouplist: grouplist,
       extension: {},
+      history_vclist: [],
     };
 
     const existUser = await userModel.getUser(username).catch(() => null);
@@ -810,4 +816,5 @@ module.exports = {
   updateUserPassword,
   createUser,
   getUserVCs,
+  getUserHistoryVCsFromUserInfo,
 };
