@@ -17,8 +17,10 @@
 
 const User = require('./user');
 const logger = require('@pai/config/logger');
+const groupModel = require('@pai/models/v2/group');
 const k8sModel = require('@pai/models/kubernetes/kubernetes');
 const { Mutex } = require('async-mutex');
+const { job } = require('@pai/models/v2/job');
 
 const USER_NAMESPACE = process.env.PAI_USER_NAMESPACE || 'pai-user-v2';
 
@@ -40,6 +42,36 @@ const USER_NAMESPACE = process.env.PAI_USER_NAMESPACE || 'pai-user-v2';
 const cache = new Map();
 
 const readMutex = new Mutex();
+
+async function getHistoryVCs(name, grouplist, retrieveFromHistory=true) {
+  // Retrieve VC list from the user's job history
+  let vcsFromJob = [];
+  if (retrieveFromHistory) {
+    logger.info(`Retrieving VC list from job history for user: ${name}`);
+    vcsFromJob = await job.listVCsFromJob(name);
+  }
+
+  // Retrieve VC list from each group the user belongs to
+  const vcSet = new Set();
+  const vcPromises = grouplist.map(async group => {
+    try {
+      return await groupModel.getGroupVCs(group);
+    } catch (error) {
+      logger.error(`Failed to fetch VCs for group ${group}:`, error);
+      return []; // Return an empty array on failure
+    }
+  });
+  const vcResults = await Promise.all(vcPromises);
+  vcResults.forEach(vcs => vcs.forEach(vc => vcSet.add(vc)));
+
+  // Merge VC lists and remove duplicates
+  const mergedVCList = new Set([
+    ...vcsFromJob,
+    ...Array.from(vcSet),
+  ]);
+
+  return Array.from(mergedVCList);
+}
 
 async function read(key) {
   if (cache.has(key)) {
@@ -86,6 +118,9 @@ async function read(key) {
         extension: JSON.parse(
           Buffer.from(userData.data.extension, 'base64').toString(),
         ),
+        history_vclist: userData.data.history_vclist
+          ? JSON.parse(Buffer.from(userData.data.history_vclist, 'base64').toString())
+          : [],
       });
 
       cache.set(key, userInstance);
@@ -153,6 +188,9 @@ async function readAll() {
             extension: JSON.parse(
               Buffer.from(item.data.extension, 'base64').toString(),
             ),
+            history_vclist: item.data.history_vclist
+              ? JSON.parse(Buffer.from(item.data.history_vclist, 'base64').toString())
+              : [],
           });
           allUserInstance.push(userInstance);
         } catch (error) {
@@ -194,8 +232,13 @@ async function create(key, value) {
       grouplist: value.grouplist,
       email: value.email,
       extension: value.extension,
+      history_vclist: [],
     });
     await User.encryptUserPassword(userInstance);
+
+    // retrieve VC list from the history job list belonging to the user if exists
+    userInstance.history_vclist = await getHistoryVCs(userInstance.username, userInstance.grouplist);
+
     const userData = {
       metadata: { name: hexKey },
       type: 'Opaque',
@@ -209,6 +252,7 @@ async function create(key, value) {
         extension: Buffer.from(JSON.stringify(userInstance.extension)).toString(
           'base64',
         ),
+        history_vclist: Buffer.from(JSON.stringify(userInstance.history_vclist)).toString('base64'),
       },
     };
     const logId = Math.floor(Math.random() * 100000);
@@ -252,10 +296,26 @@ async function update(key, value, updatePassword = false) {
       grouplist: value.grouplist,
       email: value.email,
       extension: value.extension,
+      history_vclist: value.history_vclist || [],
     });
     if (updatePassword) {
       await User.encryptUserPassword(userInstance);
     }
+
+    // if userInstance.history_vclist is empty, set it to the retrieved VC list
+    // retrieve VC list from the job list belonging to the user
+    const vclist = await getHistoryVCs(
+      userInstance.username,
+      userInstance.grouplist,
+      userInstance.history_vclist.length === 0
+    );
+
+    // Merge userInstance.history_vclist with vclist and remove duplicates
+    userInstance.history_vclist = Array.from(new Set([
+      ...(userInstance.history_vclist || []),
+      ...(vclist || []),
+    ]));
+
     const userData = {
       metadata: { name: hexKey },
       data: {
@@ -268,6 +328,7 @@ async function update(key, value, updatePassword = false) {
         extension: Buffer.from(JSON.stringify(userInstance.extension)).toString(
           'base64',
         ),
+        history_vclist: Buffer.from(JSON.stringify(userInstance.history_vclist)).toString('base64'),
       },
     };
     const logId = Math.floor(Math.random() * 100000);

@@ -26,6 +26,48 @@ const { Op } = require('sequelize');
 const { userProperty } = require('@pai/config/token');
 const userController = require('@pai/controllers/v2/user');
 
+const retrieveJobInfo = async (frameworkName, jobAttemptId, requestingUser, isAdmin, vcAdmins) => {
+  let data;
+  try {
+    data = await job.get(
+      frameworkName,
+      jobAttemptId ? Number(jobAttemptId) : undefined,
+    );
+  } catch (error) {
+    logger.error(`Error retrieving job: ${error.message}`);
+    throw createError(
+      'Internal Server Error',
+      'UnknownError',
+      `Failed to retrieve job ${frameworkName}.`,
+    );
+  }
+
+  if (data && data.jobStatus) {
+    const virtualCluster = data.jobStatus.virtualCluster;
+    const userName = data.jobStatus.username;
+    logger.info(`Job belongs to user: ${userName}, virtual cluster: ${virtualCluster}`);
+
+    const isAdminOfVC = vcAdmins.includes(virtualCluster);
+
+    if (userName !== requestingUser && !isAdmin && !isAdminOfVC) {
+      logger.warn(`User ${requestingUser} is not allowed to access job ${frameworkName}`);
+      throw createError(
+        'Forbidden',
+        'ForbiddenUserError',
+        `User ${requestingUser} is not allowed to access job ${frameworkName}.`,
+      );
+    }
+  } else {
+    throw createError(
+      'Not Found',
+      'NoJobStatusError',
+      `Job status for ${frameworkName} is not found.`,
+    );
+  }
+  logger.info(`Job ${frameworkName} retrieved successfully.`);
+  return data;
+};
+
 const list = asyncHandler(async (req, res) => {
   // ?keyword=<keyword filter>&username=<username1>,<username2>&vc=<vc1>,<vc2>
   //    &state=<state1>,<state2>&offset=<offset>&limit=<limit>&withTotalCount=true
@@ -50,13 +92,48 @@ const list = asyncHandler(async (req, res) => {
     }
 
     const username = req[userProperty].username;
-    myvcs = await userController.getUserVCs(username);
+    const currentvcs = await userController.getUserVCs(username);
+    let myvcs = await userController.getUserHistoryVCsFromUserInfo(username);
+    if (!myvcs || myvcs.length === 0) {
+      myvcs = [...currentvcs];
+    } else {
+      myvcs = Array.from(new Set([...myvcs, ...currentvcs]));
+    }
+
     if (!filters.virtualCluster || filters.virtualCluster.length === 0) {
       filters.virtualCluster = myvcs;
     } else {
       filters.virtualCluster = filters.virtualCluster.filter((vc) =>
         myvcs.includes(vc),
       );
+    }
+
+    // if the user tries to access other users' jobs in his/her history VCs,
+    // we will block the request here
+    // if filtering on username is not applied, which means accessing all users' jobs,
+    // or filtering on multiple usernames besides of himself/herself,
+    // we need to do the checking
+    const userFilterChecking = !filters.userName || filters.userName.some((name) => name !== username);
+
+    if (userFilterChecking) {
+      const isAdmin = req[userProperty].admin;
+      // for admin user, no need to check
+      if (!isAdmin) {
+        if (filters.virtualCluster && filters.virtualCluster.length > 0) {
+          // now check if the vc list only contains user's current VCs
+          // vc filter is already applied above, so we don't need to check empty case here
+          const otherVcs = filters.virtualCluster.filter(
+            (vc) => !currentvcs.includes(vc),
+          );
+          if (otherVcs.length > 0) {
+            throw createError(
+              'Forbidden',
+              'ForbiddenUserError',
+              `User ${username} is not allowed to access other users' jobs in ${otherVcs.join(', ')}.`,
+            );
+          }
+        }
+      }
     }
 
     if ('state' in req.query) {
@@ -206,9 +283,12 @@ const list = asyncHandler(async (req, res) => {
 });
 
 const get = asyncHandler(async (req, res) => {
-  const data = await job.get(
+  const data = await retrieveJobInfo(
     req.params.frameworkName,
     req.params.jobAttemptId ? Number(req.params.jobAttemptId) : undefined,
+    req[userProperty].username,
+    req[userProperty].admin,
+    req[userProperty].vcadmins || [],
   );
   res.json(data);
 });
@@ -284,6 +364,14 @@ const execute = asyncHandler(async (req, res) => {
 });
 
 const getConfig = asyncHandler(async (req, res) => {
+  await retrieveJobInfo(
+    req.params.frameworkName,
+    undefined,
+    req[userProperty].username,
+    req[userProperty].admin,
+    req[userProperty].vcadmins || [],
+  );
+
   try {
     const data = await job.getConfig(req.params.frameworkName);
     return res.status(200).type('text/yaml').send(data);
@@ -342,6 +430,14 @@ const deleteTag = asyncHandler(async (req, res) => {
 });
 
 const getEvents = asyncHandler(async (req, res) => {
+  await retrieveJobInfo(
+    req.params.frameworkName,
+    undefined,
+    req[userProperty].username,
+    req[userProperty].admin,
+    req[userProperty].vcadmins || [],
+  );
+
   const filters = {};
   if (req.query) {
     if ('type' in req.query) {
@@ -373,6 +469,14 @@ const getEvents = asyncHandler(async (req, res) => {
 });
 
 const getLogs = asyncHandler(async (req, res) => {
+  await retrieveJobInfo(
+    req.params.frameworkName,
+    undefined,
+    req[userProperty].username,
+    req[userProperty].admin,
+    req[userProperty].vcadmins || [],
+  );
+
   try {
     const data = await log.getLogListFromLogServer(
       req.params.frameworkName,
