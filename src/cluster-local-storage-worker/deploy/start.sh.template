@@ -7,6 +7,15 @@
 {% if cluster_cfg['cluster']['common']['cluster-local-storage'] == 'true' %}
 pushd $(dirname "$0") > /dev/null
 
+if ! kubectl get secret cluster-local-storage-ssh-keys >/dev/null 2>&1; then
+    ssh-keygen -t ed25519 -f ssh_host_ed25519_key -N '' -C '' || exit $?
+    kubectl create secret generic cluster-local-storage-ssh-keys \
+        --from-file=ssh_host_ed25519_key.pub=./ssh_host_ed25519_key.pub \
+        --from-file=ssh_host_ed25519_key=./ssh_host_ed25519_key \
+        --dry-run=client -o yaml | kubectl apply -f - || exit $?
+    rm -f ./ssh_host_ed25519_key*
+fi
+
 kubectl apply --overwrite=true -f cluster-local-storage-worker.yaml || exit $?
 
 sleep 10

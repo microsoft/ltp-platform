@@ -11,5 +11,9 @@ if kubectl get daemonset | grep -q "cluster-local-storage-worker-ds"; then
     kubectl delete ds cluster-local-storage-worker-ds
 fi
 
+if kubectl get secret cluster-local-storage-ssh-keys >/dev/null 2>&1; then
+    kubectl delete secret cluster-local-storage-ssh-keys || exit $?
+fi
+
 popd > /dev/null
 {% endif %}

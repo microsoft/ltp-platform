@@ -73,12 +73,20 @@ spec:
         ports:
         - name: vcport-{{ loop.index0 }}
           containerPort: {{ vcport }}
+        volumeMounts:
+        - name: ssh-keys
+          mountPath: /secret
+          readOnly: true
         livenessProbe:
           httpGet:
             path: /health
             port: {{ vcport }}
           initialDelaySeconds: 10
           periodSeconds: 60
+      volumes:
+      - name: ssh-keys
+        secret:
+          secretName: cluster-local-storage-ssh-keys
       tolerations:
       - key: node.kubernetes.io/memory-pressure
         operator: "Exists"

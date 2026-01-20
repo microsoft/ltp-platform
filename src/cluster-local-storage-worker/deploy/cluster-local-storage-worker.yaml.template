@@ -45,6 +45,9 @@ spec:
         - name: CLUSTER_LOCAL_STORAGE_ROOT
           value: '{{ cluster_cfg["cluster-local-storage"]["job-path"] }}'
         volumeMounts:
+        - name: ssh-keys
+          mountPath: /secret
+          readOnly: true
         - name: clstore
           mountPath: '{{ cluster_cfg["cluster-local-storage"]["job-path"] }}'
         livenessProbe:
@@ -56,6 +59,9 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 10
       volumes:
+      - name: ssh-keys
+        secret:
+          secretName: cluster-local-storage-ssh-keys
       - name: clstore
         hostPath:
           path: '{{ cluster_cfg["cluster-local-storage"]["host-path"] }}'
