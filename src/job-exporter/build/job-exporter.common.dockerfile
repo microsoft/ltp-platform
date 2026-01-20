@@ -19,68 +19,53 @@
 FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04
 
 ARG TARGETARCH
-# Register the ROCM package repository, and install rocm-dev package
 ARG ROCM_VERSION=6.2.2
 ARG AMDGPU_VERSION=6.2.2
+ARG DCGM_TARGET_VERSION = "1:4.4.1-1"
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-  autoconf \
-  automake \
   bash \
-  build-essential \
-  cmake \
   curl \
-  file \
-  g++ \
-  git \
   gnupg \
-  ibverbs-utils \
-  kmod \
-  libc++-dev \
-  libcap-dev \
-  libelf1 \
-  libgflags-dev \
-  libgtest-dev \
-  libnuma-dev \
-  libtool \
-  numactl \
-  pkg-config \
-  python3-dev \
+  wget \
+  ca-certificates \
   python3-pip \
-  sudo \
-  unzip && \
+  python3-dev \
+  sudo && \
   if [ "$TARGETARCH" = "amd64" ]; then \
     printf "Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600" | tee /etc/apt/preferences.d/rocm-pin-600 && \
     curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
     echo "deb https://repo.radeon.com/rocm/apt/$ROCM_VERSION/ jammy main" | tee /etc/apt/sources.list.d/rocm.list && \
     echo "deb https://repo.radeon.com/amdgpu/$AMDGPU_VERSION/ubuntu jammy main" | tee /etc/apt/sources.list.d/amdgpu.list && \
     apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rocm-dev; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rocm-dev rdc; \
   fi
 
-COPY src/Moneo /Moneo
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  datacenter-gpu-manager-4-cuda12=${DCGM_TARGET_VERSION} \
+  datacenter-gpu-manager-4-core=${DCGM_TARGET_VERSION} \
+  datacenter-gpu-manager-4-proprietary-cuda12=${DCGM_TARGET_VERSION}
 
-# Install RDC
-RUN if [ "$TARGETARCH" = "amd64" ]; then sudo bash Moneo/src/worker/install/amd.sh; fi
-
-# Install DCGM
-RUN sed -i 's/systemctl --now enable nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
-    sed -i 's/systemctl start nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
-    sudo bash Moneo/src/worker/install/nvidia.sh
-
-ENV PATH="${PATH}:/opt/rocm/bin"
-COPY build/moneo-*-exporter_entrypoint.sh ./
-COPY build/update-dcgm.py .
-
-# For the job exporter
-ENV NERDCTL_VERSION=2.1.3
-RUN apt-get update && apt-get install --no-install-recommends -y wget ca-certificates
+ENV NERDCTL_VERSION=2.2.1
 RUN wget -O /tmp/nerdctl.tar.gz https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-${TARGETARCH}.tar.gz && \
     mkdir -p /tmp/nerdctl && \
     tar -xzvf /tmp/nerdctl.tar.gz -C /tmp/nerdctl && \
     mv /tmp/nerdctl/nerdctl /usr/local/bin/nerdctl && \
     mkdir -p /job_exporter && \
     rm -rf /tmp/nerdctl*
+
+RUN python3 -m pip install prometheus_client psutil filelock
+
+COPY src/Moneo /Moneo
+
+ENV PATH="${PATH}:/opt/rocm/bin"
+COPY build/moneo-*-exporter_entrypoint.sh ./
+
+RUN [ -d /opt/rocm/lib ] && echo "/opt/rocm/lib" > /etc/ld.so.conf.d/rocm.conf; \
+    [ -d /opt/rocm/rdc/lib ] && echo "/opt/rocm/rdc/lib" >> /etc/ld.so.conf.d/rocm.conf; \
+    [ -d /opt/rocm/llvm/lib ] && echo "/opt/rocm/llvm/lib" >> /etc/ld.so.conf.d/rocm.conf
+
+RUN ldconfig
 
 COPY requirements.txt /job_exporter/
 RUN pip3 install -r /job_exporter/requirements.txt
