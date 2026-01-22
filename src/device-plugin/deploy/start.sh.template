@@ -31,6 +31,8 @@ pushd $(dirname "$0") > /dev/null
 
 { curl -s https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.15.0/deployments/static/nvidia-device-plugin.yml \
 | sed 's|nvcr.io/nvidia/k8s-device-plugin:v0.15.0|{{ cluster_cfg['cluster']['docker-registry']['prefix'] }}k8s-nvidia-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|' \
+| sed -E 's/^([[:space:]]*)name: nvidia-device-plugin-ctr$/&\
+\1imagePullPolicy: Always/' \
 | sed -E '/^[[:space:]]*allowPrivilegeEscalation: false/ {
     h
     s/^([[:space:]]*)allowPrivilegeEscalation: false.*$/\1privileged: false/
@@ -50,6 +52,8 @@ YAML
 {% if 'amd.com/gpu' in cluster_cfg['device-plugin']['devices'] %}
 
 { curl -s https://raw.githubusercontent.com/ROCm/k8s-device-plugin/master/k8s-ds-amdgpu-dp.yaml \
+| sed -E 's/^([[:space:]]*)name: amdgpu-dp-cntr$/&\
+\1imagePullPolicy: Always/' \
 | sed 's|rocm/k8s-device-plugin|{{ cluster_cfg['cluster']['docker-registry']['prefix'] }}k8s-rocm-device-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|';
   cat <<'YAML'
       imagePullSecrets:
@@ -84,6 +88,7 @@ kubectl apply --overwrite=true -f device-plugin.yaml || exit $?
 
 kubectl apply --overwrite=true -f rdma-devices.yaml || exit $?
 { curl -s https://raw.githubusercontent.com/Mellanox/k8s-rdma-shared-dev-plugin/v1.4.0/deployment/k8s/base/daemonset.yaml \
+| sed 's|imagePullPolicy: IfNotPresent|imagePullPolicy: Always|' \
 | sed 's|ghcr.io/mellanox/k8s-rdma-shared-dev-plugin|{{ cluster_cfg['cluster']['docker-registry']['prefix'] }}k8s-rdma-shared-dev-plugin:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}|';
   cat <<'YAML'
       imagePullSecrets:
