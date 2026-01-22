@@ -39,6 +39,7 @@ spec:
       containers:
       - image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}k8s-host-device-plugin:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         name: k8s-host-device-plugin-ctr
+        imagePullPolicy: Always
         securityContext:
           privileged: true
         volumeMounts:
