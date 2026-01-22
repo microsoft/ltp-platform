@@ -23,7 +23,6 @@ const runtimeEnv = require('./runtime-env');
 const launcherConfig = require('@pai/config/launcher');
 const createError = require('@pai/utils/error');
 const protocolSecret = require('@pai/utils/protocolSecret');
-const userModel = require('@pai/models/v2/user');
 const tokenModel = require('@pai/models/token');
 const storageModel = require('@pai/models/v2/storage');
 const logger = require('@pai/config/logger');
@@ -1135,6 +1134,8 @@ const get = async (frameworkName, jobAttemptId) => {
 };
 
 const put = async (frameworkName, config, rawConfig) => {
+  // Lazy load to avoid circular dependency
+  const userModel = require('@pai/models/v2/user');
   const [userName] = frameworkName.split(/~(.+)/);
 
   const virtualCluster =
