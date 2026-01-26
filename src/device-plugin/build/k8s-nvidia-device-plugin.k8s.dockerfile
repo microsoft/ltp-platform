@@ -19,7 +19,7 @@ WORKDIR /usr/src/k8s-nvidia-device-plugin
 
 RUN make PREFIX=/artifacts cmds
 
-FROM nvcr.io/nvidia/distroless/go:v3.2.2-dev AS application
+FROM nvcr.io/nvidia/distroless/go:v4.0.0-dev AS application
 
 USER 0:0
 SHELL ["/busybox/sh", "-c"]
