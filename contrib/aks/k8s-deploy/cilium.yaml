@@ -903,7 +903,7 @@ spec:
           type: Unconfined
       containers:
       - name: cilium-agent
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6"
+        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6-update"
         imagePullPolicy: Always
         command:
         - cilium-agent
@@ -1067,7 +1067,7 @@ spec:
         
       initContainers:
       - name: config
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6"
+        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6-update"
         imagePullPolicy: Always
         command:
         - cilium-dbg
@@ -1090,7 +1090,7 @@ spec:
       # Required to mount cgroup2 filesystem on the underlying Kubernetes node.
       # We use nsenter command with host's cgroup and mount namespaces enabled.
       - name: mount-cgroup
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6"
+        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6-update"
         imagePullPolicy: Always
         env:
         - name: CGROUP_ROOT
@@ -1127,7 +1127,7 @@ spec:
             #drop:
             #  - ALL
       - name: apply-sysctl-overwrites
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6"
+        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6-update"
         imagePullPolicy: Always
         env:
         - name: BIN_PATH
@@ -1165,7 +1165,7 @@ spec:
       # from a privileged container because the mount propagation bidirectional
       # only works from privileged containers.
       - name: mount-bpf-fs
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6"
+        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6-update"
         imagePullPolicy: Always
         args:
         - 'mount | grep "/sys/fs/bpf type bpf" || mount -t bpf bpf /sys/fs/bpf'
@@ -1181,7 +1181,7 @@ spec:
           mountPath: /sys/fs/bpf
           mountPropagation: Bidirectional
       - name: clean-cilium-state
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6"
+        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6-update"
         imagePullPolicy: Always
         command:
         - /init-container.sh
@@ -1228,7 +1228,7 @@ spec:
           mountPath: /var/run/cilium # wait-for-kube-proxy
       # Install the CNI binaries in an InitContainer so we don't have a writable host mount in the agent
       - name: install-cni-binaries
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6"
+        image: "openpaistatic.azurecr.io/cilium/cilium:v1.18.6-update"
         imagePullPolicy: Always
         command:
           - "/install-plugin.sh"
@@ -1412,7 +1412,7 @@ spec:
           type: Unconfined
       containers:
       - name: cilium-envoy
-        image: "openpaistatic.azurecr.io/cilium/cilium-envoy:v1.35.9-1767794330"
+        image: "openpaistatic.azurecr.io/cilium/cilium-envoy:v1.35.9-1767794330-update"
         imagePullPolicy: Always
         command:
         - /usr/bin/cilium-envoy-starter
@@ -1590,7 +1590,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: cilium-operator
-        image: "openpaistatic.azurecr.io/cilium/operator-generic:v1.18.6"
+        image: "openpaistatic.azurecr.io/cilium/operator-generic:v1.18.6-update"
         imagePullPolicy: Always
         command:
         - cilium-operator-generic
