@@ -14,7 +14,30 @@
 # NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+FROM node:20 AS build
 
+ARG TARGETOS
+ARG TARGETARCH
+
+ENV GOVERSION=1.25.3
+ENV PLUGINVERSION=v3.7.0
+
+ENV GOPATH=/usr/local/go
+ENV GOBIN=$GOPATH/bin
+ENV PATH=$GOBIN:$PATH
+
+RUN wget https://go.dev/dl/go${GOVERSION}.linux-${TARGETARCH}.tar.gz && \
+    tar -C /usr/local -xzf go${GOVERSION}.linux-${TARGETARCH}.tar.gz
+
+WORKDIR /usr/src/plugin
+
+RUN git clone --branch ${PLUGINVERSION} --depth 1 https://github.com/grafana/grafana-infinity-datasource.git /usr/src/plugin
+
+RUN go install github.com/magefile/mage@latest
+
+RUN yarn && yarn build
+
+RUN mage build:linux
 
 FROM ubuntu:22.04
 
@@ -40,9 +63,7 @@ RUN \
 
 RUN apt-get update && apt-get upgrade -y
 
-RUN grafana-cli plugins install yesoreyeram-infinity-datasource && ls /var/lib/grafana/plugins
-RUN mkdir ${GF_PLUGIN_DIR}
-RUN mv /var/lib/grafana/plugins/yesoreyeram-infinity-datasource /grafana-plugins
+COPY --from=build /usr/src/plugin/dist ${GF_PLUGIN_DIR}/yesoreyeram-infinity-datasource
 
 COPY src/run-grafana.sh /usr/local/bin
 
