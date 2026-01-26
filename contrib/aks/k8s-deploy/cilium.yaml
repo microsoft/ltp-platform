@@ -1590,7 +1590,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: cilium-operator
-        image: "openpaistatic.azurecr.io/cilium/operator-generic:v1.18.6-update"
+        image: "openpaistatic.azurecr.io/cilium/operator-generic:v1.18.6"
         imagePullPolicy: Always
         command:
         - cilium-operator-generic
