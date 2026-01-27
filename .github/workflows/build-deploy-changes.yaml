@@ -8,6 +8,7 @@ on:
   push:
     branches: [main, dev, "release/*"]
   pull_request:
+    types: [opened, reopened, ready_for_review]
     branches: [main, dev, "release/*"]
 
 env:
