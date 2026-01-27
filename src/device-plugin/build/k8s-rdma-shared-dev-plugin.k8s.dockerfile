@@ -22,6 +22,7 @@ WORKDIR /usr/src/k8s-rdma-shared-dp
 RUN go mod download && \
     go mod edit \
         -require=github.com/opencontainers/runc@v1.2.8 \
+        -require=golang.org/x/net@v0.38.0 \
         -require=github.com/opencontainers/runtime-spec@v1.2.0 && \
     go mod tidy -go=1.24.11
 
