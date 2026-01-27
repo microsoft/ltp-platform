@@ -37,7 +37,13 @@ RUN go install github.com/magefile/mage@latest
 
 RUN yarn && yarn build
 
-RUN mage build:linux
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+  mage build:linux; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+  mage build:linuxARM64; \
+    else \
+  echo "Unsupported architecture: $TARGETARCH" && exit 1; \
+    fi
 
 FROM ubuntu:22.04
 
