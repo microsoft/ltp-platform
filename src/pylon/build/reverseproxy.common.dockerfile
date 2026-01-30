@@ -1,5 +1,15 @@
+FROM golang:1.24 AS builder
+
+RUN git clone --branch v0.66.0 --depth 1 https://github.com/fatedier/frp.git /frp
+WORKDIR /frp
+
+RUN go get github.com/quic-go/quic-go@v0.57.0 && \
+    go get golang.org/x/crypto@v0.45.0 && \
+    go mod tidy
+
+RUN make frpc
+
 FROM ubuntu:22.04
-ARG TARGETARCH
 
 # Set up working directory
 WORKDIR /app
@@ -13,16 +23,10 @@ RUN apt-get update && \
 RUN apt-get -y install build-essential python3 python3-pip
 RUN pip3 install jinja2
 
-ENV FRP_VERSION=0.66.0
-# Download the binary from its GitHub releases
-RUN curl -L -o proxy.tar.gz https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_${FRP_VERSION}_linux_${TARGETARCH}.tar.gz && \
-    tar -zxvf proxy.tar.gz --strip-components=1 -C /app && \
-    mv frpc proxy-client && \
-    rm proxy.tar.gz && \
-    rm frp*
+COPY --from=builder /frp/bin/frpc /app/proxy-client
+RUN chmod +x /app/proxy-client
 
 # Ensure the binary is executable
 RUN chmod +x /app/proxy-client
-
 
 CMD ["/bin/bash"]
