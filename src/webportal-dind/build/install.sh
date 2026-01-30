@@ -62,6 +62,12 @@ curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VE
 chmod +x /usr/local/bin/docker-compose
 ln -s /usr/local/bin/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
 
+# === Update runc version to remove security issues ===
+RUNC_VERSION="1.4.0"
+wget -O runc "https://github.com/opencontainers/runc/releases/download/v${RUNC_VERSION}/runc.amd64"
+chmod +x runc
+mv runc /usr/local/bin/runc
+
 mkdir -p /var/lib/docker
 
 # -------------------------------
