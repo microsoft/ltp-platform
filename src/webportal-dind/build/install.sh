@@ -9,7 +9,7 @@ set -eux
 DOCKER_CHANNEL="stable"
 DOCKER_VERSION="29.2.0"
 DOCKER_COMPOSE_VERSION="v5.0.2"
-BUILDX_VERSION="v0.31.0"
+BUILDX_VERSION="v0.31.1"
 
 # Logging functions
 function log_info() {
