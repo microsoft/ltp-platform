@@ -32,6 +32,9 @@ apt-get update
 apt-get install -y \
   ca-certificates wget curl iptables supervisor gnupg sudo
 
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
 # === Set iptables-legacy if needed ===
 if [[ "$UBUNTU_VERSION" != "20.04" ]]; then
   update-alternatives --set iptables /usr/sbin/iptables-legacy
@@ -61,12 +64,6 @@ curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VE
   -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 ln -s /usr/local/bin/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
-
-# === Update runc version to remove security issues ===
-RUNC_VERSION="1.4.0"
-wget -O runc "https://github.com/opencontainers/runc/releases/download/v${RUNC_VERSION}/runc.amd64"
-chmod +x runc
-mv runc /usr/local/bin/runc
 
 mkdir -p /var/lib/docker
 
