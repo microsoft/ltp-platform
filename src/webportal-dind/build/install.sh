@@ -8,8 +8,6 @@ set -eux
 
 DOCKER_CHANNEL="stable"
 DOCKER_VERSION="29.2.0"
-DOCKER_COMPOSE_VERSION="v5.0.2"
-BUILDX_VERSION="v0.31.1"
 
 # Logging functions
 function log_info() {
@@ -40,7 +38,7 @@ if [[ "$UBUNTU_VERSION" != "20.04" ]]; then
   update-alternatives --set iptables /usr/sbin/iptables-legacy
 fi
 
-# === Install Docker + buildx ===
+# === Install Docker  ===
 arch="$(uname -m)"
 case "$arch" in
   x86_64) dockerArch='x86_64'; buildx_arch='linux-amd64' ;;
@@ -54,18 +52,7 @@ wget -O docker.tgz "https://download.docker.com/linux/static/${DOCKER_CHANNEL}/$
 tar --extract --file docker.tgz --strip-components 1 --directory /usr/local/bin/
 rm docker.tgz
 
-wget -O docker-buildx "https://github.com/docker/buildx/releases/download/${BUILDX_VERSION}/buildx-${BUILDX_VERSION}.${buildx_arch}"
-mkdir -p /usr/local/lib/docker/cli-plugins
-chmod +x docker-buildx
-mv docker-buildx /usr/local/lib/docker/cli-plugins/docker-buildx
-
-# === Install Docker Compose ===
-curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" \
-  -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-ln -s /usr/local/bin/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
-
-mkdir -p /var/lib/docker
+mkdir -p /var/lib/docker-vfs
 
 # -------------------------------
 # Create modprobe shim
