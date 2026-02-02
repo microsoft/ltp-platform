@@ -21,6 +21,8 @@ FROM ubuntu:22.04
 # Preparation
 #
 
+ARG NIGIXVERSION=1.26.3
+
 WORKDIR /root/
 
 RUN apt-get update && \
@@ -28,9 +30,9 @@ RUN apt-get update && \
 
 RUN pip3 install jinja2
 
-# nginx version 1.26.0
-RUN wget https://nginx.org/download/nginx-1.26.0.tar.gz && \
-    tar -zxf nginx-1.26.0.tar.gz
+# Get nginx source code
+RUN wget https://nginx.org/download/nginx-${NIGIXVERSION}.tar.gz && \
+    tar -zxf nginx-${NIGIXVERSION}.tar.gz
 
 # PCRE version PCRE2-10.43
 RUN wget https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.43/pcre2-10.43.tar.gz && \
@@ -47,13 +49,14 @@ RUN wget https://www.openssl.org/source/openssl-3.3.0.tar.gz && \
 # subs_filter
 RUN git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module.git
 
-RUN apt update && apt upgrade -y
+RUN apt update && apt upgrade -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 #
 # Configure nginx build
 #
 
-WORKDIR /root/nginx-1.26.0
+WORKDIR /root/nginx-${NIGIXVERSION}
 
 RUN ./configure \
   # Basic configurations
