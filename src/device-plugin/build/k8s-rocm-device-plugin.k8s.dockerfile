@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM docker.io/golang:1.24.11-alpine3.21 as builder
+FROM docker.io/golang:1.24.12-alpine as builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -17,7 +17,7 @@ RUN git clone --branch v1.31.0.7 --single-branch https://github.com/ROCm/k8s-dev
 
 WORKDIR /go/src/github.com/ROCm/k8s-device-plugin
 
-RUN go mod edit -go=1.24 -toolchain=go1.24.11
+RUN go mod edit -go=1.24 -toolchain=go1.24.12
 
 RUN go mod edit \
     -require=github.com/go-logr/logr@v1.4.3 \
@@ -29,7 +29,7 @@ RUN go mod edit \
     -require=k8s.io/apimachinery@v0.33.1 \
     -require=k8s.io/kubelet@v0.33.1 \
     -require=sigs.k8s.io/controller-runtime@v0.21.0
-RUN go mod tidy -go=1.24.11
+RUN go mod tidy -go=1.24.12
 
 WORKDIR /go/src/github.com/ROCm/k8s-device-plugin/cmd/k8s-device-plugin
 
