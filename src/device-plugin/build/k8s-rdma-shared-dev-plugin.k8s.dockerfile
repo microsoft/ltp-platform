@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.24.11-alpine as builder
+FROM golang:1.24.12-alpine as builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -24,7 +24,7 @@ RUN go mod download && \
         -require=github.com/opencontainers/runc@v1.2.8 \
         -require=golang.org/x/net@v0.38.0 \
         -require=github.com/opencontainers/runtime-spec@v1.2.0 && \
-    go mod tidy -go=1.24.11
+    go mod tidy -go=1.24.12
 
 RUN make clean && \
     make build
