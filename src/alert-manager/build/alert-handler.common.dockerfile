@@ -8,10 +8,10 @@ RUN npm install -g npm@latest
 
 WORKDIR /usr/src/app
 
-COPY ./src/alert-handler/package.json ./src/alert-handler/yarn.lock* ./
+COPY ./src/alert-handler/package.json ./src/alert-handler/yarn.lock* ./src/alert-handler/.yarnrc.yml ./
 
 RUN corepack enable && corepack install -g yarn@4.2.2
-RUN yarn install --immutable
+RUN yarn workspaces focus --production
 
 COPY ./src/alert-handler .
 
