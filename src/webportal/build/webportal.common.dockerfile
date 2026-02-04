@@ -52,11 +52,17 @@ COPY --from=builder /usr/src/app/node_modules_prod ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/server ./server
 COPY --from=builder /usr/src/app/config ./config
+COPY --from=builder /usr/src/app/src/app/env.js.template ./src/app/env.js.template
 COPY --from=builder /usr/src/app/package.json ./package.json
 COPY --from=builder /usr/src/app/version ./version
 
+# Create a simple env.js generator script using Node.js (no npm needed)
+RUN echo 'const fs = require("fs"); \
+const template = fs.readFileSync("src/app/env.js.template", "utf8"); \
+const result = template.replace(/\$\{([^}]+)\}/g, (_, key) => process.env[key] || ""); \
+fs.writeFileSync("dist/env.js", result);' > /generate-env.js
 
 EXPOSE ${SERVER_PORT}
 
-# Use node directly instead of npm
-CMD ["node", "server"]
+# Generate env.js at startup using Node.js, then start server
+CMD node /generate-env.js && node server
