@@ -22,12 +22,11 @@ RUN npm install -g npm@latest
 
 WORKDIR /usr/src/app
 
-COPY package.json yarn.lock* .yarnrc.yml ./
+# Copy all files first (needed for preinstall script that copies openpaidbsdk)
+COPY . .
 
 RUN corepack enable && corepack install -g yarn@4.2.2
 RUN yarn workspaces focus --production
-
-COPY . .
 
 # Production stage - use slim image
 FROM node:20-slim
