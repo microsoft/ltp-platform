@@ -22,10 +22,16 @@ RUN npm install -g npm@latest
 
 WORKDIR /usr/src/app
 
-# Copy all files first (needed for preinstall script that copies openpaidbsdk)
+# Copy all files first (needed for local dependencies)
 COPY . .
 
 RUN corepack enable && corepack install -g yarn@4.2.2
+
+# First install all dependencies (runs preinstall/postinstall scripts)
+RUN yarn install
+
+# Now remove node_modules and install only production dependencies
+RUN rm -rf node_modules
 RUN yarn workspaces focus --production
 
 # Production stage - use slim image
