@@ -48,18 +48,13 @@ ENV NODE_ENV=production \
 # Copy only production dependencies
 COPY --from=builder /usr/src/app/node_modules_prod ./node_modules
 
-# Copy built assets and necessary files
+# Copy built assets and necessary runtime files
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/server ./server
+COPY --from=builder /usr/src/app/config ./config
 COPY --from=builder /usr/src/app/package.json ./package.json
 COPY --from=builder /usr/src/app/version ./version
 
-# Clean up apt cache
-RUN apt-get update && apt upgrade -y && \
-    apt purge -y subversion && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 EXPOSE ${SERVER_PORT}
 
