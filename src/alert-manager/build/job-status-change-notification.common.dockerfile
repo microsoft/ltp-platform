@@ -8,12 +8,18 @@ RUN npm install -g npm@latest
 
 WORKDIR /usr/src/app
 
-COPY ./src/job-status-change-notification/package.json ./src/job-status-change-notification/yarn.lock* ./src/job-status-change-notification/.yarnrc.yml ./
+# Copy all files first (needed for local file dependencies like openpaidbsdk)
+COPY ./src/job-status-change-notification .
 
 RUN corepack enable && corepack install -g yarn@4.2.2
-RUN yarn workspaces focus --production
 
-COPY ./src/job-status-change-notification .
+# Install all dependencies including devDependencies
+RUN yarn install
+
+# Manually remove devDependencies from node_modules
+RUN for dep in $(node -pe "Object.keys(require('./package.json').devDependencies || {}).join(' ')"); do \
+      rm -rf node_modules/$dep; \
+    done
 
 # Production stage - use slim image
 FROM node:20-slim
