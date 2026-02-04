@@ -8,7 +8,7 @@ ARG TARGETARCH
 
 WORKDIR /go
 
-RUN git clone --branch v1.33.1 --depth 1 https://github.com/kubernetes/kubernetes.git kubernetes
+RUN git clone --branch v1.35.0 --depth 1 https://github.com/kubernetes/kubernetes.git kubernetes
 
 WORKDIR /go/kubernetes
 
