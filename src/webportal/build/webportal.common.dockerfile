@@ -38,7 +38,7 @@ RUN npm run build
 RUN yarn install --production=true --modules-folder ./node_modules_prod
 
 # Production stage - use slim image
-FROM node:carbon
+FROM node:carbon-slim
 
 WORKDIR /usr/src/app
 
