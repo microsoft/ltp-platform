@@ -273,7 +273,7 @@ def get_core_numa_mapping(core_count):
     numa_mapping = {}
     lines = output.split('\n')
     for line in lines:
-        if 'node ' in line and 'cpus' in line:
+        if 'node ' in line and 'cpus' in line and not line.strip().endswith('cpus:'):
             current_numa_domain = int(re.search(r'node (\d+)', line).group(1))
             if ':' in line:
                 cpus_str = line.split(': ')[1].split()
