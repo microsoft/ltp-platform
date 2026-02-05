@@ -20,7 +20,6 @@ const logger = require('@pai/config/logger');
 const groupModel = require('@pai/models/v2/group');
 const k8sModel = require('@pai/models/kubernetes/kubernetes');
 const { Mutex } = require('async-mutex');
-const { job } = require('@pai/models/v2/job');
 
 const USER_NAMESPACE = process.env.PAI_USER_NAMESPACE || 'pai-user-v2';
 
@@ -44,6 +43,9 @@ const cache = new Map();
 const readMutex = new Mutex();
 
 async function getHistoryVCs(name, grouplist, retrieveFromHistory=true) {
+  // Lazy require to avoid circular dependency
+  const { job } = require('@pai/models/v2/job');
+
   // Retrieve VC list from the user's job history
   let vcsFromJob = [];
   if (retrieveFromHistory) {
