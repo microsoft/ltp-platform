@@ -5,7 +5,7 @@ permissions:
 
 on:
   pull_request:
-    types: [closed]
+    types: [opened, reopened, closed]
     branches: ["release/*"]
   release:
     types: [published]
@@ -26,7 +26,7 @@ jobs:
     runs-on: [self-hosted, paicicd]
     timeout-minutes: 120
     environment: auto-test
-    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+    if: github.event_name != 'pull_request' || ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.pull_request.merged == true)
     container:
       image: ubuntu:latest
       volumes:
