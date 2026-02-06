@@ -18,7 +18,6 @@
 // module dependencies
 const status = require('statuses');
 const createError = require('@pai/utils/error');
-const user = require('@pai/models/v2/user');
 const secret = require('@pai/models/kubernetes/k8s-secret');
 const kubernetes = require('@pai/models/kubernetes/kubernetes');
 const logger = require('@pai/config/logger');
@@ -178,6 +177,9 @@ const convertVolumeDetail = async (pvc) => {
 };
 
 const list = async (userName, filterDefault = false) => {
+  // Lazy require to avoid circular dependency
+  const user = require('@pai/models/v2/user');
+
   let response;
   if (pvcCache.has('storageList')) {
     logger.info('Read persistant volume claim list from cache');
@@ -247,6 +249,9 @@ const list = async (userName, filterDefault = false) => {
 };
 
 const get = async (storageName, userName) => {
+  // Lazy require to avoid circular dependency
+  const user = require('@pai/models/v2/user');
+
   let response;
   if (pvcCache.has(storageName)) {
     logger.info(`Read persistant volume claim from cache: ${storageName}`);
