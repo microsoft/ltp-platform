@@ -135,8 +135,11 @@ RUN set -eux; \
     python3 -m pip install --no-cache-dir \
         --no-index --find-links=/wheels \
         prometheus_client psutil filelock && \
+    # Mark important packages as manual to prevent removal
+    apt-mark manual rdc amd-smi-lib 2>/dev/null || true; \
     apt-get remove -y python3-pip; \
-    apt-get autoremove -y; \
+    # Set environment variable to allow sudo removal during autoremove
+    SUDO_FORCE_REMOVE=yes apt-get autoremove -y; \
     apt-get clean; \
     rm -rf /wheels /root/.cache /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
 
