@@ -19,7 +19,7 @@
 ############################
 # builder: only for compiling python wheels
 ############################
-FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04 AS builder
+FROM ubuntu:22.04 AS builder
 
 ARG TARGETARCH
 
@@ -44,9 +44,9 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 
 
 ############################
-# runtime: final image
+# runtime: use minimal CUDA base (includes nvidia-smi and CUDA libs)
 ############################
-FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04
+FROM nvcr.io/nvidia/cuda:12.0.1-base-ubuntu22.04
 
 ARG TARGETARCH
 ARG ROCM_VERSION=6.2.2
@@ -62,19 +62,18 @@ RUN set -eux; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         bash \
         ca-certificates \
-        curl \
-        gnupg \
-        wget \
         python3 \
-        python3-pip; \
+        kmod; \
     apt-get clean; \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
 
 # --------------------------
 # ROCm (runtime only)
 # --------------------------
 RUN set -eux; \
     if [ "$TARGETARCH" = "amd64" ]; then \
+        apt-get update; \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl gnupg; \
         printf "Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600" \
             > /etc/apt/preferences.d/rocm-pin-600; \
         curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -; \
@@ -84,11 +83,15 @@ RUN set -eux; \
             > /etc/apt/sources.list.d/amdgpu.list; \
         apt-get update; \
         DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rdc; \
-        rm -rf /var/lib/apt/lists/*; \
+        apt-get remove -y curl gnupg; \
+        apt-get autoremove -y; \
+        apt-get clean; \
+        rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*; \
     fi
 
 # --------------------------
-# DCGM (runtime only, same layer clean)
+# DCGM (minimal runtime, monitoring only)
+# Note: CUDA base image already provides nvidia-smi and CUDA libraries
 # --------------------------
 RUN set -eux; \
     apt-get update; \
@@ -97,19 +100,23 @@ RUN set -eux; \
         datacenter-gpu-manager-4-core=${DCGM_TARGET_VERSION} \
         datacenter-gpu-manager-4-proprietary-cuda12=${DCGM_TARGET_VERSION}; \
     apt-get clean; \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
 
 # --------------------------
 # nerdctl
 # --------------------------
 ENV NERDCTL_VERSION=2.2.1
 RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends wget; \
     wget -O /tmp/nerdctl.tar.gz \
         https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-${TARGETARCH}.tar.gz; \
-    mkdir -p /tmp/nerdctl; \
-    tar -xzf /tmp/nerdctl.tar.gz -C /tmp/nerdctl; \
-    mv /tmp/nerdctl/nerdctl /usr/local/bin/nerdctl; \
-    rm -rf /tmp/nerdctl* /tmp/nerdctl.tar.gz
+    tar -xzf /tmp/nerdctl.tar.gz -C /usr/local/bin nerdctl; \
+    chmod +x /usr/local/bin/nerdctl; \
+    apt-get remove -y wget; \
+    apt-get autoremove -y; \
+    apt-get clean; \
+    rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apt/*
 
 # --------------------------
 # python runtime deps (from wheels)
@@ -118,14 +125,20 @@ RUN set -eux; \
 COPY --from=builder /w/wheels /wheels
 COPY requirements.txt /job_exporter/requirements.txt
 
-RUN python3 -m pip install --no-cache-dir -U pip && \  
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3-pip; \
+    python3 -m pip install --no-cache-dir -U pip && \
     python3 -m pip install --no-cache-dir \
         --no-index --find-links=/wheels \
         -r /job_exporter/requirements.txt && \
     python3 -m pip install --no-cache-dir \
         --no-index --find-links=/wheels \
         prometheus_client psutil filelock && \
-    rm -rf /wheels
+    apt-get remove -y python3-pip; \
+    apt-get autoremove -y; \
+    apt-get clean; \
+    rm -rf /wheels /root/.cache /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
 
 # --------------------------
 # app files
