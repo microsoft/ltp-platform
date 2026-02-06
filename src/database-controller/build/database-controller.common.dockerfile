@@ -34,11 +34,13 @@ COPY --from=builder /database-controller/src .
 COPY --from=builder /database-controller/sdk ../sdk
 COPY --from=builder /database-controller/version ../version
 
+# Remove npm and corepack to eliminate security warnings
 # Clean up apt cache
 RUN apt-get update && apt upgrade -y && \
     apt purge -y subversion && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /usr/local/lib/node_modules
 
 CMD ["sleep", "infinity"]

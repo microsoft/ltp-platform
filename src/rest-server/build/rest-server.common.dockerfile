@@ -50,12 +50,14 @@ ENV NODE_ENV=production \
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app .
 
+# Remove npm and corepack to eliminate security warnings
 # Clean up apt cache
 RUN apt-get update && apt upgrade -y && \
     apt purge -y subversion && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /usr/local/lib/node_modules
 
 EXPOSE ${SERVER_PORT}
 

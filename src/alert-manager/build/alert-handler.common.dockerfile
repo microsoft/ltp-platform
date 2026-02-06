@@ -26,6 +26,7 @@ ENV NODE_ENV=production
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY ./src/alert-handler .
 
+# Remove npm and corepack to eliminate security warnings
 # Install python and dependencies
 RUN apt-get update &&  apt upgrade -y && \
     apt purge -y subversion && \
@@ -34,7 +35,8 @@ RUN apt-get update &&  apt upgrade -y && \
     apt-get remove -y python3-pip && \
     apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /usr/local/lib/node_modules
 
 # Use node directly instead of npm
 ENTRYPOINT ["node", "index.js"]
