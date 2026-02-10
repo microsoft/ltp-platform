@@ -80,6 +80,9 @@ RUN set -eux; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         cuda-cudart-12-0 \
         cuda-compat-12-0; \
+    # Install nvidia-smi and utils (automatically match the version from CUDA repo)
+    NVIDIA_UTILS_VERSION=$(apt-cache search --names-only '^nvidia-utils-[0-9]+$' | sort -V | tail -1 | awk '{print $1}'); \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ${NVIDIA_UTILS_VERSION}; \
     # Remove curl and gnupg after CUDA setup
     apt-get remove -y curl gnupg; \
     apt-get autoremove -y; \
