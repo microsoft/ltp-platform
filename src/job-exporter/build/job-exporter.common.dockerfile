@@ -44,9 +44,9 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 
 
 ############################
-# runtime: use minimal CUDA base (includes nvidia-smi and CUDA libs)
+# runtime: minimal Ubuntu base with only essential NVIDIA components
 ############################
-FROM nvcr.io/nvidia/cuda:12.0.1-base-ubuntu22.04
+FROM ubuntu:22.04
 
 ARG TARGETARCH
 ARG ROCM_VERSION=6.2.2
@@ -54,7 +54,7 @@ ARG AMDGPU_VERSION=6.2.2
 ARG DCGM_TARGET_VERSION=1:4.4.1-1
 
 # --------------------------
-# base + REQUIRED apt upgrade
+# base + NVIDIA CUDA repository setup
 # --------------------------
 RUN set -eux; \
     apt-get update; \
@@ -62,8 +62,27 @@ RUN set -eux; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         bash \
         ca-certificates \
+        curl \
+        gnupg \
         python3 \
         kmod; \
+    # Add NVIDIA CUDA repository
+    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub | gpg --dearmor -o /usr/share/keyrings/cuda-archive-keyring.gpg; \
+    echo "deb [signed-by=/usr/share/keyrings/cuda-archive-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64 /" > /etc/apt/sources.list.d/cuda.list; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
+
+# --------------------------
+# Install minimal CUDA components (only what's needed for nvidia-smi and DCGM)
+# --------------------------
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        cuda-cudart-12-0 \
+        cuda-compat-12-0; \
+    # Remove curl and gnupg after CUDA setup
+    apt-get remove -y curl gnupg; \
+    apt-get autoremove -y; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
 
@@ -91,7 +110,7 @@ RUN set -eux; \
 
 # --------------------------
 # DCGM (minimal runtime, monitoring only)
-# Note: CUDA base image already provides nvidia-smi and CUDA libraries
+# Note: DCGM packages will pull in necessary CUDA dependencies including nvidia-smi
 # --------------------------
 RUN set -eux; \
     apt-get update; \
@@ -99,8 +118,12 @@ RUN set -eux; \
         datacenter-gpu-manager-4-cuda12=${DCGM_TARGET_VERSION} \
         datacenter-gpu-manager-4-core=${DCGM_TARGET_VERSION} \
         datacenter-gpu-manager-4-proprietary-cuda12=${DCGM_TARGET_VERSION}; \
+    # Clean up any extra CUDA packages we don't need
     apt-get clean; \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/* \
+        /usr/local/cuda-12.0/targets/x86_64-linux/lib/*.a \
+        /usr/local/cuda-12.0/nsight* \
+        /usr/local/cuda-12.0/libnvvp
 
 # --------------------------
 # nerdctl
@@ -149,3 +172,25 @@ RUN set -eux; \
 COPY src/Moneo /Moneo
 COPY src/*.py /job_exporter/
 COPY build/moneo-*-exporter_entrypoint.sh ./
+
+# --------------------------
+# Final cleanup: remove unnecessary CUDA files to reduce image size
+# --------------------------
+RUN set -eux; \
+    # Remove CUDA static libraries (we only need shared libs for runtime)
+    find /usr/local/cuda-12.0 -name "*.a" -delete 2>/dev/null || true; \
+    find /usr/local/cuda-12.0 -name "*.la" -delete 2>/dev/null || true; \
+    # Remove CUDA development tools and samples
+    rm -rf /usr/local/cuda-12.0/nsight* \
+        /usr/local/cuda-12.0/libnvvp \
+        /usr/local/cuda-12.0/doc \
+        /usr/local/cuda-12.0/samples \
+        /usr/local/cuda-12.0/extras \
+        2>/dev/null || true; \
+    # Remove documentation and man pages
+    rm -rf /usr/share/doc/* \
+        /usr/share/man/* \
+        /usr/share/info/* \
+        2>/dev/null || true; \
+    # Final cache cleanup
+    rm -rf /var/cache/* /tmp/* /var/tmp/* 2>/dev/null || true
