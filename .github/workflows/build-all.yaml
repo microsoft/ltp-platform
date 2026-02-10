@@ -4,9 +4,8 @@ permissions:
   contents: read
 
 on:
-  push:
-    branches: ["release/*"]
   pull_request:
+    types: [opened, reopened, closed]
     branches: ["release/*"]
   release:
     types: [published]
@@ -15,7 +14,7 @@ on:
       branch:
         description: 'The branch name or tag to run the workflow on'
         required: true
-        default: 'main'
+        default: 'dev'
         type: string
 
 env:
@@ -27,6 +26,7 @@ jobs:
     runs-on: [self-hosted, paicicd]
     timeout-minutes: 120
     environment: auto-test
+    if: github.event_name != 'pull_request' || ( github.event.action == 'opened' || github.event.action == 'reopened' || github.event.pull_request.merged == true)
     container:
       image: ubuntu:latest
       volumes:
