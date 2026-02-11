@@ -44,9 +44,27 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 
 
 ############################
-# runtime: minimal Ubuntu base with only essential NVIDIA components
+# nerdctl-builder: build nerdctl from source
 ############################
-FROM ubuntu:22.04
+FROM golang:1.25.6 AS nerdctl-builder
+
+ARG TARGETARCH
+ARG NERDCTL_VERSION=2.2.1
+
+WORKDIR /build
+
+RUN set -eux; \
+    git clone --depth 1 --branch v${NERDCTL_VERSION} https://github.com/containerd/nerdctl.git .; \
+    make binaries; \
+    mkdir -p /opt/nerdctl; \
+    cp _output/nerdctl /opt/nerdctl/nerdctl; \
+    chmod +x /opt/nerdctl/nerdctl
+
+
+############################
+# runtime: minimal CUDA base with only essential components
+############################
+FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-base-ubuntu22.04
 
 ARG TARGETARCH
 ARG ROCM_VERSION=6.2.2
@@ -54,11 +72,11 @@ ARG AMDGPU_VERSION=6.2.2
 ARG DCGM_TARGET_VERSION=1:4.4.1-1
 
 # --------------------------
-# base + NVIDIA CUDA repository setup
+# Install all components in single layer for size optimization
 # --------------------------
 RUN set -eux; \
+    # Base setup
     apt-get update; \
-    apt-get upgrade -y; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         bash \
         ca-certificates \
@@ -66,36 +84,8 @@ RUN set -eux; \
         gnupg \
         python3 \
         kmod; \
-    # Add NVIDIA CUDA repository
-    curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub | gpg --dearmor -o /usr/share/keyrings/cuda-archive-keyring.gpg; \
-    echo "deb [signed-by=/usr/share/keyrings/cuda-archive-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64 /" > /etc/apt/sources.list.d/cuda.list; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
-
-# --------------------------
-# Install minimal CUDA components (only what's needed for nvidia-smi and DCGM)
-# --------------------------
-RUN set -eux; \
-    apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        cuda-cudart-12-0 \
-        cuda-compat-12-0; \
-    # Install nvidia-smi and utils (automatically match the version from CUDA repo)
-    NVIDIA_UTILS_VERSION=$(apt-cache search --names-only '^nvidia-utils-[0-9]+$' | sort -V | tail -1 | awk '{print $1}'); \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ${NVIDIA_UTILS_VERSION}; \
-    # Remove curl and gnupg after CUDA setup
-    apt-get remove -y curl gnupg; \
-    apt-get autoremove -y; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
-
-# --------------------------
-# ROCm (runtime only)
-# --------------------------
-RUN set -eux; \
+    # ROCm (runtime only) for AMD GPUs
     if [ "$TARGETARCH" = "amd64" ]; then \
-        apt-get update; \
-        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl gnupg; \
         printf "Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600" \
             > /etc/apt/preferences.d/rocm-pin-600; \
         curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -; \
@@ -105,44 +95,22 @@ RUN set -eux; \
             > /etc/apt/sources.list.d/amdgpu.list; \
         apt-get update; \
         DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rdc; \
-        apt-get remove -y curl gnupg; \
-        apt-get autoremove -y; \
-        apt-get clean; \
-        rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*; \
-    fi
-
-# --------------------------
-# DCGM (minimal runtime, monitoring only)
-# Note: DCGM packages will pull in necessary CUDA dependencies including nvidia-smi
-# --------------------------
-RUN set -eux; \
-    apt-get update; \
+    fi; \
+    # DCGM for GPU monitoring (NVIDIA)
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        datacenter-gpu-manager-4-cuda12=${DCGM_TARGET_VERSION} \
         datacenter-gpu-manager-4-core=${DCGM_TARGET_VERSION} \
+        datacenter-gpu-manager-4-cuda12=${DCGM_TARGET_VERSION} \
         datacenter-gpu-manager-4-proprietary-cuda12=${DCGM_TARGET_VERSION}; \
-    # Clean up any extra CUDA packages we don't need
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/* \
-        /usr/local/cuda-12.0/targets/x86_64-linux/lib/*.a \
-        /usr/local/cuda-12.0/nsight* \
-        /usr/local/cuda-12.0/libnvvp
-
-# --------------------------
-# nerdctl
-# --------------------------
-ENV NERDCTL_VERSION=2.2.1
-RUN set -eux; \
-    apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends wget; \
-    wget -O /tmp/nerdctl.tar.gz \
-        https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-${TARGETARCH}.tar.gz; \
-    tar -xzf /tmp/nerdctl.tar.gz -C /usr/local/bin nerdctl; \
-    chmod +x /usr/local/bin/nerdctl; \
-    apt-get remove -y wget; \
+    # Clean up everything in single layer
+    apt-get remove -y curl gnupg; \
     apt-get autoremove -y; \
     apt-get clean; \
-    rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apt/*
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
+
+# --------------------------
+# nerdctl (copy from nerdctl-builder)
+# --------------------------
+COPY --from=nerdctl-builder /opt/nerdctl/nerdctl /usr/local/bin/nerdctl
 
 # --------------------------
 # python runtime deps (from wheels)
