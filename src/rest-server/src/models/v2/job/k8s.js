@@ -549,7 +549,7 @@ const generateTaskRole = (
                 },
               ],
               securityContext: {
-                ...((dindMode) && { privileged: true }),
+                privileged: true,
                 capabilities: {
                   add: ['SYS_ADMIN', 'IPC_LOCK', 'DAC_READ_SEARCH'],
                   drop: ['MKNOD'],
