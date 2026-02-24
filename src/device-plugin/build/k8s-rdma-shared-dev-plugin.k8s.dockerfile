@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.24.12-alpine as builder
+FROM golang:1.24.13-alpine as builder
 
 ARG TARGETOS
 ARG TARGETARCH
