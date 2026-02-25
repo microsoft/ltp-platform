@@ -46,7 +46,7 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 ############################
 # nerdctl-builder: build nerdctl from source
 ############################
-FROM golang:1.25.6 AS nerdctl-builder
+FROM golang:1.25.7 AS nerdctl-builder
 
 ARG TARGETARCH
 ARG NERDCTL_VERSION=2.2.1
@@ -94,7 +94,7 @@ RUN set -eux; \
         echo "deb https://repo.radeon.com/amdgpu/$AMDGPU_VERSION/ubuntu jammy main" \
             > /etc/apt/sources.list.d/amdgpu.list; \
         apt-get update; \
-        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rdc; \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rdc amd-smi-lib; \
     fi; \
     # DCGM for GPU monitoring (NVIDIA)
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -129,9 +129,6 @@ RUN set -eux; \
     python3 -m pip install --no-cache-dir \
         --no-index --find-links=/wheels \
         prometheus_client psutil filelock && \
-    # Mark important packages as manual to prevent removal
-    apt-mark manual rdc amd-smi-lib 2>/dev/null || true; \
-    apt-get remove -y python3-pip; \
     # Set environment variable to allow sudo removal during autoremove
     SUDO_FORCE_REMOVE=yes apt-get autoremove -y; \
     apt-get clean; \
