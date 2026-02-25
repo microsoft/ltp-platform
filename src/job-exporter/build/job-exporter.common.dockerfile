@@ -121,7 +121,7 @@ COPY requirements.txt /job_exporter/requirements.txt
 
 RUN set -eux; \
     apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3-pip; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3-pip numactl; \
     python3 -m pip install --no-cache-dir -U pip && \
     python3 -m pip install --no-cache-dir \
         --no-index --find-links=/wheels \
