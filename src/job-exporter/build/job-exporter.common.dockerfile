@@ -77,6 +77,7 @@ ARG DCGM_TARGET_VERSION=1:4.4.1-1
 RUN set -eux; \
     # Base setup
     apt-get update; \
+    apt-get upgrade -y; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         bash \
         ca-certificates \
