@@ -1,8 +1,8 @@
 {
   "name": "database-controller",
   "version": "1.0.0",
-  "paiVersion": null,
-  "paiCommitVersion": null,
+  "paiVersion": "v1.8.1",
+  "paiCommitVersion": "daec9b56ba7a80cc9b9af9e65ee260cbb81c5f7d",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint --ext .js --ext .jsx ."
@@ -46,7 +46,7 @@
   "resolutions": {
     "tar-fs": "^3.1.1",
     "@eslint/plugin-kit": "^0.3.3",
-    "qs": "^6.14.1",
+    "qs": "^6.14.2",
     "lodash": "^4.17.23",
     "form-data": "^4.0.4"
   },
