@@ -15,13 +15,30 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM node:20
+# Build stage
+FROM node:20 AS builder
 
 RUN npm install -g npm@latest
 
-RUN apt update && apt upgrade -y
+WORKDIR /usr/src/app
 
-RUN apt purge -y subversion && apt autoremove -y
+# Copy all files first (needed for local dependencies)
+COPY . .
+
+RUN corepack enable && corepack install -g yarn@4.2.2
+
+# Install all dependencies including devDependencies
+RUN yarn install
+
+# Manually remove devDependencies from node_modules
+# This is more reliable than trying to reinstall
+RUN yarn plugin import https://raw.githubusercontent.com/yarnpkg/berry/master/packages/plugin-production-install/bin/%40yarnpkg/plugin-production-install.js || true
+RUN for dep in $(node -pe "Object.keys(require('./package.json').devDependencies || {}).join(' ')"); do \
+      rm -rf node_modules/$dep; \
+    done
+
+# Production stage - use slim image
+FROM node:20-slim
 
 WORKDIR /usr/src/app
 
@@ -29,11 +46,20 @@ ENV NODE_ENV=production \
     SERVER_PORT=8080 \
     UV_THREADPOOL_SIZE=8
 
-COPY . .
+# Copy only production dependencies and application code
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app .
 
-RUN corepack enable && corepack install -g yarn@4.2.2
-RUN yarn install
+# Remove npm and corepack to eliminate security warnings
+# Clean up apt cache
+RUN apt-get update && apt upgrade -y && \
+    apt purge -y subversion && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /usr/local/lib/node_modules
 
 EXPOSE ${SERVER_PORT}
 
-CMD ["npm", "start"]
+# Use node directly instead of npm
+CMD ["node", "index.js"]
