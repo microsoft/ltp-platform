@@ -5,6 +5,7 @@ WORKDIR /frp
 
 RUN go get github.com/quic-go/quic-go@v0.57.0 && \
     go get golang.org/x/crypto@v0.45.0 && \
+    go get github.com/pion/dtls/v3@v3.1.1 && \
     go mod tidy
 
 RUN make frpc
