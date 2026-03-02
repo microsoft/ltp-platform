@@ -1,6 +1,22 @@
 # Redis with Built-in Monitoring Tools for Node Failure Detection
 # Based on official Redis Alpine image with custom monitoring capabilities
-FROM tianon/gosu:latest AS gosu
+FROM golang:1.24 AS gosu
+
+WORKDIR /src
+
+RUN git clone --branch 1.19 --depth 1 https://github.com/tianon/gosu.git .
+
+RUN go mod edit -go=1.24 \
+ && go mod edit -toolchain=go1.24.0 \
+ && go mod tidy -compat=1.24
+
+RUN go get -u ./... && go mod tidy -compat=1.24
+
+RUN go mod download
+
+RUN CGO_ENABLED=0 go build \
+    -trimpath -buildvcs=false -ldflags="-s -w" \
+    -o /usr/local/bin/gosu .
 
 FROM redis:7-bullseye
 

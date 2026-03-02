@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 
-FROM golang:1.24.9-alpine3.21 as builder
+FROM golang:1.24.13-alpine3.22 as builder
 
 ENV GOPATH=/go
 ENV PROJECT_DIR=/src
@@ -33,7 +33,7 @@ RUN ${PROJECT_DIR}/build/frameworkcontroller/go-build.sh && \
   mv ${PROJECT_DIR}/dist/frameworkcontroller/* ${INSTALL_DIR}
 
 
-FROM alpine:3.21
+FROM alpine:3.22
 
 ENV INSTALL_DIR=/opt/frameworkcontroller/frameworkcontroller
 

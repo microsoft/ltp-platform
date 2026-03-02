@@ -15,84 +15,26 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM ubuntu:22.04
+FROM nginx:1.29.4
 
 #
-# Preparation
+# Preparation - Install Python and dependencies for configuration rendering
 #
-
-WORKDIR /root/
 
 RUN apt-get update && \
-    apt-get -y install wget build-essential python3 python3-pip git
-
-RUN pip3 install jinja2
-
-# nginx version 1.26.0
-RUN wget https://nginx.org/download/nginx-1.26.0.tar.gz && \
-    tar -zxf nginx-1.26.0.tar.gz
-
-# PCRE version PCRE2-10.43
-RUN wget https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.43/pcre2-10.43.tar.gz && \
-    tar -zxf pcre2-10.43.tar.gz
-
-# zlib version 1.3.1
-RUN wget https://www.zlib.net/zlib-1.3.1.tar.gz && \
-    tar -zxf zlib-1.3.1.tar.gz
-
-# OpenSSL 3.3.0
-RUN wget https://www.openssl.org/source/openssl-3.3.0.tar.gz && \
-    tar -zxf openssl-3.3.0.tar.gz
-
-# subs_filter
-RUN git clone https://github.com/yaoweibin/ngx_http_substitutions_filter_module.git
-
-RUN apt update && apt upgrade -y
+    apt-get upgrade -y && \
+    apt-get -y install python3 python3-jinja2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 #
-# Configure nginx build
+# Prepare nginx logging
 #
 
-WORKDIR /root/nginx-1.26.0
-
-RUN ./configure \
-  # Basic configurations
-  --prefix=/usr/share/nginx \
-  --sbin-path=/usr/sbin/nginx \
-  --modules-path=/usr/lib/nginx/modules \
-  --conf-path=/etc/nginx/nginx.conf \
-  --error-log-path=/var/log/nginx/error.log \
-  --http-log-path=/var/log/nginx/access.log \
-  --user=www-data \
-  --group=www-data \
-  # Built-in modules
-  --with-http_realip_module \
-  --with-http_sub_module \
-  --with-http_stub_status_module \
-  --with-http_ssl_module \
-  # External modules
-  --with-openssl=../openssl-3.3.0 \
-  --with-pcre=../pcre2-10.43 \
-  --with-zlib=../zlib-1.3.1 \
-  --add-module=/root/ngx_http_substitutions_filter_module
-
-#
-# Make and install nginx
-#
-
-RUN make -j
-
-RUN make install
-
-#
-# Prepare and start nginx
-#
+RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
 
 WORKDIR /root/
-
-RUN ln -sf /dev/stdout /var/log/nginx/access.log
-
-RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
 CMD ["/bin/bash"]
 #
