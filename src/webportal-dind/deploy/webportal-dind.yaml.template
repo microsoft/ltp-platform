@@ -28,7 +28,9 @@ spec:
       name: webportal-dind
       labels:
         app: webportal-dind
+        azure.workload.identity/use: "true"
     spec:
+      serviceAccountName: webportal-dind-sa    
       hostNetwork: false
       hostPID: false
       containers:
