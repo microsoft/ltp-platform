@@ -22,9 +22,11 @@ RUN apt-get update && \
     apt-get install -y systemd && \
     # LuaRocks modules you need
     luarocks install lua-cjson && \
-    luarocks install lua-resty-jwt && \
     luarocks install luafilesystem && \
     luarocks install lua-path && \
+    luarocks install lua-resty-openssl && \
+    luarocks install lua-resty-string && \
+    luarocks install lua-resty-jwt && \
     # clean apt cache to keep image slim
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
