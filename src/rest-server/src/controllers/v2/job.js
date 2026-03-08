@@ -92,9 +92,13 @@ const list = asyncHandler(async (req, res) => {
     }
 
     const username = req[userProperty].username;
+    const isAdmin = req[userProperty].admin;
     const currentvcs = await userController.getUserVCs(username);
+
     let myvcs = await userController.getUserHistoryVCsFromUserInfo(username);
-    if (!myvcs || myvcs.length === 0) {
+    if (!myvcs || myvcs.length === 0 || (!filters.userName && !isAdmin)) {
+      // if the user has no history VC or no username filter is applied, we will use current VCs as default VCs to filter
+      // so the request from homepage without username filter can also be filtered by user's current VCs
       myvcs = [...currentvcs];
     } else {
       myvcs = Array.from(new Set([...myvcs, ...currentvcs]));
@@ -116,7 +120,6 @@ const list = asyncHandler(async (req, res) => {
     const userFilterChecking = !filters.userName || filters.userName.some((name) => name !== username);
 
     if (userFilterChecking) {
-      const isAdmin = req[userProperty].admin;
       // for admin user, no need to check
       if (!isAdmin) {
         if (filters.virtualCluster && filters.virtualCluster.length > 0) {
