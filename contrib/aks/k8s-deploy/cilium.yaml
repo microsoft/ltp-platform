@@ -896,7 +896,7 @@ spec:
           type: Unconfined
       containers:
       - name: cilium-agent
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
+        image: "luciaopenpai.azurecr.io/cilium/cilium:v1.17.5-update"
         imagePullPolicy: Always
         command:
         - cilium-agent
@@ -1055,7 +1055,7 @@ spec:
           mountPath: /tmp
       initContainers:
       - name: config
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
+        image: "luciaopenpai.azurecr.io/cilium/cilium:v1.17.5-update"
         imagePullPolicy: Always
         command:
         - cilium-dbg
@@ -1078,7 +1078,7 @@ spec:
       # Required to mount cgroup2 filesystem on the underlying Kubernetes node.
       # We use nsenter command with host's cgroup and mount namespaces enabled.
       - name: mount-cgroup
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
+        image: "luciaopenpai.azurecr.io/cilium/cilium:v1.17.5-update"
         imagePullPolicy: Always
         env:
         - name: CGROUP_ROOT
@@ -1115,7 +1115,7 @@ spec:
             #drop:
             #  - ALL
       - name: apply-sysctl-overwrites
-        image: "openpaistatic.azurecr.io/cilium/cilium:v1.17.5-update"
+        image: "luciaopenpai.azurecr.io/cilium/cilium:v1.17.5-update"
         imagePullPolicy: Always
         env:
         - name: BIN_PATH

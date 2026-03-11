@@ -24,7 +24,7 @@ spec:
       serviceAccountName: azure-acr-identity
       initContainers:
         - name: install
-          image: openpaistatic.azurecr.io/openai/wi-image-cred-provider:0.2.530
+          image: luciaopenpai.azurecr.io/system/wi-image-cred-provider:0.2.530
           command: ['sh', '-c']
           args:
             - |
@@ -34,7 +34,7 @@ spec:
               mountPath: /host/bin
       containers:
         - name: provider
-          image: openpaistatic.azurecr.io/openai/wi-image-cred-provider:0.2.530
+          image: luciaopenpai.azurecr.io/system/wi-image-cred-provider:0.2.530
           command:
             - "/wi-image-cred-provider"
           volumeMounts:
