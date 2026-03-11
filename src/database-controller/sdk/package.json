@@ -9,7 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "pg": "^8.15.6",
-    "sequelize": "6.37.7"
+    "sequelize": "6.37.8"
   },
   "devDependencies": {
     "eslint": "^9.25.1",
