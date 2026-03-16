@@ -22,15 +22,16 @@ pushd $(dirname "$0") > /dev/null
 #chmod u+x configmap-create.sh
 /bin/bash configmap-create.sh || exit $?
 
-cp secret.yaml secret-default.yaml
-sed  -i "s/%NAMESPACE%/default/g" secret-default.yaml
-kubectl apply --overwrite=true -f secret-default.yaml || exit $?
-rm -rf secret-default.yaml
+# Remove the pai-secret deployment for we don't need to use it anymore
+#cp secret.yaml secret-default.yaml
+#sed  -i "s/%NAMESPACE%/default/g" secret-default.yaml
+#kubectl apply --overwrite=true -f secret-default.yaml || exit $?
+#rm -rf secret-default.yaml
 
-cp secret.yaml secret-system.yaml
-sed  -i "s/%NAMESPACE%/kube-system/g" secret-system.yaml
-kubectl apply --overwrite=true -f secret-system.yaml || exit $?
-rm -rf secret-system.yaml
+#cp secret.yaml secret-system.yaml
+#sed  -i "s/%NAMESPACE%/kube-system/g" secret-system.yaml
+#kubectl apply --overwrite=true -f secret-system.yaml || exit $?
+#rm -rf secret-system.yaml
 
 # Create priorityClass for PAI daemon
 kubectl apply --overwrite=true -f priority-class.yaml || exit $?

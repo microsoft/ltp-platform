@@ -28,7 +28,9 @@ spec:
       name: webportal-dind
       labels:
         app: webportal-dind
+        azure.workload.identity/use: "true"
     spec:
+      serviceAccountName: azure-acr-identity
       hostNetwork: false
       hostPID: false
       containers:
@@ -41,10 +43,8 @@ spec:
         env:
         - name: DOCKER_IMAGE
           value: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}webportal
-        - name: DOCKER_USER
-          value: {{ cluster_cfg['cluster']['docker-registry']['username'] }}
-        - name: DOCKER_PASS
-          value: {{ cluster_cfg['cluster']['docker-registry']['password'] }}
+        - name: DOCKER_NAMESPACE
+          value: {{ cluster_cfg['cluster']['docker-registry']['namespace'] }}
         - name: DOCKER_TAG
           value: {{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         - name: LAUNCHER_TYPE

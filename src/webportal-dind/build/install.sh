@@ -142,7 +142,53 @@ fi
 
 log_info "Logging in to Docker registry"
 DOCKER_REGISTRY=$(echo "$DOCKER_IMAGE" | cut -d'/' -f1)
-echo "$DOCKER_PASS" | docker login "$DOCKER_REGISTRY" -u "$DOCKER_USER" --password-stdin
+
+# Get UAMI Client ID from Azure Workload Identity injected environment variable
+if [ -z "$AZURE_CLIENT_ID" ]; then
+    log_error "AZURE_CLIENT_ID environment variable not found"
+    log_error "Please ensure azure-acr-identity service account is properly configured with Workload Identity"
+    exit 1
+fi
+
+log_info "Using AZURE_CLIENT_ID: $AZURE_CLIENT_ID"
+
+# For ACR authentication, we need to get a token for the ACR resource
+IMDS_URL="http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/&client_id=${AZURE_CLIENT_ID}"
+
+log_info "Getting AAD token from IMDS for ACR: ${DOCKER_REGISTRY}"
+AAD_TOKEN=$(curl -s -H "Metadata: true" "${IMDS_URL}" | jq -r .access_token)
+if [ "${AAD_TOKEN}" == "null" ] || [ -z "${AAD_TOKEN}" ]; then
+    log_error "Failed to get AAD token from IMDS"
+    exit 1
+fi
+
+log_info "Exchanging AAD token for ACR refresh token"
+ACR_REFRESH_TOKEN=$(curl -s -X POST \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "grant_type=access_token&service=${DOCKER_REGISTRY}&access_token=${AAD_TOKEN}" \
+    "https://${DOCKER_REGISTRY}/oauth2/exchange" | jq -r .refresh_token)
+if [ "${ACR_REFRESH_TOKEN}" == "null" ] || [ -z "${ACR_REFRESH_TOKEN}" ]; then
+    log_error "Failed to get ACR refresh token"
+    exit 1
+fi
+
+log_info "Getting ACR access token"
+# Extract full repository path (e.g., "luciaopenai/webportal" from "luciaopenpai.azurecr.io/luciaopenai/webportal:test")
+DOCKER_REPOSITORY=$(echo "$DOCKER_IMAGE" | cut -d'/' -f2- | cut -d':' -f1)
+log_info "Repository path: ${DOCKER_REPOSITORY}"
+ACR_ACCESS_TOKEN=$(curl -s -X POST \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "grant_type=refresh_token&service=${DOCKER_REGISTRY}&scope=repository:${DOCKER_REPOSITORY}:pull&refresh_token=${ACR_REFRESH_TOKEN}" \
+    "https://${DOCKER_REGISTRY}/oauth2/token" | jq -r .access_token)
+if [ "${ACR_ACCESS_TOKEN}" == "null" ] || [ -z "${ACR_ACCESS_TOKEN}" ]; then
+    log_error "Failed to get ACR access token"
+    exit 1
+fi
+
+log_info "Logging in to Docker registry with ACR access token"
+echo "${ACR_ACCESS_TOKEN}" | docker login "${DOCKER_REGISTRY}" \
+    -u 00000000-0000-0000-0000-000000000000 \
+    --password-stdin
 
 log_info "Pulling webportal Docker image"
 docker pull "$DOCKER_IMAGE":"$DOCKER_TAG"
