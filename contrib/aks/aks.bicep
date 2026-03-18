@@ -482,7 +482,7 @@ resource federatedCrendial 'Microsoft.ManagedIdentity/userAssignedIdentities/fed
       'api://AzureADTokenExchange'
     ]
     issuer: aks.properties.oidcIssuerProfile.issuerURL
-    subject: 'system:serviceaccount:kube-system:azure-acr-identity'
+    subject: 'system:serviceaccount:default:azure-acr-identity'
   }
 }
 

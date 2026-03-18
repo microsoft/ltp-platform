@@ -4,48 +4,4 @@ metadata:
   annotations:
     azure.workload.identity/client-id: __CLIENT_ID__
   name: azure-acr-identity
-  namespace: kube-system
----
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: wi-image-cred-provider
-  namespace: kube-system
-spec:
-  selector:
-    matchLabels:
-      app: wi-image-cred-provider
-  template:
-    metadata:
-      labels:
-        app: wi-image-cred-provider
-        azure.workload.identity/use: "true"
-    spec:
-      serviceAccountName: azure-acr-identity
-      initContainers:
-        - name: install
-          image: openpaistatic.azurecr.io/openai/wi-image-cred-provider:0.2.530
-          command: ['sh', '-c']
-          args:
-            - |
-              cp /workload-identity-token /host/bin
-          volumeMounts:
-            - name: binfolder
-              mountPath: /host/bin
-      containers:
-        - name: provider
-          image: openpaistatic.azurecr.io/openai/wi-image-cred-provider:0.2.530
-          command:
-            - "/wi-image-cred-provider"
-          volumeMounts:
-            - name: sock
-              mountPath: /var/run/
-      volumes:
-        - name: sock
-          hostPath:
-            path: /var/run/
-            type: DirectoryOrCreate
-        - name: binfolder
-          hostPath:
-            path: /opt/image-cred-provider/bin
-            type: DirectoryOrCreate
+  namespace: default
