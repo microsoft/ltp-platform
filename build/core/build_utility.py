@@ -71,21 +71,61 @@ class DockerClient:
                     logger.info("Initiating interactive Azure login...")
                 execute_shell(shell_cmd)
 
-            # Login to Azure Container Registry
-            shell_cmd = "az acr login --name {0}".format(self.docker_registry)
+            # Check if ACR exists in current subscription before attempting login
+            # Extract registry name without .azurecr.io suffix
+            registry_name = self.docker_registry.replace('.azurecr.io', '')
+            check_cmd = "az acr show --name {0}".format(registry_name)
+
             try:
-                logger.info("Begin to execute the command: {0}".format(shell_cmd))
-                subprocess.check_call(shell_cmd, shell=True)
-                logger.info("Executing command successfully: {0}".format(shell_cmd))
-            except subprocess.CalledProcessError:
-                logger.error("Executing command failed: {0}".format(shell_cmd))
-                logger.error("ACR login failed. This may be caused by:")
-                logger.error("  1. Wrong Azure subscription is selected")
-                logger.error("  2. ACR registry '{0}' not found in current subscription".format(self.docker_registry))
-                logger.error("  3. No permission to access the ACR registry")
-                logger.error("Please check your Azure subscription and permissions.")
-                logger.error("You can run 'az account show' to check current subscription,")
-                logger.error("and run 'az account set --subscription <subscription-id>' to switch subscription.")
+                logger.info("Checking if ACR '{0}' exists in current subscription...".format(registry_name))
+                subprocess.run(
+                    check_cmd,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=True
+                )
+                logger.info("ACR '{0}' found in current subscription".format(registry_name))
+            except subprocess.TimeoutExpired:
+                logger.error("Command timed out: {0}".format(check_cmd))
+                logger.error("Failed to check ACR existence within 10 seconds")
+                sys.exit(1)
+            except subprocess.CalledProcessError as e:
+                logger.error("ACR '{0}' not found in current subscription".format(registry_name))
+                if e.stderr:
+                    logger.error("Error details: {0}".format(e.stderr.strip()))
+                logger.error("")
+                logger.error("Please check:")
+                logger.error("  1. The ACR registry name is correct")
+                logger.error("  2. You are using the correct Azure subscription")
+                logger.error("")
+                logger.error("Current subscription can be checked with: az account show")
+                logger.error("To switch subscription, use: az account set --subscription <subscription-id>")
+                sys.exit(1)
+
+            # Login to Azure Container Registry
+            shell_cmd = "az acr login --name {0}".format(registry_name)
+            try:
+                logger.info("Logging in to ACR '{0}'...".format(registry_name))
+                subprocess.run(
+                    shell_cmd,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=True
+                )
+                logger.info("Successfully logged in to ACR '{0}'".format(registry_name))
+            except subprocess.TimeoutExpired:
+                logger.error("Command timed out: {0}".format(shell_cmd))
+                logger.error("ACR login command exceeded 30 seconds timeout")
+                sys.exit(1)
+            except subprocess.CalledProcessError as e:
+                logger.error("Failed to login to ACR '{0}'".format(registry_name))
+                if e.stderr:
+                    logger.error("Error details: {0}".format(e.stderr.strip()))
+                logger.error("Please check your permissions to access this ACR registry")
                 sys.exit(1)
 
 
