@@ -71,8 +71,22 @@ class DockerClient:
                     logger.info("Initiating interactive Azure login...")
                 execute_shell(shell_cmd)
 
+            # Login to Azure Container Registry
             shell_cmd = "az acr login --name {0}".format(self.docker_registry)
-            execute_shell(shell_cmd)
+            try:
+                logger.info("Begin to execute the command: {0}".format(shell_cmd))
+                subprocess.check_call(shell_cmd, shell=True)
+                logger.info("Executing command successfully: {0}".format(shell_cmd))
+            except subprocess.CalledProcessError:
+                logger.error("Executing command failed: {0}".format(shell_cmd))
+                logger.error("ACR login failed. This may be caused by:")
+                logger.error("  1. Wrong Azure subscription is selected")
+                logger.error("  2. ACR registry '{0}' not found in current subscription".format(self.docker_registry))
+                logger.error("  3. No permission to access the ACR registry")
+                logger.error("Please check your Azure subscription and permissions.")
+                logger.error("You can run 'az account show' to check current subscription,")
+                logger.error("and run 'az account set --subscription <subscription-id>' to switch subscription.")
+                sys.exit(1)
 
 
     def docker_image_build(self, image_name, dockerfile_path, build_path):
