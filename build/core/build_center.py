@@ -45,7 +45,8 @@ class BuildCenter:
             docker_registry = self.build_config['dockerRegistryInfo']['dockerRegistryDomain'],
             docker_namespace = self.build_config['dockerRegistryInfo']['dockerNameSpace'],
             docker_username = self.build_config['dockerRegistryInfo']['dockerUserName'],
-            docker_password = self.build_config['dockerRegistryInfo']['dockerPassword']
+            docker_password = self.build_config['dockerRegistryInfo']['dockerPassword'],
+            managed_identity_id = self.build_config['dockerRegistryInfo']['managedIdentityId']
         )
 
         # Initialize graph instance

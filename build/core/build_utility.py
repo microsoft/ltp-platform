@@ -27,7 +27,7 @@ import yaml
 
 class DockerClient:
 
-    def __init__(self, docker_registry, docker_namespace, docker_username, docker_password):
+    def __init__(self, docker_registry, docker_namespace, docker_username, docker_password, managed_identity_id=None):
 
         docker_registry = "" if docker_registry == "public" else docker_registry
 
@@ -35,6 +35,7 @@ class DockerClient:
         self.docker_namespace = docker_namespace
         self.docker_username = docker_username
         self.docker_password = docker_password
+        self.managed_identity_id = managed_identity_id
 
         self.docker_login()
 
@@ -49,8 +50,29 @@ class DockerClient:
 
 
     def docker_login(self):
-        shell_cmd = "docker login -u {0} -p {1} {2}".format(self.docker_username, self.docker_password, self.docker_registry)
-        execute_shell(shell_cmd)
+        if self.docker_username and self.docker_password:
+            shell_cmd = "docker login -u {0} -p {1} {2}".format(self.docker_username, self.docker_password, self.docker_registry)
+            execute_shell(shell_cmd)
+        else:
+            # Check if already logged in to Azure CLI
+            try:
+                logger.info("Checking Azure CLI login status...")
+                subprocess.check_output("az account show", shell=True, stderr=subprocess.STDOUT)
+                logger.info("Azure CLI is already logged in")
+            except subprocess.CalledProcessError:
+                logger.info("Azure CLI not logged in, initiating login...")
+                if self.managed_identity_id:
+                    # Login with managed identity
+                    shell_cmd = "az login --identity --username {0}".format(self.managed_identity_id)
+                    logger.info("Logging in with managed identity: {0}".format(self.managed_identity_id))
+                else:
+                    # Interactive login with user account
+                    shell_cmd = "az login"
+                    logger.info("Initiating interactive Azure login...")
+                execute_shell(shell_cmd)
+
+            shell_cmd = "az acr login --name {0}".format(self.docker_registry)
+            execute_shell(shell_cmd)
 
 
     def docker_image_build(self, image_name, dockerfile_path, build_path):
