@@ -159,6 +159,10 @@ class BuildCenter:
 
     def push_center(self):
 
+        # Login to Docker registry before pushing images
+        self.logger.info("Preparing to push images, logging in to Docker registry...")
+        self.docker_cli.docker_login()
+
         # Find services and map dockfile to services
         self.construct_graph()
 

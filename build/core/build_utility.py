@@ -37,7 +37,8 @@ class DockerClient:
         self.docker_password = docker_password
         self.managed_identity_id = managed_identity_id
 
-        self.docker_login()
+        # Login is no longer performed automatically during initialization
+        # Call docker_login() explicitly when needed (e.g., before pushing images)
 
 
     def set_build_cache_type(self, build_nocache=False):
