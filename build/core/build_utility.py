@@ -63,8 +63,19 @@ class DockerClient:
                 logger.info("Azure CLI not logged in, initiating login...")
                 if self.managed_identity_id:
                     # Login with managed identity
-                    shell_cmd = "az login --identity --username {0}".format(self.managed_identity_id)
-                    logger.info("Logging in with managed identity: {0}".format(self.managed_identity_id))
+                    # Please NOTE that the managed identity must have the following permissions to access the ACR registry including:
+                    # ------ "Reader" for az show command to check ACR existence
+                    # ------ "AcrPull" for az acr login and docker pull command
+                    # ------ "AcrPush" if you want to push docker images to ACR registry as well
+                    # Determine the type of managed identity identifier
+                    if self.managed_identity_id.startswith('/subscriptions/'):
+                        # Full resource ID format
+                        shell_cmd = "az login --identity --resource-id {0}".format(self.managed_identity_id)
+                        logger.info("Logging in with managed identity (resource-id): {0}".format(self.managed_identity_id))
+                    else:
+                        # Assume it's a client ID (UUID format)
+                        shell_cmd = "az login --identity --client-id {0}".format(self.managed_identity_id)
+                        logger.info("Logging in with managed identity (client-id): {0}".format(self.managed_identity_id))
                 else:
                     # Interactive login with user account
                     shell_cmd = "az login"
