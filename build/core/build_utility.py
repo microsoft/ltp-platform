@@ -101,7 +101,7 @@ class DockerClient:
                 logger.info("ACR '{0}' found in current subscription".format(registry_name))
             except subprocess.TimeoutExpired:
                 logger.error("Command timed out: {0}".format(check_cmd))
-                logger.error("Failed to check ACR existence within 10 seconds")
+                logger.error("Failed to check ACR existence within 30 seconds")
                 sys.exit(1)
             except subprocess.CalledProcessError as e:
                 logger.error("ACR '{0}' not found in current subscription".format(registry_name))
