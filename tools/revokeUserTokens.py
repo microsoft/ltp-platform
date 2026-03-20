@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 # This tool is used to revoke all tokens in the cluster and restore the application token.
-# Usage: python3 revokeAllTokens.py
+# Usage: python3 revokeUserTokens.py
 
 import sys
 import jwt
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     print("=" * 70)
 
     alert_namespace = "default"
-    alert_deployment ="alertmanager"
+    alert_deployment = "alertmanager"
     alert_container = "job-status-change-notification"
 
     alert_token = get_application_token(alert_namespace, alert_deployment, alert_container)

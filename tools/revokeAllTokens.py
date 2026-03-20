@@ -31,7 +31,7 @@ def revoke_tokens(bearer_token, url):
 if __name__ == "__main__":
     print("NOTE: This tool will revoke all tokens in the cluster including the application tokens.")
     print("Removing them may cause service disruptions.")
-    print("If you try to remove the user releated tokens, please run `revokeUserTokens.py` instead.")
+    print("If you try to remove the user related tokens, please run `revokeUserTokens.py` instead.")
     print("Please make sure you understand the impact before proceeding.")
     confirm = input("Type 'yes' to proceed: ")
     if confirm.lower() != 'yes':
