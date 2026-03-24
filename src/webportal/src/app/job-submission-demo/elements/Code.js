@@ -2,8 +2,11 @@
 // Licensed under the MIT License.
 import styled from 'styled-components';
 import { color, layout, typography } from 'styled-system';
+import shouldForwardProp from '@styled-system/should-forward-prop';
 
-const Code = styled('code')(
+const Code = styled('code').withConfig({
+  shouldForwardProp,
+})(
   {
     lineHeight: 'inherit',
     border: 0,

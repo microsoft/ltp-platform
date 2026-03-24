@@ -35,7 +35,7 @@ import {
   Stack,
   getTheme,
   StackItem,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { getFormClassNames, getTabFromStyle } from './form-style';
 import { TabFormContent } from './tab-form-content';
 import Card from '../../components/card';
@@ -242,10 +242,7 @@ export class TabForm extends React.Component {
           </StackItem>
         )}
         <Card style={{ padding: 0, minHeight: 0, display: 'flex' }}>
-          <Stack
-            padding='l2 l1 0'
-            styles={{ root: { overflowY: 'auto', width: '100%' } }}
-          >
+          <Stack styles={{ root: { overflowY: 'auto', width: '100%' } }} tokens={{ padding: 'l2 l1 0' }}>
             <div style={{ paddingBottom: spacing.l1 }}>
               {!isNil(selectedIndex) && (
                 <TabFormContent

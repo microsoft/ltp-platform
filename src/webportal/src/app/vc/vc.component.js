@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 require('bootstrap');
-require('admin-lte/dist/css/AdminLTE.min.css');
+require('admin-lte/dist/css/adminlte.min.css');
 require('bootstrap/dist/css/bootstrap.css');
-require('font-awesome/css/font-awesome.min.css');
-require('datatables.net/js/jquery.dataTables.js');
+require('@fortawesome/fontawesome-free/css/all.min.css');
+require('datatables.net');
 require('datatables.net-bs/js/dataTables.bootstrap.js');
 require('datatables.net-bs/css/dataTables.bootstrap.css');
 require('datatables.net-plugins/sorting/natural.js');

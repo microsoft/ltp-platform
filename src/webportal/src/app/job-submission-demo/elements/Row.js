@@ -4,7 +4,7 @@ import React, { isValidElement } from 'react';
 import Box from './Box';
 import PropTypes from 'prop-types';
 
-const Row = ({ children, gutter }) => {
+const Row = ({ children, gutter = 0 }) => {
   const rowStyle =
     gutter > 0
       ? {

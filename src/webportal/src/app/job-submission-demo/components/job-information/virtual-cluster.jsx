@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { Dropdown } from 'office-ui-fabric-react';
+import { Dropdown } from '@fluentui/react';
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { get } from 'lodash';

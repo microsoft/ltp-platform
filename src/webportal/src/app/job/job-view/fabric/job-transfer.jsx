@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import React, { useEffect, useState, useRef } from 'react';
 import {
   Stack,
@@ -13,15 +12,16 @@ import {
   ColorClassNames,
   getTheme,
   mergeStyleSets,
-} from 'office-ui-fabric-react';
-import { Label } from 'office-ui-fabric-react/lib/Label';
-import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
-import ReactDOM from 'react-dom';
+} from '@fluentui/react';
+import { Label } from '@fluentui/react/lib/Label';
+import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
+import { createRoot } from 'react-dom/client';
 import { jobProtocolSchema } from '../../../job-submission/models/protocol-schema';
 import qs from 'querystring';
 import Joi from 'joi-browser';
 import yaml from 'js-yaml';
 
+import { Layout } from '../../../layout/layout';
 import { SpinnerLoading } from '../../../components/loading';
 import MonacoPanel from '../../../components/monaco-panel';
 
@@ -112,7 +112,7 @@ class JobConfig {
 
   static validateFromYAML(yamlText) {
     try {
-      const jobConfig = new JobConfig(yaml.safeLoad(yamlText));
+      const jobConfig = new JobConfig(yaml.load(yamlText));
       return jobConfig.validate();
     } catch (err) {
       return [false, err.message];
@@ -120,7 +120,7 @@ class JobConfig {
   }
 
   getYAML() {
-    return yaml.safeDump(this._jobConfig);
+    return yaml.dump(this._jobConfig);
   }
 }
 
@@ -254,7 +254,7 @@ const JobTransferPage = () => {
 
   const onSaveEditor = () => {
     try {
-      const newJobConfig = new JobConfig(yaml.safeLoad(editorYAML));
+      const newJobConfig = new JobConfig(yaml.load(editorYAML));
       setJobConfig(newJobConfig);
       setShowEditor(false);
     } catch (err) {
@@ -280,13 +280,8 @@ const JobTransferPage = () => {
       {loading && <SpinnerLoading />}
       {!loading && (
         <Stack horizontal horizontalAlign='center'>
-          <Stack
-            gap={25}
-            padding={20}
-            horizontalAlign='center'
-            className={styles.form}
-          >
-            <Stack className={styles.header} gap={12}>
+          <Stack horizontalAlign='center' className={styles.form} tokens={{ childrenGap: '25', padding: '20' }}>
+            <Stack className={styles.header} tokens={{ childrenGap: '12' }}>
               <Stack horizontal={true} horizontalAlign='center'>
                 <Text variant='xxLarge' className={styles.title}>
                   Job Transfer
@@ -300,7 +295,7 @@ const JobTransferPage = () => {
               </Stack>
             </Stack>
             <Stack className={styles.item}>
-              <Stack horizontal gap={10}>
+              <Stack horizontal tokens={{ childrenGap: '10' }}>
                 <Label required>Transfer to</Label>
                 <Stack grow>
                   <Dropdown
@@ -354,12 +349,7 @@ const JobTransferPage = () => {
                 required
               />
             </Stack>
-            <Stack
-              gap={20}
-              horizontal={true}
-              horizontalAlign='end'
-              className={styles.footer}
-            >
+            <Stack horizontal={true} horizontalAlign='end' className={styles.footer} tokens={{ childrenGap: '20' }}>
               {transferring && <Spinner size={SpinnerSize.medium} />}
               <PrimaryButton
                 disabled={transferring || selectedCluster === ''}
@@ -428,7 +418,13 @@ const JobTransferPage = () => {
   );
 };
 
-ReactDOM.render(
-  <JobTransferPage />,
-  document.getElementById('content-wrapper'),
-);
+const JobTransferWithLayout = () => {
+  return <Layout><JobTransferPage /></Layout>;
+};
+
+const container = document.getElementById('wrapper');
+if (container && !container.hasAttribute('data-root-initialized')) {
+  container.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(container);
+  root.render(<JobTransferWithLayout />);
+}

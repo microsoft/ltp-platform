@@ -67,7 +67,7 @@ export class JobProtocol {
   // make sure protocolYaml is valid before use this function
   static fromYaml(protocolYaml) {
     try {
-      const jobProtocol = yaml.safeLoad(protocolYaml);
+      const jobProtocol = yaml.load(protocolYaml);
       return new JobProtocol(jobProtocol);
     } catch (e) {
       alert(e.message);
@@ -76,7 +76,7 @@ export class JobProtocol {
 
   static validateFromYaml(protocolYaml) {
     try {
-      const protocol = yaml.safeLoad(protocolYaml);
+      const protocol = yaml.load(protocolYaml);
       return JobProtocol.validateFromObject(protocol);
     } catch (err) {
       return String(err.message);
@@ -196,7 +196,7 @@ export class JobProtocol {
 
   toYaml() {
     try {
-      return yaml.safeDump(JobProtocol.safePruneProtocol(this));
+      return yaml.dump(JobProtocol.safePruneProtocol(this));
     } catch (e) {
       alert(e.message);
     }

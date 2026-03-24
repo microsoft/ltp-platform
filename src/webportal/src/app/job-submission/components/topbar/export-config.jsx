@@ -22,9 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 import React from 'react';
-import { DefaultButton, ColorClassNames } from 'office-ui-fabric-react';
+import { DefaultButton, ColorClassNames } from '@fluentui/react';
 import { cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
 

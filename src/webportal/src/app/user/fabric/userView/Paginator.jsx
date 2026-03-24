@@ -17,7 +17,7 @@
 
 import React, { useContext } from 'react';
 
-import { CommandBar } from 'office-ui-fabric-react';
+import { CommandBar } from '@fluentui/react';
 
 import Context from './Context';
 import Pagination from './Pagination';
@@ -30,10 +30,10 @@ export default function Paginator() {
   const start = itemsPerPage * pageIndex + 1;
   const end = Math.min(itemsPerPage * (pageIndex + 1), length);
 
-  /** @type {import('office-ui-fabric-react').ICommandBarItemProps[]} */
+  /** @type {import('@fluentui/react').ICommandBarItemProps[]} */
   const farItems = [];
 
-  /** @type {import('office-ui-fabric-react').IButtonStyles} */
+  /** @type {import('@fluentui/react').IButtonStyles} */
   const buttonStyles = {
     root: { backgroundColor: 'white' },
     rootDisabled: { backgroundColor: 'white' },
@@ -79,7 +79,7 @@ export default function Paginator() {
 
   /**
    * @param {number} page
-   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @returns {import('@fluentui/react').ICommandBarItemProps}
    */
   function getPageButton(page) {
     return {

@@ -25,7 +25,7 @@ import {
   ColorClassNames,
   getTheme,
   TooltipHost,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { PropTypes } from 'prop-types';
 import { findIndex } from 'lodash';
 
@@ -99,7 +99,7 @@ function TopBar() {
   const transparentStyles = { root: { background: 'transparent' } };
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnAddUser = {
     key: 'addUser',
@@ -112,7 +112,7 @@ function TopBar() {
   };
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnCreateBulkUsers = {
     key: 'createBulkUsers',
@@ -126,7 +126,7 @@ function TopBar() {
 
   /**
    * btn remove
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnRemove = {
     key: 'remove',
@@ -157,7 +157,7 @@ function TopBar() {
   };
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnEdit = {
     key: 'edit',
@@ -172,7 +172,7 @@ function TopBar() {
   };
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnBatchEditPassword = {
     key: 'batchEditPassword',
@@ -186,7 +186,7 @@ function TopBar() {
 
   /**
    * btnBatchEditVirtualClusters
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnBatchEditVirtualClusters = {
     key: 'BatchEditVirtualClusters',
@@ -217,7 +217,7 @@ function TopBar() {
   };
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnRefresh = {
     key: 'refresh',
@@ -230,7 +230,7 @@ function TopBar() {
   };
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const inputKeyword = {
     key: 'keyword',
@@ -239,7 +239,7 @@ function TopBar() {
 
   /**
    * btnFilters
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnFilters = {
     key: 'filters',
@@ -264,7 +264,7 @@ function TopBar() {
   };
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnClear = {
     key: 'clear',
@@ -281,12 +281,12 @@ function TopBar() {
   };
 
   /**
-   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @returns {import('@fluentui/react').ICommandBarItemProps}
    */
   function getBtnAdmin() {
     /**
      * @param {React.SyntheticEvent} event
-     * @param {import('office-ui-fabric-react').IContextualMenuItem} item
+     * @param {import('@fluentui/react').IContextualMenuItem} item
      */
     function onClick(event, { key, checked }) {
       event.preventDefault();
@@ -312,7 +312,7 @@ function TopBar() {
     /**
      * @param {string} key
      * @param {string} text
-     * @returns {import('office-ui-fabric-react').IContextualMenuItem}
+     * @returns {import('@fluentui/react').IContextualMenuItem}
      */
     function getItem(key) {
       return {
@@ -349,12 +349,12 @@ function TopBar() {
   }
 
   /**
-   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @returns {import('@fluentui/react').ICommandBarItemProps}
    */
   function getBtnVirtualCluster() {
     /**
      * @param {React.SyntheticEvent} event
-     * @param {import('office-ui-fabric-react').IContextualMenuItem} item
+     * @param {import('@fluentui/react').IContextualMenuItem} item
      */
     function onClick(event, { key, checked }) {
       event.preventDefault();
@@ -380,7 +380,7 @@ function TopBar() {
     /**
      * @param {string} key
      * @param {string} text
-     * @returns {import('office-ui-fabric-react').IContextualMenuItem}
+     * @returns {import('@fluentui/react').IContextualMenuItem}
      */
     function getItem(key) {
       return {

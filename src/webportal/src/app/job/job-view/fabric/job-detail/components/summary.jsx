@@ -20,7 +20,7 @@ import {
   FontWeights,
   ColorClassNames,
   IconFontSizes,
-} from '@uifabric/styling';
+} from '@fluentui/react/lib/Styling';
 import c from 'classnames';
 import { get, isEmpty, isNil } from 'lodash';
 import { DateTime } from 'luxon';
@@ -34,7 +34,7 @@ import {
   TooltipHost,
   DirectionalHint,
   Icon,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import React from 'react';
 import yaml from 'js-yaml';
@@ -129,7 +129,7 @@ export default class Summary extends React.Component {
     if (isJobV2(rawJobConfig)) {
       this.props.showEditor('Job Config', {
         language: 'yaml',
-        value: yaml.safeDump(rawJobConfig),
+        value: yaml.dump(rawJobConfig),
       });
     } else {
       this.props.showEditor('Job Config', {

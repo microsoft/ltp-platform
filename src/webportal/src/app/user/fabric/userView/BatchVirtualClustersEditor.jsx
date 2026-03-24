@@ -26,7 +26,7 @@ import {
   Dropdown,
   mergeStyles,
   getTheme,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import c from 'classnames';
 import t from '../../../components/tachyons.scss';
@@ -95,7 +95,7 @@ export default function BatchVirtualClustersEditor({ isOpen = false, hide }) {
   const tdLabelStyle = c(tdPaddingStyle, t.tr);
 
   /**
-   * @type {import('office-ui-fabric-react').IDropdownOption[]}
+   * @type {import('@fluentui/react').IDropdownOption[]}
    */
   const vcsOptions = allVCs.map(vc => {
     return { key: vc, text: vc };
@@ -139,7 +139,7 @@ export default function BatchVirtualClustersEditor({ isOpen = false, hide }) {
               marginRight: 'auto',
             }}
           >
-            <Stack horizontal={true} horizontalAlign='center' gap={spacing.s1}>
+            <Stack horizontal={true} horizontalAlign='center' tokens={{ childrenGap: spacing.s1 }}>
               <StackItem>
                 <PrimaryButton type='submit' disabled={lock}>
                   Save

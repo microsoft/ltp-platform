@@ -3,11 +3,11 @@
 
 import c from 'classnames';
 import React, { useEffect, useState, useCallback } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import cookies from 'js-cookie';
 import PropTypes from 'prop-types';
-import { FontClassNames, FontWeights, getTheme } from '@uifabric/styling';
-import { DefaultButton } from 'office-ui-fabric-react';
+import { FontClassNames, FontWeights, getTheme } from '@fluentui/react/lib/Styling';
+import { DefaultButton } from '@fluentui/react';
 import { isEmpty, cloneDeep } from 'lodash';
 
 import Card from '../../components/card';
@@ -320,4 +320,20 @@ const UserProfile = () => {
   }
 };
 
-ReactDOM.render(<UserProfile />, document.getElementById('content-wrapper'));
+// Prevent layout.jsx from auto-initializing since we'll do it ourselves
+window.__LAYOUT_INITIALIZED__ = true;
+
+import { Layout } from '../../layout/layout';
+
+const App = () => (
+  <Layout>
+    <UserProfile />
+  </Layout>
+);
+
+const wrapper = document.getElementById('wrapper');
+if (wrapper && !wrapper.hasAttribute('data-root-initialized')) {
+  wrapper.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(wrapper);
+  root.render(<App />);
+}

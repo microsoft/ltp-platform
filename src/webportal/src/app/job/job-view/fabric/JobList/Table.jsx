@@ -15,7 +15,7 @@ import {
   ColorClassNames,
   FontSizes,
   FontWeights,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { isNil } from 'lodash';
 import { DateTime } from 'luxon';
 
@@ -57,13 +57,13 @@ export default function Table() {
   const [currentJob, setCurrentJob] = useState(null);
 
   // workaround for fabric's bug
-  // https://github.com/OfficeDev/office-ui-fabric-react/issues/5280#issuecomment-489619108
+  // https://github.com/OfficeDev/@fluentui/react/issues/5280#issuecomment-489619108
   useLayoutEffect(() => {
     window.dispatchEvent(new Event('resize'));
   });
 
   /**
-   * @type {import('office-ui-fabric-react').Selection}
+   * @type {import('@fluentui/react').Selection}
    */
   const selection = useMemo(() => {
     return new Selection({
@@ -75,7 +75,7 @@ export default function Table() {
 
   /**
    * @param {React.MouseEvent<HTMLElement>} event
-   * @param {import('office-ui-fabric-react').IColumn} column
+   * @param {import('@fluentui/react').IColumn} column
    */
   function onColumnClick(event, column) {
     const { field, descending } = ordering;
@@ -91,7 +91,7 @@ export default function Table() {
   }
 
   /**
-   * @param {import('office-ui-fabric-react').IColumn} column
+   * @param {import('@fluentui/react').IColumn} column
    */
   function applySortProps(column) {
     column.isSorted = ordering.field === column.key;
@@ -235,7 +235,7 @@ export default function Table() {
 
   /**
    * action column
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const actionsColumn = {
     key: 'actions',

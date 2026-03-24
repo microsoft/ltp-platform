@@ -6,7 +6,7 @@ import {
   CheckboxVisibility,
   DetailsListLayoutMode,
   SelectionMode,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { Box, Code } from '../../elements';
 import { FormSection } from '../form-page';
 import { PAI_ENV_VAR } from '../../utils/constants';

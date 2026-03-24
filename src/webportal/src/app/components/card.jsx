@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-import { getTheme } from 'office-ui-fabric-react';
+import { getTheme } from '@fluentui/react';
 import styled from 'styled-components';
 import { boxShadow } from './theme';
 

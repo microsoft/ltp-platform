@@ -17,7 +17,7 @@
 
 import React, { useContext } from 'react';
 
-import { PrimaryButton, CommandBar, getTheme } from 'office-ui-fabric-react';
+import { PrimaryButton, CommandBar, getTheme } from '@fluentui/react';
 
 import Context from './Context';
 
@@ -29,7 +29,7 @@ function BottomBar() {
   const buttonPrimaryStyles = { margin: spacing.l1 };
 
   /**
-   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @returns {import('@fluentui/react').ICommandBarItemProps}
    */
   function getSubmit() {
     return {

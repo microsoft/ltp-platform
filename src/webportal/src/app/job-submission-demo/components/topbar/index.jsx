@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import React from 'react';
-import { Text, FontWeights, Link } from 'office-ui-fabric-react';
+import { Text, FontWeights, Link } from '@fluentui/react';
 
 import { ExportConfig } from './export-config';
 import { ImportConfig } from './import-config';

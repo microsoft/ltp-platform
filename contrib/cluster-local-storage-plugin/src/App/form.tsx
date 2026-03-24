@@ -5,9 +5,11 @@ import React from "react";
 import {
   ChoiceGroup, DefaultPalette, Dropdown, DropdownMenuItemType, IDropdownOption,
   Fabric, IChoiceGroupOption, PrimaryButton, Stack, Spinner, SpinnerSize, Text,
-  TextField, Toggle, initializeIcons, mergeStyleSets, getTheme,
+  TextField, Toggle, mergeStyleSets, getTheme,
 } from "office-ui-fabric-react";
 import { PAIV2 } from "@microsoft/openpai-js-sdk";
+
+import { initializeIconsOnce } from "../utils/icon-initializer";
 
 const theme = getTheme();
 const styles = mergeStyleSets({
@@ -80,7 +82,7 @@ const styles = mergeStyleSets({
   },
 });
 
-initializeIcons();
+initializeIconsOnce();
 
 interface IFormProps {
   api: string;
@@ -269,7 +271,7 @@ export default class Form extends React.Component<IFormProps, IFormState> {
     try {
       clusterlist = Object.keys(await this.client.virtualCluster.listVirtualClusters());
     } catch (err) {
-      alert(`Failed to get virtual clusters: ${err.message}`);
+      alert(`Failed to get virtual clusters: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     const endpoint = new URL("cluster-local-storage", window.location.href).href;

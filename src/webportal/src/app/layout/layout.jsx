@@ -14,33 +14,34 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import 'whatwg-fetch';
 import 'normalize.css/normalize.css';
 
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import c from 'classnames';
-import { initializeIcons } from '@uifabric/icons';
-import { ColorClassNames } from '@uifabric/styling';
+import { ColorClassNames } from '@fluentui/react/lib/Styling';
 import { useMediaQuery } from 'react-responsive';
+import PropTypes from 'prop-types';
+import cookies from 'js-cookie';
 
 import Logo from './components/logo';
 import Navbar from './components/navbar';
 import Sidebar from './components/sidebar';
 import { initTheme, boxShadow } from '../components/theme';
 import { getUserRequest } from '../user/fabric/conn';
+import { initializeIconsOnce } from '../utils/icon-initializer';
 
 import t from '../components/tachyons.scss';
 
 initTheme();
-initializeIcons();
+initializeIconsOnce();
 
 const BREAKPOINT = 1200;
 
-const Layout = () => {
+const Layout = ({ children }) => {
   const [mobileShowSidebar, setMobileShowSidebar] = useState(false);
   const [userInfo, setUserInfo] = useState({});
 
@@ -92,10 +93,55 @@ const Layout = () => {
             t.overflowXAuto,
             ColorClassNames.neutralLighterBackground,
           )}
-        ></div>
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
 };
 
-ReactDOM.render(<Layout />, document.getElementById('wrapper'));
+Layout.propTypes = {
+  children: PropTypes.node,
+};
+
+export { Layout };
+
+// Render the layout when this module is loaded as an entry point
+// Only auto-render if wrapper exists and hasn't been initialized yet
+if (typeof document !== 'undefined' && typeof window !== 'undefined') {
+  // Defer the initialization check to allow other modules to set their flags first
+  const initLayout = () => {
+    // Skip if already marked that someone else will initialize
+    if (window.__LAYOUT_INITIALIZED__) {
+      return;
+    }
+
+    const wrapper = document.getElementById('wrapper');
+    if (!wrapper) {
+      return;
+    }
+
+    // Check multiple conditions to avoid conflicts:
+    // 1. wrapper doesn't have data-root-initialized attribute (used by other pages)
+    // 2. wrapper has no children (hasn't been rendered yet)
+    // 3. wrapper doesn't have _reactRootContainer property (React compatibility)
+    if (
+      !wrapper.hasAttribute('data-root-initialized') &&
+      wrapper.childNodes.length === 0 &&
+      !wrapper._reactRootContainer
+    ) {
+      window.__LAYOUT_INITIALIZED__ = true;
+      const root = createRoot(wrapper);
+      root.render(<Layout />);
+    }
+  };
+
+  // Use setTimeout(0) to defer execution until after current script completes
+  // This allows importing modules to set their flags first
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initLayout, 0));
+  } else {
+    setTimeout(initLayout, 0);
+  }
+}

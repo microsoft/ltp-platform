@@ -2,7 +2,7 @@
 // Licensed under the MIT License
 
 import React from 'react';
-import { DefaultButton, ColorClassNames } from 'office-ui-fabric-react';
+import { DefaultButton, ColorClassNames } from '@fluentui/react';
 import yaml from 'js-yaml';
 import PropTypes from 'prop-types';
 
@@ -32,7 +32,7 @@ export const YamlEditExportConfig = React.memo(({ protocolYaml }) => {
     try {
       _exportFile(
         protocolYaml,
-        (yaml.safeLoad(protocolYaml).name || 'job') + '.yaml',
+        (yaml.load(protocolYaml).name || 'job') + '.yaml',
         'text/yaml',
       );
     } catch (err) {

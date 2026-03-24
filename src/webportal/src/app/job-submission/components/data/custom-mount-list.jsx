@@ -16,7 +16,7 @@ import {
   IconButton,
   FontClassNames,
   TextField,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -72,7 +72,7 @@ const checkErrorMessage = async (
 
 export const MountList = ({ dataList, setDataList, setDataError }) => {
   // workaround for fabric's bug
-  // https://github.com/OfficeDev/office-ui-fabric-react/issues/5280#issuecomment-489619108
+  // https://github.com/OfficeDev/@fluentui/react/issues/5280#issuecomment-489619108
   useLayoutEffect(() => {
     dispatchResizeEvent();
   });

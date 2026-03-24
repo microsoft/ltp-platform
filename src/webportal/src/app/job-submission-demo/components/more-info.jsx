@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { Icon } from 'office-ui-fabric-react';
+import { Icon } from '@fluentui/react';
 import React from 'react';
 import { Box, Flex } from '../elements';
 import PropTypes from 'prop-types';

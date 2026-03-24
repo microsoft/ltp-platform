@@ -44,7 +44,6 @@ function generateHtml(opt) {
         version: version,
         commitVersion: commitVersion,
         template: './src/app/layout/layout.ejs',
-        chunksSortMode: 'manual',
         minify: {
           collapseWhitespace: true,
           html5: true,
@@ -59,6 +58,7 @@ function generateHtml(opt) {
 }
 
 const config = (env, argv) => ({
+  mode: argv.mode || 'development',
   entry: {
     index: './src/app/home/index.jsx',
     home: './src/app/home/home.jsx',
@@ -86,11 +86,38 @@ const config = (env, argv) => ({
   output: {
     path: helpers.root('dist'),
     filename: 'scripts/[name].[contenthash].js',
-    jsonpFunction: 'webportalWebpackJsonp',
+    chunkFilename: 'scripts/[name].[contenthash].js',
+    clean: true,
   },
   resolve: {
     extensions: ['.js', '.jsx', '.json'],
     modules: [helpers.root('node_modules'), helpers.root('src')],
+    extensionAlias: {
+      '.js': ['.js', '.jsx'],
+    },
+    fullySpecified: false,
+    alias: {
+      'process/browser': require.resolve('process/browser.js'),
+    },
+    fallback: {
+      fs: false,
+      net: false,
+      tls: false,
+      process: require.resolve('process/browser'),
+      buffer: require.resolve('buffer/'),
+      querystring: require.resolve('querystring-es3'),
+      path: require.resolve('path-browserify'),
+      crypto: false, // require.resolve('crypto-browserify'),
+      stream: require.resolve('stream-browserify'),
+      http: require.resolve('stream-http'),
+      https: require.resolve('https-browserify'),
+      constants: require.resolve('constants-browserify'),
+      util: require.resolve('util/'),
+      vm: require.resolve('vm-browserify'),
+      zlib: require.resolve('browserify-zlib'),
+      url: require.resolve('url/'),
+      assert: require.resolve('assert/'),
+    },
   },
   module: {
     rules: [
@@ -100,7 +127,7 @@ const config = (env, argv) => ({
         use: {
           loader: 'babel-loader',
           options: {
-            plugins: ['lodash', '@babel/plugin-syntax-dynamic-import'],
+            plugins: ['@babel/plugin-syntax-dynamic-import'],
             presets: [
               '@babel/preset-react',
               [
@@ -116,7 +143,7 @@ const config = (env, argv) => ({
       },
       {
         test: /\.txt$/,
-        loader: 'raw-loader',
+        type: 'asset/source',
       },
       {
         test: /\.md$/,
@@ -136,126 +163,167 @@ const config = (env, argv) => ({
       {
         test: /\.ejs$/,
         loader: 'ejs-loader',
+        options: {
+          esModule: false,
+        },
       },
       {
-        test: /\.(css|scss)$/,
-        include: FABRIC_DIR,
+        test: /tachyons\.scss$/,
         use: [
           argv.mode === 'production'
             ? MiniCssExtractPlugin.loader
-            : {
-                loader: 'style-loader',
-                options: {
-                  sourceMap: true,
-                },
-              },
+            : 'style-loader',
           {
             loader: 'css-loader',
             options: {
-              url: true,
               sourceMap: true,
               importLoaders: 2,
-              modules: true,
-              camelCase: true,
-              localIdentName: '[name]-[local]--[hash:base64:5]',
+              modules: {
+                localIdentName: '[local]',
+                exportLocalsConvention: 'dashesOnly',
+                namedExport: false,
+              },
             },
           },
           {
             loader: 'postcss-loader',
             options: {
               sourceMap: true,
-              ident: 'postcss',
-              plugins: loader => [
-                require('postcss-import')({ root: loader.resourcePath }),
-                require('autoprefixer')(),
-                require('cssnano')(),
-              ],
+              postcssOptions: {
+                plugins: [
+                  'postcss-import',
+                  'autoprefixer',
+                  'cssnano',
+                ],
+              },
             },
           },
           {
             loader: 'sass-loader',
             options: {
               sourceMap: true,
+              api: 'modern',
+              sassOptions: {
+                silenceDeprecations: ['legacy-js-api', 'import', 'slash-div'],
+                loadPaths: [helpers.root('node_modules')],
+              },
             },
           },
         ],
       },
       {
         test: /\.(css|scss)$/,
-        exclude: FABRIC_DIR,
+        include: FABRIC_DIR,
+        exclude: /tachyons\.scss$/,
         use: [
           argv.mode === 'production'
             ? MiniCssExtractPlugin.loader
-            : {
-                loader: 'style-loader',
-                options: {
-                  sourceMap: true,
-                },
-              },
+            : 'style-loader',
           {
             loader: 'css-loader',
             options: {
-              url: true,
               sourceMap: true,
               importLoaders: 2,
+              modules: {
+                localIdentName: '[name]-[local]--[hash:base64:5]',
+                exportLocalsConvention: 'camelCaseOnly',
+                namedExport: false,
+              },
             },
           },
           {
             loader: 'postcss-loader',
             options: {
               sourceMap: true,
-              ident: 'postcss2',
-              plugins: loader => [
-                require('postcss-import')({ root: loader.resourcePath }),
-                require('autoprefixer')(),
-                require('cssnano')(),
-              ],
+              postcssOptions: {
+                plugins: [
+                  'postcss-import',
+                  'autoprefixer',
+                  'cssnano',
+                ],
+              },
             },
           },
           {
             loader: 'sass-loader',
             options: {
               sourceMap: true,
+              api: 'modern',
+              sassOptions: {
+                silenceDeprecations: ['legacy-js-api', 'import', 'slash-div'],
+                loadPaths: [helpers.root('node_modules')],
+              },
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(css|scss)$/,
+        exclude: [FABRIC_DIR, /tachyons\.scss$/],
+        use: [
+          argv.mode === 'production'
+            ? MiniCssExtractPlugin.loader
+            : 'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true,
+              importLoaders: 2,
+              modules: {
+                auto: true,
+                localIdentName: '[name]-[local]--[hash:base64:5]',
+                exportLocalsConvention: 'camelCase',
+              },
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              sourceMap: true,
+              postcssOptions: {
+                plugins: [
+                  'postcss-import',
+                  'autoprefixer',
+                  'cssnano',
+                ],
+              },
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+              api: 'modern',
+              sassOptions: {
+                silenceDeprecations: ['legacy-js-api', 'import', 'slash-div'],
+                loadPaths: [helpers.root('node_modules')],
+              },
             },
           },
         ],
       },
       {
         test: /\.(jpg|png|gif|ico)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              publicPath: '/assets/img/',
-              outputPath: 'assets/img/',
-            },
-          },
-        ],
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/img/[name][ext]',
+        },
       },
       {
         test: /\.(eot|woff2?|ttf)([?]?.*)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              publicPath: '/assets/font/',
-              outputPath: 'assets/font/',
-            },
-          },
-        ],
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/font/[name][ext]',
+        },
       },
       {
         test: /\.svg$/,
+        issuer: /\.[jt]sx?$/,
         use: [
-          '@svgr/webpack',
           {
-            loader: 'file-loader',
+            loader: '@svgr/webpack',
             options: {
-              name: '[name].[ext]',
-              publicPath: '/assets/font/',
-              outputPath: 'assets/font/',
+              exportType: 'named',
             },
           },
         ],
@@ -263,23 +331,33 @@ const config = (env, argv) => ({
     ],
   },
   plugins: [
-    new webpack.WatchIgnorePlugin([/css\.d\.ts$/]),
     new webpack.IgnorePlugin({
       resourceRegExp: /^moment$/,
-      contextRegExp: /chart.js/,
+      contextRegExp: /chart\.js/,
     }),
     new webpack.IgnorePlugin({
       resourceRegExp: /^esprima$/,
       contextRegExp: /js-yaml/,
     }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+      Buffer: ['buffer', 'Buffer'],
+    }),
     new MonacoWebpackPlugin({
       languages: ['json', 'yaml', 'shell'],
       features: ['suggest', 'hover'],
+      publicPath: '/dist/',
     }),
-    new CopyWebpackPlugin([
-      { from: 'src/assets', to: 'assets' },
-      { from: 'src/assets/img/favicon.ico', to: 'favicon.ico' },
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'src/assets', to: 'assets' },
+        { from: 'src/assets/img/favicon.ico', to: 'favicon.ico' },
+        {
+          from: 'node_modules/monaco-editor/min/vs',
+          to: 'vs',
+        },
+      ],
+    }),
     new MiniCssExtractPlugin({
       filename: 'styles/[name].[contenthash].css',
     }),
@@ -288,13 +366,14 @@ const config = (env, argv) => ({
       _: 'lodash',
     }),
     new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery',
-      'window.jQuery': 'jquery',
+      $: ['jquery', 'default'],
+      jQuery: ['jquery', 'default'],
+      'window.jQuery': ['jquery', 'default'],
+      'window.$': ['jquery', 'default'],
     }),
     new webpack.ProvidePlugin({
-      cookies: 'js-cookie',
-      'window.cookies': 'js-cookie',
+      cookies: ['js-cookie', 'default'],
+      'window.cookies': ['js-cookie', 'default'],
     }),
     generateHtml({
       filename: 'index.html',
@@ -303,19 +382,19 @@ const config = (env, argv) => ({
     }),
     generateHtml({
       filename: 'home.html',
-      chunks: ['layout', 'home'],
+      chunks: ['home'],
     }),
     generateHtml({
       filename: 'user-view.html',
-      chunks: ['layout', 'userView'],
+      chunks: ['userView'],
     }),
     generateHtml({
       filename: 'batch-register.html',
-      chunks: ['layout', 'batchRegister'],
+      chunks: ['batchRegister'],
     }),
     generateHtml({
       filename: 'user-profile.html',
-      chunks: ['layout', 'userProfile'],
+      chunks: ['userProfile'],
     }),
     generateHtml({
       filename: 'dashboard.html',
@@ -323,11 +402,11 @@ const config = (env, argv) => ({
     }),
     generateHtml({
       filename: 'submit.html',
-      chunks: ['layout', 'submit'],
+      chunks: ['submit'],
     }),
     generateHtml({
       filename: 'submit_demo.html',
-      chunks: ['layout', 'submit_demo'],
+      chunks: ['submit_demo'],
     }),
     generateHtml({
       filename: 'submit_v1.html',
@@ -335,23 +414,23 @@ const config = (env, argv) => ({
     }),
     generateHtml({
       filename: 'job-list.html',
-      chunks: ['layout', 'jobList'],
+      chunks: ['jobList'],
     }),
     generateHtml({
       filename: 'job-detail.html',
-      chunks: ['layout', 'jobDetail'],
+      chunks: ['jobDetail'],
     }),
     generateHtml({
       filename: 'task-attempt.html',
-      chunks: ['layout', 'taskAttempt'],
+      chunks: ['taskAttempt'],
     }),
     generateHtml({
       filename: 'job-event.html',
-      chunks: ['layout', 'jobEvent'],
+      chunks: ['jobEvent'],
     }),
     generateHtml({
       filename: 'job-transfer.html',
-      chunks: ['layout', 'jobTransfer'],
+      chunks: ['jobTransfer'],
     }),
     generateHtml({
       filename: 'virtual-clusters.html',
@@ -379,39 +458,36 @@ const config = (env, argv) => ({
     }),
   ],
   devServer: {
-    contentBase: path.resolve(__dirname, '..', 'dist'),
+    static: {
+      directory: path.resolve(__dirname, '..', 'dist'),
+    },
     port: 9286,
     host: '0.0.0.0',
+    hot: true,
   },
   optimization: {
-    moduleIds: 'hashed',
+    moduleIds: 'deterministic',
     runtimeChunk: 'single',
     minimizer: [
       new TerserPlugin({
-        cache: true,
         parallel: true,
       }),
     ],
     splitChunks: {
-      name: false,
+      chunks: 'all',
       cacheGroups: {
         vendors: {
-          chunks: 'all',
-          minSize: 30000,
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10,
+          reuseExistingChunk: true,
+        },
+        default: {
           minChunks: 2,
-          maxAsyncRequests: Infinity,
-          maxInitialRequests: Infinity,
+          priority: -20,
+          reuseExistingChunk: true,
         },
       },
     },
-  },
-  node: {
-    fs: 'empty',
-    net: 'empty',
-    tls: 'empty',
-    global: true,
-    process: true,
-    module: false,
   },
 });
 

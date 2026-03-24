@@ -9,7 +9,7 @@ import {
   Dialog,
   DetailsListLayoutMode,
   SelectionMode,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { Box, Link, Text } from '../../elements';
 import styled from 'styled-components';
 import theme from '../../theme';

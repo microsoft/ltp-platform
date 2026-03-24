@@ -9,8 +9,11 @@ import {
   flexbox,
   border,
 } from 'styled-system';
+import shouldForwardProp from '@styled-system/should-forward-prop';
 
-const Box = styled('div')(
+const Box = styled('div').withConfig({
+  shouldForwardProp,
+})(
   {
     boxSizing: 'border-box',
     minWidth: 0,

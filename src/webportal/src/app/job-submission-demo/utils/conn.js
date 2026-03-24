@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import { PAIV2 } from '@microsoft/openpai-js-sdk';
 import { clearToken } from '../../user/user-logout/user-logout.component';
 import config from '../../config/webportal.config';
@@ -42,7 +41,7 @@ const wrapper = async func => {
 };
 
 export async function submitJob(jobProtocol) {
-  const job = yaml.safeLoad(jobProtocol);
+  const job = yaml.load(jobProtocol);
   return wrapper(() => client.job.createJob(job));
 }
 

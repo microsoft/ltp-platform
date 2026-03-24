@@ -24,12 +24,13 @@
  */
 
 import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   FontWeights,
   DefaultButton,
   Label,
   ColorClassNames,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -38,8 +39,9 @@ import Context from '../context';
 import { getJobComponentsFromConfig } from '../../utils/utils';
 
 export const ImportConfig = React.memo(
-  ({ extras, onChange, isSingle, history, setYamlText }) => {
+  ({ extras, onChange, isSingle, setYamlText }) => {
     const { vcNames } = useContext(Context);
+    const navigate = useNavigate();
 
     const _updatedComponent = protocolYaml => {
       const updatedJob = JobProtocol.fromYaml(protocolYaml);
@@ -85,7 +87,7 @@ export const ImportConfig = React.memo(
         try {
           if (isSingle) {
             setYamlText(text);
-            history.push('/general');
+            navigate('/general');
           } else {
             _updatedComponent(text);
           }
@@ -137,6 +139,5 @@ ImportConfig.propTypes = {
   extras: PropTypes.object.isRequired,
   onChange: PropTypes.func,
   isSingle: PropTypes.bool,
-  history: PropTypes.object,
   setYamlText: PropTypes.func,
 };

@@ -16,11 +16,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require('bootstrap');
-require('admin-lte/dist/css/AdminLTE.min.css');
+require('admin-lte/dist/css/adminlte.min.css');
 require('bootstrap/dist/css/bootstrap.css');
-require('font-awesome/css/font-awesome.min.css');
+require('@fortawesome/fontawesome-free/css/all.min.css');
 
-require('datatables.net/js/jquery.dataTables.js');
+require('datatables.net');
 require('datatables.net-bs/js/dataTables.bootstrap.js');
 require('datatables.net-bs/css/dataTables.bootstrap.css');
 require('datatables.net-plugins/sorting/natural.js');
@@ -84,7 +84,10 @@ const initCells = (idPrefix, instanceList, table) => {
     "<span title=\"-1\"/><font color='silver' title=''>N/A</font>";
   for (let i = 0; i < instanceList.length; i++) {
     const cellId = getCellId(idPrefix + ':' + instanceList[i]);
-    table.cell(cellId).data(noDataCellHtml);
+    const cell = table.cell(cellId);
+    if (cell && cell.node()) {
+      cell.data(noDataCellHtml);
+    }
   }
 };
 
@@ -118,7 +121,10 @@ const loadCpuUtilData = (
         const cellId = getCellId('cpu:' + getHostname(item.metric.instance));
         const percentage = item.values[0][1];
         const cellHtml = getCellHtml(percentage);
-        table.cell(cellId).data(cellHtml);
+        const cell = table.cell(cellId);
+        if (cell && cell.node()) {
+          cell.data(cellHtml);
+        }
       }
     },
     error: function() {
@@ -176,7 +182,10 @@ const loadMemUtilData = (
             const percentage =
               (dictOfMemUsed[item.metric.instance] / item.values[0][1]) * 100;
             const cellHtml = getCellHtml(percentage);
-            table.cell(cellId).data(cellHtml);
+            const cell = table.cell(cellId);
+            if (cell && cell.node()) {
+              cell.data(cellHtml);
+            }
           }
         },
         error: function() {
@@ -219,7 +228,10 @@ const loadGpuUtilData = (
         const cellId = getCellId('gpu:' + getHostname(item.metric.instance));
         const percentage = item.values[0][1];
         const cellHtml = getCellHtml(percentage);
-        table.cell(cellId).data(cellHtml);
+        const cell = table.cell(cellId);
+        if (cell && cell.node()) {
+          cell.data(cellHtml);
+        }
       }
     },
     error: function() {
@@ -256,7 +268,10 @@ const loadGpuMemUtilData = (
         const cellId = getCellId('gpumem:' + getHostname(item.metric.instance));
         const percentage = item.values[0][1];
         const cellHtml = getCellHtml(percentage);
-        table.cell(cellId).data(cellHtml);
+        const cell = table.cell(cellId);
+        if (cell && cell.node()) {
+          cell.data(cellHtml);
+        }
       }
     },
     error: function() {
@@ -324,7 +339,10 @@ const loadDiskUtilData = (
                 Math.min(1, diskBytesWritten / 1024 / 1024 / 500) * 100;
               const percentage = Math.max(p1, p2);
               const cellHtml = getCellHtml(percentage);
-              table.cell(cellId).data(cellHtml);
+              const cell = table.cell(cellId);
+              if (cell && cell.node()) {
+                cell.data(cellHtml);
+              }
             }
           }
         },
@@ -400,7 +418,10 @@ const loadEthUtilData = (
               const p2 = Math.min(1, ethBytesSent / 1024 / 1024 / 100) * 100;
               const percentage = Math.max(p1, p2);
               const cellHtml = getCellHtml(percentage);
-              table.cell(cellId).data(cellHtml);
+              const cell = table.cell(cellId);
+              if (cell && cell.node()) {
+                cell.data(cellHtml);
+              }
             }
           }
         },
@@ -444,6 +465,9 @@ const loadData = () => {
             { type: 'ip-address', targets: [1] },
             { type: 'title-numeric', targets: [2, 3, 4, 5, 6, 7] },
           ],
+          language: {
+            lengthMenu: 'Show _MENU_ entries',
+          },
         })
         .api();
       const instanceList = [];
@@ -499,10 +523,19 @@ const resizeContentWrapper = () => {
   }
 };
 
-$(document).ready(() => {
-  loadData();
-  window.onresize = function(envent) {
+const initHardwarePage = () => {
+  const contentWrapper = document.getElementById('content-wrapper');
+  if (contentWrapper) {
+    loadData();
+    window.onresize = function(envent) {
+      resizeContentWrapper();
+    };
     resizeContentWrapper();
-  };
-  resizeContentWrapper();
+  } else {
+    setTimeout(initHardwarePage, 50);
+  }
+};
+
+$(document).ready(() => {
+  initHardwarePage();
 });

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { TabForm } from './tab-form';
 import { JobTaskRole } from '../models/job-task-role';
 import Context from './context';
@@ -72,7 +72,7 @@ export const TaskRoles = React.memo(
     });
 
     const { setErrorMessage } = useContext(Context);
-    useMemo(() => {
+    useEffect(() => {
       const nameCount = items.reduce((res, item) => {
         if (res[item.headerText] === undefined) {
           res[item.headerText] = 0;
@@ -89,7 +89,7 @@ export const TaskRoles = React.memo(
       } else {
         setErrorMessage('TaskRole', '');
       }
-    }, [taskRoles]);
+    }, [taskRoles, setErrorMessage]);
 
     return (
       <TabForm

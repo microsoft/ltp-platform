@@ -16,10 +16,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
+import { Layout } from '../../../layout/layout';
 import JobList from './JobList';
 
-const contentWrapper = document.getElementById('content-wrapper');
+const JobListWithLayout = () => {
+  return <Layout><JobList /></Layout>;
+};
 
-ReactDOM.render(<JobList />, contentWrapper);
+const container = document.getElementById('wrapper');
+if (container && !container.hasAttribute('data-root-initialized')) {
+  container.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(container);
+  root.render(<JobListWithLayout />);
+}

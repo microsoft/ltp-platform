@@ -34,7 +34,7 @@ import {
   Dropdown,
   Toggle,
   getTheme,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import { DockerInfo } from '../models/docker-info';
 import { BasicSection } from './basic-section';
@@ -51,7 +51,7 @@ const dockerSectionStyle = getDockerSectionStyle();
 const AuthTextFiled = props => {
   const { label, value, componentRef, type } = props;
   return (
-    <Stack horizontal gap='s1'>
+    <Stack horizontal tokens={{ childrenGap: 's1' }}>
       <StackItem styles={{ root: [t.w30] }}>
         <Label>{label}</Label>
       </StackItem>
@@ -173,9 +173,9 @@ export const DockerSection = ({ sectionTooltip, onValueChange, value }) => {
         verticalAlign='center'
         styles={{ root: dockerSectionStyle.auth.outerForm }}
       >
-        <Stack gap='l1' styles={{ root: dockerSectionStyle.auth.innerForm }}>
+        <Stack styles={{ root: dockerSectionStyle.auth.innerForm }} tokens={{ childrenGap: 'l1' }}>
           <span>Auth</span>
-          <Stack gap='m'>
+          <Stack tokens={{ childrenGap: 'm' }}>
             <AuthTextFiled
               value={auth.username}
               label='username'
@@ -194,7 +194,7 @@ export const DockerSection = ({ sectionTooltip, onValueChange, value }) => {
             />
           </Stack>
           <Stack>
-            <Stack horizontal gap='m' horizontalAlign='center'>
+            <Stack horizontal horizontalAlign='center' tokens={{ childrenGap: 'm' }}>
               <PrimaryButton onClick={_onAuthSubmit}>Submit</PrimaryButton>
               <DefaultButton onClick={() => setShowAuth(false)}>
                 Cancel
@@ -208,7 +208,7 @@ export const DockerSection = ({ sectionTooltip, onValueChange, value }) => {
 
   return (
     <BasicSection sectionLabel='Docker image' sectionTooltip={sectionTooltip}>
-      <Stack horizontal gap='l1'>
+      <Stack horizontal tokens={{ childrenGap: 'l1' }}>
         <FormShortSection>
           <Dropdown
             placeholder='Select a docker image'
@@ -231,7 +231,7 @@ export const DockerSection = ({ sectionTooltip, onValueChange, value }) => {
         </Stack>
       </Stack>
       {isUseCustomizedDocker && (
-        <Stack horizontal gap='l1'>
+        <Stack horizontal tokens={{ childrenGap: 'l1' }}>
           <FormShortSection>
             <TextField
               placeholder='Enter docker uri...'

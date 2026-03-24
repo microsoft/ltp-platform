@@ -4,8 +4,8 @@
 import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import { CommandBar } from 'office-ui-fabric-react/lib/CommandBar';
-import { TextField, Stack, DefaultButton } from 'office-ui-fabric-react';
+import { CommandBar } from '@fluentui/react/lib/CommandBar';
+import { TextField, Stack, DefaultButton } from '@fluentui/react';
 
 import Context from './Context';
 import Pagination from './Pagination';
@@ -14,13 +14,7 @@ function GotoPage(props) {
   const [pageIndex, setPageIndex] = useState(props.pageIndex);
 
   return (
-    <Stack
-      horizontal
-      verticalAlign='center'
-      gap='5'
-      horizontalAlign='space-between'
-      styles={{ root: { padding: 10 } }}
-    >
+    <Stack horizontal verticalAlign='center' horizontalAlign='space-between' styles={{ root: { padding: 10 } }} tokens={{ childrenGap: '5' }}>
       <TextField
         value={pageIndex}
         styles={{ fieldGroup: { width: 80 } }}
@@ -66,10 +60,10 @@ export default function Paginator() {
     setPagination(newPagination);
   }
 
-  /** @type {import('office-ui-fabric-react').ICommandBarItemProps[]} */
+  /** @type {import('@fluentui/react').ICommandBarItemProps[]} */
   const farItems = [];
 
-  /** @type {import('office-ui-fabric-react').IButtonStyles} */
+  /** @type {import('@fluentui/react').IButtonStyles} */
   const buttonStyles = {
     root: { backgroundColor: 'white' },
     rootDisabled: { backgroundColor: 'white' },
@@ -125,7 +119,7 @@ export default function Paginator() {
 
   /**
    * @param {number} page
-   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @returns {import('@fluentui/react').ICommandBarItemProps}
    */
   function getPageButton(page) {
     return {

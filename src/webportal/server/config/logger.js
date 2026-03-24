@@ -16,41 +16,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // module dependencies
-const util = require('util');
 const winston = require('winston');
 const config = require('./index');
 
-const logTransports = {
-  console: new winston.transports.Console({
-    json: false,
-    colorize: true,
-    timestamp: () => new Date().toISOString(),
-    formatter: options => {
-      const timestamp = options.timestamp();
-      const level = winston.config.colorize(
-        options.level,
-        options.level.toUpperCase(),
-      );
-      const message = options.message ? options.message : '';
-      const meta =
-        options.meta && Object.keys(options.meta).length
-          ? '\nmeta = ' + JSON.stringify(options.meta, null, 2)
-          : '';
-      return util.format(timestamp, '[' + level + ']', message, meta);
-    },
-  }),
-  file: new winston.transports.File({
-    json: true,
-    colorize: false,
-    timestamp: () => Date.now(),
-    filename: 'server.log',
-  }),
-};
-
-// create logger
-const logger = new winston.Logger({
+// create logger with Winston 3.x API
+const logger = winston.createLogger({
   level: config.logLevel,
-  transports: [logTransports.console, logTransports.file],
+  format: winston.format.combine(
+    winston.format.splat(),
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.splat(),
+        winston.format.colorize(),
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+          let metaStr = '';
+          if (Object.keys(meta).length > 0) {
+            metaStr = '\nmeta = ' + JSON.stringify(meta, null, 2);
+          }
+          return `${timestamp} [${level}] ${message}${metaStr}`;
+        })
+      )
+    }),
+    new winston.transports.File({
+      filename: 'server.log',
+      format: winston.format.combine(
+        winston.format.splat(),
+        winston.format.timestamp(),
+        winston.format.json()
+      )
+    })
+  ],
   exitOnError: false,
 });
 

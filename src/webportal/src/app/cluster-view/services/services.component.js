@@ -28,9 +28,9 @@ const serviceViewComponent = require('./services.component.ejs');
 const loading = require('../../job/loading/loading.component');
 const webportalConfig = require('../../config/webportal.config.js');
 require('bootstrap');
-require('admin-lte/dist/css/AdminLTE.min.css');
+require('admin-lte/dist/css/adminlte.min.css');
 require('bootstrap/dist/css/bootstrap.css');
-require('datatables.net/js/jquery.dataTables.js');
+require('datatables.net');
 require('datatables.net-bs/js/dataTables.bootstrap.js');
 require('datatables.net-bs/css/dataTables.bootstrap.css');
 require('datatables.net-plugins/sorting/natural.js');
@@ -64,6 +64,9 @@ const loadServices = () => {
           { orderDataType: 'dom-text', targets: [1, 2] },
           { type: 'ip-address', targets: [0] },
         ],
+        language: {
+          lengthMenu: 'Show _MENU_ entries',
+        },
       })
       .api();
   });
@@ -71,7 +74,18 @@ const loadServices = () => {
 
 window.loadServices = loadServices;
 
-$('#content-wrapper').html(serviceViewHtml);
+// Wait for content-wrapper to be available before inserting HTML
+const initServicesPage = () => {
+  const contentWrapper = document.getElementById('content-wrapper');
+  if (contentWrapper) {
+    $('#content-wrapper').html(serviceViewHtml);
+    loadServices();
+  } else {
+    // If content-wrapper doesn't exist yet, wait a bit and try again
+    setTimeout(initServicesPage, 50);
+  }
+};
+
 $(document).ready(() => {
-  loadServices();
+  initServicesPage();
 });

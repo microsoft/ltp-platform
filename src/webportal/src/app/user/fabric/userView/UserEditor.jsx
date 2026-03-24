@@ -28,7 +28,7 @@ import {
   Dropdown,
   mergeStyles,
   getTheme,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import { isEmpty, isEqual } from 'lodash';
 import c from 'classnames';
@@ -230,7 +230,7 @@ export default function UserEditor({
   const tdLabelStyle = c(tdPaddingStyle, t.tr, t.vTop);
 
   /**
-   * @type {import('office-ui-fabric-react').IDropdownOption[]}
+   * @type {import('@fluentui/react').IDropdownOption[]}
    */
   const vcsOptions = allVCs.map(vc => {
     if (vc === 'default') return { key: vc, text: vc, disabled: true };
@@ -307,7 +307,7 @@ export default function UserEditor({
                 <tr>
                   <td className={tdLabelStyle}>Admin user</td>
                   <td className={tdPaddingStyle}>
-                    <Stack horizontal={true} gap={spacing.m}>
+                    <Stack horizontal={true} tokens={{ childrenGap: spacing.m }}>
                       <StackItem>
                         <Checkbox
                           componentRef={adminRef}
@@ -333,7 +333,7 @@ export default function UserEditor({
               marginRight: 'auto',
             }}
           >
-            <Stack horizontal={true} horizontalAlign='center' gap={spacing.s1}>
+            <Stack horizontal={true} horizontalAlign='center' tokens={{ childrenGap: spacing.s1 }}>
               <StackItem>
                 <PrimaryButton type='submit' disabled={lock} autoFocus>
                   {isCreate ? 'Add' : 'Save'}

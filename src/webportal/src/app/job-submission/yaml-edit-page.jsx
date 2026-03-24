@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import yaml from 'js-yaml';
 import { isEmpty, debounce } from 'lodash';
 import PropTypes from 'prop-types';
@@ -16,7 +16,7 @@ import {
   DefaultButton,
   PrimaryButton,
   StackItem,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import MonacoEditor from '../components/monaco-editor';
 import { YamlEditTopBar } from './components/yamledit-topbar/yamledit-topbar';
 // models
@@ -30,7 +30,8 @@ const JOB_PROTOCOL_SCHEMA_URL =
 
 const user = cookies.get('user');
 
-export const YamlEditPage = ({ history }) => {
+export const YamlEditPage = () => {
+  const navigate = useNavigate();
   const [protocolYaml, setProtocolYaml] = useState(
     'Paste or import your yaml here...',
   );
@@ -61,7 +62,7 @@ export const YamlEditPage = ({ history }) => {
     try {
       await submitJob(protocolYaml);
       window.location.href = `/job-detail.html?username=${user}&jobName=${
-        yaml.safeLoad(protocolYaml).name
+        yaml.load(protocolYaml).name
       }`;
     } catch (err) {
       alert(err);
@@ -70,22 +71,14 @@ export const YamlEditPage = ({ history }) => {
 
   return (
     <Fabric style={{ height: '100%', overflowX: 'auto' }}>
-      <Stack
-        style={{
-          height: '100%',
-          width: '100%',
-        }}
-        verticalAlign='space-between'
-        gap='l1'
-        padding='l1'
-      >
+      <Stack style={{ height: '100%', width: '100%', }} verticalAlign='space-between' tokens={{ childrenGap: 'l1', padding: 'l1' }}>
         <StackItem disableShrink>
           <YamlEditTopBar
             protocolYaml={protocolYaml}
             onChange={setProtocolYaml}
           />
         </StackItem>
-        <Stack gap='s1' style={{ flex: 1 }}>
+        <Stack style={{ flex: 1 }} tokens={{ childrenGap: 's1' }}>
           <MessageBar messageBarType={validStatus.barType}>
             {validStatus.message}
           </MessageBar>
@@ -104,7 +97,7 @@ export const YamlEditPage = ({ history }) => {
           />
         </Stack>
         <Card>
-          <Stack horizontal gap='m' horizontalAlign='space-between'>
+          <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: 'm' }}>
             <StackItem>
               <DefaultButton
                 text='Back'
@@ -113,11 +106,11 @@ export const YamlEditPage = ({ history }) => {
                   rootHovered: [ColorClassNames.neutralTertiaryBackground],
                 }}
                 onClick={() => {
-                  history.push('/');
+                  navigate('/');
                 }}
               />
             </StackItem>
-            <Stack horizontal gap='l1'>
+            <Stack horizontal tokens={{ childrenGap: 'l1' }}>
               <DefaultButton
                 styles={{
                   root: [ColorClassNames.neutralTertiaryAltBackground],
@@ -139,6 +132,4 @@ export const YamlEditPage = ({ history }) => {
   );
 };
 
-YamlEditPage.propTypes = {
-  history: PropTypes.object.isRequired,
-};
+YamlEditPage.propTypes = {};

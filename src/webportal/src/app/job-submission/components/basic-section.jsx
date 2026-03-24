@@ -30,7 +30,7 @@ import {
   Icon,
   StackItem,
   FontClassNames,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import { FormSection } from './form-page';
 import { getFormPageSytle, getFormBasicSectionStyle } from './form-style';
@@ -39,7 +39,7 @@ import { TooltipIcon } from './controls/tooltip-icon';
 const formPageStyle = getFormPageSytle();
 
 export const BasicSection = props => {
-  const { sectionLabel, sectionOptional, sectionTooltip, children } = props;
+  const { sectionLabel = '', sectionOptional, sectionTooltip, children } = props;
   const basicSectionStyle = getFormBasicSectionStyle(sectionOptional);
 
   const [isSectionOn, setSectionOn] = useState(true);
@@ -50,7 +50,7 @@ export const BasicSection = props => {
   return (
     <FormSection>
       <StackItem styles={formPageStyle.formFirstColumn}>
-        <Stack horizontal gap='s1' verticalAlign='baseline'>
+        <Stack horizontal verticalAlign='baseline' tokens={{ childrenGap: 's1' }}>
           <Icon
             iconName={isSectionOn ? 'CaretDown8' : 'CaretSolidRight'}
             styles={basicSectionStyle.icon}
@@ -70,14 +70,10 @@ export const BasicSection = props => {
         </Stack>
       </StackItem>
       <StackItem styles={formPageStyle.formSecondColunm}>
-        <Stack gap='m'>{(!sectionOptional || isSectionOn) && children}</Stack>
+        <Stack tokens={{ childrenGap: 'm' }}>{(!sectionOptional || isSectionOn) && children}</Stack>
       </StackItem>
     </FormSection>
   );
-};
-
-BasicSection.defaultProps = {
-  sectionLabel: '',
 };
 
 BasicSection.propTypes = {

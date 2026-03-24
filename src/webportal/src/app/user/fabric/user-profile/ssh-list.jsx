@@ -14,7 +14,7 @@ import {
   DialogFooter,
   PrimaryButton,
   DefaultButton,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 import t from '../../../components/tachyons.scss';
 import CopyButton from '../../../components/copy-button';

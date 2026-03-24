@@ -27,7 +27,7 @@ import {
   DetailsList,
   DetailsListLayoutMode,
   SelectionMode,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -59,12 +59,7 @@ const DummyContent = () => {
         >
           {`As you visit jobs, they'll be listed in Recently used jobs for quick and easy access.`}
         </div>
-        <Stack
-          styles={{ root: [{ marginTop: spacing.l3 }] }}
-          horizontal
-          horizontalAlign='center'
-          gap='s1'
-        >
+        <Stack styles={{ root: [{ marginTop: spacing.l3 }] }} horizontal horizontalAlign='center' tokens={{ childrenGap: 's1' }}>
           <Stack.Item>
             <PrimaryButton
               styles={{ root: [{ width: 120 }] }}

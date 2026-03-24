@@ -12,7 +12,7 @@ import {
   StackItem,
   Icon,
   IconFontSizes,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import React, { useCallback, useState, useEffect } from 'react';
 import { checkToken } from '../../user/user-auth/user-auth.component';
 import webportalConfig from '../../config/webportal.config';

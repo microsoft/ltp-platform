@@ -10,7 +10,7 @@ import {
   Label,
   FontClassNames,
   getTheme,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -40,11 +40,16 @@ export const AddLocal = ({
     if (!hdfsClient) {
       setHDFSErrorMessage('Cannot upload to LTP right now');
     } else {
-      hdfsClient.checkAccess().then(isAccessiable => {
-        if (!isAccessiable) {
-          setHDFSErrorMessage('Cannot upload to LTP right now');
-        }
-      });
+      hdfsClient.checkAccess()
+        .then(isAccessiable => {
+          if (!isAccessiable) {
+            setHDFSErrorMessage('Cannot upload to LTP right now');
+          }
+        })
+        .catch(err => {
+          console.error('Failed to check HDFS access:', err);
+          setHDFSErrorMessage('Failed to check upload availability');
+        });
     }
   }, []);
 
@@ -84,7 +89,7 @@ export const AddLocal = ({
     setDataType('none');
   };
   return (
-    <Stack horizontal horizontalAlign='space-between' gap='m'>
+    <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: 'm' }}>
       <Stack.Item align='baseline'>
         <Label required className={FontClassNames.medium}>
           Container path

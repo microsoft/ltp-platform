@@ -32,7 +32,7 @@ import {
   CommandBarButton,
   getTheme,
   SelectionMode,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import { countBy, isEmpty } from 'lodash';
 import React, { useCallback, useLayoutEffect } from 'react';
@@ -85,7 +85,7 @@ export const KeyValueList = ({
   const getKey = useCallback((item, idx) => idx, []);
 
   // workaround for fabric's bug
-  // https://github.com/OfficeDev/office-ui-fabric-react/issues/5280#issuecomment-489619108
+  // https://github.com/OfficeDev/@fluentui/react/issues/5280#issuecomment-489619108
   useLayoutEffect(() => {
     dispatchResizeEvent();
   });
@@ -146,7 +146,7 @@ export const KeyValueList = ({
   ];
 
   return (
-    <Stack gap='m'>
+    <Stack tokens={{ childrenGap: 'm' }}>
       <div>
         <DetailsList
           items={items}

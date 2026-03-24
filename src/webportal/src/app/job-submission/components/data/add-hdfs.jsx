@@ -9,7 +9,7 @@ import {
   Stack,
   IconButton,
   Label,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 
 import { STORAGE_PREFIX, ERROR_MARGIN } from '../../utils/constants';
@@ -40,12 +40,18 @@ export const AddHDFS = ({
       setIsHdfsEnabled(false);
       setHdfsPathErrorMessage('LTP HDFS is not available');
     } else {
-      hdfsClient.checkAccess().then(isAccessiable => {
-        setIsHdfsEnabled(isAccessiable);
-        if (!isAccessiable) {
-          setHdfsPathErrorMessage('LTP HDFS is not available');
-        }
-      });
+      hdfsClient.checkAccess()
+        .then(isAccessiable => {
+          setIsHdfsEnabled(isAccessiable);
+          if (!isAccessiable) {
+            setHdfsPathErrorMessage('LTP HDFS is not available');
+          }
+        })
+        .catch(err => {
+          console.error('Failed to check HDFS access:', err);
+          setIsHdfsEnabled(false);
+          setHdfsPathErrorMessage('Failed to check HDFS availability');
+        });
     }
   }, []);
 
@@ -66,7 +72,7 @@ export const AddHDFS = ({
   };
 
   return (
-    <Stack horizontal horizontalAlign='space-between' gap='s'>
+    <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: 's' }}>
       <Stack.Item align='baseline'>
         <Label reqired className={FontClassNames.medium}>
           Container path

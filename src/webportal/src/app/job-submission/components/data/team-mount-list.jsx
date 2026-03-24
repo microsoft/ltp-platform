@@ -8,7 +8,7 @@ import {
   SelectionMode,
   FontClassNames,
   DetailsListLayoutMode,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 
 import { dispatchResizeEvent } from '../../utils/utils';
@@ -17,7 +17,7 @@ import { InputData } from '../../models/data/input-data';
 
 export const TeamMountList = ({ dataList }) => {
   // workaround for fabric's bug
-  // https://github.com/OfficeDev/office-ui-fabric-react/issues/5280#issuecomment-489619108
+  // https://github.com/OfficeDev/@fluentui/react/issues/5280#issuecomment-489619108
   useLayoutEffect(() => {
     dispatchResizeEvent();
   });
