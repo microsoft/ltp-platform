@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { Label, Modal, TextField } from 'office-ui-fabric-react';
+import { Label, Modal, TextField } from '@fluentui/react';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';

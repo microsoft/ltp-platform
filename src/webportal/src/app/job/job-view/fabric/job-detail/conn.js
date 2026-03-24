@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import { PAIV2 } from '@microsoft/openpai-js-sdk';
 import { isNil, get } from 'lodash';
 import urljoin from 'url-join';
@@ -32,13 +31,13 @@ const wrapper = async func => {
   try {
     return await func();
   } catch (err) {
-    if (err.data.code === 'UnauthorizedUserError') {
+    if (err.data && err.data.code === 'UnauthorizedUserError') {
       alert(err.data.message);
       clearToken();
-    } else if (err.data.code === 'NoJobConfigError') {
+    } else if (err.data && err.data.code === 'NoJobConfigError') {
       throw new NotFoundError(err.data.message);
     } else {
-      throw new Error(err.data.message);
+      throw new Error((err.data && err.data.message) || err.message || 'Unknown error');
     }
   }
 };

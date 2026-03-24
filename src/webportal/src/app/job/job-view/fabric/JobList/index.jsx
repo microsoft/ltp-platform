@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import { PAIV2 } from '@microsoft/openpai-js-sdk';
 import * as querystring from 'querystring';
 import urljoin from 'url-join';
@@ -14,13 +13,13 @@ import React, {
 } from 'react';
 import { debounce, isEmpty, cloneDeep } from 'lodash';
 
-import { ColorClassNames, getTheme } from '@uifabric/styling';
-import { Fabric } from 'office-ui-fabric-react/lib/Fabric';
+import { ColorClassNames, getTheme } from '@fluentui/react/lib/Styling';
+import { Fabric } from '@fluentui/react/lib/Fabric';
 import {
   MessageBar,
   MessageBarType,
-} from 'office-ui-fabric-react/lib/MessageBar';
-import { Stack } from 'office-ui-fabric-react/lib/Stack';
+} from '@fluentui/react/lib/MessageBar';
+import { Stack } from '@fluentui/react/lib/Stack';
 
 import Context from './Context';
 import Filter from './Filter';

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Modal, Toggle } from 'office-ui-fabric-react';
+import { Modal, Toggle } from '@fluentui/react';
 import { Flex, Box, Button, Heading } from '../../elements';
 import { SIDEBAR_CONFIG } from '../../utils/constants';
 

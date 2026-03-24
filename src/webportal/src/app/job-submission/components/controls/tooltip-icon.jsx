@@ -24,7 +24,7 @@
  */
 
 import React from 'react';
-import { IconButton } from 'office-ui-fabric-react';
+import { IconButton } from '@fluentui/react';
 import PropTypes from 'prop-types';
 
 export const TooltipIcon = ({ content }) => {

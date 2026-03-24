@@ -10,7 +10,7 @@ import {
   ChoiceGroup,
   Dropdown,
   Stack,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { isNil, cloneDeep } from 'lodash';
@@ -54,12 +54,7 @@ const PureSaveTemplateDialog = props => {
       text: 'Protected',
       onRenderField: (props, render) => {
         return (
-          <Stack
-            horizontal
-            verticalAlign='center'
-            horizontalAlign='space-between'
-            gap='s1'
-          >
+          <Stack horizontal verticalAlign='center' horizontalAlign='space-between' tokens={{ childrenGap: 's1' }}>
             {render(props)}
             <Dropdown
               placeholder='Select groups to share'

@@ -7,7 +7,7 @@ import {
   DefaultButton,
   Label,
   ColorClassNames,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 
 import { JobProtocol } from '../../models/job-protocol';

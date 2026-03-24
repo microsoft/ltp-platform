@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { cloneDeep, debounce, isEmpty } from 'lodash';
@@ -11,7 +10,7 @@ import {
   MessageBarType,
   PrimaryButton,
   Stack,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { Box, Flex } from './elements';
 import { SaveTemplateDialog } from './components/save-template-dialog';
 import MonacoEditor from '../components/monaco-editor';
@@ -111,7 +110,7 @@ const PureYamlEditPage = ({ jobProtocol, onJobProtocolChange }) => {
         />
       </Flex>
       <Box padding='m' marginTop='m' bg='white'>
-        <Stack horizontal horizontalAlign='end' gap='m'>
+        <Stack horizontal horizontalAlign='end' tokens={{ childrenGap: 'm' }}>
           {isReadOnly ? (
             <>
               <DefaultButton onClick={onEdit}>Edit</DefaultButton>

@@ -30,7 +30,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Stack } from 'office-ui-fabric-react';
+import { Stack } from '@fluentui/react';
 import PropTypes from 'prop-types';
 import Context from '../context';
 import { SidebarCard } from './sidebar-card';
@@ -79,7 +79,7 @@ export const Secrets = React.memo(
         onSelect={onSelect}
         error={hasError}
       >
-        <Stack gap='m'>
+        <Stack tokens={{ childrenGap: 'm' }}>
           <Hint>
             Secret is a special type of parameter which will be masked after
             submission. You could reference these secrets in command by{' '}

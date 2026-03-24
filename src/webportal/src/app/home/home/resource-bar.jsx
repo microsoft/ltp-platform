@@ -11,7 +11,7 @@ import {
   StackItem,
   Text,
   FontSizes,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import React from 'react';
 
 const { palette } = getTheme();
@@ -33,7 +33,7 @@ export const ResourceBar = ({ name, percentage, tailInfo, barHeight }) => {
   const curBarHeigh = isNil(barHeight) ? '14px' : barHeight;
 
   return (
-    <Stack horizontal gap='s1' styles={{ root: { height: curBarHeigh } }}>
+    <Stack horizontal tokens={{ childrenGap: 's1' }} styles={{ root: { height: curBarHeigh } }}>
       <StackItem styles={{ root: { width: 50 } }} align='center'>
         <Text variant='small'>{name}</Text>
       </StackItem>

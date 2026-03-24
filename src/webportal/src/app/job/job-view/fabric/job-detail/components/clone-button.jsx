@@ -19,7 +19,7 @@ import React, { useMemo, useContext } from 'react';
 import PropTypes from 'prop-types';
 import qs from 'querystring';
 import { get, isNil } from 'lodash';
-import { PrimaryButton } from 'office-ui-fabric-react';
+import { PrimaryButton } from '@fluentui/react';
 import { isClonable, isJobV2 } from '../util';
 import Context from './context';
 

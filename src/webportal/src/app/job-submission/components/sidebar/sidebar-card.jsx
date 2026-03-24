@@ -32,7 +32,7 @@ import {
   FontWeights,
   getTheme,
   StackItem,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import Card from '../../../components/card';
 import { TooltipIcon } from '../controls/tooltip-icon';
@@ -73,9 +73,9 @@ export const SidebarCard = ({
         border: error && !selected ? `1px solid ${palette.red}` : null,
       }}
     >
-      <Stack gap='m' styles={{ root: { height: '100%' } }}>
+      <Stack styles={{ root: { height: '100%' } }} tokens={{ childrenGap: 'm' }}>
         <StackItem disableShrink>
-          <Stack horizontal gap='s1'>
+          <Stack horizontal tokens={{ childrenGap: 's1' }}>
             <ActionButton
               iconProps={{ iconName: selected ? 'ChevronUp' : 'ChevronDown' }}
               styles={style.actionButton}

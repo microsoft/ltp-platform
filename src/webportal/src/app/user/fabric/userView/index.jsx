@@ -17,7 +17,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 
-import { Fabric, Stack, getTheme } from 'office-ui-fabric-react';
+import { Fabric, Stack, getTheme } from '@fluentui/react';
 import { debounce, findIndex } from 'lodash';
 
 import { MaskSpinnerLoading } from '../../../components/loading';

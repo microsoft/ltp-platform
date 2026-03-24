@@ -8,7 +8,7 @@ import {
   DetailsListLayoutMode,
   SelectionMode,
   FontClassNames,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 function normalizePath(path) {
   if (path.startsWith('/')) {

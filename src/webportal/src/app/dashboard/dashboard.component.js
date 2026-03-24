@@ -23,6 +23,15 @@ const dashboardHtml = dashboardComponent({
   grafanaUri: webportalConfig.grafanaUri,
 });
 
+const initDashboard = () => {
+  const contentWrapper = document.getElementById('content-wrapper');
+  if (contentWrapper) {
+    $('#content-wrapper').html(dashboardHtml);
+  } else {
+    setTimeout(initDashboard, 50);
+  }
+};
+
 $(document).ready(function() {
-  $('#content-wrapper').html(dashboardHtml);
+  initDashboard();
 });

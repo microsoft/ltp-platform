@@ -17,7 +17,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { Fabric, Stack, getTheme } from 'office-ui-fabric-react';
+import { Fabric, Stack, getTheme } from '@fluentui/react';
 import { isNil, countBy, findIndex } from 'lodash';
 
 import t from '../../../components/tachyons.scss';
@@ -316,16 +316,7 @@ export default function BatchRegister() {
   return (
     <Context.Provider value={context}>
       <Fabric className={t.h100}>
-        <Stack
-          verticalFill
-          styles={{
-            root: [
-              t.relative,
-              { padding: `${spacing.s1} ${spacing.l1} ${spacing.l1}` },
-            ],
-          }}
-          gap={spacing.s2}
-        >
+        <Stack verticalFill styles={{ root: [ t.relative, { padding: `${spacing.s1} ${spacing.l1} ${spacing.l1}` }, ], }} tokens={{ childrenGap: spacing.s2 }}>
           <Stack.Item>
             <BackButton />
           </Stack.Item>

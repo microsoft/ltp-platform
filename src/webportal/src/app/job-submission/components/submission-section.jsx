@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 import PropTypes from 'prop-types';
 import { isNil, debounce, isEqual, isEmpty, cloneDeep } from 'lodash';
 import React, { useState, useRef, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Stack,
   DefaultButton,
@@ -38,7 +38,7 @@ import {
   Dialog,
   DialogFooter,
   TextField,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 import { JobProtocol } from '../models/job-protocol';
 import { JobBasicInfo } from '../models/job-basic-info';
@@ -75,9 +75,9 @@ export const SubmissionSection = props => {
     jobData,
     jobProtocol,
     setJobProtocol,
-    history,
     isSingle,
   } = props;
+  const navigate = useNavigate();
   const [isEditorOpen, setEditorOpen] = useState(false);
 
   const [protocolYaml, setProtocolYaml] = useState('');
@@ -241,13 +241,13 @@ export const SubmissionSection = props => {
           text='Back'
           disabled={params.has('op') && params.get('op') === 'resubmit'}
           onClick={() => {
-            history.push('/');
+            navigate('/');
           }}
         />
-        <Stack horizontal gap='l1'>
+        <Stack horizontal tokens={{ childrenGap: 'l1' }}>
           <FormShortSection>
             <Stack horizontal horizontalAlign='space-between'>
-              <Stack horizontal gap='s1'>
+              <Stack horizontal tokens={{ childrenGap: 's1' }}>
                 <PrimaryButton
                   onClick={_submitJob}
                   disabled={!isEmpty(errorMessages)}
@@ -266,7 +266,7 @@ export const SubmissionSection = props => {
               </Stack>
             </Stack>
           </FormShortSection>
-          <Stack horizontal verticalAlign='center' gap='s1'>
+          <Stack horizontal verticalAlign='center' tokens={{ childrenGap: 's1' }}>
             <div>Advanced</div>
             <Toggle
               styles={{ root: { margin: 0 } }}
@@ -383,6 +383,5 @@ SubmissionSection.propTypes = {
   jobData: PropTypes.object,
   jobProtocol: PropTypes.object,
   setJobProtocol: PropTypes.func,
-  history: PropTypes.object,
   isSingle: PropTypes.bool,
 };

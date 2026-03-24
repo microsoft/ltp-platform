@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as webhdfs from 'webhdfs';
-import { promisify } from 'util';
-
 import { getHostNameFromUrl } from './utils';
 
 export class WebHDFSClient {
@@ -11,41 +8,109 @@ export class WebHDFSClient {
     this.host = `http://${host}:${port}`;
     this.pylonEndpoint = `http://${host}:80/webhdfs/api/v1`;
     this.endpoint = `http://${host}:${port}${path}`;
-    this.client = webhdfs.createClient({ host, port, user, path }, { timeout });
-    this.client.readdir = promisify(this.client.readdir);
-    this.client.mkdir = promisify(this.client.mkdir);
+    this.user = user;
+    this.timeout = timeout;
+  }
+
+  /**
+   * Perform a WebHDFS REST API request
+   */
+  async _request(path, operation, method = 'GET', options = {}) {
+    const url = `${this.endpoint}${path}?op=${operation}&user.name=${this.user}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(url, {
+        method,
+        signal: controller.signal,
+        ...options,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`WebHDFS ${operation} failed: ${response.status} ${errorText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('WebHDFS request timeout');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * List directory contents (LISTSTATUS operation)
+   */
+  async _readdir(path) {
+    const data = await this._request(path, 'LISTSTATUS');
+    return data.FileStatuses.FileStatus;
+  }
+
+  /**
+   * Create directory (MKDIRS operation)
+   */
+  async _mkdir(path, permission = '755') {
+    const url = `${this.endpoint}${path}?op=MKDIRS&user.name=${this.user}&permission=${permission}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(url, {
+        method: 'PUT',
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`WebHDFS MKDIRS failed: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      return data.boolean;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('WebHDFS request timeout');
+      }
+      throw error;
+    }
   }
 
   async checkAccess() {
-    return this.client
-      .readdir('/')
-      .then(() => {
-        return true;
-      })
-      .catch(error => {
-        if (error) {
-          return false;
-        }
-      });
+    try {
+      await this._readdir('/');
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   async ensureDir(path) {
-    this.client
-      .readdir(path)
-      .then(data => {})
-      .catch(error => {
-        if (error.message.includes('does not exist')) {
-          this.client.mkdir(path);
-        } else {
-          throw error;
-        }
-      });
+    try {
+      await this._readdir(path);
+    } catch (error) {
+      if (
+        error.message.includes('does not exist') ||
+        error.message.includes('FileNotFoundException')
+      ) {
+        await this._mkdir(path);
+      } else {
+        throw error;
+      }
+    }
   }
 
   async readDir(path) {
-    return this.client
-      .readdir(path)
-      .then(data => data.map(item => item.pathSuffix));
+    const items = await this._readdir(path);
+    return items.map(item => item.pathSuffix);
   }
 
   async uploadFile(dir, file, newFileName = file.name) {
@@ -57,9 +122,9 @@ export class WebHDFSClient {
     }
 
     try {
-      await this.client.readdir(dir);
+      await this._readdir(dir);
     } catch (e) {
-      await this.client.mkdir(dir);
+      await this._mkdir(dir);
     }
 
     const res = await fetch(

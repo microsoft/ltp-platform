@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { cloneDeep, isNil, get } from 'lodash';
 import PropTypes from 'prop-types';
-import { Toggle } from 'office-ui-fabric-react';
+import { Toggle } from '@fluentui/react';
 import { Row, Col } from '../../elements';
 import theme from '../../theme';
 

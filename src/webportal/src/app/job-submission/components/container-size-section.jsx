@@ -24,7 +24,7 @@
  */
 
 import React from 'react';
-import { getTheme, Toggle, Stack } from 'office-ui-fabric-react';
+import { getTheme, Toggle, Stack } from '@fluentui/react';
 import PropTypes from 'prop-types';
 import { BasicSection } from './basic-section';
 import { getDefaultContainerSize } from '../models/container-size';
@@ -62,8 +62,8 @@ export const ContainerSizeSection = props => {
       sectionLabel='Resources'
       sectionTooltip={PROTOCOL_TOOLTIPS.taskRoleContainerSize}
     >
-      <Stack horizontal gap='l1'>
-        <FormShortSection gap='m'>
+      <Stack horizontal tokens={{ childrenGap: 'l1' }}>
+        <FormShortSection tokens={{ childrenGap: 'm' }}>
           <CSpinButton
             label='GPU count'
             value={gpu}

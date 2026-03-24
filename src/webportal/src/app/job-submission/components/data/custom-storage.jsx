@@ -3,7 +3,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FontClassNames, FontWeights, getTheme } from 'office-ui-fabric-react';
+import { FontClassNames, FontWeights, getTheme } from '@fluentui/react';
 import c from 'classnames';
 
 import { AddDataSource } from './add-data-source';

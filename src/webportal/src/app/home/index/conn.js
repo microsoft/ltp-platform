@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import { PAIV2 } from '@microsoft/openpai-js-sdk';
 
 import config from '../../config/webportal.config';

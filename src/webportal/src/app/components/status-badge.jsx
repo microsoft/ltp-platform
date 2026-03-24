@@ -15,10 +15,10 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { FontClassNames, FontSizes } from '@uifabric/styling';
+import { FontClassNames, FontSizes } from '@fluentui/react/lib/Styling';
 import c from 'classnames';
 import { isEmpty } from 'lodash';
-import { Icon } from 'office-ui-fabric-react/lib/Icon';
+import { Icon } from '@fluentui/react/lib/Icon';
 import PropTypes from 'prop-types';
 import React from 'react';
 

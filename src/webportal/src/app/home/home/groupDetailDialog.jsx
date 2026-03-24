@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { FontClassNames } from '@uifabric/styling';
+import { FontClassNames } from '@fluentui/react/lib/Styling';
 import c from 'classnames';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
@@ -10,7 +10,7 @@ import {
   DetailsList,
   DetailsListLayoutMode,
   SelectionMode,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import CopyButton from '../../components/copy-button';
 
 import t from '../../components/tachyons.scss';

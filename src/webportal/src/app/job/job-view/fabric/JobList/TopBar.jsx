@@ -24,7 +24,7 @@ import {
   CommandBarButton,
   SearchBox,
   Stack,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 import Context from './Context';
 import Filter from './Filter';
@@ -52,7 +52,7 @@ function KeywordSearchBox() {
     setFilter(newFilter);
   }
 
-  /** @type {import('office-ui-fabric-react').IStyle} */
+  /** @type {import('@fluentui/react').IStyle} */
   const rootStyles = {
     backgroundColor: 'transparent',
     alignSelf: 'center',
@@ -177,7 +177,7 @@ function TopBar() {
   }, []);
 
   /**
-   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @returns {import('@fluentui/react').ICommandBarItemProps}
    */
   function getStop() {
     return {
@@ -197,7 +197,7 @@ function TopBar() {
   }
 
   /**
-   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @returns {import('@fluentui/react').ICommandBarItemProps}
    */
   function getNew() {
     return {
@@ -214,7 +214,7 @@ function TopBar() {
   }
 
   /**
-   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @returns {import('@fluentui/react').ICommandBarItemProps}
    */
   function getRefresh() {
     return {
@@ -231,7 +231,7 @@ function TopBar() {
   }
 
   /**
-   * @returns {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @returns {import('@fluentui/react').ICommandBarItemProps}
    */
   function getFilters() {
     return {

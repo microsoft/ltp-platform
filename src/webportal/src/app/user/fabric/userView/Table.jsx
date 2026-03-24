@@ -25,7 +25,7 @@ import {
   DefaultButton,
   mergeStyles,
   TooltipHost,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 import c from 'classnames';
 import t from '../../../components/tachyons.scss';
@@ -49,7 +49,7 @@ export default function Table() {
     getSelectedUsers,
   } = useContext(Context);
   /**
-   * @type {import('office-ui-fabric-react').Selection}
+   * @type {import('@fluentui/react').Selection}
    */
   const selection = useMemo(() => {
     return new Selection({
@@ -62,7 +62,7 @@ export default function Table() {
 
   /**
    * @param {React.MouseEvent<HTMLElement>} event
-   * @param {import('office-ui-fabric-react').IColumn} column
+   * @param {import('@fluentui/react').IColumn} column
    */
   function onColumnClick(event, column) {
     const { field, descending } = ordering;
@@ -78,7 +78,7 @@ export default function Table() {
   }
 
   /**
-   * @param {import('office-ui-fabric-react').IColumn} column
+   * @param {import('@fluentui/react').IColumn} column
    */
   function applySortProps(column) {
     column.isSorted = ordering.field === column.key;
@@ -88,7 +88,7 @@ export default function Table() {
   }
 
   /**
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const usernameColumn = applySortProps({
     key: 'username',
@@ -139,7 +139,7 @@ export default function Table() {
 
   /**
    * actions column
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const actionsColumn = {
     key: 'actions',

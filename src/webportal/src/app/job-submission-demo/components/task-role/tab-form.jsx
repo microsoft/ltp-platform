@@ -12,7 +12,7 @@ import {
   IconFontSizes,
   Pivot,
   PivotItem,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { Box, Flex } from '../../elements';
 import { createUniqueName } from '../../utils/utils';
 import { DEFAULT_DOCKER_URI } from '../../utils/constants';

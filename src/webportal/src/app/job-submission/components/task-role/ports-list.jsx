@@ -42,7 +42,7 @@ import {
   DefaultButton,
   SpinButton,
   FontClassNames,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { BasicSection } from '../basic-section';
 import { FormShortSection } from '../form-page';
 
@@ -142,7 +142,7 @@ export const PortsList = React.memo(({ onChange, ports }) => {
             height: '100%',
           }}
         >
-          <Stack horizontal gap='s1'>
+          <Stack horizontal tokens={{ childrenGap: 's1' }}>
             <IconButton
               iconProps={{ iconName: 'Edit' }}
               onClick={() => onEdit(idx)}
@@ -162,7 +162,7 @@ export const PortsList = React.memo(({ onChange, ports }) => {
   return (
     <BasicSection sectionLabel='Ports' sectionOptional>
       <FormShortSection>
-        <Stack gap='m'>
+        <Stack tokens={{ childrenGap: 'm' }}>
           <div>
             <DetailsList
               items={ports}
@@ -193,7 +193,7 @@ export const PortsList = React.memo(({ onChange, ports }) => {
               }}
               minWidth={400}
             >
-              <Stack gap='m'>
+              <Stack tokens={{ childrenGap: 'm' }}>
                 <div>
                   <p>The port value will be assigned randomly.</p>
                   <p>

@@ -8,7 +8,7 @@ import {
   ColorClassNames,
   FontClassNames,
   FontWeights,
-} from '@uifabric/styling';
+} from '@fluentui/react/lib/Styling';
 
 import t from '../../components/tachyons.scss';
 

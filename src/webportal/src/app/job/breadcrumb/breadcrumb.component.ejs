@@ -1,6 +1,6 @@
 <h1><%= breadcrumbTitle %></h1>
 <ol class="breadcrumb">
-  <li>
+  <li class="breadcrumb-item">
     <a href="/"><i class="fa fa-home"></i>Home</a>
   </li>
 <%
@@ -10,13 +10,13 @@
   for (let i = 0; i < pages.length; i++) {
     if (i < pages.length - 1) {
 %>
-  <li>
+  <li class="breadcrumb-item">
     <a href='<%= pages[i].path %>'><%= pages[i].title %></a>
   </li>
 <%
     } else {
 %>
-  <li class="active"><%= pages[i].title %></li>
+  <li class="breadcrumb-item active"><%= pages[i].title %></li>
 <%
     }
   }

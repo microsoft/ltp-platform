@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { isEmpty, isNil, get } from 'lodash';
 import PropTypes from 'prop-types';
-import { Pivot, PivotItem } from 'office-ui-fabric-react';
+import { Pivot, PivotItem } from '@fluentui/react';
 import { Flex } from './elements';
 import { Topbar } from './components/topbar';
 import { JobEditPage } from './job-edit-page';
@@ -139,7 +138,7 @@ const PureJobSubmissionPage = ({ onJobProtocolChange, onTaskRoleSelect }) => {
   );
 };
 
-const mapStateToProps = () => {};
+const mapStateToProps = () => ({});
 
 const mapDispatchToProps = dispatch => ({
   onJobProtocolChange: jobProtocol =>

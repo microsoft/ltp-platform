@@ -19,13 +19,12 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import 'whatwg-fetch';
 
-import { FontClassNames, ColorClassNames } from '@uifabric/styling';
+import { FontClassNames, ColorClassNames } from '@fluentui/react/lib/Styling';
 import c from 'classnames';
 import { isEmpty } from 'lodash';
-import { initializeIcons } from 'office-ui-fabric-react';
 import querystring from 'querystring';
 import React, { useState, useCallback, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import Bottom from './index/bottom';
 import { login } from './index/conn';
@@ -34,6 +33,7 @@ import LoginModal from './index/login-modal';
 import { checkToken } from '../user/user-auth/user-auth.component';
 import config from '../config/webportal.config';
 import { SpinnerLoading } from '../components/loading';
+import { initializeIconsOnce } from '../utils/icon-initializer';
 import t from 'tachyons-sass/tachyons.scss';
 
 let loginTarget = '/home.html';
@@ -63,7 +63,7 @@ if (config.authnMethod === 'OIDC') {
   }
 }
 
-initializeIcons();
+initializeIconsOnce();
 
 const Index = () => {
   const [loginModal, setLoginModal] = useState(false);
@@ -162,4 +162,6 @@ const Index = () => {
   );
 };
 
-ReactDOM.render(<Index />, document.getElementById('content'));
+const container = document.getElementById('wrapper');
+const root = createRoot(container);
+root.render(<Index />);

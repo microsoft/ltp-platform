@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import React from 'react';
-import { Label } from 'office-ui-fabric-react';
+import { Label } from '@fluentui/react';
 import { TooltipIcon } from './controls/tooltip-icon';
 import { Box, Flex } from '../elements';
 import PropTypes from 'prop-types';

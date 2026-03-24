@@ -15,10 +15,12 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Build stage - install all dependencies and build
-FROM node:carbon AS builder
+FROM node:24-alpine
 
 WORKDIR /usr/src/app
+
+ENV NODE_ENV=production \
+    SERVER_PORT=8080
 
 COPY dependency/ ../../
 COPY . .
@@ -27,42 +29,15 @@ RUN rm -rf .env && yarn --no-git-tag-version --new-version version \
     "$(cat version/PAI.VERSION)"
 RUN npm install json -g
 RUN json -I -f package.json -e "this.commitVersion=\"`cat version/COMMIT.VERSION`\""
-
-# Install all dependencies including devDependencies for building
+# Fix openpai-js-sdk path for Docker build (point to the .tgz file)
+RUN json -I -f package.json -e "this.dependencies['@microsoft/openpai-js-sdk']='file:./openpai-js-sdk/microsoft-openpai-js-sdk-0.2.0.tgz'"
+# Install webportal dependencies (including the SDK from tar)
 RUN yarn install --production=false
-
-# Build the frontend assets
+# Build webportal
 RUN npm run build
-
-# Now install only production dependencies in a separate location
-RUN yarn install --production=true --modules-folder ./node_modules_prod
-
-# Production stage - use slim image
-FROM node:carbon-slim
-
-WORKDIR /usr/src/app
-
-ENV NODE_ENV=production \
-    SERVER_PORT=8080
-
-# Copy only production dependencies
-COPY --from=builder /usr/src/app/node_modules_prod ./node_modules
-
-# Copy built assets and necessary runtime files
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/server ./server
-COPY --from=builder /usr/src/app/config ./config
-COPY --from=builder /usr/src/app/src/app/env.js.template ./src/app/env.js.template
-COPY --from=builder /usr/src/app/package.json ./package.json
-COPY --from=builder /usr/src/app/version ./version
-
-# Create a simple env.js generator script using Node.js (no npm needed)
-RUN echo 'const fs = require("fs"); \
-const template = fs.readFileSync("src/app/env.js.template", "utf8"); \
-const result = template.replace(/\$\{([^}]+)\}/g, (_, key) => process.env[key] || ""); \
-fs.writeFileSync("dist/env.js", result);' > /generate-env.js
+# Create empty .env file for envsub (actual values come from k8s env vars)
+RUN touch .env
 
 EXPOSE ${SERVER_PORT}
 
-# Generate env.js at startup using Node.js, then start server
-CMD node /generate-env.js && node server
+CMD ["npm", "start"]

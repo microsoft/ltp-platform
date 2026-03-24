@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import { clearToken } from '../../../../user/user-logout/user-logout.component';
 import config from '../../../../config/webportal.config';
 import urljoin from 'url-join';

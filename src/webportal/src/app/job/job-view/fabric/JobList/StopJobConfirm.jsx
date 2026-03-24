@@ -14,7 +14,7 @@
 // NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-import { FontClassNames, FontSizes } from '@uifabric/styling';
+import { FontClassNames, FontSizes } from '@fluentui/react/lib/Styling';
 import c from 'classnames';
 import PropTypes from 'prop-types';
 import React, { useContext } from 'react';
@@ -24,7 +24,7 @@ import {
   Dialog,
   DialogFooter,
   Icon,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 import t from '../../../../components/tachyons.scss';
 

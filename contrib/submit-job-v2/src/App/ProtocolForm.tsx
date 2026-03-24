@@ -5,7 +5,7 @@ import React, { Suspense, lazy } from "react";
 import {
   ChoiceGroup, DefaultButton, DefaultPalette, Fabric, IChoiceGroupOption, IRenderFunction,
   Label, List, Panel, PanelType, PrimaryButton, Stack, Spinner, SpinnerSize, Text, TextField, Toggle,
-  initializeIcons, mergeStyleSets,
+  mergeStyleSets,
 } from "office-ui-fabric-react";
 import Cookies from "js-cookie";
 import classNames from "classnames/bind";
@@ -15,6 +15,7 @@ import { PAIV2 } from "@microsoft/openpai-js-sdk";
 
 import monacoStyles from "./monaco.scss";
 import MarketplaceForm from "./MarketplaceForm";
+import { initializeIconsOnce } from "../utils/icon-initializer";
 
 const MonacoEditor = lazy(() => import("react-monaco-editor"));
 const styles = mergeStyleSets({
@@ -109,9 +110,9 @@ const styles = mergeStyleSets({
     border: "0",
   },
 });
-const cx = classNames.bind(styles);
+const cx = classNames.bind(styles as any);
 
-initializeIcons();
+initializeIconsOnce();
 
 interface IArrayObj {
   [key: string]: string;
@@ -366,7 +367,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
         });
       }
     } catch (err) {
-      alert(err.message);
+      alert(err instanceof Error ? err.message : String(err));
     }
     this.setState({ loading: false });
   }
@@ -399,7 +400,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
         protocolYAML: text,
       });
     } catch (err) {
-      alert(err.message);
+      alert(err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -420,7 +421,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
           protocolYAML: text,
         });
       } catch (err) {
-        alert(err.message);
+        alert(err instanceof Error ? err.message : String(err));
       }
     });
     fileReader.readAsText(files[0]);
@@ -519,7 +520,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
         showEditor: false,
       });
     } catch (err) {
-      alert(err.message);
+      alert(err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -551,7 +552,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
         window.location.href = `/job-detail.html?username=${this.props.user}&jobName=${this.state.jobName}`;
       }
     } catch (err) {
-      alert(err.message);
+      alert(err instanceof Error ? err.message : String(err));
     }
   }
 }

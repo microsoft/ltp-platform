@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { DefaultButton, Dropdown, TextField } from 'office-ui-fabric-react';
+import { DefaultButton, Dropdown, TextField } from '@fluentui/react';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { isEmpty } from 'lodash';

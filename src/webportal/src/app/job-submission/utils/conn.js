@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import { PAIV2 } from '@microsoft/openpai-js-sdk';
 import { clearToken } from '../../user/user-logout/user-logout.component.js';
 import config from '../../config/webportal.config';
@@ -42,7 +41,7 @@ export class NotFoundError extends Error {
 }
 
 export async function submitJob(jobProtocol) {
-  const job = yaml.safeLoad(jobProtocol);
+  const job = yaml.load(jobProtocol);
   return wrapper(() => client.job.createJob(job));
 }
 
@@ -148,6 +147,9 @@ export async function fetchMyTemplates(user) {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
     return items;
+  } else if (res.status === 404) {
+    // 404 is expected when user has no templates
+    return [];
   } else {
     throw new Error(res.statusText);
   }

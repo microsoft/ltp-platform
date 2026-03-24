@@ -18,7 +18,7 @@
 import React from 'react';
 import { PropTypes } from 'prop-types';
 
-import { Modal, MessageBar, MessageBarButton } from 'office-ui-fabric-react';
+import { Modal, MessageBar, MessageBarButton } from '@fluentui/react';
 
 import t from '../../../components/tachyons.scss';
 

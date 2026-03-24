@@ -4,7 +4,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { debounce, get } from 'lodash';
-import { TextField } from 'office-ui-fabric-react';
+import { TextField } from '@fluentui/react';
 import PropTypes from 'prop-types';
 
 const PureTaskRoleName = ({

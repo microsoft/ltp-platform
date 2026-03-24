@@ -22,8 +22,8 @@ import {
   Stack,
   IconButton,
   TooltipHost,
-} from 'office-ui-fabric-react';
-import { getTheme } from '@uifabric/styling';
+} from '@fluentui/react';
+import { getTheme } from '@fluentui/react/lib/Styling';
 
 import CustomPassword from '../components/CustomPassword';
 

@@ -24,7 +24,7 @@
  */
 
 import React from 'react';
-import { Stack } from 'office-ui-fabric-react';
+import { Stack } from '@fluentui/react';
 import PropTypes from 'prop-types';
 import { SidebarCard } from '../sidebar/sidebar-card';
 import { Hint } from '../sidebar/hint';
@@ -43,7 +43,7 @@ export const ToolComponent = React.memo(
           selected={selected}
           onSelect={onSelect}
         >
-          <Stack gap='m'>
+          <Stack tokens={{ childrenGap: 'm' }}>
             <Hint>
               Tools section is used to configure the tools that are useful for
               jobs.

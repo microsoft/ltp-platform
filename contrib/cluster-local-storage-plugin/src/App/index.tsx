@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import React from "react";
-import Form from "./Form";
+import Form from "./form";
 
 interface IProps {
   api: string;

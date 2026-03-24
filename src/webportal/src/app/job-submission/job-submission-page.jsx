@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Fabric, Stack, StackItem, Dropdown } from 'office-ui-fabric-react';
+import { Fabric, Stack, StackItem, Dropdown } from '@fluentui/react';
 import { isNil, isEmpty, get, cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -322,17 +321,21 @@ export const JobSubmissionPage = ({
 
   // fill template options
   useEffect(() => {
-    fetchMyTemplates(loginUser).then(templates => {
-      const newTemplateOptions = cloneDeep(templateOptions);
-      for (const template of templates) {
-        newTemplateOptions.push({
-          key: template.id,
-          text: template.name,
-          protocol: template.protocol,
-        });
-      }
-      setTemplateOptions(newTemplateOptions);
-    });
+    fetchMyTemplates(loginUser)
+      .then(templates => {
+        const newTemplateOptions = cloneDeep(templateOptions);
+        for (const template of templates) {
+          newTemplateOptions.push({
+            key: template.id,
+            text: template.name,
+            protocol: template.protocol,
+          });
+        }
+        setTemplateOptions(newTemplateOptions);
+      })
+      .catch(err => {
+        console.error('Failed to fetch templates:', err);
+      });
   }, []);
 
   // update component if yamlText is not null
@@ -453,13 +456,9 @@ export const JobSubmissionPage = ({
   return (
     <Context.Provider value={contextValue}>
       <Fabric style={{ height: '100%', overflowX: 'auto' }}>
-        <Stack
-          styles={{ root: { height: '100%', minWidth: 1000, minHeight: 720 } }}
-          verticalAlign='space-between'
-          gap='m' // form has 4px(s2)'s bottom padding, so the total padding is still 4 + 16 = 20px (l1)
-          padding='l1'
-        >
-          <Stack gap='l1' styles={{ root: { minHeight: 0 } }}>
+        {/* form has 4px(s2)'s bottom padding, so the total padding is still 4 + 16 = 20px (l1) */}
+        <Stack styles={{ root: { height: '100%', minWidth: 1000, minHeight: 720 } }} verticalAlign='space-between' tokens={{ childrenGap: 'm', padding: 'l1' }}>
+          <Stack styles={{ root: { minHeight: 0 } }} tokens={{ childrenGap: 'l1' }}>
             <StackItem disableShrink>
               <Topbar
                 jobData={jobData}
@@ -484,20 +483,16 @@ export const JobSubmissionPage = ({
               />
             </StackItem>
             {/* top - form */}
-            <Stack styles={{ root: { minHeight: 0 } }} horizontal gap='l1'>
+            <Stack styles={{ root: { minHeight: 0 } }} horizontal tokens={{ childrenGap: 'l1' }}>
               {/* left column */}
               <StackItem
                 grow
                 styles={{ root: { minWidth: 700, flexBasis: 0 } }}
               >
-                <Stack
-                  gap='l1'
-                  padding='0 0 s2'
-                  styles={{ root: { height: '100%' } }}
-                >
+                <Stack styles={{ root: { height: '100%' } }} tokens={{ childrenGap: 'l1', padding: '0 0 s2' }}>
                   {config.saveTemplate === 'true' && (
                     <Card>
-                      <Stack gap='m'>
+                      <Stack tokens={{ childrenGap: 'm' }}>
                         <div style={{ FontSizes: '16px', fontWeight: '600' }}>
                           Template Selection
                         </div>
@@ -524,11 +519,7 @@ export const JobSubmissionPage = ({
               </StackItem>
               {/* right column */}
               <StackItem shrink styles={{ root: { overflowX: 'auto' } }}>
-                <Stack
-                  gap='l1'
-                  padding='0 0 s2'
-                  styles={{ root: { height: '100%', width: 550 } }}
-                >
+                <Stack styles={{ root: { height: '100%', width: 550 } }} tokens={{ childrenGap: 'l1', padding: '0 0 s2' }}>
                   <Parameters
                     parameters={parameters}
                     onChange={setParameters}

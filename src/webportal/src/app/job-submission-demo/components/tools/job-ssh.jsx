@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { cloneDeep, isNil, isEmpty } from 'lodash';
-import { DefaultButton, TextField, Toggle } from 'office-ui-fabric-react';
+import { DefaultButton, TextField, Toggle } from '@fluentui/react';
 import { Box, Flex, Row, Text } from '../../elements';
 import { TooltipIcon } from '../controls/tooltip-icon';
 import SSHGenerator from './ssh-generator';

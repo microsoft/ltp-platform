@@ -10,7 +10,7 @@ import {
   Stack,
   getTheme,
   Label,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 
 import { TrieNode, MountPathTrie } from '../../models/data/mount-trie';
@@ -67,7 +67,7 @@ const TreeNode = ({ label, isVisible, subpaths }) => {
     <div>
       {isVisible && (
         <div>
-          <Stack horizontal gap='s2'>
+          <Stack horizontal tokens={{ childrenGap: 's2' }}>
             {nodeType === 'folder' && (
               <div>
                 {childrenVisualState ? (

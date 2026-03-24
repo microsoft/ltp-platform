@@ -14,7 +14,7 @@ import {
   getTheme,
   DetailsListLayoutMode,
   Text,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { TooltipIcon } from '../controls/tooltip-icon';
 
 import c from 'classnames';
@@ -35,7 +35,7 @@ export const TeamStorage = ({
   onMountDirChange,
 }) => {
   // workaround for fabric's bug
-  // https://github.com/OfficeDev/office-ui-fabric-react/issues/5280#issuecomment-489619108
+  // https://github.com/OfficeDev/@fluentui/react/issues/5280#issuecomment-489619108
   useLayoutEffect(() => {
     dispatchResizeEvent();
   });

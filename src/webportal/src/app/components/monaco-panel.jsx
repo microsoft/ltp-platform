@@ -24,7 +24,7 @@ import {
   Stack,
   StackItem,
   getTheme,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
 
@@ -84,12 +84,7 @@ const MonacoPanel = ({
             completionItems={completionItems}
             schemas={schemas}
           />
-          <Stack
-            horizontal
-            horizontalAlign='space-between'
-            gap={spacing.m}
-            padding={spacing.m}
-          >
+          <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: spacing.m, padding: spacing.m }}>
             <StackItem grow>
               <div>{footer}</div>
             </StackItem>

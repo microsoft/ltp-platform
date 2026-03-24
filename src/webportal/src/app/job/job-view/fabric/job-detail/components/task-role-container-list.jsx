@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { ThemeProvider } from '@uifabric/foundation';
+import { ThemeProvider } from '@fluentui/react';
 import {
   createTheme,
   ColorClassNames,
   FontClassNames,
   getTheme,
-} from '@uifabric/styling';
+} from '@fluentui/react/lib/Styling';
 import c from 'classnames';
 import { capitalize, isEmpty, isNil, flatten } from 'lodash';
 import { DateTime, Interval } from 'luxon';
@@ -22,13 +22,13 @@ import {
   Stack,
   Link,
   Icon,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import {
   DetailsList,
   SelectionMode,
   DetailsRow,
   DetailsListLayoutMode,
-} from 'office-ui-fabric-react/lib/DetailsList';
+} from '@fluentui/react/lib/DetailsList';
 import PropTypes from 'prop-types';
 import React from 'react';
 import yaml from 'js-yaml';
@@ -550,7 +550,7 @@ export default class TaskRoleContainerList extends React.Component {
           }
           minWidth='500px'
         >
-          <Stack gap='m'>
+          <Stack tokens={{ childrenGap: 'm' }}>
             <Text variant='xLarge'>All Logs:</Text>
             <LogDialogContent urls={fullLogUrls} logListUrl={logListUrl} />
           </Stack>
@@ -894,7 +894,7 @@ export default class TaskRoleContainerList extends React.Component {
                   // content
                   result.push('[Exit Spec]');
                   result.push('');
-                  result.push(yaml.safeDump(spec));
+                  result.push(yaml.dump(spec));
                   result.push('');
                 }
 

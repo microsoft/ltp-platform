@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import config from '../../../../config/webportal.config';
 import _ from 'lodash';
 import qs from 'querystring';

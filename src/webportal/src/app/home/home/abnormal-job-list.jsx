@@ -24,7 +24,7 @@ import {
   SelectionMode,
   DefaultButton,
   getTheme,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import React, { useCallback, useState } from 'react';
 

@@ -15,7 +15,7 @@ import {
   Text,
   Stack,
   getTheme,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import c from 'classnames';
@@ -155,10 +155,10 @@ export default function TeamDetail({ isOpen = false, config, hide }) {
         styles: { main: { maxWidth: 900 } },
       }}
     >
-      <Stack gap='s1'>
+      <Stack tokens={{ childrenGap: 's1' }}>
         <Text variant='large'>Upload</Text>
         {config.type === 'nfs' && (
-          <Stack gap='s2' styles={{ root: { marginLeft: `${spacing.m}` } }}>
+          <Stack styles={{ root: { marginLeft: `${spacing.m}` } }} tokens={{ childrenGap: 's2' }}>
             <Text>
               It is recommended to use an ubuntu host to upload data to nfs.
             </Text>
@@ -201,9 +201,9 @@ export default function TeamDetail({ isOpen = false, config, hide }) {
           </div>
         )}
         {config.type === 'nfs' && (
-          <Stack gap='s1'>
+          <Stack tokens={{ childrenGap: 's1' }}>
             <Text variant='large'>Download</Text>
-            <Stack gap='s2' styles={{ root: { marginLeft: `${spacing.m}` } }}>
+            <Stack styles={{ root: { marginLeft: `${spacing.m}` } }} tokens={{ childrenGap: 's2' }}>
               <CommandWrapper>
                 <Text block>$ sudo mkdir -p /mnt/nfsData</Text>
                 <Text block>

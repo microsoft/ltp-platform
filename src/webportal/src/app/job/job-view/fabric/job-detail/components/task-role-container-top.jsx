@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 
 import React from 'react';
-import { getTheme } from '@uifabric/styling';
+import { getTheme } from '@fluentui/react/lib/Styling';
 import {
   ColorClassNames,
   CommandBarButton,
   SearchBox,
   Stack,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import TaskRoleFilter from './task-role-filter';
 import FilterButton from '../../JobList/FilterButton';
@@ -27,7 +27,7 @@ function KeywordSearchBox({ filter, setFilter }) {
     setFilter(newFilter);
   }
 
-  /** @type {import('office-ui-fabric-react').IStyle} */
+  /** @type {import('@fluentui/react').IStyle} */
   const rootStyles = {
     backgroundColor: 'transparent',
     alignSelf: 'center',

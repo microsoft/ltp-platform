@@ -30,7 +30,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Stack } from 'office-ui-fabric-react';
+import { Stack } from '@fluentui/react';
 import PropTypes from 'prop-types';
 import Context from '../context';
 import { Hint } from './hint';
@@ -79,7 +79,7 @@ export const Parameters = React.memo(
         onSelect={onSelect}
         error={hasError}
       >
-        <Stack gap='m'>
+        <Stack tokens={{ childrenGap: 'm' }}>
           <Hint>
             You could reference these parameters in command by{' '}
             <code>{'<% $parameters.paramKey %>'}</code>.

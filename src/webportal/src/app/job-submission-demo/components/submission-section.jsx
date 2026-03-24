@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react';
+import { PrimaryButton, DefaultButton } from '@fluentui/react';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { cloneDeep } from 'lodash';

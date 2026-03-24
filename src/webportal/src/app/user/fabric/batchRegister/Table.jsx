@@ -23,7 +23,7 @@ import {
   TooltipHost,
   Dropdown,
   DefaultButton,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 import c from 'classnames';
 import t from '../../../components/tachyons.scss';
@@ -41,7 +41,7 @@ export default function Table() {
 
   /**
    * username column
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const usernameColumn = {
     key: 'username',
@@ -78,7 +78,7 @@ export default function Table() {
 
   /**
    * password column
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const passwordColumn = {
     key: 'password',
@@ -109,7 +109,7 @@ export default function Table() {
 
   /**
    * email column
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const emailColumn = {
     key: 'email',
@@ -143,7 +143,7 @@ export default function Table() {
 
   /**
    * admin column
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const adminColumn = {
     key: 'admin',
@@ -155,7 +155,7 @@ export default function Table() {
     isResizable: true,
     onRender: userInfo => {
       /**
-       * @type {import('office-ui-fabric-react').IDropdownOption[]}
+       * @type {import('@fluentui/react').IDropdownOption[]}
        */
       const options = [
         { key: 'true', text: 'Yes' },
@@ -183,7 +183,7 @@ export default function Table() {
 
   /**
    * virtual cluster column
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const virtualClusterColumn = {
     key: 'virtual cluster',
@@ -195,7 +195,7 @@ export default function Table() {
     isResizable: true,
     onRender: userInfo => {
       /**
-       * @type {import('office-ui-fabric-react').IDropdownOption[]}
+       * @type {import('@fluentui/react').IDropdownOption[]}
        */
       const options = virtualClusters.map(vc => {
         return { key: vc, text: vc };
@@ -235,7 +235,7 @@ export default function Table() {
 
   /**
    * status column
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const statusColumn = {
     key: 'status',
@@ -268,7 +268,7 @@ export default function Table() {
 
   /**
    * action column
-   * @type {import('office-ui-fabric-react').IColumn}
+   * @type {import('@fluentui/react').IColumn}
    */
   const actionColumn = {
     key: 'action',

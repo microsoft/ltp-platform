@@ -15,14 +15,14 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import c3 from 'c3';
+import { bb, donut } from 'billboard.js';
 import * as d3 from 'd3';
 import c from 'classnames';
 import PropTypes from 'prop-types';
-import { Stack, getTheme } from 'office-ui-fabric-react';
+import { Stack, getTheme } from '@fluentui/react';
 import React, { useEffect, useRef } from 'react';
 
-import './c3.scss';
+import 'billboard.js/dist/billboard.css';
 import t from '../../components/tachyons.scss';
 
 export const UtilizationChart = ({ percentage }) => {
@@ -38,7 +38,7 @@ export const UtilizationChart = ({ percentage }) => {
   }
 
   useEffect(() => {
-    const chart = c3.generate({
+    const chart = bb.generate({
       size: {
         width: 100,
         height: 100,
@@ -49,7 +49,7 @@ export const UtilizationChart = ({ percentage }) => {
           ['usedResouce', percentage],
           ['unsedResouces', 1 - percentage],
         ],
-        type: 'donut',
+        type: donut(),
         order: null,
       },
       color: {
@@ -76,7 +76,7 @@ export const UtilizationChart = ({ percentage }) => {
         show: false,
       },
       onrendered: () => {
-        const d3Donuts = d3.selectAll('.c3-chart-arcs').nodes();
+        const d3Donuts = d3.selectAll('.bb-chart-arcs').nodes();
         d3Donuts.forEach(node => {
           // TODO: hardcode here, change it when has better solution
           node.setAttribute('transform', 'translate(' + 45 + ',' + 43 + ')');

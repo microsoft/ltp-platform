@@ -18,7 +18,7 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import copy from 'copy-to-clipboard';
-import { IconButton, FontSizes, TooltipHost } from 'office-ui-fabric-react';
+import { IconButton, FontSizes, TooltipHost } from '@fluentui/react';
 
 const COPIED_TOOLTIP_CLOSE_DELAY = 1000;
 

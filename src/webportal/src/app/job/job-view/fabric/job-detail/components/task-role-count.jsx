@@ -17,7 +17,7 @@
 
 import c from 'classnames';
 import { capitalize } from 'lodash';
-import { TooltipHost, Text } from 'office-ui-fabric-react';
+import { TooltipHost, Text } from '@fluentui/react';
 import PropTypes from 'prop-types';
 import React from 'react';
 

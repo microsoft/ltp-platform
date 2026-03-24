@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
-import { DefaultButton, PrimaryButton, Stack } from 'office-ui-fabric-react';
+import { DefaultButton, PrimaryButton, Stack } from '@fluentui/react';
 import { Flex, Box } from './elements';
 import { TemplateSelection } from './components/template-selection';
 import { SaveTemplateDialog } from './components/save-template-dialog';
@@ -59,7 +58,7 @@ const PureJobEditPage = ({ jobProtocol, fetchVirtualClusters }) => {
         <Sidebar />
       </Flex>
       <Box padding='m' marginTop='m' bg='white'>
-        <Stack horizontal horizontalAlign='end' gap='m'>
+        <Stack horizontal horizontalAlign='end' tokens={{ childrenGap: 'm' }}>
           <PrimaryButton onClick={onSubmit}>Submit</PrimaryButton>
           {config.saveTemplate === 'true' && (
             <DefaultButton onClick={toggleHideDialog}>
