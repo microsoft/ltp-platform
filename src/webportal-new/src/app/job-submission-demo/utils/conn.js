@@ -41,7 +41,7 @@ const wrapper = async func => {
 };
 
 export async function submitJob(jobProtocol) {
-  const job = yaml.safeLoad(jobProtocol);
+  const job = yaml.load(jobProtocol);
   return wrapper(() => client.job.createJob(job));
 }
 

@@ -111,7 +111,7 @@ class JobConfig {
 
   static validateFromYAML(yamlText) {
     try {
-      const jobConfig = new JobConfig(yaml.safeLoad(yamlText));
+      const jobConfig = new JobConfig(yaml.load(yamlText));
       return jobConfig.validate();
     } catch (err) {
       return [false, err.message];
@@ -119,7 +119,7 @@ class JobConfig {
   }
 
   getYAML() {
-    return yaml.safeDump(this._jobConfig);
+    return yaml.dump(this._jobConfig);
   }
 }
 
@@ -253,7 +253,7 @@ const JobTransferPage = () => {
 
   const onSaveEditor = () => {
     try {
-      const newJobConfig = new JobConfig(yaml.safeLoad(editorYAML));
+      const newJobConfig = new JobConfig(yaml.load(editorYAML));
       setJobConfig(newJobConfig);
       setShowEditor(false);
     } catch (err) {

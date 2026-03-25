@@ -228,7 +228,7 @@ class JobDetail extends React.Component {
       // content
       result.push('[Exit Spec]');
       result.push('');
-      result.push(yaml.safeDump(spec));
+      result.push(yaml.dump(spec));
       result.push('');
     }
 

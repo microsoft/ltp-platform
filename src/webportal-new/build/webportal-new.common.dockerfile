@@ -29,8 +29,11 @@ RUN rm -rf .env && yarn --no-git-tag-version --new-version version \
     "$(cat version/PAI.VERSION)"
 RUN npm install json -g
 RUN json -I -f package.json -e "this.commitVersion=\"`cat version/COMMIT.VERSION`\""
-# Install dev-dependencies when building image
+# Fix openpai-js-sdk path for Docker build (point to the .tgz file)
+RUN json -I -f package.json -e "this.dependencies['@microsoft/openpai-js-sdk']='file:./openpai-js-sdk/microsoft-openpai-js-sdk-0.2.0.tgz'"
+# Install webportal-new dependencies (including the SDK from tar)
 RUN yarn install --production=false
+# Build webportal-new
 RUN npm run build
 # Create empty .env file for envsub (actual values come from k8s env vars)
 RUN touch .env

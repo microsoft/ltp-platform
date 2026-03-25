@@ -129,7 +129,7 @@ export default class Summary extends React.Component {
     if (isJobV2(rawJobConfig)) {
       this.props.showEditor('Job Config', {
         language: 'yaml',
-        value: yaml.safeDump(rawJobConfig),
+        value: yaml.dump(rawJobConfig),
       });
     } else {
       this.props.showEditor('Job Config', {

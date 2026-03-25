@@ -26,6 +26,14 @@ mkdir -p "../dependency"
 echo "Copying docs and examples..."
 cp -arf "../../../docs" "../../../examples" "../dependency" 2>/dev/null || echo "Warning: docs or examples not found, skipping"
 
+# Copy openpai-js-sdk tar package for local dependency
+echo "Copying openpai-js-sdk tar package..."
+mkdir -p "../openpai-js-sdk"
+cp -af "../../openpai-js-sdk/microsoft-openpai-js-sdk-0.2.0.tgz" "../openpai-js-sdk/" || {
+    echo "Error: Failed to copy openpai-js-sdk tar package"
+    exit 1
+}
+
 # Copy version files
 echo "Copying version files..."
 cp -arfT "../../../version" "../version" 2>/dev/null || {
@@ -49,6 +57,7 @@ fi
 
 echo "Build preparation complete!"
 echo "  - dependency/ directory created"
+echo "  - openpai-js-sdk/ copied"
 echo "  - version/ files ready"
 echo "  - PAI.VERSION: $(cat ../version/PAI.VERSION)"
 echo "  - COMMIT.VERSION: $(cat ../version/COMMIT.VERSION)"

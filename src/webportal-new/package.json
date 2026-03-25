@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@loadable/component": "^5.16.4",
-    "@microsoft/openpai-js-sdk": "^0.1.5",
+    "@microsoft/openpai-js-sdk": "file:../openpai-js-sdk/microsoft-openpai-js-sdk-0.2.0.tgz",
     "@webcomponents/custom-elements": "^1.6.0",
     "admin-lte": "~2.4.2",
     "buffer": "^6.0.3",
@@ -60,7 +60,7 @@
     "joi-browser": "^13.4.0",
     "jquery": "~3.7.1",
     "js-cookie": "~3.0.5",
-    "js-yaml": "~3.13.1",
+    "js-yaml": "^4.1.0",
     "json-editor": "~0.7.28",
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.4.4",

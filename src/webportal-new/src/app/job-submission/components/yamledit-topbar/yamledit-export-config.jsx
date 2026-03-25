@@ -32,7 +32,7 @@ export const YamlEditExportConfig = React.memo(({ protocolYaml }) => {
     try {
       _exportFile(
         protocolYaml,
-        (yaml.safeLoad(protocolYaml).name || 'job') + '.yaml',
+        (yaml.load(protocolYaml).name || 'job') + '.yaml',
         'text/yaml',
       );
     } catch (err) {

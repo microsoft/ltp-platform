@@ -10,6 +10,7 @@ dist/
 # Build-generated files (created by build-pre.sh)
 dependency/
 version/
+openpai-js-sdk/
 
 # IDE
 .vscode/

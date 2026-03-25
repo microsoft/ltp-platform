@@ -62,7 +62,7 @@ export const YamlEditPage = () => {
     try {
       await submitJob(protocolYaml);
       window.location.href = `/job-detail.html?username=${user}&jobName=${
-        yaml.safeLoad(protocolYaml).name
+        yaml.load(protocolYaml).name
       }`;
     } catch (err) {
       alert(err);

@@ -38,7 +38,12 @@ The `build-pre.sh` script prepares the following files needed for the Docker bui
    - Copies `docs/` from the root directory
    - Copies `examples/` from the root directory
 
-2. **version/** directory
+2. **openpai-js-sdk/** directory
+   - Copies the local `openpai-js-sdk` from `src/openpai-js-sdk/`
+   - This is needed because the SDK is referenced as `"file:../openpai-js-sdk"` in package.json
+   - The Docker build context is `src/webportal-new/`, so the SDK must be copied into this directory
+
+3. **version/** directory
    - Copies version files from the root `version/` directory
    - PAI.VERSION: Platform version (e.g., v1.8.1)
    - COMMIT.VERSION: Git commit ID (first 6 characters)
@@ -48,6 +53,7 @@ These files are used during the Docker build to:
 - Set the correct version in package.json
 - Include documentation and examples in the image
 - Track the build version and commit
+- Build the local openpai-js-sdk dependency
 
 ## Building Locally (Development)
 
@@ -97,6 +103,10 @@ webportal-new/
 ├── dependency/
 │   ├── docs/
 │   └── examples/
+├── openpai-js-sdk/
+│   ├── package.json
+│   ├── src/
+│   └── ... (complete SDK source)
 └── version/
     ├── PAI.VERSION
     ├── COMMIT.VERSION
@@ -111,7 +121,7 @@ To clean up generated files:
 
 ```bash
 cd /home/ruigao/ltp-platform/src/webportal-new
-rm -rf dependency/ version/
+rm -rf dependency/ version/ openpai-js-sdk/
 ```
 
 The pai-build system will regenerate these files automatically on the next build.
