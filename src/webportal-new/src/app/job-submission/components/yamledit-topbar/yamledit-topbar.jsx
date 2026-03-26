@@ -11,15 +11,15 @@ import { YamlEditImportConfig } from './yamledit-import-config';
 
 export const YamlEditTopBar = ({ protocolYaml, onChange }) => {
   return (
-    <Stack horizontal horizontalAlign='space-between' padding='0 m'>
-      <Stack horizontal gap='m' verticalAlign='baseline'>
+    <Stack horizontal horizontalAlign='space-between' tokens={{ padding: '0 m' }}>
+      <Stack horizontal verticalAlign='baseline' tokens={{ childrenGap: 'm' }}>
         <StackItem>
           <Text variant='xLarge' styles={{ root: { fontWeight: 'semibold' } }}>
             Config Editor
           </Text>
         </StackItem>
       </Stack>
-      <Stack horizontal gap='s1'>
+      <Stack horizontal tokens={{ childrenGap: 's1' }}>
         <YamlEditExportConfig protocolYaml={protocolYaml} />
         <YamlEditImportConfig onChange={onChange} />
       </Stack>

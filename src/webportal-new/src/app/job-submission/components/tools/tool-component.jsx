@@ -43,7 +43,7 @@ export const ToolComponent = React.memo(
           selected={selected}
           onSelect={onSelect}
         >
-          <Stack gap='m'>
+          <Stack tokens={{ childrenGap: 'm' }}>
             <Hint>
               Tools section is used to configure the tools that are useful for
               jobs.

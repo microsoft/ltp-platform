@@ -110,7 +110,7 @@ const PureYamlEditPage = ({ jobProtocol, onJobProtocolChange }) => {
         />
       </Flex>
       <Box padding='m' marginTop='m' bg='white'>
-        <Stack horizontal horizontalAlign='end' gap='m'>
+        <Stack horizontal horizontalAlign='end' tokens={{ childrenGap: 'm' }}>
           {isReadOnly ? (
             <>
               <DefaultButton onClick={onEdit}>Edit</DefaultButton>

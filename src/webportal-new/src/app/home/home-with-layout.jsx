@@ -6,7 +6,7 @@
 // Combined entry point for home page with layout in React 18
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Layout } from '../layout/layout';
 import { Home } from './home';
 
@@ -16,4 +16,5 @@ const HomePageWithLayout = () => {
 };
 
 const container = document.getElementById('wrapper');
-ReactDOM.render(<HomePageWithLayout />, container);
+const root = createRoot(container);
+root.render(<HomePageWithLayout />);

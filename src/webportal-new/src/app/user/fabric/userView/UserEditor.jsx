@@ -307,7 +307,7 @@ export default function UserEditor({
                 <tr>
                   <td className={tdLabelStyle}>Admin user</td>
                   <td className={tdPaddingStyle}>
-                    <Stack horizontal={true} gap={spacing.m}>
+                    <Stack horizontal={true} tokens={{ childrenGap: spacing.m }}>
                       <StackItem>
                         <Checkbox
                           componentRef={adminRef}
@@ -333,7 +333,7 @@ export default function UserEditor({
               marginRight: 'auto',
             }}
           >
-            <Stack horizontal={true} horizontalAlign='center' gap={spacing.s1}>
+            <Stack horizontal={true} horizontalAlign='center' tokens={{ childrenGap: spacing.s1 }}>
               <StackItem>
                 <PrimaryButton type='submit' disabled={lock} autoFocus>
                   {isCreate ? 'Add' : 'Save'}

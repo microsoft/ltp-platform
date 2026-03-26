@@ -35,7 +35,7 @@ import {
 import t from '../../../components/tachyons.scss';
 import CopyButton from '../../../components/copy-button';
 
-const TokenList = ({ tokens, onRevoke }) => {
+const TokenList = ({ tokens = [], onRevoke }) => {
   const [processing, setProcessing] = useState(false);
   const [revokeToken, setRevokeToken] = useState(null);
 
@@ -175,10 +175,6 @@ const TokenList = ({ tokens, onRevoke }) => {
       </Dialog>
     </div>
   );
-};
-
-TokenList.defaultProps = {
-  tokens: [],
 };
 
 TokenList.propTypes = {

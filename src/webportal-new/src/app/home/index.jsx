@@ -25,7 +25,7 @@ import { isEmpty } from 'lodash';
 import { initializeIcons } from '@fluentui/react';
 import querystring from 'querystring';
 import React, { useState, useCallback, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import Bottom from './index/bottom';
 import { login } from './index/conn';
@@ -34,6 +34,7 @@ import LoginModal from './index/login-modal';
 import { checkToken } from '../user/user-auth/user-auth.component';
 import config from '../config/webportal.config';
 import { SpinnerLoading } from '../components/loading';
+import { registerAppIcons } from '../components/icon-registry';
 import t from 'tachyons-sass/tachyons.scss';
 
 let loginTarget = '/home.html';
@@ -64,6 +65,7 @@ if (config.authnMethod === 'OIDC') {
 }
 
 initializeIcons();
+registerAppIcons();
 
 const Index = () => {
   const [loginModal, setLoginModal] = useState(false);
@@ -163,4 +165,5 @@ const Index = () => {
 };
 
 const container = document.getElementById('wrapper');
-ReactDOM.render(<Index />, container);
+const root = createRoot(container);
+root.render(<Index />);

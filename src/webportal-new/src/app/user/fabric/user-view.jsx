@@ -16,9 +16,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
+import { Layout } from '../../layout/layout';
 import UserView from './userView';
 
+const App = () => (
+  <Layout>
+    <UserView />
+  </Layout>
+);
 
-ReactDOM.render(<UserView />, document.getElementById("content-wrapper") || document.getElementById("wrapper"));
+const wrapper = document.getElementById('wrapper');
+if (wrapper && !wrapper.hasAttribute('data-root-initialized')) {
+  wrapper.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(wrapper);
+  root.render(<App />);
+}

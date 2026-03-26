@@ -67,7 +67,7 @@ const TreeNode = ({ label, isVisible, subpaths }) => {
     <div>
       {isVisible && (
         <div>
-          <Stack horizontal gap='s2'>
+          <Stack horizontal tokens={{ childrenGap: 's2' }}>
             {nodeType === 'folder' && (
               <div>
                 {childrenVisualState ? (

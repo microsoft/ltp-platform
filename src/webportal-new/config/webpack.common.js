@@ -58,6 +58,8 @@ function generateHtml(opt) {
 }
 
 const config = (env, argv) => ({
+  mode: argv.mode || 'development', // Enable development mode for debugging
+  devtool: 'source-map', // Generate source maps for debugging
   entry: {
     index: './src/app/home/index.jsx',
     home: './src/app/home/home.jsx',
@@ -106,7 +108,7 @@ const config = (env, argv) => ({
       buffer: require.resolve('buffer/'),
       querystring: require.resolve('querystring-es3'),
       path: require.resolve('path-browserify'),
-      crypto: require.resolve('crypto-browserify'),
+      crypto: false, // require.resolve('crypto-browserify'),
       stream: require.resolve('stream-browserify'),
       http: require.resolve('stream-http'),
       https: require.resolve('https-browserify'),
@@ -317,12 +319,15 @@ const config = (env, argv) => ({
       },
       {
         test: /\.svg$/,
-        use: ['@svgr/webpack'],
-        type: 'asset/resource',
-        generator: {
-          filename: 'assets/font/[name][ext]',
-        },
         issuer: /\.[jt]sx?$/,
+        use: [
+          {
+            loader: '@svgr/webpack',
+            options: {
+              exportType: 'named',
+            },
+          },
+        ],
       },
     ],
   },
@@ -376,15 +381,15 @@ const config = (env, argv) => ({
     }),
     generateHtml({
       filename: 'user-view.html',
-      chunks: ['layout', 'userView'],
+      chunks: ['userView'],
     }),
     generateHtml({
       filename: 'batch-register.html',
-      chunks: ['layout', 'batchRegister'],
+      chunks: ['batchRegister'],
     }),
     generateHtml({
       filename: 'user-profile.html',
-      chunks: ['layout', 'userProfile'],
+      chunks: ['userProfile'],
     }),
     generateHtml({
       filename: 'dashboard.html',
@@ -392,11 +397,11 @@ const config = (env, argv) => ({
     }),
     generateHtml({
       filename: 'submit.html',
-      chunks: ['layout', 'submit'],
+      chunks: ['submit'],
     }),
     generateHtml({
       filename: 'submit_demo.html',
-      chunks: ['layout', 'submit_demo'],
+      chunks: ['submit_demo'],
     }),
     generateHtml({
       filename: 'submit_v1.html',
@@ -404,23 +409,23 @@ const config = (env, argv) => ({
     }),
     generateHtml({
       filename: 'job-list.html',
-      chunks: ['layout', 'jobList'],
+      chunks: ['jobList'],
     }),
     generateHtml({
       filename: 'job-detail.html',
-      chunks: ['layout', 'jobDetail'],
+      chunks: ['jobDetail'],
     }),
     generateHtml({
       filename: 'task-attempt.html',
-      chunks: ['layout', 'taskAttempt'],
+      chunks: ['taskAttempt'],
     }),
     generateHtml({
       filename: 'job-event.html',
-      chunks: ['layout', 'jobEvent'],
+      chunks: ['jobEvent'],
     }),
     generateHtml({
       filename: 'job-transfer.html',
-      chunks: ['layout', 'jobTransfer'],
+      chunks: ['jobTransfer'],
     }),
     generateHtml({
       filename: 'virtual-clusters.html',
@@ -456,6 +461,7 @@ const config = (env, argv) => ({
     hot: true,
   },
   optimization: {
+    minimize: false, // Temporarily disable for debugging
     moduleIds: 'deterministic',
     runtimeChunk: 'single',
     minimizer: [

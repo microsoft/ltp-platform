@@ -201,7 +201,7 @@ export const DataComponent = React.memo(props => {
           dataError.customContainerPathError || dataError.customDataSourceError
         }
       >
-        <Stack gap='m'>
+        <Stack tokens={{ childrenGap: 'm' }}>
           <Hint>
             The data configured here will be mounted or copied into job
             container. You could use them with <code>{'Container Path'}</code>{' '}

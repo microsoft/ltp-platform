@@ -49,8 +49,8 @@ export const CompletionPolicy = React.memo(({ onChange, value }) => {
       sectionTooltip={PROTOCOL_TOOLTIPS.policy}
       sectionOptional
     >
-      <FormShortSection gap='m'>
-        <Stack horizontal gap='s1'>
+      <FormShortSection tokens={{ childrenGap: 'm' }}>
+        <Stack horizontal tokens={{ childrenGap: 's1' }}>
           <CSpinButton
             label={'Min Failed Instances'}
             value={minFailedInstances}

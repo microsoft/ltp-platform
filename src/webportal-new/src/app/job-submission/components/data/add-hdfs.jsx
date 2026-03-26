@@ -66,7 +66,7 @@ export const AddHDFS = ({
   };
 
   return (
-    <Stack horizontal horizontalAlign='space-between' gap='s'>
+    <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: 's' }}>
       <Stack.Item align='baseline'>
         <Label reqired className={FontClassNames.medium}>
           Container path

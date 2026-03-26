@@ -17,10 +17,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { Stack, ActionButton, Text } from '@fluentui/react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { isNil, capitalize } from 'lodash';
 import { DateTime, Interval } from 'luxon';
 
+import { Layout } from '../../../layout/layout';
 import { SpinnerLoading } from '../../../components/loading';
 import TaskAttemptList from './task-attempt/task-attempt-list';
 import { fetchTaskStatus } from './task-attempt/conn';
@@ -72,7 +73,7 @@ const TaskAttemptPage = () => {
     <div>
       {loading && <SpinnerLoading />}
       {!loading && (
-        <Stack styles={{ root: { margin: '30px' } }} gap='l1'>
+        <Stack styles={{ root: { margin: '30px' } }} tokens={{ childrenGap: 'l1' }}>
           <div>
             <ActionButton
               iconProps={{ iconName: 'revToggleKey' }}
@@ -83,40 +84,40 @@ const TaskAttemptPage = () => {
           </div>
           <Card style={{ padding: 10 }}>
             <Stack>
-              <Stack horizontal gap='m' padding='m'>
+              <Stack horizontal tokens={{ childrenGap: 'm', padding: 'm' }}>
                 <Text>Job Name:</Text>
                 <Text>{jobName}</Text>
               </Stack>
               <HorizontalLine />
-              <Stack horizontal gap='l1' padding='m'>
-                <Stack gap='m'>
+              <Stack horizontal tokens={{ childrenGap: 'l1', padding: 'm' }}>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Job Attempt Index</Text>
                   <Text>{jobAttemptIndex}</Text>
                 </Stack>
-                <Stack gap='m'>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Task Role</Text>
                   <Text>{taskRoleName}</Text>
                 </Stack>
-                <Stack gap='m'>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Task Index</Text>
                   <Text>{taskIndex}</Text>
                 </Stack>
-                <Stack gap='m'>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Task Uid</Text>
                   <Text>{taskStatus.taskUid}</Text>
                 </Stack>
               </Stack>
               <HorizontalLine />
-              <Stack horizontal gap='l1' padding='m'>
-                <Stack gap='m'>
+              <Stack horizontal tokens={{ childrenGap: 'l1', padding: 'm' }}>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Task State</Text>
                   <StatusBadge status={capitalize(taskStatus.taskState)} />
                 </Stack>
-                <Stack gap='m'>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Task Retries</Text>
                   <Text>{taskStatus.retries}</Text>
                 </Stack>
-                <Stack gap='m'>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Task Creation Time</Text>
                   <Text>
                     {isNil(taskStatus.createdTime)
@@ -126,7 +127,7 @@ const TaskAttemptPage = () => {
                         ).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)}
                   </Text>
                 </Stack>
-                <Stack gap='m'>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Task Duration</Text>
                   <Text>
                     {getDurationString(
@@ -137,7 +138,7 @@ const TaskAttemptPage = () => {
                     )}
                   </Text>
                 </Stack>
-                <Stack gap='m'>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Task Running Start Time</Text>
                   <Text>
                     {isNil(taskStatus.launchedTime)
@@ -147,7 +148,7 @@ const TaskAttemptPage = () => {
                         ).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)}
                   </Text>
                 </Stack>
-                <Stack gap='m'>
+                <Stack tokens={{ childrenGap: 'm' }}>
                   <Text>Task Running Duration</Text>
                   <Text>
                     {getDurationString(
@@ -170,4 +171,13 @@ const TaskAttemptPage = () => {
   );
 };
 
-ReactDOM.render(<TaskAttemptPage />, document.getElementById("content-wrapper") || document.getElementById("wrapper"));
+const TaskAttemptWithLayout = () => {
+  return <Layout><TaskAttemptPage /></Layout>;
+};
+
+const container = document.getElementById('wrapper');
+if (container && !container.hasAttribute('data-root-initialized')) {
+  container.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(container);
+  root.render(<TaskAttemptWithLayout />);
+}

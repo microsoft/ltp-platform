@@ -48,7 +48,7 @@ function getSpacingValue(unitString) {
 }
 
 export const AutoComplete = ({
-  items,
+  items = [],
   value,
   onChange,
   showAllSuggestions,
@@ -70,7 +70,7 @@ export const AutoComplete = ({
     if (suggested >= suggestions.length) {
       setSuggested(Math.max(0, suggestions.length - 1));
     }
-  }, [value, items, showAllSuggestions]);
+  }, [value, items, showAllSuggestions, suggested]);
   // event handler
   const onTextChange = useCallback(
     (e, newValue) => {
@@ -165,10 +165,6 @@ export const AutoComplete = ({
       </Callout>
     </div>
   );
-};
-
-AutoComplete.defaultProps = {
-  items: [],
 };
 
 AutoComplete.propTypes = {

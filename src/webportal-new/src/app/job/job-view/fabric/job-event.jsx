@@ -17,9 +17,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Stack, ActionButton, Text } from '@fluentui/react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { isEmpty } from 'lodash';
 
+import { Layout } from '../../../layout/layout';
 import { SpinnerLoading } from '../../../components/loading';
 import { fetchJobEvents } from './job-event/conn';
 import JobEventList from './job-event/job-event-list';
@@ -43,7 +44,7 @@ const JobEventPage = () => {
     <div>
       {loading && <SpinnerLoading />}
       {!loading && (
-        <Stack styles={{ root: { margin: '30px', overflow: 'auto' } }} gap='l1'>
+        <Stack styles={{ root: { margin: '30px', overflow: 'auto' } }} tokens={{ childrenGap: 'l1' }}>
           <ActionButton
             iconProps={{ iconName: 'revToggleKey' }}
             href={`job-detail.html?username=${userName}&jobName=${jobName}`}
@@ -58,5 +59,13 @@ const JobEventPage = () => {
   );
 };
 
-const container = document.getElementById('content-wrapper');
-ReactDOM.render(<JobEventPage />, container);
+const JobEventWithLayout = () => {
+  return <Layout><JobEventPage /></Layout>;
+};
+
+const container = document.getElementById('wrapper');
+if (container && !container.hasAttribute('data-root-initialized')) {
+  container.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(container);
+  root.render(<JobEventWithLayout />);
+}

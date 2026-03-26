@@ -182,9 +182,9 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                 padding: spacing.s1,
               }}
             >
-              <Stack gap='s2'>
+              <Stack tokens={{ childrenGap: 's2' }}>
                 {d[0].value > 0 && (
-                  <Stack horizontal gap='s1' verticalAlign='center'>
+                  <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                     <div
                       style={{
                         width: 20,
@@ -199,8 +199,8 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                   </Stack>
                 )}
                 {d[1].value > 0 && (
-                  <Stack gap='s2'>
-                    <Stack horizontal gap='s1' verticalAlign='center'>
+                  <Stack tokens={{ childrenGap: 's2' }}>
+                    <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                       <div
                         style={{
                           width: 20,
@@ -217,8 +217,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                       <Stack
                         key={`dedicated-${name}`}
                         horizontal
-                        gap='s1'
-                        padding='0 l2'
+                        tokens={{ childrenGap: 's1', padding: '0 l2' }}
                         verticalAlign='center'
                       >
                         <div
@@ -313,7 +312,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
 
   return (
     <Card className={t.ph5} style={style}>
-      <Stack styles={{ root: [{ height: '100%' }] }} gap='l1'>
+      <Stack styles={{ root: [{ height: '100%' }] }} tokens={{ childrenGap: 'l1' }}>
         <Stack.Item>
           <Stack horizontal horizontalAlign='space-between'>
             <div className={FontClassNames.mediumPlus}>Available GPU nodes</div>
@@ -322,8 +321,8 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                 <div>
                   {/* large */}
                   <MediaQuery maxWidth={BREAKPOINT1}>
-                    <Stack gap='s2'>
-                      <Stack horizontal gap='s1' verticalAlign='center'>
+                    <Stack tokens={{ childrenGap: 's2' }}>
+                      <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                         <div
                           style={{
                             width: 20,
@@ -333,7 +332,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                         ></div>
                         <div>Available nodes in shared VC</div>
                       </Stack>
-                      <Stack horizontal gap='s1' verticalAlign='center'>
+                      <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                         <div
                           style={{
                             width: 20,
@@ -347,8 +346,8 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                   </MediaQuery>
                   {/* large */}
                   <MediaQuery minWidth={BREAKPOINT2}>
-                    <Stack gap='s2'>
-                      <Stack horizontal gap='s1' verticalAlign='center'>
+                    <Stack tokens={{ childrenGap: 's2' }}>
+                      <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                         <div
                           style={{
                             width: 20,
@@ -358,7 +357,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                         ></div>
                         <div>Available nodes in shared VC</div>
                       </Stack>
-                      <Stack horizontal gap='s1' verticalAlign='center'>
+                      <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                         <div
                           style={{
                             width: 20,
@@ -375,7 +374,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                     minWidth={BREAKPOINT1 + 1}
                     maxWidth={BREAKPOINT2 - 1}
                   >
-                    <Stack gap='s2'>
+                    <Stack tokens={{ childrenGap: 's2' }}>
                       <TooltipHost
                         calloutProps={{
                           isBeakVisible: false,

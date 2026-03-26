@@ -84,7 +84,7 @@ export const AddLocal = ({
     setDataType('none');
   };
   return (
-    <Stack horizontal horizontalAlign='space-between' gap='m'>
+    <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: 'm' }}>
       <Stack.Item align='baseline'>
         <Label required className={FontClassNames.medium}>
           Container path

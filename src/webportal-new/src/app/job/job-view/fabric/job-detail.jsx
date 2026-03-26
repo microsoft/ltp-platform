@@ -12,9 +12,10 @@ import {
   Link,
 } from '@fluentui/react';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import yaml from 'js-yaml';
 
+import { Layout } from '../../../layout/layout';
 import t from '../../../components/tachyons.scss';
 
 import { getDurationString } from '../../../components/util/job';
@@ -366,7 +367,7 @@ class JobDetail extends React.Component {
         <Context.Provider
           value={{ sshInfo, rawJobConfig, jobConfig, isViewingSelf }}
         >
-          <Stack styles={{ root: { margin: '30px' } }} gap='l1'>
+          <Stack styles={{ root: { margin: '30px' } }} tokens={{ childrenGap: 'l1' }}>
             <Top />
             {!isEmpty(error) && (
               <div className={t.bgWhite}>
@@ -432,8 +433,8 @@ class JobDetail extends React.Component {
               showEditor={this.showEditor}
             />
             <Card>
-              <Stack gap='m' padding='l2'>
-                <Stack horizontal gap='m' verticalAlign='center'>
+              <Stack tokens={{ childrenGap: 'm', padding: 'l2' }}>
+                <Stack horizontal verticalAlign='center' tokens={{ childrenGap: 'm' }}>
                   <Text>Job Attempt Index</Text>
                   <Dropdown
                     styles={{ root: { width: '150px' } }}
@@ -448,15 +449,15 @@ class JobDetail extends React.Component {
                 {loadingAttempt ? (
                   <SpinnerLoading />
                 ) : (
-                  <Stack gap='l2'>
-                    <Stack horizontal gap='l1'>
-                      <Stack gap='m'>
+                  <Stack tokens={{ childrenGap: 'l2' }}>
+                    <Stack horizontal tokens={{ childrenGap: 'l1' }}>
+                      <Stack tokens={{ childrenGap: 'm' }}>
                         <Text>Attempt State</Text>
                         <StatusBadge
                           status={capitalize(jobInfo.jobStatus.attemptState)}
                         />
                       </Stack>
-                      <Stack gap='m'>
+                      <Stack tokens={{ childrenGap: 'm' }}>
                         <Text>Attempt Creation Time</Text>
                         <Text>
                           {isNil(jobInfo.jobStatus.appCreatedTime)
@@ -468,7 +469,7 @@ class JobDetail extends React.Component {
                               )}
                         </Text>
                       </Stack>
-                      <Stack gap='m'>
+                      <Stack tokens={{ childrenGap: 'm' }}>
                         <Text>Attempt Duration</Text>
                         <Text>
                           {getDurationString(
@@ -479,7 +480,7 @@ class JobDetail extends React.Component {
                           )}
                         </Text>
                       </Stack>
-                      <Stack gap='m'>
+                      <Stack tokens={{ childrenGap: 'm' }}>
                         <Text>Attempt Running Start Time</Text>
                         <Text>
                           {isNil(jobInfo.jobStatus.appLaunchedTime)
@@ -491,7 +492,7 @@ class JobDetail extends React.Component {
                               )}
                         </Text>
                       </Stack>
-                      <Stack gap='m'>
+                      <Stack tokens={{ childrenGap: 'm' }}>
                         <Text>Attempt Running Duration</Text>
                         <Text>
                           {getDurationString(
@@ -523,9 +524,9 @@ class JobDetail extends React.Component {
                     </Stack>
                     {!isEmpty(jobInfo.taskRoles) &&
                       Object.keys(jobInfo.taskRoles).map(name => (
-                        <Stack key={name} gap='m'>
+                        <Stack key={name} tokens={{ childrenGap: 'm' }}>
                           <HorizontalLine />
-                          <Stack horizontal gap='l1'>
+                          <Stack horizontal tokens={{ childrenGap: 'l1' }}>
                             <Text>{`Task Role:  ${name}`}</Text>
                             <TaskRoleCount taskInfo={jobInfo.taskRoles[name]} />
                           </Stack>
@@ -555,5 +556,13 @@ class JobDetail extends React.Component {
   }
 }
 
-const container = document.getElementById('content-wrapper');
-ReactDOM.render(<JobDetail />, container);
+const JobDetailWithLayout = () => {
+  return <Layout><JobDetail /></Layout>;
+};
+
+const container = document.getElementById('wrapper');
+if (container && !container.hasAttribute('data-root-initialized')) {
+  container.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(container);
+  root.render(<JobDetailWithLayout />);
+}

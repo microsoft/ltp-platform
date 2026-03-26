@@ -102,8 +102,8 @@ export default function SSHGenerator({
 
       <Separator>SSH key pair</Separator>
 
-      <Stack horizontal padding='l1' gap='l1' styles={{ root: { width: 860 } }}>
-        <Stack padding='s1' gap='s1' grow={1}>
+      <Stack horizontal styles={{ root: { width: 860 } }} tokens={{ childrenGap: 'l1', padding: 'l1' }}>
+        <Stack grow={1} tokens={{ childrenGap: 's1', padding: 's1' }}>
           <TextField
             label='Private Key'
             multiline
@@ -121,7 +121,7 @@ export default function SSHGenerator({
             Download Private Key
           </DefaultButton>
         </Stack>
-        <Stack padding='s1' gap='s1' grow={1}>
+        <Stack grow={1} tokens={{ childrenGap: 's1', padding: 's1' }}>
           <TextField
             label='Public Key'
             multiline
@@ -140,13 +140,7 @@ export default function SSHGenerator({
 
       <Separator></Separator>
 
-      <Stack
-        horizontal
-        horizontalAlign='space-evenly'
-        padding='l1'
-        gap='l1'
-        styles={{ root: { width: 860 } }}
-      >
+      <Stack horizontal horizontalAlign='space-evenly' styles={{ root: { width: 860 } }} tokens={{ childrenGap: 'l1', padding: 'l1' }}>
         <Stack.Item align='end'>
           {!downloadedPriKey && (
             <Label required={true}>

@@ -54,12 +54,7 @@ const PureSaveTemplateDialog = props => {
       text: 'Protected',
       onRenderField: (props, render) => {
         return (
-          <Stack
-            horizontal
-            verticalAlign='center'
-            horizontalAlign='space-between'
-            gap='s1'
-          >
+          <Stack horizontal verticalAlign='center' horizontalAlign='space-between' tokens={{ childrenGap: 's1' }}>
             {render(props)}
             <Dropdown
               placeholder='Select groups to share'

@@ -20,7 +20,7 @@ import 'whatwg-fetch';
 import 'normalize.css/normalize.css';
 
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import c from 'classnames';
 import { initializeIcons } from '@fluentui/react/lib/Icons';
 import { ColorClassNames } from '@fluentui/react/lib/Styling';
@@ -32,11 +32,13 @@ import Navbar from './components/navbar';
 import Sidebar from './components/sidebar';
 import { initTheme, boxShadow } from '../components/theme';
 import { getUserRequest } from '../user/fabric/conn';
+import { registerAppIcons } from '../components/icon-registry';
 
 import t from '../components/tachyons.scss';
 
 initTheme();
 initializeIcons();
+registerAppIcons();
 
 const BREAKPOINT = 1200;
 
@@ -105,13 +107,3 @@ Layout.propTypes = {
 };
 
 export { Layout };
-
-// Only render if this is being loaded as a standalone page (not imported by another page)
-if (typeof window !== 'undefined' && document.getElementById('wrapper')) {
-  // Check if this script is the main entry (not being imported)
-  const isStandalone = !document.querySelector('[data-page-type]');
-  if (isStandalone) {
-    const container = document.getElementById('wrapper');
-    ReactDOM.render(<Layout />, container);
-  }
-}

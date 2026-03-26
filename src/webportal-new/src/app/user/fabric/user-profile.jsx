@@ -3,7 +3,7 @@
 
 import c from 'classnames';
 import React, { useEffect, useState, useCallback } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import cookies from 'js-cookie';
 import PropTypes from 'prop-types';
 import { FontClassNames, FontWeights, getTheme } from '@fluentui/react/lib/Styling';
@@ -320,5 +320,17 @@ const UserProfile = () => {
   }
 };
 
-const container = document.getElementById('content-wrapper');
-ReactDOM.render(<UserProfile />, container);
+import { Layout } from '../../layout/layout';
+
+const App = () => (
+  <Layout>
+    <UserProfile />
+  </Layout>
+);
+
+const wrapper = document.getElementById('wrapper');
+if (wrapper && !wrapper.hasAttribute('data-root-initialized')) {
+  wrapper.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(wrapper);
+  root.render(<App />);
+}

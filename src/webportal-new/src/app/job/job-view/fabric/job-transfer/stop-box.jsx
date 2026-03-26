@@ -53,7 +53,7 @@ function StopBox({ hidden, userName, jobName, jobState, onDismiss }) {
         isBlocking: true,
       }}
     >
-      <Stack gap='m'>
+      <Stack tokens={{ childrenGap: 'm' }}>
         <Text variant='xLarge'>Notice</Text>
         <Text variant='large'>
           Your job has been successfully transferred! Now, your job on this
@@ -61,7 +61,7 @@ function StopBox({ hidden, userName, jobName, jobState, onDismiss }) {
         </Text>
       </Stack>
       <DialogFooter>
-        <Stack gap={20} horizontal={true} horizontalAlign='end'>
+        <Stack horizontal={true} horizontalAlign='end' tokens={{ childrenGap: '20' }}>
           {isStopping && <Spinner size={SpinnerSize.medium} />}
           <PrimaryButton disabled={isStopping} onClick={onClickStop}>
             Stop it

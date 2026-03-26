@@ -244,10 +244,10 @@ export const SubmissionSection = props => {
             navigate('/');
           }}
         />
-        <Stack horizontal gap='l1'>
+        <Stack horizontal tokens={{ childrenGap: 'l1' }}>
           <FormShortSection>
             <Stack horizontal horizontalAlign='space-between'>
-              <Stack horizontal gap='s1'>
+              <Stack horizontal tokens={{ childrenGap: 's1' }}>
                 <PrimaryButton
                   onClick={_submitJob}
                   disabled={!isEmpty(errorMessages)}
@@ -266,7 +266,7 @@ export const SubmissionSection = props => {
               </Stack>
             </Stack>
           </FormShortSection>
-          <Stack horizontal verticalAlign='center' gap='s1'>
+          <Stack horizontal verticalAlign='center' tokens={{ childrenGap: 's1' }}>
             <div>Advanced</div>
             <Toggle
               styles={{ root: { margin: 0 } }}

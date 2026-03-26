@@ -47,8 +47,8 @@ export const Topbar = React.memo(
       );
     };
     return (
-      <Stack horizontal horizontalAlign='space-between' padding='0 m'>
-        <Stack horizontal gap='m' verticalAlign='baseline'>
+      <Stack horizontal horizontalAlign='space-between' tokens={{ padding: '0 m' }}>
+        <Stack horizontal verticalAlign='baseline' tokens={{ childrenGap: 'm' }}>
           <Text variant='xLarge' styles={{ root: { fontWeight: 'semibold' } }}>
             Job submission
           </Text>
@@ -67,7 +67,7 @@ export const Topbar = React.memo(
             {'Switch to new version'}
           </Link>
         </Stack>
-        <Stack horizontal gap='s1'>
+        <Stack horizontal tokens={{ childrenGap: 's1' }}>
           <ExportConfig jobData={jobData} jobProtocol={jobProtocol} />
           <ImportConfig
             extras={extras}

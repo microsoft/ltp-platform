@@ -76,7 +76,7 @@ export const HivedSkuSection = React.memo(props => {
       sectionLabel='Resources SKU'
       sectionTooltip={PROTOCOL_TOOLTIPS.hivedSkuType}
     >
-      <FormShortSection gap='m'>
+      <FormShortSection tokens={{ childrenGap: 'm' }}>
         <Stack horizontal verticalAlign='baseline'>
           <div style={{ width: '20%' }}>SKU count</div>
           <Stack.Item grow>

@@ -24,10 +24,11 @@
  */
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Fabric } from '@fluentui/react';
 
+import { Layout } from '../layout/layout';
 import { JobSubmissionPage } from './job-submission-page';
 import { YamlEditPage } from './yaml-edit-page';
 import JobWizard from './job-wizard';
@@ -35,23 +36,30 @@ import JobWizard from './job-wizard';
 const App = () => {
   const [yamlText, setYamlText] = useState();
   return (
-    <Fabric style={{ height: '100%' }}>
-      <Router>
-        <Routes>
-          <Route path='/' element={<JobWizard setYamlText={setYamlText} />} />
-          <Route
-            path='/single'
-            element={<JobSubmissionPage isSingle={true} setYamlText={setYamlText} />}
-          />
-          <Route
-            path='/general'
-            element={<JobSubmissionPage isSingle={false} yamlText={yamlText} />}
-          />
-          <Route path='/yaml-edit' element={<YamlEditPage />} />
-        </Routes>
-      </Router>
-    </Fabric>
+    <Layout>
+      <Fabric style={{ height: '100%' }}>
+        <Router>
+          <Routes>
+            <Route path='/' element={<JobWizard setYamlText={setYamlText} />} />
+            <Route
+              path='/single'
+              element={<JobSubmissionPage isSingle={true} setYamlText={setYamlText} />}
+            />
+            <Route
+              path='/general'
+              element={<JobSubmissionPage isSingle={false} yamlText={yamlText} />}
+            />
+            <Route path='/yaml-edit' element={<YamlEditPage />} />
+          </Routes>
+        </Router>
+      </Fabric>
+    </Layout>
   );
 };
 
-ReactDOM.render(<App />, document.getElementById("content-wrapper") || document.getElementById("wrapper"));
+const wrapper = document.getElementById("wrapper");
+if (wrapper && !wrapper.hasAttribute('data-root-initialized')) {
+  wrapper.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(wrapper);
+  root.render(<App />);
+}

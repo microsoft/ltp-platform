@@ -14,13 +14,7 @@ function GotoPage(props) {
   const [pageIndex, setPageIndex] = useState(props.pageIndex);
 
   return (
-    <Stack
-      horizontal
-      verticalAlign='center'
-      gap='5'
-      horizontalAlign='space-between'
-      styles={{ root: { padding: 10 } }}
-    >
+    <Stack horizontal verticalAlign='center' horizontalAlign='space-between' styles={{ root: { padding: 10 } }} tokens={{ childrenGap: '5' }}>
       <TextField
         value={pageIndex}
         styles={{ fieldGroup: { width: 80 } }}

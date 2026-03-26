@@ -15,21 +15,40 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { registerIcons } from '@fluentui/react/lib/Styling';
 
-import { Layout } from '../../layout/layout';
-import BatchRegister from './batchRegister';
+// Register all icons used in the application
+// This prevents "icon was used but not registered" warnings
+export function registerAppIcons() {
+  registerIcons({
+    icons: {
+      // Navigation and actions
+      'add': '\uE710',
+      'refresh': '\uE72C',
+      'filter': '\uE71C',
+      'chevronup': '\uE70E',
+      'chevrondown': '\uE70D',
+      'chevronright': '\uE76C',
+      'search': '\uE721',
+      'sort': '\uE8CB',
+      'cancel': '\uE711',
 
-const App = () => (
-  <Layout>
-    <BatchRegister />
-  </Layout>
-);
+      // Contact and communication
+      'contact': '\uE77B',
+      'cellphone': '\uE8EA',
 
-const wrapper = document.getElementById('wrapper');
-if (wrapper && !wrapper.hasAttribute('data-root-initialized')) {
-  wrapper.setAttribute('data-root-initialized', 'true');
-  const root = createRoot(wrapper);
-  root.render(<App />);
+      // Time
+      'clock': '\uE917',
+
+      // Status indicators
+      'error': '\uE783',
+      'circlering': '\uEA3A',
+      'statuscirclecheckmark': '\uF13E',
+      'statuscircleouter': '\uF136',
+      'statuscircleblock2': '\uF140',
+
+      // Media controls
+      'stopsolid': '\uE71A',
+    },
+  });
 }

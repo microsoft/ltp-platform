@@ -59,7 +59,7 @@ export const EnvVar = React.memo(({ selected, onSelect }) => (
     selected={selected}
     onSelect={onSelect}
   >
-    <Stack gap='m'>
+    <Stack tokens={{ childrenGap: 'm' }}>
       <Hint>
         You could reference these LTP Environment Variables in command by{' '}
         <code>{'$envKey'}</code>

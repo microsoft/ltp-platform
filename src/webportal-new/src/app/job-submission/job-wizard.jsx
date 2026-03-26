@@ -88,7 +88,10 @@ const JobWizard = ({ setYamlText }) => {
   return (
     <div style={{ display: 'flex', height: '100%' }}>
       <Card style={{ margin: `${spacing.l2}`, width: '100%' }}>
-        <Stack horizontalAlign='center' padding={100} gap={100}>
+        <Stack
+          horizontalAlign='center'
+          tokens={{ padding: 100, childrenGap: 100 }}
+        >
           <div
             style={{
               color: palette.themePrimary,
@@ -103,10 +106,13 @@ const JobWizard = ({ setYamlText }) => {
           <Stack
             horizontal
             horizontalAlign='center'
-            gap={120}
+            tokens={{ childrenGap: 120 }}
             style={{ width: '100%', marginTop: 100 }}
           >
-            <Stack horizontalAlign='center' gap={50}>
+            <Stack
+              horizontalAlign='center'
+              tokens={{ childrenGap: 50 }}
+            >
               <WizardButton
                 onClick={() => {
                   navigate('/yaml-edit');
@@ -123,7 +129,10 @@ const JobWizard = ({ setYamlText }) => {
                 Config Editor
               </div>
             </Stack>
-            <Stack horizontalAlign='center' gap={50}>
+            <Stack
+              horizontalAlign='center'
+              tokens={{ childrenGap: 50 }}
+            >
               <WizardButton
                 onClick={() => {
                   navigate('/single');
@@ -140,7 +149,10 @@ const JobWizard = ({ setYamlText }) => {
                 Single Job
               </div>
             </Stack>
-            <Stack horizontalAlign='center' gap={50}>
+            <Stack
+              horizontalAlign='center'
+              tokens={{ childrenGap: 50 }}
+            >
               <WizardButton
                 onClick={() => {
                   navigate('/general');

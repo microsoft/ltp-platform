@@ -32,7 +32,7 @@ export const Header = ({
 }) => (
   <div className={c(t.flex, t.justifyBetween, FontClassNames.mediumPlus)}>
     <div>
-      <Stack horizontal gap='s1'>
+      <Stack horizontal tokens={{ childrenGap: 's1' }}>
         <div>{headerName}</div>
         {children}
       </Stack>

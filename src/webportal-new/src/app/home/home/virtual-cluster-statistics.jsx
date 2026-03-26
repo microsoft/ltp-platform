@@ -42,8 +42,8 @@ const getGrantedGroupsDescription = groups => {
   }
 };
 
-const isAdmin = cookies.get('admin') === 'true';
 const vcListColumns = colProps => {
+  const isAdmin = cookies.get('admin') === 'true';
   const columns = [
     {
       key: 'name',
@@ -107,7 +107,7 @@ const vcListColumns = colProps => {
         const resourcesGuaranteed = vc.resourcesGuaranteed || resourcesTotal;
         return (
           <Stack
-            gap='s1'
+            tokens={{ childrenGap: 's1' }}
             verticalAlign='center'
             verticalFill
             styles={{ root: { marginRight: 20 } }}
@@ -178,12 +178,7 @@ const vcListColumns = colProps => {
           }
         });
         return (
-          <Stack
-            horizontal
-            verticalAlign='center'
-            horizontalAlign='space-between'
-            gap='m'
-          >
+          <Stack horizontal verticalAlign='center' horizontalAlign='space-between' tokens={{ childrenGap: 'm' }}>
             <div className={FontClassNames.medium}>
               <p>{getGrantedGroupsDescription(groups)}</p>
             </div>
@@ -262,6 +257,7 @@ export const VirtualClusterStatistics = ({
   virtualClusters,
 }) => {
   const { spacing } = getTheme();
+  const isAdmin = cookies.get('admin') === 'true';
   const userVC = useMemo(() => {
     if (isAdmin) {
       return virtualClusters;
@@ -278,7 +274,7 @@ export const VirtualClusterStatistics = ({
 
   return (
     <Card className={t.ph5} style={{ paddingRight: spacing.m, ...style }}>
-      <Stack styles={{ root: [{ height: '100%' }] }} gap='l1'>
+      <Stack styles={{ root: [{ height: '100%' }] }} tokens={{ childrenGap: 'l1' }}>
         <Stack.Item>
           <Header
             headerName={

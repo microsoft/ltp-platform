@@ -29,7 +29,7 @@ export const AddGit = props => {
   };
 
   return (
-    <Stack horizontal horizontalAlign='space-between' gap='m'>
+    <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: 'm' }}>
       <Stack.Item align='baseline'>
         <TextField
           required={true}

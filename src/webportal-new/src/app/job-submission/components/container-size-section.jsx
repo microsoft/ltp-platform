@@ -62,8 +62,8 @@ export const ContainerSizeSection = props => {
       sectionLabel='Resources'
       sectionTooltip={PROTOCOL_TOOLTIPS.taskRoleContainerSize}
     >
-      <Stack horizontal gap='l1'>
-        <FormShortSection gap='m'>
+      <Stack horizontal tokens={{ childrenGap: 'l1' }}>
+        <FormShortSection tokens={{ childrenGap: 'm' }}>
           <CSpinButton
             label='GPU count'
             value={gpu}

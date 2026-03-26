@@ -453,7 +453,7 @@ export default class TaskAttemptList extends React.Component {
           }
           minWidth='500px'
         >
-          <Stack gap='m'>
+          <Stack tokens={{ childrenGap: 'm' }}>
             <Text variant='xLarge'>All Logs:</Text>
             <LogDialogContent urls={fullLogUrls} logListUrl={logListUrl} />
           </Stack>

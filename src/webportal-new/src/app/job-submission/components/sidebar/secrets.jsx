@@ -79,7 +79,7 @@ export const Secrets = React.memo(
         onSelect={onSelect}
         error={hasError}
       >
-        <Stack gap='m'>
+        <Stack tokens={{ childrenGap: 'm' }}>
           <Hint>
             Secret is a special type of parameter which will be masked after
             submission. You could reference these secrets in command by{' '}

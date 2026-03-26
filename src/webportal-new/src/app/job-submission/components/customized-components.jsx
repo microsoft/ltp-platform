@@ -35,7 +35,7 @@ export const CSpinButton = props => {
     onIncrement,
     onDecrement,
     onValidate,
-    min,
+    min = 0,
     max,
     label,
     tooltip,
@@ -78,10 +78,6 @@ export const CSpinButton = props => {
       />
     </Stack>
   );
-};
-
-CSpinButton.defaultProps = {
-  min: 0,
 };
 
 CSpinButton.propTypes = {

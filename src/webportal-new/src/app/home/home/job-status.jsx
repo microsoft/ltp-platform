@@ -35,15 +35,18 @@ import Card from '../../components/card';
 import t from '../../components/tachyons.scss';
 
 const isAdmin = cookies.get('admin') === 'true';
+
+// Define styled component outside of render function
+const TableRow = styled.tr`
+  td {
+    padding: ${props => props.$spacing};
+  }
+`;
+
 const StatusRow = ({ cellClassName, icon, name, count, link }) => {
   const { spacing } = getTheme();
-  const TableRow = styled.tr`
-    td {
-      padding: ${spacing.s1};
-    }
-  `;
   return (
-    <TableRow>
+    <TableRow $spacing={spacing.s1}>
       <td className={cellClassName}>
         <div className={c(t.w4)}>
           <StatusBadge status={name} />
@@ -88,7 +91,7 @@ const JobStatus = ({ className, style, jobStatusNumber }) => {
 
   return (
     <Card className={c(className, t.ph5)} style={style}>
-      <Stack gap='l1'>
+      <Stack tokens={{ childrenGap: 'l1' }}>
         <div className={FontClassNames.mediumPlus}>
           {isAdmin ? 'Job Status' : 'My job status'}
         </div>

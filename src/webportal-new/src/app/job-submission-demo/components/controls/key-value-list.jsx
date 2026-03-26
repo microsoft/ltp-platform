@@ -116,7 +116,7 @@ export const KeyValueList = ({
   ];
 
   return (
-    <Stack gap='m'>
+    <Stack tokens={{ childrenGap: 'm' }}>
       <div>
         <DetailsList
           items={items}

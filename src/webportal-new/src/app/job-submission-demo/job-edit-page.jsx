@@ -58,7 +58,7 @@ const PureJobEditPage = ({ jobProtocol, fetchVirtualClusters }) => {
         <Sidebar />
       </Flex>
       <Box padding='m' marginTop='m' bg='white'>
-        <Stack horizontal horizontalAlign='end' gap='m'>
+        <Stack horizontal horizontalAlign='end' tokens={{ childrenGap: 'm' }}>
           <PrimaryButton onClick={onSubmit}>Submit</PrimaryButton>
           {config.saveTemplate === 'true' && (
             <DefaultButton onClick={toggleHideDialog}>

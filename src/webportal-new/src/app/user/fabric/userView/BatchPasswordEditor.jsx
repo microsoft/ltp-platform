@@ -128,7 +128,7 @@ export default function BatchPasswordEditor({ isOpen = false, hide }) {
               marginRight: 'auto',
             }}
           >
-            <Stack horizontal={true} horizontalAlign='center' gap={spacing.s1}>
+            <Stack horizontal={true} horizontalAlign='center' tokens={{ childrenGap: spacing.s1 }}>
               <StackItem>
                 <PrimaryButton type='submit' disabled={lock} autoFocus>
                   Save

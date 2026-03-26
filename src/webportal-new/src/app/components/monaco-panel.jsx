@@ -84,12 +84,7 @@ const MonacoPanel = ({
             completionItems={completionItems}
             schemas={schemas}
           />
-          <Stack
-            horizontal
-            horizontalAlign='space-between'
-            gap={spacing.m}
-            padding={spacing.m}
-          >
+          <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: spacing.m, padding: spacing.m }}>
             <StackItem grow>
               <div>{footer}</div>
             </StackItem>

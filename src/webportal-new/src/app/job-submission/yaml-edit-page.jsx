@@ -71,22 +71,14 @@ export const YamlEditPage = () => {
 
   return (
     <Fabric style={{ height: '100%', overflowX: 'auto' }}>
-      <Stack
-        style={{
-          height: '100%',
-          width: '100%',
-        }}
-        verticalAlign='space-between'
-        gap='l1'
-        padding='l1'
-      >
+      <Stack style={{ height: '100%', width: '100%', }} verticalAlign='space-between' tokens={{ childrenGap: 'l1', padding: 'l1' }}>
         <StackItem disableShrink>
           <YamlEditTopBar
             protocolYaml={protocolYaml}
             onChange={setProtocolYaml}
           />
         </StackItem>
-        <Stack gap='s1' style={{ flex: 1 }}>
+        <Stack style={{ flex: 1 }} tokens={{ childrenGap: 's1' }}>
           <MessageBar messageBarType={validStatus.barType}>
             {validStatus.message}
           </MessageBar>
@@ -105,7 +97,7 @@ export const YamlEditPage = () => {
           />
         </Stack>
         <Card>
-          <Stack horizontal gap='m' horizontalAlign='space-between'>
+          <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: 'm' }}>
             <StackItem>
               <DefaultButton
                 text='Back'
@@ -118,7 +110,7 @@ export const YamlEditPage = () => {
                 }}
               />
             </StackItem>
-            <Stack horizontal gap='l1'>
+            <Stack horizontal tokens={{ childrenGap: 'l1' }}>
               <DefaultButton
                 styles={{
                   root: [ColorClassNames.neutralTertiaryAltBackground],
