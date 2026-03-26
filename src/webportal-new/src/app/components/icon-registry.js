@@ -17,9 +17,19 @@
 
 import { registerIcons } from '@fluentui/react/lib/Styling';
 
+// Track if icons have been registered to prevent duplicate registration
+let iconsRegistered = false;
+
 // Register all icons used in the application
 // This prevents "icon was used but not registered" warnings
 export function registerAppIcons() {
+  // Only register once to avoid duplicate registration warnings
+  if (iconsRegistered) {
+    return;
+  }
+
+  iconsRegistered = true;
+
   registerIcons({
     icons: {
       // Navigation and actions

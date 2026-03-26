@@ -40,11 +40,16 @@ export const AddLocal = ({
     if (!hdfsClient) {
       setHDFSErrorMessage('Cannot upload to LTP right now');
     } else {
-      hdfsClient.checkAccess().then(isAccessiable => {
-        if (!isAccessiable) {
-          setHDFSErrorMessage('Cannot upload to LTP right now');
-        }
-      });
+      hdfsClient.checkAccess()
+        .then(isAccessiable => {
+          if (!isAccessiable) {
+            setHDFSErrorMessage('Cannot upload to LTP right now');
+          }
+        })
+        .catch(err => {
+          console.error('Failed to check HDFS access:', err);
+          setHDFSErrorMessage('Failed to check upload availability');
+        });
     }
   }, []);
 

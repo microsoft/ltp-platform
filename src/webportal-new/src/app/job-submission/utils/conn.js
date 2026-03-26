@@ -147,6 +147,9 @@ export async function fetchMyTemplates(user) {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
     return items;
+  } else if (res.status === 404) {
+    // 404 is expected when user has no templates
+    return [];
   } else {
     throw new Error(res.statusText);
   }

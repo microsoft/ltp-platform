@@ -321,17 +321,21 @@ export const JobSubmissionPage = ({
 
   // fill template options
   useEffect(() => {
-    fetchMyTemplates(loginUser).then(templates => {
-      const newTemplateOptions = cloneDeep(templateOptions);
-      for (const template of templates) {
-        newTemplateOptions.push({
-          key: template.id,
-          text: template.name,
-          protocol: template.protocol,
-        });
-      }
-      setTemplateOptions(newTemplateOptions);
-    });
+    fetchMyTemplates(loginUser)
+      .then(templates => {
+        const newTemplateOptions = cloneDeep(templateOptions);
+        for (const template of templates) {
+          newTemplateOptions.push({
+            key: template.id,
+            text: template.name,
+            protocol: template.protocol,
+          });
+        }
+        setTemplateOptions(newTemplateOptions);
+      })
+      .catch(err => {
+        console.error('Failed to fetch templates:', err);
+      });
   }, []);
 
   // update component if yamlText is not null

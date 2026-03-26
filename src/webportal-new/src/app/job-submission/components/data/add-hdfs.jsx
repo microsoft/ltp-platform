@@ -40,12 +40,18 @@ export const AddHDFS = ({
       setIsHdfsEnabled(false);
       setHdfsPathErrorMessage('LTP HDFS is not available');
     } else {
-      hdfsClient.checkAccess().then(isAccessiable => {
-        setIsHdfsEnabled(isAccessiable);
-        if (!isAccessiable) {
-          setHdfsPathErrorMessage('LTP HDFS is not available');
-        }
-      });
+      hdfsClient.checkAccess()
+        .then(isAccessiable => {
+          setIsHdfsEnabled(isAccessiable);
+          if (!isAccessiable) {
+            setHdfsPathErrorMessage('LTP HDFS is not available');
+          }
+        })
+        .catch(err => {
+          console.error('Failed to check HDFS access:', err);
+          setIsHdfsEnabled(false);
+          setHdfsPathErrorMessage('Failed to check HDFS availability');
+        });
     }
   }, []);
 
