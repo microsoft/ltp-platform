@@ -22,7 +22,6 @@ import 'whatwg-fetch';
 import { FontClassNames, ColorClassNames } from '@fluentui/react/lib/Styling';
 import c from 'classnames';
 import { isEmpty } from 'lodash';
-import { initializeIcons } from '@fluentui/react';
 import querystring from 'querystring';
 import React, { useState, useCallback, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -34,7 +33,7 @@ import LoginModal from './index/login-modal';
 import { checkToken } from '../user/user-auth/user-auth.component';
 import config from '../config/webportal.config';
 import { SpinnerLoading } from '../components/loading';
-import { registerAppIcons } from '../components/icon-registry';
+import { initializeIconsOnce } from '../utils/icon-initializer';
 import t from 'tachyons-sass/tachyons.scss';
 
 let loginTarget = '/home.html';
@@ -64,8 +63,7 @@ if (config.authnMethod === 'OIDC') {
   }
 }
 
-initializeIcons();
-registerAppIcons();
+initializeIconsOnce();
 
 const Index = () => {
   const [loginModal, setLoginModal] = useState(false);

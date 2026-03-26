@@ -15,50 +15,27 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { registerIcons } from '@fluentui/react/lib/Styling';
+import { initializeIcons as fluentInitializeIcons } from '@fluentui/react/lib/Icons';
 
-// Track if icons have been registered to prevent duplicate registration
-let iconsRegistered = false;
+// Global flag to ensure icons are only initialized once
+const ICONS_INITIALIZED_KEY = '__FLUENT_ICONS_INITIALIZED__';
 
-// Register all icons used in the application
-// This prevents "icon was used but not registered" warnings
-export function registerAppIcons() {
-  // Only register once to avoid duplicate registration warnings
-  if (iconsRegistered) {
+/**
+ * Initialize Fluent UI icons once globally
+ * This wrapper ensures initializeIcons is only called once across the entire application
+ * to prevent duplicate icon registration warnings
+ */
+export function initializeIconsOnce() {
+  // Check if icons have already been initialized
+  if (typeof window !== 'undefined' && window[ICONS_INITIALIZED_KEY]) {
     return;
   }
 
-  iconsRegistered = true;
+  // Mark as initialized before calling to prevent race conditions
+  if (typeof window !== 'undefined') {
+    window[ICONS_INITIALIZED_KEY] = true;
+  }
 
-  registerIcons({
-    icons: {
-      // Navigation and actions
-      'add': '\uE710',
-      'refresh': '\uE72C',
-      'filter': '\uE71C',
-      'chevronup': '\uE70E',
-      'chevrondown': '\uE70D',
-      'chevronright': '\uE76C',
-      'search': '\uE721',
-      'sort': '\uE8CB',
-      'cancel': '\uE711',
-
-      // Contact and communication
-      'contact': '\uE77B',
-      'cellphone': '\uE8EA',
-
-      // Time
-      'clock': '\uE917',
-
-      // Status indicators
-      'error': '\uE783',
-      'circlering': '\uEA3A',
-      'statuscirclecheckmark': '\uF13E',
-      'statuscircleouter': '\uF136',
-      'statuscircleblock2': '\uF140',
-
-      // Media controls
-      'stopsolid': '\uE71A',
-    },
-  });
+  // Initialize all Fluent UI MDL2 icons
+  fluentInitializeIcons();
 }

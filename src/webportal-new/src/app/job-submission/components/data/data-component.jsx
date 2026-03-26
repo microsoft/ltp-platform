@@ -144,31 +144,34 @@ export const DataComponent = React.memo(props => {
     );
 
     setJobData(jobData => {
-      const updatedJobData = new JobData(
+      return new JobData(
         jobData.hdfsClient,
         jobData.customDataList,
         mountDirectories,
         true,
       );
-      onChange(updatedJobData);
-      return updatedJobData;
     });
-  }, [extras, teamStorageConfig, onChange]);
+  }, [extras, teamStorageConfig, props.jobName]);
+
+  // Separate effect to notify parent of jobData changes
+  useEffect(() => {
+    if (jobData) {
+      onChange(jobData);
+    }
+  }, [jobData, onChange]);
 
   const onDataListChange = useCallback(
     dataList => {
       setJobData(jobData => {
-        const updatedJobData = new JobData(
+        return new JobData(
           jobData.hdfsClient,
           dataList,
           jobData.mountDirs,
           true,
         );
-        onChange(updatedJobData);
-        return updatedJobData;
       });
     },
-    [onChange],
+    [],
   );
 
   const onMountDirChange = useCallback(

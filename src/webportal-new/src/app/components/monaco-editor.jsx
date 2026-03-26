@@ -21,9 +21,13 @@ import { isNil, isNumber } from 'lodash';
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import loadable from '@loadable/component';
 import { Spinner, SpinnerSize } from '@fluentui/react';
+import { loader } from '@monaco-editor/react';
 
 import monacoHackStyles from './monaco-hack.scss';
 import t from './tachyons.scss';
+
+// Configure monaco-editor to use webpack-bundled files instead of CDN
+loader.config({ monaco: window.monaco });
 
 const monacoHack = monacoHackStyles.monacoHack;
 

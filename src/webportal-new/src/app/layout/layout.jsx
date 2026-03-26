@@ -22,7 +22,6 @@ import 'normalize.css/normalize.css';
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import c from 'classnames';
-import { initializeIcons } from '@fluentui/react/lib/Icons';
 import { ColorClassNames } from '@fluentui/react/lib/Styling';
 import { useMediaQuery } from 'react-responsive';
 import PropTypes from 'prop-types';
@@ -32,13 +31,12 @@ import Navbar from './components/navbar';
 import Sidebar from './components/sidebar';
 import { initTheme, boxShadow } from '../components/theme';
 import { getUserRequest } from '../user/fabric/conn';
-import { registerAppIcons } from '../components/icon-registry';
+import { initializeIconsOnce } from '../utils/icon-initializer';
 
 import t from '../components/tachyons.scss';
 
 initTheme();
-initializeIcons();
-registerAppIcons();
+initializeIconsOnce();
 
 const BREAKPOINT = 1200;
 
