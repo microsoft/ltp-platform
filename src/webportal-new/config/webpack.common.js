@@ -114,6 +114,8 @@ const config = (env, argv) => ({
       util: require.resolve('util/'),
       vm: require.resolve('vm-browserify'),
       zlib: require.resolve('browserify-zlib'),
+      url: require.resolve('url/'),
+      assert: require.resolve('assert/'),
     },
   },
   module: {
@@ -177,7 +179,8 @@ const config = (env, argv) => ({
               importLoaders: 2,
               modules: {
                 localIdentName: '[local]',
-                exportLocalsConvention: 'camelCase',
+                exportLocalsConvention: 'dashesOnly',
+                namedExport: false,
               },
             },
           },
@@ -314,17 +317,11 @@ const config = (env, argv) => ({
       },
       {
         test: /\.svg$/,
-        use: [
-          '@svgr/webpack',
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              publicPath: '/assets/font/',
-              outputPath: 'assets/font/',
-            },
-          },
-        ],
+        use: ['@svgr/webpack'],
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/font/[name][ext]',
+        },
         issuer: /\.[jt]sx?$/,
       },
     ],

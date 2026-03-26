@@ -18,9 +18,9 @@
 //
 
 require('bootstrap');
-require('admin-lte/dist/css/AdminLTE.min.css');
+require('admin-lte/dist/css/adminlte.min.css');
 require('bootstrap/dist/css/bootstrap.css');
-require('font-awesome/css/font-awesome.min.css');
+require('@fortawesome/fontawesome-free/css/all.min.css');
 
 const hardwareDetailComponent = require('./hardware-detail.component.ejs');
 const breadcrumbComponent = require('../../job/breadcrumb/breadcrumb.component.ejs');

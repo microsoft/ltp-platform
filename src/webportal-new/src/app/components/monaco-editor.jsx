@@ -27,7 +27,7 @@ import t from './tachyons.scss';
 
 const monacoHack = monacoHackStyles.monacoHack;
 
-const ReactMonacoEditor = loadable(() => import('react-monaco-editor'), {
+const ReactMonacoEditor = loadable(() => import('@monaco-editor/react'), {
   fallback: <Spinner size={SpinnerSize.large} />,
 });
 
@@ -117,8 +117,8 @@ const MonacoEditor = ({
             className={c(t.flexAuto, monacoClassName)}
             theme='vs-dark'
             language='text'
-            // editor did mount
-            editorDidMount={(e, m) => {
+            // onMount for @monaco-editor/react
+            onMount={(e, m) => {
               // save monaco context
               editor.current = e;
               monaco.current = m;

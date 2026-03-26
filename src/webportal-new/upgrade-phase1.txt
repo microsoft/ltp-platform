@@ -1,0 +1,38 @@
+# Phase 1: Safe upgrades (non-breaking)
+# Minor version bumps
+marked@latest
+winston@latest
+dotenv@latest
+luxon@latest
+fs-extra@latest
+compression@latest
+cookie-parser@latest
+express@^4.21.2
+jsonwebtoken@latest
+styled-components@latest
+query-string@^8.2.0
+papaparse@latest
+handlebars@latest
+morgan@latest
+
+# Monaco editor (minor upgrade within v0.x)
+monaco-editor@^0.52.0
+
+# Babel and build tools (latest compatible)
+@babel/core@latest
+@babel/preset-env@latest
+@babel/preset-react@latest
+babel-loader@latest
+
+# Webpack plugins
+mini-css-extract-plugin@latest
+css-loader@latest
+sass-loader@latest
+postcss-loader@latest
+html-webpack-plugin@latest
+terser-webpack-plugin@latest
+
+# Other dev tools
+prettier@latest
+rimraf@latest
+mkdirp@latest

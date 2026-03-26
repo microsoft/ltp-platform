@@ -16,7 +16,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // module dependencies
-const { marked } = require('marked');
 const URL = require('url').URL;
 
 const baseUrl = 'https://github.com/Microsoft/pai/tree/master/docs/';
