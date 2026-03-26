@@ -19,21 +19,18 @@ import c from 'classnames';
 import PropTypes from 'prop-types';
 import { isNil, isNumber } from 'lodash';
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
-import loadable from '@loadable/component';
-import { Spinner, SpinnerSize } from '@fluentui/react';
-import { loader } from '@monaco-editor/react';
+import Editor, { loader } from '@monaco-editor/react';
 
 import monacoHackStyles from './monaco-hack.scss';
 import t from './tachyons.scss';
 
-// Configure monaco-editor to use webpack-bundled files instead of CDN
-loader.config({ monaco: window.monaco });
+// Configure @monaco-editor/react to use local monaco-editor files
+// copied to /vs by CopyWebpackPlugin instead of loading from CDN
+loader.config({ paths: { vs: '/vs' } });
 
 const monacoHack = monacoHackStyles.monacoHack;
 
-const ReactMonacoEditor = loadable(() => import('@monaco-editor/react'), {
-  fallback: <Spinner size={SpinnerSize.large} />,
-});
+const ReactMonacoEditor = Editor;
 
 const MonacoEditor = ({
   className,

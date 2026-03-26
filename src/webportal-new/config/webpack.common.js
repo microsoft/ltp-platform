@@ -347,11 +347,16 @@ const config = (env, argv) => ({
     new MonacoWebpackPlugin({
       languages: ['json', 'yaml', 'shell'],
       features: ['suggest', 'hover'],
+      publicPath: '/dist/',
     }),
     new CopyWebpackPlugin({
       patterns: [
         { from: 'src/assets', to: 'assets' },
         { from: 'src/assets/img/favicon.ico', to: 'favicon.ico' },
+        {
+          from: 'node_modules/monaco-editor/min/vs',
+          to: 'vs',
+        },
       ],
     }),
     new MiniCssExtractPlugin({
