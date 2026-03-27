@@ -37,6 +37,7 @@
     "@microsoft/openpai-js-sdk": "file:../openpai-js-sdk/microsoft-openpai-js-sdk-0.2.0.tgz",
     "@monaco-editor/react": "^4.7.0",
     "@popperjs/core": "~2.11.8",
+    "@styled-system/should-forward-prop": "~5.1.5",
     "@webcomponents/custom-elements": "^1.6.0",
     "admin-lte": "~4.0.0-rc7",
     "app-root-path": "~3.1.0",

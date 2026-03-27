@@ -39,14 +39,14 @@ const isAdmin = cookies.get('admin') === 'true';
 // Define styled component outside of render function
 const TableRow = styled.tr`
   td {
-    padding: ${props => props.$spacing};
+    padding: ${props => props.spacing};
   }
 `;
 
 const StatusRow = ({ cellClassName, icon, name, count, link }) => {
   const { spacing } = getTheme();
   return (
-    <TableRow $spacing={spacing.s1}>
+    <TableRow spacing={spacing.s1}>
       <td className={cellClassName}>
         <div className={c(t.w4)}>
           <StatusBadge status={name} />
