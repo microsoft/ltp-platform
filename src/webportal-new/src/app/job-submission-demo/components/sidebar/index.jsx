@@ -101,6 +101,7 @@ const UnwrapperedSidebar = ({
             item =>
               item.checked && (
                 <SidebarItem
+                  key={item.key}
                   mt='m'
                   mb='m'
                   selected={currentSideKey === item.key}

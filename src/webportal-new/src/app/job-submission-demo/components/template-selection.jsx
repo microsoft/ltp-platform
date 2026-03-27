@@ -34,35 +34,46 @@ const PureTemplateSelection = props => {
   // fetch template options
   useEffect(() => {
     const newTemplateOptions = cloneDeep(templateOptions);
-    fetchMyPrivateTemplates(loginUser).then(templates => {
-      newTemplateOptions.push({
-        key: 'MyTemplatesHeader',
-        text: 'My Templates',
-        itemType: DropdownMenuItemType.Header,
-      });
-      for (const template of templates) {
+    fetchMyPrivateTemplates(loginUser)
+      .then(templates => {
         newTemplateOptions.push({
-          key: template.id,
-          text: template.name,
-          protocol: template.protocol,
-        });
-      }
-      fetchPublicTemplates().then(publicTemplates => {
-        newTemplateOptions.push({
-          key: 'PublicTemplatesHeader',
-          text: 'Public Templates',
+          key: 'MyTemplatesHeader',
+          text: 'My Templates',
           itemType: DropdownMenuItemType.Header,
         });
-        for (const template of publicTemplates) {
+        for (const template of templates) {
           newTemplateOptions.push({
             key: template.id,
             text: template.name,
             protocol: template.protocol,
           });
         }
-        setTemplateOptions(newTemplateOptions);
+      })
+      .catch(() => {
+        // Marketplace API not available, skip private templates
+      })
+      .finally(() => {
+        fetchPublicTemplates()
+          .then(publicTemplates => {
+            newTemplateOptions.push({
+              key: 'PublicTemplatesHeader',
+              text: 'Public Templates',
+              itemType: DropdownMenuItemType.Header,
+            });
+            for (const template of publicTemplates) {
+              newTemplateOptions.push({
+                key: template.id,
+                text: template.name,
+                protocol: template.protocol,
+              });
+            }
+            setTemplateOptions(newTemplateOptions);
+          })
+          .catch(() => {
+            // Public templates also not available, use default options
+            setTemplateOptions(newTemplateOptions);
+          });
       });
-    });
   }, []);
 
   const onTemplateChange = (_, item) => {

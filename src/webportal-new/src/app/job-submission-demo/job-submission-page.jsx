@@ -138,7 +138,7 @@ const PureJobSubmissionPage = ({ onJobProtocolChange, onTaskRoleSelect }) => {
   );
 };
 
-const mapStateToProps = () => {};
+const mapStateToProps = () => ({});
 
 const mapDispatchToProps = dispatch => ({
   onJobProtocolChange: jobProtocol =>

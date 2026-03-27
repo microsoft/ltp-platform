@@ -52,7 +52,7 @@ const mapStateToProps = state => ({
   availableHivedSkuTypes: state.JobExtraInfo.availableHivedSkuTypes,
 });
 
-const mapDispatchToProps = () => {};
+const mapDispatchToProps = () => ({});
 
 export const SKUType = connect(
   mapStateToProps,
