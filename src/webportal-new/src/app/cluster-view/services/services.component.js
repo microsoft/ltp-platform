@@ -71,7 +71,18 @@ const loadServices = () => {
 
 window.loadServices = loadServices;
 
-$('#content-wrapper').html(serviceViewHtml);
+// Wait for content-wrapper to be available before inserting HTML
+const initServicesPage = () => {
+  const contentWrapper = document.getElementById('content-wrapper');
+  if (contentWrapper) {
+    $('#content-wrapper').html(serviceViewHtml);
+    loadServices();
+  } else {
+    // If content-wrapper doesn't exist yet, wait a bit and try again
+    setTimeout(initServicesPage, 50);
+  }
+};
+
 $(document).ready(() => {
-  loadServices();
+  initServicesPage();
 });

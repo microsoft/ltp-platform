@@ -23,6 +23,9 @@
  * SOFTWARE.
  */
 
+// Prevent layout.jsx from auto-initializing since we'll do it ourselves
+window.__LAYOUT_INITIALIZED__ = true;
+
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';

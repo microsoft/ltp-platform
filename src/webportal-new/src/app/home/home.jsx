@@ -209,6 +209,9 @@ const Home = () => {
   }
 };
 
+// Prevent layout.jsx from auto-initializing since we'll do it ourselves
+window.__LAYOUT_INITIALIZED__ = true;
+
 import { Layout } from '../layout/layout';
 
 export { Home };

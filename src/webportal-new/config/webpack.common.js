@@ -367,9 +367,10 @@ const config = (env, argv) => ({
       _: 'lodash',
     }),
     new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery',
-      'window.jQuery': 'jquery',
+      $: ['jquery', 'default'],
+      jQuery: ['jquery', 'default'],
+      'window.jQuery': ['jquery', 'default'],
+      'window.$': ['jquery', 'default'],
     }),
     new webpack.ProvidePlugin({
       cookies: ['js-cookie', 'default'],

@@ -25,6 +25,7 @@ import c from 'classnames';
 import { ColorClassNames } from '@fluentui/react/lib/Styling';
 import { useMediaQuery } from 'react-responsive';
 import PropTypes from 'prop-types';
+import cookies from 'js-cookie';
 
 import Logo from './components/logo';
 import Navbar from './components/navbar';
@@ -105,3 +106,42 @@ Layout.propTypes = {
 };
 
 export { Layout };
+
+// Render the layout when this module is loaded as an entry point
+// Only auto-render if wrapper exists and hasn't been initialized yet
+if (typeof document !== 'undefined' && typeof window !== 'undefined') {
+  // Defer the initialization check to allow other modules to set their flags first
+  const initLayout = () => {
+    // Skip if already marked that someone else will initialize
+    if (window.__LAYOUT_INITIALIZED__) {
+      return;
+    }
+
+    const wrapper = document.getElementById('wrapper');
+    if (!wrapper) {
+      return;
+    }
+
+    // Check multiple conditions to avoid conflicts:
+    // 1. wrapper doesn't have data-root-initialized attribute (used by other pages)
+    // 2. wrapper has no children (hasn't been rendered yet)
+    // 3. wrapper doesn't have _reactRootContainer property (React compatibility)
+    if (
+      !wrapper.hasAttribute('data-root-initialized') &&
+      wrapper.childNodes.length === 0 &&
+      !wrapper._reactRootContainer
+    ) {
+      window.__LAYOUT_INITIALIZED__ = true;
+      const root = createRoot(wrapper);
+      root.render(<Layout />);
+    }
+  };
+
+  // Use setTimeout(0) to defer execution until after current script completes
+  // This allows importing modules to set their flags first
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initLayout, 0));
+  } else {
+    setTimeout(initLayout, 0);
+  }
+}

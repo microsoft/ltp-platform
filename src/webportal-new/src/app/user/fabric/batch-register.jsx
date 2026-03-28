@@ -15,6 +15,9 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// Prevent layout.jsx from auto-initializing since we'll do it ourselves
+window.__LAYOUT_INITIALIZED__ = true;
+
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
