@@ -271,7 +271,7 @@ export default class Form extends React.Component<IFormProps, IFormState> {
     try {
       clusterlist = Object.keys(await this.client.virtualCluster.listVirtualClusters());
     } catch (err) {
-      alert(`Failed to get virtual clusters: ${err.message}`);
+      alert(`Failed to get virtual clusters: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     const endpoint = new URL("cluster-local-storage", window.location.href).href;
