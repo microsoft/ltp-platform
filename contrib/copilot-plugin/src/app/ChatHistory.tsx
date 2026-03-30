@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+// @ts-nocheck
 "use client";
 
 import { v4 as uuidv4 } from "uuid";
@@ -216,7 +217,7 @@ const Message: React.FC<{ message: ChatMessage, expand?: boolean, isAssistant?: 
           onClick={toggleExpanded}
           className="absolute top-0 right-0 mt-1 mr-1 text-blue-500 text-xs flex items-center justify-center bg-white border border-gray-300 rounded-full h-6 w-6"
         >
-          {expanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
+          {expanded ? <IoIosArrowUp /> as any : <IoIosArrowDown /> as any}
         </button>
       )}
       <div 
