@@ -23,7 +23,7 @@
     "test": "npm run lint",
     "clean": "rimraf dist",
     "prebuild": "npm run clean && node config/preprocess.js",
-    "build": "webpack --progress --mode development",
+    "build": "webpack --progress --profile --mode production",
     "preanalyze": "webpack --mode production --json > bundle.profile.json",
     "analyze": "webpack-bundle-analyzer bundle.profile.json dist",
     "dev": "yarn prebuild && yarn prestart && webpack-dev-server --progress --mode development",

@@ -58,8 +58,7 @@ function generateHtml(opt) {
 }
 
 const config = (env, argv) => ({
-  mode: argv.mode || 'development', // Enable development mode for debugging
-  devtool: 'source-map', // Generate source maps for debugging
+  mode: argv.mode || 'development',
   entry: {
     index: './src/app/home/index.jsx',
     home: './src/app/home/home.jsx',
@@ -467,7 +466,6 @@ const config = (env, argv) => ({
     hot: true,
   },
   optimization: {
-    minimize: false, // Temporarily disable for debugging
     moduleIds: 'deterministic',
     runtimeChunk: 'single',
     minimizer: [
