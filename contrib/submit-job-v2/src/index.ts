@@ -6,18 +6,18 @@ import "whatwg-fetch";
 
 import React from "react";
 import ReactDOM from "react-dom";
-import { resolve } from "url";
 
 import App from "./App";
 
 declare let __webpack_public_path__: string;
-const publicPath = __webpack_public_path__ = resolve((window.document.currentScript as HTMLScriptElement).src, "./");
+const scriptSrc = (window.document.currentScript as HTMLScriptElement).src;
+const publicPath = __webpack_public_path__ = new URL("./", scriptSrc).href;
 
 (window as any).MonacoEnvironment = {
   getWorkerUrl() {
     const code = `
     self.MonacoEnvironment = { baseUrl: '${publicPath}' };
-    importScripts('${resolve(publicPath, "editor.worker.js")}');`;
+    importScripts('${new URL("editor.worker.js", publicPath).href}');`;
     return `data:application/javascript;charset=utf-8,${encodeURIComponent(code)}`;
   },
 };

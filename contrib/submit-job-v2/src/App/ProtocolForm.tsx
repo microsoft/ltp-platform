@@ -110,7 +110,7 @@ const styles = mergeStyleSets({
     border: "0",
   },
 });
-const cx = classNames.bind(styles);
+const cx = classNames.bind(styles as any);
 
 initializeIconsOnce();
 
@@ -367,7 +367,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
         });
       }
     } catch (err) {
-      alert(err.message);
+      alert(err instanceof Error ? err.message : String(err));
     }
     this.setState({ loading: false });
   }
@@ -400,7 +400,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
         protocolYAML: text,
       });
     } catch (err) {
-      alert(err.message);
+      alert(err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -421,7 +421,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
           protocolYAML: text,
         });
       } catch (err) {
-        alert(err.message);
+        alert(err instanceof Error ? err.message : String(err));
       }
     });
     fileReader.readAsText(files[0]);
@@ -520,7 +520,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
         showEditor: false,
       });
     } catch (err) {
-      alert(err.message);
+      alert(err instanceof Error ? err.message : String(err));
     }
   }
 
@@ -552,7 +552,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
         window.location.href = `/job-detail.html?username=${this.props.user}&jobName=${this.state.jobName}`;
       }
     } catch (err) {
-      alert(err.message);
+      alert(err instanceof Error ? err.message : String(err));
     }
   }
 }
