@@ -19,8 +19,8 @@
 
 pushd $(dirname "$0") > /dev/null
 
-if kubectl get daemonset | grep -q "webportal-new-ds"; then
-    kubectl delete ds webportal-new-ds
+if kubectl get daemonset | grep -q "webportal-ds"; then
+    kubectl delete ds webportal-ds
 fi
 
 popd > /dev/null
