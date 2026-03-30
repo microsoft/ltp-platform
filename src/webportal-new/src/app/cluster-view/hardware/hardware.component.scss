@@ -15,3 +15,24 @@
 .metric-icon-loading {
   color: silver;
 }
+
+.content-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+
+  h1 {
+    margin: 0 !important;
+    flex: 0 0 auto;
+  }
+
+  .breadcrumb {
+    --bs-breadcrumb-divider: ">";
+    background: transparent !important;
+    margin-bottom: 0 !important;
+    font-size: 12px;
+    padding: 7px 5px;
+    flex: 0 0 auto;
+  }
+}

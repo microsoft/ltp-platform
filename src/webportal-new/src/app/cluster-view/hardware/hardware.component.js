@@ -465,6 +465,9 @@ const loadData = () => {
             { type: 'ip-address', targets: [1] },
             { type: 'title-numeric', targets: [2, 3, 4, 5, 6, 7] },
           ],
+          language: {
+            lengthMenu: 'Show _MENU_ entries',
+          },
         })
         .api();
       const instanceList = [];

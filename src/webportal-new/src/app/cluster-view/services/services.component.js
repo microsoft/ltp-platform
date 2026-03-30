@@ -64,6 +64,9 @@ const loadServices = () => {
           { orderDataType: 'dom-text', targets: [1, 2] },
           { type: 'ip-address', targets: [0] },
         ],
+        language: {
+          lengthMenu: 'Show _MENU_ entries',
+        },
       })
       .api();
   });
