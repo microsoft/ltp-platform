@@ -5,7 +5,7 @@ import React, { Suspense, lazy } from "react";
 import {
   ChoiceGroup, DefaultButton, DefaultPalette, Fabric, IChoiceGroupOption, IRenderFunction,
   Label, List, Panel, PanelType, PrimaryButton, Stack, Spinner, SpinnerSize, Text, TextField, Toggle,
-  initializeIcons, mergeStyleSets,
+  mergeStyleSets,
 } from "office-ui-fabric-react";
 import Cookies from "js-cookie";
 import classNames from "classnames/bind";
@@ -15,6 +15,7 @@ import { PAIV2 } from "@microsoft/openpai-js-sdk";
 
 import monacoStyles from "./monaco.scss";
 import MarketplaceForm from "./MarketplaceForm";
+import { initializeIconsOnce } from "../utils/icon-initializer";
 
 const MonacoEditor = lazy(() => import("react-monaco-editor"));
 const styles = mergeStyleSets({
@@ -111,7 +112,7 @@ const styles = mergeStyleSets({
 });
 const cx = classNames.bind(styles);
 
-initializeIcons();
+initializeIconsOnce();
 
 interface IArrayObj {
   [key: string]: string;
