@@ -139,34 +139,6 @@ RUN set -eux; \
 # app files
 # --------------------------
 COPY src/Moneo /Moneo
-
-# Install RDC
-RUN if [ "$TARGETARCH" = "amd64" ]; then sudo bash Moneo/src/worker/install/amd.sh; fi
-
-# Install DCGM
-RUN sed -i 's/systemctl --now enable nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
-    sed -i 's/systemctl start nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
-    sudo bash Moneo/src/worker/install/nvidia.sh
-
-ENV PATH="${PATH}:/opt/rocm/bin"
-COPY build/moneo-*-exporter_entrypoint.sh ./
-COPY build/update-dcgm.py .
-
-# For the job exporter
-ENV NERDCTL_VERSION=2.2.1
-RUN apt-get update && apt-get install --no-install-recommends -y wget ca-certificates
-RUN wget -O /tmp/nerdctl.tar.gz https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-${TARGETARCH}.tar.gz && \
-    mkdir -p /tmp/nerdctl && \
-    tar -xzvf /tmp/nerdctl.tar.gz -C /tmp/nerdctl && \
-    mv /tmp/nerdctl/nerdctl /usr/local/bin/nerdctl && \
-    mkdir -p /job_exporter && \
-    rm -rf /tmp/nerdctl*
-
-COPY requirements.txt /job_exporter/
-RUN pip3 install -r /job_exporter/requirements.txt
-
-RUN apt update && apt upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
-
 COPY src/*.py /job_exporter/
 COPY build/moneo-*-exporter_entrypoint.sh ./
 
