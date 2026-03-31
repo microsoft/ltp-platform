@@ -36,9 +36,9 @@ RUN wget https://nginx.org/download/nginx-1.26.0.tar.gz && \
 RUN wget https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.43/pcre2-10.43.tar.gz && \
     tar -zxf pcre2-10.43.tar.gz
 
-# zlib version 1.3.1
-RUN wget https://www.zlib.net/zlib-1.3.1.tar.gz && \
-    tar -zxf zlib-1.3.1.tar.gz
+# zlib version 1.3.2
+RUN wget https://www.zlib.net/zlib-1.3.2.tar.gz && \
+    tar -zxf zlib-1.3.2.tar.gz
 
 # OpenSSL 3.3.0
 RUN wget https://www.openssl.org/source/openssl-3.3.0.tar.gz && \
@@ -73,7 +73,7 @@ RUN ./configure \
   # External modules
   --with-openssl=../openssl-3.3.0 \
   --with-pcre=../pcre2-10.43 \
-  --with-zlib=../zlib-1.3.1 \
+  --with-zlib=../zlib-1.3.2 \
   --add-module=/root/ngx_http_substitutions_filter_module
 
 #
