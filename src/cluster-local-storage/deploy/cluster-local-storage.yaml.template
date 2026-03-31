@@ -24,6 +24,7 @@ spec:
         app: cluster-local-storage-sts-{{ vc }}
     spec:
       hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       priorityClassName: pai-daemon-priority
       serviceAccountName: cluster-local-storage-account
       nodeSelector:

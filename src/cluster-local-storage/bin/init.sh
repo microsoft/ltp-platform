@@ -24,6 +24,7 @@ env | grep CLUSTER_LOCAL_STORAGE >> /etc/environment
 
 # ssh
 cat /secret/ssh_host_ed25519_key > /etc/ssh/ssh_host_ed25519_key
+cat /secret/ssh_host_ed25519_key.pub > /etc/ssh/ssh_host_ed25519_key.pub
 cat /secret/ssh_host_ed25519_key.pub > /root/.ssh/authorized_keys
 
 cat > /root/.ssh/config << EOL

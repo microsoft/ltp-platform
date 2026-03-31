@@ -29,6 +29,29 @@ kubectl create configmap docker-credentials --from-file=docker-credentials/ --dr
 echo "refresh gpu-configuration"
 kubectl create configmap gpu-configuration --from-file=gpu-configuration/ --dry-run=client -o yaml | kubectl apply -f - || exit $?
 
+echo "update coredns-custom configmap and restart coredns"
+{
+  cat <<'EOF'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  hosts.override: |
+    hosts {
+EOF
+  kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{" "}{.metadata.name}{"\n"}{end}' \
+    | awk 'NF { printf "        %s\n", $0 }'
+  cat <<'EOF'
+        fallthrough
+    }
+EOF
+} | kubectl apply -f -
+
+# Restart CoreDNS to apply the changes
+kubectl -n kube-system rollout restart deployment coredns || exit $?
+
 echo "refresh k8s-etc-hosts"
 kubectl get nodes -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\t"}{.metadata.name}{"\n"}{end}' \
   | kubectl create configmap k8s-etc-hosts --from-file=k8s-etc-hosts.txt=/dev/stdin --dry-run=client -o yaml \
