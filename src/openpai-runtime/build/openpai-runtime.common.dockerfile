@@ -34,7 +34,7 @@ RUN /bin/bash ubuntu_build.sh package_cache_info ubuntu22.04
 
 # Package Cache Data Layer Ends
 
-FROM golang:1.24 AS builder
+FROM golang:1.22 AS builder
 
 ENV PROJECT_DIR=/src/
 ENV INSTALL_DIR=/opt/kube-runtime
