@@ -19,12 +19,14 @@
 
 pushd $(dirname "$0") > /dev/null
 
-{% if cluster_cfg['hivedscheduler']['config']|length > 1 %}
-
-{% for vc in cluster_cfg['hivedscheduler']['structured-config']['virtualClusters'] %}
-PYTHONPATH="../../../deployment" python -m k8sPaiLibrary.maintaintool.update_resource \
-    --operation delete --resource statefulset --name hivedscheduler-ds-{{ vc }}
-{% endfor %}
+vcs=$(kubectl get statefulset | grep hivedscheduler-ds)
+if [[ -n "$vcs" ]]; then
+    while read -r vc; do
+        vc_name=$(echo "$vc" | awk '{print $1}')
+        PYTHONPATH="../../../deployment" python -m k8sPaiLibrary.maintaintool.update_resource \
+            --operation delete --resource statefulset --name "$vc_name"
+    done <<< "$vcs"
+fi
 
 PYTHONPATH="../../../deployment" python -m k8sPaiLibrary.maintaintool.update_resource \
     --operation delete --resource statefulset --name hivedscheduler-hs
@@ -44,7 +46,5 @@ fi
 if kubectl get serviceaccount | grep -q "hivedscheduler-account"; then
     kubectl delete serviceaccount hivedscheduler-account || exit $?
 fi
-
-{% endif %}
 
 popd > /dev/null
