@@ -34,7 +34,7 @@ RUN /bin/bash ubuntu_build.sh package_cache_info ubuntu22.04
 
 # Package Cache Data Layer Ends
 
-FROM golang:1.22 AS builder
+FROM golang:1.24 AS builder
 
 ENV PROJECT_DIR=/src/
 ENV INSTALL_DIR=/opt/kube-runtime
@@ -50,7 +50,7 @@ RUN wget https://untroubled.org/daemontools-encore/daemontools-encore-1.10.tar.g
 RUN cd daemontools-encore-1.10 && sed -i 's/gcc -s/gcc -s -static/g' conf-ld && make -j && \
   cp multilog ${INSTALL_DIR}
 
-FROM golang:1.24.2-alpine3.21 as barrier-builder
+FROM golang:1.24.13-alpine3.23 as barrier-builder
 
 ENV GOPATH=/go
 ENV PROJECT_DIR=/src

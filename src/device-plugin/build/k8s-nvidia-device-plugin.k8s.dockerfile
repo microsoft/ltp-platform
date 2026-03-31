@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.25.6 AS build
+FROM golang:1.25.8 AS build
 
 ARG TARGETOS
 ARG TARGETARCH
