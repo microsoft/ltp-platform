@@ -58,7 +58,7 @@
     "openpaidbsdk": "file:./openpaidbsdk",
     "pg": "^8.16.0",
     "querystring": "~0.2.1",
-    "sequelize": "^6.37.7",
+    "sequelize": "^6.37.8",
     "sshpk": "^1.18.0",
     "statuses": "~2.0.1",
     "swagger-ui-express": "^5.0.1",
