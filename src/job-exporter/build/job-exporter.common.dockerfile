@@ -16,75 +16,150 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-runtime-ubuntu22.04
+############################
+# builder: only for compiling python wheels
+############################
+FROM ubuntu:22.04 AS builder
 
 ARG TARGETARCH
-# Register the ROCM package repository, and install rocm-dev package
+
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates \
+        python3-pip \
+        python3-dev \
+        build-essential \
+        gcc; \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /w
+
+# build wheels once
+COPY requirements.txt /w/requirements.txt
+RUN python3 -m pip install --no-cache-dir -U pip wheel && \
+    python3 -m pip wheel --no-cache-dir --wheel-dir /w/wheels \
+        -r /w/requirements.txt \
+        prometheus_client psutil filelock
+
+
+############################
+# nerdctl-builder: build nerdctl from source
+############################
+FROM golang:1.25.7 AS nerdctl-builder
+
+ARG TARGETARCH
+ARG NERDCTL_VERSION=2.2.1
+
+WORKDIR /build
+
+RUN set -eux; \
+    git clone --depth 1 --branch v${NERDCTL_VERSION} https://github.com/containerd/nerdctl.git .; \
+    make binaries; \
+    mkdir -p /opt/nerdctl; \
+    cp _output/nerdctl /opt/nerdctl/nerdctl; \
+    chmod +x /opt/nerdctl/nerdctl
+
+
+############################
+# runtime: minimal CUDA base with only essential components
+############################
+FROM mcr.microsoft.com/mirror/nvcr/nvidia/cuda:12.0.1-base-ubuntu22.04
+
+ARG TARGETARCH
 ARG ROCM_VERSION=6.2.2
 ARG AMDGPU_VERSION=6.2.2
+ARG DCGM_TARGET_VERSION=1:4.4.1-1
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-  autoconf \
-  automake \
-  bash \
-  build-essential \
-  cmake \
-  curl \
-  file \
-  g++ \
-  git \
-  gnupg \
-  ibverbs-utils \
-  kmod \
-  libc++-dev \
-  libcap-dev \
-  libelf1 \
-  libgflags-dev \
-  libgtest-dev \
-  libnuma-dev \
-  libtool \
-  numactl \
-  pkg-config \
-  python3-dev \
-  python3-pip \
-  sudo \
-  unzip && \
-  if [ "$TARGETARCH" = "amd64" ]; then \
-    printf "Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600" | tee /etc/apt/preferences.d/rocm-pin-600 && \
-    curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
-    echo "deb https://repo.radeon.com/rocm/apt/$ROCM_VERSION/ jammy main" | tee /etc/apt/sources.list.d/rocm.list && \
-    echo "deb https://repo.radeon.com/amdgpu/$AMDGPU_VERSION/ubuntu jammy main" | tee /etc/apt/sources.list.d/amdgpu.list && \
-    apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rocm-dev; \
-  fi
+# --------------------------
+# Install all components in single layer for size optimization
+# --------------------------
+RUN set -eux; \
+    # Base setup
+    apt-get update; \
+    apt-get upgrade -y; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        curl \
+        gnupg \
+        python3 \
+        kmod; \
+    # ROCm (runtime only) for AMD GPUs
+    if [ "$TARGETARCH" = "amd64" ]; then \
+        printf "Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600" \
+            > /etc/apt/preferences.d/rocm-pin-600; \
+        curl -sL https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add -; \
+        echo "deb https://repo.radeon.com/rocm/apt/$ROCM_VERSION/ jammy main" \
+            > /etc/apt/sources.list.d/rocm.list; \
+        echo "deb https://repo.radeon.com/amdgpu/$AMDGPU_VERSION/ubuntu jammy main" \
+            > /etc/apt/sources.list.d/amdgpu.list; \
+        apt-get update; \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rdc amd-smi-lib; \
+    fi; \
+    # DCGM for GPU monitoring (NVIDIA)
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        datacenter-gpu-manager-4-core=${DCGM_TARGET_VERSION} \
+        datacenter-gpu-manager-4-cuda12=${DCGM_TARGET_VERSION} \
+        datacenter-gpu-manager-4-proprietary-cuda12=${DCGM_TARGET_VERSION}; \
+    # Clean up everything in single layer
+    apt-get remove -y curl gnupg; \
+    apt-get autoremove -y; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
 
+# --------------------------
+# nerdctl (copy from nerdctl-builder)
+# --------------------------
+COPY --from=nerdctl-builder /opt/nerdctl/nerdctl /usr/local/bin/nerdctl
+
+# --------------------------
+# python runtime deps (from wheels)
+# --------------------------
+
+COPY --from=builder /w/wheels /wheels
+COPY requirements.txt /job_exporter/requirements.txt
+
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3-pip numactl; \
+    python3 -m pip install --no-cache-dir -U pip && \
+    python3 -m pip install --no-cache-dir \
+        --no-index --find-links=/wheels \
+        -r /job_exporter/requirements.txt && \
+    python3 -m pip install --no-cache-dir \
+        --no-index --find-links=/wheels \
+        prometheus_client psutil filelock && \
+    # Set environment variable to allow sudo removal during autoremove
+    SUDO_FORCE_REMOVE=yes apt-get autoremove -y; \
+    apt-get clean; \
+    rm -rf /wheels /root/.cache /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
+
+# --------------------------
+# app files
+# --------------------------
 COPY src/Moneo /Moneo
-
-# Install RDC
-RUN if [ "$TARGETARCH" = "amd64" ]; then sudo bash Moneo/src/worker/install/amd.sh; fi
-
-# Install DCGM
-RUN sed -i 's/systemctl --now enable nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
-    sed -i 's/systemctl start nvidia-dcgm/#&/' Moneo/src/worker/install/nvidia.sh && \
-    sudo bash Moneo/src/worker/install/nvidia.sh
-
-ENV PATH="${PATH}:/opt/rocm/bin"
-COPY build/moneo-*-exporter_entrypoint.sh ./
-COPY build/update-dcgm.py .
-
-# For the job exporter
-ENV NERDCTL_VERSION=2.1.3
-RUN apt-get update && apt-get install --no-install-recommends -y wget ca-certificates
-RUN wget -O /tmp/nerdctl.tar.gz https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-${TARGETARCH}.tar.gz && \
-    mkdir -p /tmp/nerdctl && \
-    tar -xzvf /tmp/nerdctl.tar.gz -C /tmp/nerdctl && \
-    mv /tmp/nerdctl/nerdctl /usr/local/bin/nerdctl && \
-    mkdir -p /job_exporter && \
-    rm -rf /tmp/nerdctl*
-
-COPY requirements.txt /job_exporter/
-RUN pip3 install -r /job_exporter/requirements.txt
-
-RUN apt update && apt upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
-
 COPY src/*.py /job_exporter/
+COPY build/moneo-*-exporter_entrypoint.sh ./
+
+# --------------------------
+# Final cleanup: remove unnecessary CUDA files to reduce image size
+# --------------------------
+RUN set -eux; \
+    # Remove CUDA static libraries (we only need shared libs for runtime)
+    find /usr/local/cuda-12.0 -name "*.a" -delete 2>/dev/null || true; \
+    find /usr/local/cuda-12.0 -name "*.la" -delete 2>/dev/null || true; \
+    # Remove CUDA development tools and samples
+    rm -rf /usr/local/cuda-12.0/nsight* \
+        /usr/local/cuda-12.0/libnvvp \
+        /usr/local/cuda-12.0/doc \
+        /usr/local/cuda-12.0/samples \
+        /usr/local/cuda-12.0/extras \
+        2>/dev/null || true; \
+    # Remove documentation and man pages
+    rm -rf /usr/share/doc/* \
+        /usr/share/man/* \
+        /usr/share/info/* \
+        2>/dev/null || true; \
+    # Final cache cleanup
+    rm -rf /var/cache/* /tmp/* /var/tmp/* 2>/dev/null || true

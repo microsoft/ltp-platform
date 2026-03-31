@@ -9,7 +9,6 @@ if lsmod | grep -qi amdgpu; then
     echo "AMD Exporter Started!"
 elif lsmod | grep -qi nvidia; then
     echo "NVIDIA Graphics card detected."
-    python3 /update-dcgm.py
     # Launches NVIDIA DCGM Daemon
     nohup nv-hostengine &
     echo "DCGM Daemon Started!"
