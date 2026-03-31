@@ -12,6 +12,11 @@ resource aksbootstrapid 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-0
   scope: resourceGroup(hubsub, hubgroup)
 }
 
+resource aksAcrUai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: 'aksacr'
+  scope: resourceGroup(hubsub, hubgroup)
+}
+
 var kubeconfig = base64ToString(aks.listClusterUserCredential().kubeconfigs[0].value)
 
 var kubeletversion = aks.properties.kubernetesVersion
@@ -44,7 +49,7 @@ var bootstrapscripts = {
     '${nvidiacronjobscript} 1215 1410'
     '${containerdscript} nvidia'
     kubeletmsiscript
-    '${kubeletscript} Standard_ND96asr_v4 gpu'
+    '${kubeletscript} Standard_ND96asr_v4 gpu ${tenant().tenantId} ${hubsub} ${hubgroup} ${aksAcrUai.properties.clientId}'
     tlsscanscript
     blobproxyscript
   ]
@@ -57,7 +62,7 @@ var bootstrapscripts = {
     '${nvidiacronjobscript} 1593 1410'
     '${containerdscript} nvidia'
     kubeletmsiscript
-    '${kubeletscript} Standard_ND96amsr_A100_v4 gpu'
+    '${kubeletscript} Standard_ND96amsr_A100_v4 gpu ${tenant().tenantId} ${hubsub} ${hubgroup} ${aksAcrUai.properties.clientId}'
     tlsscanscript
     blobproxyscript
   ]
@@ -70,7 +75,7 @@ var bootstrapscripts = {
     rocmruntimescript
     '${containerdscript} rocm'
     kubeletmsiscript
-    '${kubeletscript} Standard_ND96isr_MI300X_v5 gpu'
+    '${kubeletscript} Standard_ND96isr_MI300X_v5 gpu ${tenant().tenantId} ${hubsub} ${hubgroup} ${aksAcrUai.properties.clientId}'
     tlsscanscript
     blobproxyscript
     configipoibscript
@@ -83,7 +88,7 @@ var bootstrapscripts = {
     '${nvidianvswitch} 2619 1980'
     '${containerdscript} nvidia'
     kubeletmsiscript
-    '${kubeletscript} Standard_ND96isr_H100_v5 gpu'
+    '${kubeletscript} Standard_ND96isr_H100_v5 gpu ${tenant().tenantId} ${hubsub} ${hubgroup} ${aksAcrUai.properties.clientId}'
     tlsscanscript
     blobproxyscript
   ]
@@ -95,7 +100,7 @@ var bootstrapscripts = {
     '${nvidianvswitch} 3201 1980'
     '${containerdscript} nvidia'
     kubeletmsiscript
-    '${kubeletscript} Standard_ND96isr_H200_v5 gpu'
+    '${kubeletscript} Standard_ND96isr_H200_v5 gpu ${tenant().tenantId} ${hubsub} ${hubgroup} ${aksAcrUai.properties.clientId}'
     tlsscanscript
     blobproxyscript
   ]
@@ -104,21 +109,21 @@ var bootstrapscripts = {
     waitdnsready
     '${containerdscript} runc'
     kubeletmsiscript
-    '${kubeletscript} Standard_E16bs_v5 cpu'
+    '${kubeletscript} Standard_E16bs_v5 cpu ${tenant().tenantId} ${hubsub} ${hubgroup} ${aksAcrUai.properties.clientId}'
   ]
 
   Standard_D8s_v3: [
     waitdnsready
     '${containerdscript} runc'
     kubeletmsiscript
-    '${kubeletscript} Standard_D8s_v3 cpu'
+    '${kubeletscript} Standard_D8s_v3 cpu ${tenant().tenantId} ${hubsub} ${hubgroup} ${aksAcrUai.properties.clientId}'
   ]
 
   Standard_E8ds_v4: [
     waitdnsready
     '${containerdscript} runc'
     kubeletmsiscript
-    '${kubeletscript} Standard_E8ds_v4 cpu'
+    '${kubeletscript} Standard_E8ds_v4 cpu ${tenant().tenantId} ${hubsub} ${hubgroup} ${aksAcrUai.properties.clientId}'
   ]
 }
 

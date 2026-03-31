@@ -10,6 +10,19 @@ AKS_FQDN=$2
 KUBE_CA_CERT=$3
 INSTANCE_TYPE=$4
 PROCESSOR_TYPE=$5
+TENANT_ID=$6
+SUBSCRIPTION_ID=$7
+RESOURCE_GROUP=$8
+UAMI_CLIENT_ID_OR_RESOURCE_ID=$9
+ARCH_TYPE=$(uname -m)
+if [ "$ARCH_TYPE" = "x86_64" ]; then
+  ARCH_TYPE="amd64"
+elif [ "$ARCH_TYPE" = "aarch64" ]; then
+  ARCH_TYPE="arm64"
+else
+  echo "Unsupported architecture: $ARCH_TYPE"
+  exit 1
+fi
 
 NODE_NAME=$(hostname)
 
@@ -36,36 +49,47 @@ KUBELET_SERVER_CERT_PATH="/etc/kubernetes/certs/kubeletserver.crt"
 openssl genrsa -out $KUBELET_SERVER_PRIVATE_KEY_PATH 4096
 openssl req -new -x509 -days 7300 -key $KUBELET_SERVER_PRIVATE_KEY_PATH -out $KUBELET_SERVER_CERT_PATH -subj "/CN=system:node:${NODE_NAME}"
 
-curl -LO https://dl.k8s.io/v${KUBE_VERSION}/kubernetes-node-linux-amd64.tar.gz
-tar -xvzf kubernetes-node-linux-amd64.tar.gz kubernetes/node/bin/kubelet
+curl -LO https://dl.k8s.io/v${KUBE_VERSION}/kubernetes-node-linux-${ARCH_TYPE}.tar.gz
+tar -xvzf kubernetes-node-linux-${ARCH_TYPE}.tar.gz kubernetes/node/bin/kubelet
 mv kubernetes/node/bin/kubelet /usr/local/bin
-rm kubernetes-node-linux-amd64.tar.gz
+rm kubernetes-node-linux-${ARCH_TYPE}.tar.gz
 
 # setup wicred
 mkdir -p /opt/image-cred-provider/config/
 mkdir -p /opt/image-cred-provider/bin/
 
-touch /opt/image-cred-provider/bin/workload-identity-token
-chmod +x /opt/image-cred-provider/bin/workload-identity-token
+curl -L https://github.com/kubernetes-sigs/cloud-provider-azure/releases/download/v${KUBE_VERSION}/azure-acr-credential-provider-linux-${ARCH_TYPE}  -o /opt/image-cred-provider/bin/acr-credential-provider
+chmod +x /opt/image-cred-provider/bin/acr-credential-provider
 
-tee /opt/image-cred-provider/config/workload-identity-token.yaml > /dev/null <<EOF
+sudo tee /etc/kubernetes/azure.json > /dev/null <<EOF
+{
+  "cloud": "AzurePublicCloud",
+  "tenantId": "${TENANT_ID}",
+  "subscriptionId": "${SUBSCRIPTION_ID}",
+  "resourceGroup": "${RESOURCE_GROUP}",
+  "useManagedIdentityExtension": true,
+  "userAssignedIdentityID": "${UAMI_CLIENT_ID_OR_RESOURCE_ID}"
+}
+EOF
+
+tee /opt/image-cred-provider/config/acr-credential-provider.yaml > /dev/null <<EOF
 kind: CredentialProviderConfig
 apiVersion: kubelet.config.k8s.io/v1
 providers:
-- name: workload-identity-token
+- name: acr-credential-provider
   apiVersion: credentialprovider.kubelet.k8s.io/v1
   matchImages:
   - "*.azurecr.io"
   args:
-  - /var/run/workload-identity-token.sock
-  defaultCacheDuration: 1m
+  - /etc/kubernetes/azure.json
+  defaultCacheDuration: 10m
 EOF
 # end setup wicred
 
 # adust flags as desired
 tee /etc/default/kubelet > /dev/null <<EOF
 KUBELET_NODE_LABELS="kubernetes.azure.com/mode=system,kubernetes.azure.com/role=agent,node.kubernetes.io/exclude-from-external-load-balancers=true,kubernetes.azure.com/managed=false,kubernetes.io/os=linux,node.kubernetes.io/instance-type=$INSTANCE_TYPE,RepairStatus=Validate"
-KUBELET_FLAGS="--address=0.0.0.0 --anonymous-auth=false --authentication-token-webhook=true --authorization-mode=Webhook --cgroup-driver=systemd --cgroups-per-qos=true --client-ca-file=/etc/kubernetes/certs/ca.crt --cluster-dns=10.0.0.10 --cluster-domain=cluster.local --enforce-node-allocatable=pods --event-qps=0 --eviction-hard=memory.available<500Mi,nodefs.available<50Gi,imagefs.available<200Gi,nodefs.inodesFree<5% --image-gc-high-threshold=99 --image-gc-low-threshold=90 --kube-reserved=cpu=180m,memory=3399Mi,pid=1000 --kubeconfig=/var/lib/kubelet/kubeconfig --max-pods=110 --node-status-update-frequency=10s --pod-infra-container-image=mcr.microsoft.com/oss/kubernetes/pause:3.6 --protect-kernel-defaults=true --read-only-port=0 --rotate-certificates=true --streaming-connection-idle-timeout=4h --tls-cert-file=/etc/kubernetes/certs/kubeletserver.crt --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256 --tls-private-key-file=/etc/kubernetes/certs/kubeletserver.key --image-credential-provider-config=/opt/image-cred-provider/config/workload-identity-token.yaml --image-credential-provider-bin-dir=/opt/image-cred-provider/bin --container-log-max-size=5Gi --container-log-max-files=2"
+KUBELET_FLAGS="--address=0.0.0.0 --anonymous-auth=false --authentication-token-webhook=true --authorization-mode=Webhook --cgroup-driver=systemd --cgroups-per-qos=true --client-ca-file=/etc/kubernetes/certs/ca.crt --cluster-dns=10.0.0.10 --cluster-domain=cluster.local --enforce-node-allocatable=pods --event-qps=0 --eviction-hard=memory.available<500Mi,nodefs.available<50Gi,imagefs.available<200Gi,nodefs.inodesFree<5% --image-gc-high-threshold=99 --image-gc-low-threshold=90 --kube-reserved=cpu=180m,memory=3399Mi,pid=1000 --kubeconfig=/var/lib/kubelet/kubeconfig --max-pods=110 --node-status-update-frequency=10s --pod-infra-container-image=mcr.microsoft.com/oss/kubernetes/pause:3.6 --protect-kernel-defaults=true --read-only-port=0 --rotate-certificates=true --streaming-connection-idle-timeout=4h --tls-cert-file=/etc/kubernetes/certs/kubeletserver.crt --tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256 --tls-private-key-file=/etc/kubernetes/certs/kubeletserver.key --image-credential-provider-config=/opt/image-cred-provider/config/acr-credential-provider.yaml --image-credential-provider-bin-dir=/opt/image-cred-provider/bin --container-log-max-size=5Gi --container-log-max-files=2"
 EOF
 
 # can simplify this + 2 following files by merging together
