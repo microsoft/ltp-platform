@@ -15,12 +15,9 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-FROM node:24-alpine
+FROM node:24-alpine AS builder
 
 WORKDIR /usr/src/app
-
-ENV NODE_ENV=production \
-    SERVER_PORT=8080
 
 COPY dependency/ ../../
 COPY . .
@@ -31,13 +28,39 @@ RUN npm install json -g
 RUN json -I -f package.json -e "this.commitVersion=\"`cat version/COMMIT.VERSION`\""
 # Fix openpai-js-sdk path for Docker build (point to the .tgz file)
 RUN json -I -f package.json -e "this.dependencies['@microsoft/openpai-js-sdk']='file:./openpai-js-sdk/microsoft-openpai-js-sdk-0.2.0.tgz'"
-# Install webportal dependencies (including the SDK from tar)
+# Install all dependencies including devDependencies for building
 RUN yarn install --production=false
-# Build webportal
+# Build webportal frontend assets
 RUN npm run build
-# Create empty .env file for envsub (actual values come from k8s env vars)
-RUN touch .env
+# Now install only production dependencies in a separate location
+RUN yarn install --production=true --modules-folder ./node_modules_prod
+
+# Production stage - use slim image
+FROM node:24-slim
+
+WORKDIR /usr/src/app
+
+ENV NODE_ENV=production \
+    SERVER_PORT=8080
+
+# Copy only production dependencies
+COPY --from=builder /usr/src/app/node_modules_prod ./node_modules
+
+# Copy built assets and necessary runtime files
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/server ./server
+COPY --from=builder /usr/src/app/src/app/env.js.template ./src/app/env.js.template
+COPY --from=builder /usr/src/app/package.json ./package.json
+COPY --from=builder /usr/src/app/version ./version
+
+# Create a Node.js script to replace envsub (which is a devDependency)
+RUN echo 'const fs = require("fs"); \
+const template = fs.readFileSync("src/app/env.js.template", "utf8"); \
+const result = template.replace(/\$\{([^}]+)\}/g, (_, key) => process.env[key] || ""); \
+fs.mkdirSync("dist", { recursive: true }); \
+fs.writeFileSync("dist/env.js", result);' > /generate-env.js
 
 EXPOSE ${SERVER_PORT}
 
-CMD ["npm", "start"]
+# Generate env.js at startup, then start the server
+CMD node /generate-env.js && node server
