@@ -105,6 +105,11 @@ def main():
         default=None,
         help="The image list you want to build"
     )
+    build_parser.add_argument(
+        '--managed-identity-id',
+        type=str,
+        help="The Azure managed identity ID for authentication"
+    )
     build_parser.set_defaults(func=build_service)
 
     # Push commands
@@ -148,6 +153,11 @@ def main():
         help="The docker password you want to use for authentication, which will override the config file if '--docker-registry' is also set"
     )
     push_parser.add_argument(
+        '--managed-identity-id',
+        type=str,
+        help="The Azure managed identity ID for authentication, which will override the config file if '--docker-registry' is also set"
+    )
+    push_parser.add_argument(
         "--docker-tag",
         type=str,
         help="The docker tag you want to push to, which will override the config file if '--docker-registry' is also set"
@@ -156,15 +166,18 @@ def main():
 
     args = parser.parse_args()
     config_model = load_build_config(args.config)
+
     if hasattr(args, 'docker_registry') and args.docker_registry is not None:
         config_model['dockerRegistryInfo']['dockerRegistryDomain'] = args.docker_registry
-        if args.docker_namespace is not None:
+        if hasattr(args, 'docker_namespace') and args.docker_namespace is not None:
             config_model['dockerRegistryInfo']['dockerNameSpace'] = args.docker_namespace
-        if args.docker_username is not None:
+        if hasattr(args, 'docker_username') and args.docker_username is not None:
             config_model['dockerRegistryInfo']['dockerUserName'] = args.docker_username
-        if args.docker_password is not None:
+        if hasattr(args, 'docker_password') and args.docker_password is not None:
             config_model['dockerRegistryInfo']['dockerPassword'] = args.docker_password
-        if args.docker_tag is not None:
+        if hasattr(args, 'managed_identity_id') and args.managed_identity_id is not None:
+            config_model['dockerRegistryInfo']['managedIdentityId'] = args.managed_identity_id
+        if hasattr(args, 'docker_tag') and args.docker_tag is not None:
             config_model['dockerRegistryInfo']['dockerTag'] = args.docker_tag
     
     args.func(args, config_model)

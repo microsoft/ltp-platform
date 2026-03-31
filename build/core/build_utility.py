@@ -27,7 +27,7 @@ import yaml
 
 class DockerClient:
 
-    def __init__(self, docker_registry, docker_namespace, docker_username, docker_password):
+    def __init__(self, docker_registry, docker_namespace, docker_username, docker_password, managed_identity_id=None):
 
         docker_registry = "" if docker_registry == "public" else docker_registry
 
@@ -35,8 +35,10 @@ class DockerClient:
         self.docker_namespace = docker_namespace
         self.docker_username = docker_username
         self.docker_password = docker_password
+        self.managed_identity_id = managed_identity_id
 
-        self.docker_login()
+        # Login is no longer performed automatically during initialization
+        # Call docker_login() explicitly when needed (e.g., before pushing images)
 
 
     def set_build_cache_type(self, build_nocache=False):
@@ -49,8 +51,94 @@ class DockerClient:
 
 
     def docker_login(self):
-        shell_cmd = "docker login -u {0} -p {1} {2}".format(self.docker_username, self.docker_password, self.docker_registry)
-        execute_shell(shell_cmd)
+        if self.docker_username and self.docker_password:
+            shell_cmd = "docker login -u {0} -p {1} {2}".format(self.docker_username, self.docker_password, self.docker_registry)
+            execute_shell(shell_cmd)
+        else:
+            # Check if already logged in to Azure CLI
+            try:
+                logger.info("Checking Azure CLI login status...")
+                subprocess.check_output("az account show", shell=True, stderr=subprocess.STDOUT)
+                logger.info("Azure CLI is already logged in")
+            except subprocess.CalledProcessError:
+                logger.info("Azure CLI not logged in, initiating login...")
+                if self.managed_identity_id:
+                    # Login with managed identity
+                    # Please NOTE that the managed identity must have the following permissions to access the ACR registry including:
+                    # ------ "Reader" for az show command to check ACR existence
+                    # ------ "AcrPull" for az acr login and docker pull command
+                    # ------ "AcrPush" if you want to push docker images to ACR registry as well
+                    # Determine the type of managed identity identifier
+                    if self.managed_identity_id.startswith('/subscriptions/'):
+                        # Full resource ID format
+                        shell_cmd = "az login --identity --resource-id {0}".format(self.managed_identity_id)
+                        logger.info("Logging in with managed identity (resource-id): {0}".format(self.managed_identity_id))
+                    else:
+                        # Assume it's a client ID (UUID format)
+                        shell_cmd = "az login --identity --client-id {0}".format(self.managed_identity_id)
+                        logger.info("Logging in with managed identity (client-id): {0}".format(self.managed_identity_id))
+                else:
+                    # Interactive login with user account
+                    shell_cmd = "az login"
+                    logger.info("Initiating interactive Azure login...")
+                execute_shell(shell_cmd)
+
+            # Check if ACR exists in current subscription before attempting login
+            # Extract registry name without .azurecr.io suffix
+            registry_name = self.docker_registry.replace('.azurecr.io', '')
+            check_cmd = "az acr show --name {0}".format(registry_name)
+
+            try:
+                logger.info("Checking if ACR '{0}' exists in current subscription...".format(registry_name))
+                subprocess.run(
+                    check_cmd,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=True
+                )
+                logger.info("ACR '{0}' found in current subscription".format(registry_name))
+            except subprocess.TimeoutExpired:
+                logger.error("Command timed out: {0}".format(check_cmd))
+                logger.error("Failed to check ACR existence within 30 seconds")
+                sys.exit(1)
+            except subprocess.CalledProcessError as e:
+                logger.error("ACR '{0}' not found in current subscription".format(registry_name))
+                if e.stderr:
+                    logger.error("Error details: {0}".format(e.stderr.strip()))
+                logger.error("")
+                logger.error("Please check:")
+                logger.error("  1. The ACR registry name is correct")
+                logger.error("  2. You are using the correct Azure subscription")
+                logger.error("")
+                logger.error("Current subscription can be checked with: az account show")
+                logger.error("To switch subscription, use: az account set --subscription <subscription-id>")
+                sys.exit(1)
+
+            # Login to Azure Container Registry
+            shell_cmd = "az acr login --name {0}".format(registry_name)
+            try:
+                logger.info("Logging in to ACR '{0}'...".format(registry_name))
+                subprocess.run(
+                    shell_cmd,
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    check=True
+                )
+                logger.info("Successfully logged in to ACR '{0}'".format(registry_name))
+            except subprocess.TimeoutExpired:
+                logger.error("Command timed out: {0}".format(shell_cmd))
+                logger.error("ACR login command exceeded 30 seconds timeout")
+                sys.exit(1)
+            except subprocess.CalledProcessError as e:
+                logger.error("Failed to login to ACR '{0}'".format(registry_name))
+                if e.stderr:
+                    logger.error("Error details: {0}".format(e.stderr.strip()))
+                logger.error("Please check your permissions to access this ACR registry")
+                sys.exit(1)
 
 
     def docker_image_build(self, image_name, dockerfile_path, build_path):

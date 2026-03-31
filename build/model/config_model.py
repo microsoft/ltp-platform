@@ -44,6 +44,8 @@ class ConfigModel:
                 if  "docker-username" in buildConfigContent["cluster"]["docker-registry-info"] else None
             self.buildConfigDict["dockerRegistryInfo"]["dockerPassword"] = buildConfigContent["cluster"]["docker-registry-info"]["docker-password"] \
                 if  "docker-password" in buildConfigContent["cluster"]["docker-registry-info"] else None
+            self.buildConfigDict["dockerRegistryInfo"]["managedIdentityId"] = buildConfigContent["cluster"]["docker-registry-info"]["managed-identity-id"] \
+                if  "managed-identity-id" in buildConfigContent["cluster"]["docker-registry-info"] else None
             self.buildConfigDict["dockerRegistryInfo"]["dockerTag"] = \
                 buildConfigContent["cluster"]["docker-registry-info"]["docker-tag"]
             self.buildConfigDict["dockerRegistryInfo"]["secretName"] = \
@@ -59,6 +61,8 @@ class ConfigModel:
                 if  "username" in buildConfigContent["cluster"]["docker-registry"] else None
             self.buildConfigDict["dockerRegistryInfo"]["dockerPassword"] = buildConfigContent["cluster"]["docker-registry"]["password"] \
                 if  "password" in buildConfigContent["cluster"]["docker-registry"] else None
+            self.buildConfigDict["dockerRegistryInfo"]["managedIdentityId"] = buildConfigContent["cluster"]["docker-registry"]["managed-identity-id"] \
+                if  "managed-identity-id" in buildConfigContent["cluster"]["docker-registry"] else None
             self.buildConfigDict["dockerRegistryInfo"]["dockerTag"] = \
                 buildConfigContent["cluster"]["docker-registry"]["tag"]
             self.buildConfigDict["dockerRegistryInfo"]["secretName"] = \
