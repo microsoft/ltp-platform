@@ -4362,11 +4362,11 @@ __metadata:
 
 "openpaidbsdk@file:./openpaidbsdk::locator=pai-rest-server%40workspace%3A.":
   version: 1.0.2
-  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=2318c0&locator=pai-rest-server%40workspace%3A."
+  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=13d9d1&locator=pai-rest-server%40workspace%3A."
   dependencies:
     pg: "npm:^8.15.6"
     sequelize: "npm:6.37.7"
-  checksum: 10c0/37403f99e7805e802bf87b19a93033e444fc0b753c55ad569c080eeda9f0f6b3fdb16e008107c215737147cc9a4a32b4432ea25474f193ee752a31e8a3db34f7
+  checksum: 10c0/b0b833eef79b0601effa76cefed88d67e4ad5a4abadcda8e6525a08cbd5809b9a1045d18367dacbdd84b1eed3435396964fe81493d53fb23b973e488c3b7d142
   languageName: node
   linkType: hard
 
@@ -4597,9 +4597,9 @@ __metadata:
   linkType: hard
 
 "path-to-regexp@npm:^8.0.0":
-  version: 8.3.0
-  resolution: "path-to-regexp@npm:8.3.0"
-  checksum: 10c0/ee1544a73a3f294a97a4c663b0ce71bbf1621d732d80c9c9ed201b3e911a86cb628ebad691b9d40f40a3742fe22011e5a059d8eed2cf63ec2cb94f6fb4efe67c
+  version: 8.4.1
+  resolution: "path-to-regexp@npm:8.4.1"
+  checksum: 10c0/5c9686cd10ab5e8e964365a6318e9cc818061ed68d9b49aa37a0f5a04ec2ae1ead00f614a3596f3b1430b4e326b7ecec454725d8ba26b6eb00f0d9ea5d119de0
   languageName: node
   linkType: hard
 
