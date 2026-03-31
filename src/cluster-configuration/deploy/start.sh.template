@@ -48,6 +48,19 @@ echo kubectl label nodes {{ cluster_cfg['layout']['machine-list'][host]['hostnam
     {%- endif %}
     {%- if 'pai-worker' in cluster_cfg['layout']['machine-list'][host] and cluster_cfg['layout']['machine-list'][host]['pai-worker'] == 'true' %}
 echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} pai-worker=true || exit $?
+        {%- set machine_type = cluster_cfg['layout']['machine-list'][host]['machine-type'] %}
+        {%- if machine_type in cluster_cfg['layout']['machine-sku'] and 'computing-device' in cluster_cfg['layout']['machine-sku'][machine_type] %}
+            {%- set device_type = cluster_cfg['layout']['machine-sku'][machine_type]['computing-device']['type'] %}
+            {%- if device_type == 'nvidia.com/gpu' %}
+echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} vendor=nvidia || exit $?
+            {%- elif device_type == 'amd.com/gpu' %}
+echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} vendor=amd || exit $?
+            {%- else %}
+echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} vendor=unknown || exit $?
+            {%- endif %}
+        {%- else %}
+echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} vendor=cpu || exit $?
+        {%- endif %}
     {%- else %}
 echo kubectl label nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} pai-worker- || exit $?
     {%- endif %}
