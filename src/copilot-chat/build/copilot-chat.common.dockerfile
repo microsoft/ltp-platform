@@ -6,6 +6,8 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
+RUN pip install --upgrade pip
+
 # Copy project files
 COPY src/requirements.txt ./
 COPY src/copilot_agent ./copilot_agent

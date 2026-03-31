@@ -37,6 +37,7 @@ spec:
       containers:
       - name: hivedscheduler
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}hivedscheduler:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        imagePullPolicy: Always
         command: [
           "bash", "-c",
           "cp /hivedscheduler-config/hivedscheduler.yaml . &&
