@@ -28,6 +28,7 @@ kubectl delete --ignore-not-found --now deployment/redis
 kubectl delete --ignore-not-found --now service/redis
 kubectl delete --ignore-not-found --now cronjob/cluster-utilization
 kubectl delete --ignore-not-found --now cronjob/cert-expiration-checker
+kubectl delete --ignore-not-found --now cronjob/abnormal-detector
 
 if kubectl get clusterrolebinding | grep -q "alert-manager-role-binding"; then
     kubectl delete clusterrolebinding alert-manager-role-binding || exit $?
