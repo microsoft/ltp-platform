@@ -2,19 +2,22 @@
 # Licensed under the MIT License.
 
 
-FROM python:3.12
+FROM python:3.12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
+    curl \
     iproute2 \
     net-tools \
     openssh-client \
     openssh-server \
     parallel \
     pssh \
-    rsync
+    rsync && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 RUN curl -sL https://aka.ms/downloadazcopy-v10-linux | tar -xz --strip-components=1 -C /usr/local/bin
 
 ENV SSHD_PORT=23333 \
@@ -31,8 +34,6 @@ RUN mkdir -p /root/.ssh && \
     sed -i "s/RSYNC_ENABLE=false/RSYNC_ENABLE=true/" /etc/default/rsync && \
     echo "* soft nofile 1048576\n* hard nofile 1048576" >> /etc/security/limits.conf && \
     echo "root soft nofile 1048576\nroot hard nofile 1048576" >> /etc/security/limits.conf
-
-RUN apt purge -y subversion && apt autoremove -y
 
 WORKDIR /usr/src/app
 COPY ./src .
