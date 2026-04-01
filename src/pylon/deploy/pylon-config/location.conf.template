@@ -46,9 +46,18 @@ location ~ ^/log-manager/([^/]+):(\d+)/(.*)$ {
 # job server
 location ~ ^/job-server/([^/]+):(\d+)/(.*)$ {
   proxy_pass http://$1:$2/$3$is_args$args;
+  proxy_http_version 1.1;
+  proxy_set_header Connection "";
   proxy_connect_timeout 180m;
   proxy_read_timeout 180m;
   proxy_send_timeout 180m;
+
+  # Before nginx commits any response bytes to the client, retry once on
+  # connection-level errors (TCP RST / ETIMEDOUT during connect).
+  # non_idempotent is required because inference endpoints are POST.
+  proxy_next_upstream error timeout non_idempotent;
+  proxy_next_upstream_tries 2;
+  proxy_next_upstream_timeout 5s;
 
   # Disable buffering based on content type
   proxy_buffering off;
@@ -65,7 +74,9 @@ location ~ ^/copilot/api/operation(.*)$ {
 
 # Model proxy backend
 location ~ ^/model-proxy/(.*)$ {
-  proxy_pass {{MODEL_PROXY_URI}}/$1$is_args$args;
+  proxy_pass http://model_proxy_upstream/$1$is_args$args;
+  proxy_http_version 1.1;
+  proxy_set_header Connection "";
   proxy_connect_timeout 60m;
   proxy_read_timeout 60m;
   proxy_send_timeout 60m;

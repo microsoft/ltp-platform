@@ -34,6 +34,9 @@ spec:
         - name: pylon
           image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}pylon:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
           imagePullPolicy: Always
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN"]
           volumeMounts:
             - mountPath: /pylon-config
               name: pylon-configuration
