@@ -1,11 +1,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM python:3.12
+FROM python:3.12-slim
 
-RUN apt update && apt upgrade -y
-
-RUN apt purge -y subversion && apt autoremove -y
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip
 
