@@ -1,9 +1,9 @@
-FROM python:3.12
+FROM python:3.12-slim
 
 # Install cron
-RUN apt-get update && apt-get upgrade -y && apt-get install -y cron && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get purge -y subversion && apt-get autoremove -y
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+    cron \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
