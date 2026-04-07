@@ -1,8 +1,8 @@
 module github.com/microsoft/watchdog
 
-go 1.24.0
+go 1.24.13
 
-toolchain go1.24.9
+toolchain go1.24.13
 
 require (
 	github.com/prometheus/client_golang v1.22.0

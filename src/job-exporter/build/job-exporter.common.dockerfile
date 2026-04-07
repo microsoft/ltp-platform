@@ -49,7 +49,7 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 FROM golang:1.25.8 AS nerdctl-builder
 
 ARG TARGETARCH
-ARG NERDCTL_VERSION=2.2.1
+ARG NERDCTL_VERSION=2.2.2
 
 WORKDIR /build
 

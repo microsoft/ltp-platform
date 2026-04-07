@@ -9,7 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "pg": "^8.15.6",
-    "sequelize": "6.37.7"
+    "sequelize": "6.37.8"
   },
   "devDependencies": {
     "eslint": "^9.25.1",
@@ -21,6 +21,9 @@
     "eslint-plugin-promise": "7.2.1",
     "eslint-plugin-standard": "5.0.0",
     "prettier": "3.5.3"
-
+  },
+  "resolutions": {
+    "dottie": ">=2.0.7",
+    "path-to-regexp": ">=8.4.0"
   }
 }
