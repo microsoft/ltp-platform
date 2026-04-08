@@ -16,20 +16,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Build cilium agent from source with updated Go.
-# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.24.13
-# (latest 1.24.x patch, up from 1.24.11 used by upstream v1.18.6).
+# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.25.9
+# (latest 1.25.x patch). All Go binaries (cilium, hubble, CNI plugins) are
+# compiled from source so no pre-built binaries from the base image are used.
 # Runtime base is the official cilium-runtime image (Ubuntu 24.04 + LLVM + BPF tools)
 # with OS-level security patches applied.
 #
 
-ARG GOLANG_VERSION=1.24.13
-ARG CILIUM_VERSION=v1.18.6
-ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:aee2ef3503e1a74ba2bd97250a5138951fd55e35@sha256:8518245c6c0392c6e50e7f658c0956cfbbd9fdbdb9dabe2effc69db74bdaf623
-ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.35.9-1767794330-db497dd19e346b39d81d7b5c0dedf6c812bcc5c9@sha256:81398e449f2d3d0a6a70527e4f641aaa685d3156bea0bb30712fae3fd8822b86
+ARG GOLANG_VERSION=1.25.9
+ARG CILIUM_VERSION=v1.18.8
+ARG CNI_PLUGINS_VERSION=v1.9.0
+ARG GOPS_VERSION=v0.3.27
+ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:8f79229999eadc0ced8eacdfdd3574759246d025@sha256:4b36fa5fdeff01bcb7b5dacc9689539ec7f7cdf4a4b758933b0c5b5523a1069a
+ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.35.9-1773656288-7b052e66eb2cfc5ac130ce0a5be66202a10d83be@sha256:60031f39669542b21aedf05a3317d14e8d3ea48255790af039b315a1c9637361
 
-# Stage 1: Build all Go binaries from source with Go 1.24.13
+# Stage 1: Build all Go binaries from source with Go 1.25.9
 FROM golang:${GOLANG_VERSION} AS builder
 ARG CILIUM_VERSION
+ARG CNI_PLUGINS_VERSION
+ARG GOPS_VERSION
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git make && \
@@ -49,6 +54,16 @@ RUN mkdir -p /tmp/install && \
 
 # Build hubble CLI
 RUN cd hubble && make && mv hubble /tmp/install/usr/bin/hubble
+
+# Build CNI plugins (loopback, etc.) from source to replace pre-built binaries
+RUN git clone --depth 1 --branch ${CNI_PLUGINS_VERSION} \
+    https://github.com/containernetworking/plugins.git /tmp/cni-plugins && \
+    cd /tmp/cni-plugins && \
+    CGO_ENABLED=0 go build -o /tmp/install/cni/loopback ./plugins/main/loopback
+
+# Build gops from source to replace pre-built binary in runtime image
+RUN CGO_ENABLED=0 go install -ldflags="-s -w" github.com/google/gops@${GOPS_VERSION} && \
+    cp /go/bin/gops /tmp/install/usr/bin/gops
 
 # Generate licenses and bash completion
 RUN make DESTDIR=/tmp/install PKG_BUILD=1 install-bash-completion && \
