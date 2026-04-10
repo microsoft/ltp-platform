@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.24.13-alpine as builder
+FROM golang:1.25-alpine3.23 as builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -18,14 +18,14 @@ RUN git clone https://github.com/Mellanox/k8s-rdma-shared-dev-plugin.git /usr/sr
 ENV HTTP_PROXY $http_proxy
 ENV HTTPS_PROXY $https_proxy
 
-RUN apk add --no-cache --virtual build-base=0.5-r3 linux-headers=5.19.5-r0
+RUN apk add --no-cache --virtual build-base linux-headers
 WORKDIR /usr/src/k8s-rdma-shared-dp
 
 RUN make clean && \
     make build
 
-FROM alpine:3.21.3
-RUN apk add --no-cache hwdata-pci=0.393-r0
+FROM alpine:3.23
+RUN apk add --no-cache hwdata-pci
 COPY --from=builder /usr/src/k8s-rdma-shared-dp/build/k8s-rdma-shared-dp /bin/
 
 RUN apk update && apk upgrade && \
