@@ -46,7 +46,7 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 ############################
 # nerdctl-builder: build nerdctl from source
 ############################
-FROM golang:1.25.8 AS nerdctl-builder
+FROM golang:1.25.9 AS nerdctl-builder
 
 ARG TARGETARCH
 ARG NERDCTL_VERSION=2.2.2
@@ -55,6 +55,7 @@ WORKDIR /build
 
 RUN set -eux; \
     git clone --depth 1 --branch v${NERDCTL_VERSION} https://github.com/containerd/nerdctl.git .; \
+    go get github.com/go-jose/go-jose/v4@v4.1.4 && go mod tidy && if [ -d vendor ]; then go work vendor 2>/dev/null || go mod vendor; fi; \
     make binaries; \
     mkdir -p /opt/nerdctl; \
     cp _output/nerdctl /opt/nerdctl/nerdctl; \

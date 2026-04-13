@@ -3,6 +3,10 @@ FROM golang:1.25 AS builder
 RUN git clone --branch v0.68.0 --depth 1 https://github.com/fatedier/frp.git /frp
 WORKDIR /frp
 
+RUN go get github.com/go-jose/go-jose/v4@v4.1.4 && \
+    go get golang.org/x/crypto@v0.45.0 && \
+    go get github.com/quic-go/quic-go@v0.57.0 && go mod tidy && if [ -d vendor ]; then go work vendor 2>/dev/null || go mod vendor; fi
+
 RUN make frpc
 
 FROM ubuntu:22.04

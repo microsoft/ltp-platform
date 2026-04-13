@@ -4287,11 +4287,11 @@ __metadata:
 
 "openpaidbsdk@file:./openpaidbsdk::locator=pai-rest-server%40workspace%3A.":
   version: 1.0.2
-  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=82c911&locator=pai-rest-server%40workspace%3A."
+  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=d39dda&locator=pai-rest-server%40workspace%3A."
   dependencies:
     pg: "npm:^8.15.6"
     sequelize: "npm:6.37.8"
-  checksum: 10c0/b26a13e323d343f77bbad2be905b70e13e802bd0549a7c2e581f19ba56f47e6401f2968d8dc582724d9b7045857ad52af8f42ef4fdfa79ca7292bb421efd687e
+  checksum: 10c0/2fcb806518832888b27945ce02255eca9c130982f7e561e33b950ce0483c224d1d2866817aefddf336a124f48d1ba3df2af20c535094f4a894c473d2acc27d8e
   languageName: node
   linkType: hard
 
@@ -4430,7 +4430,7 @@ __metadata:
     joi: "npm:~17.13.3"
     js-yaml: "npm:^4.1.1"
     jsonwebtoken: "npm:~9.0.2"
-    lodash: "npm:^4.17.23"
+    lodash: "npm:^4.18.0"
     mocha: "npm:~11.4.0"
     module-alias: "npm:^2.2.3"
     morgan: "npm:~1.10.0"
