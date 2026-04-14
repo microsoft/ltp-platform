@@ -63,8 +63,10 @@ spec:
             port: {{ cluster_cfg['k8s-dashboard']['dashboard-port'] }}
           initialDelaySeconds: 30
           timeoutSeconds: 30
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       tolerations:
       - key: "CriticalAddonsOnly"
         operator: "Exists"

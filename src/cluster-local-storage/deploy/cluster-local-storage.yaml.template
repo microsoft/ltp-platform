@@ -29,8 +29,10 @@ spec:
       serviceAccountName: cluster-local-storage-account
       nodeSelector:
         pai-master: "true"
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       containers:
       - name: cluster-local-storage
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}cluster-local-storage:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}

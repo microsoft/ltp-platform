@@ -32,7 +32,7 @@ const k8sLauncherConfigSchema = Joi.object()
     enabledHived: Joi.boolean().required(),
     hivedSpecPath: Joi.string().required(),
     runtimeImage: Joi.string().required(),
-    runtimeImagePullSecrets: Joi.string().required(),
+    runtimeImagePullSecrets: Joi.string().allow('', null).default(''),
     requestHeaders: Joi.object(),
     sqlConnectionString: Joi.string().required(),
     sqlMaxConnection: Joi.number().integer().required(),

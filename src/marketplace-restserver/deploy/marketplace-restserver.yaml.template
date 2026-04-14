@@ -59,5 +59,7 @@ spec:
           value: "{{ cluster_cfg["marketplace-restserver"]["server-port"] }}"
         - name: AZURE_STORAGE
           value: '{{ cluster_cfg["marketplace-restserver"]["azure_storage_json"] }}'
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}

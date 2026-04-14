@@ -113,8 +113,10 @@ spec:
           mountPath: /etc/prometheus-record
         - name: prometheus-data
           mountPath: /prometheus-data
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       volumes:
       - name: config-volume
         configMap:

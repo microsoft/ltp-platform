@@ -72,8 +72,10 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           failureThreshold: 3
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       volumes:
       - name: redis-data
         hostPath:

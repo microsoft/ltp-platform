@@ -17,8 +17,10 @@ spec:
       tolerations:
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       containers:
       - name: model-proxy
         image: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}model-proxy:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}

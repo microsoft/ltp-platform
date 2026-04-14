@@ -44,6 +44,7 @@ if kubectl get configmap | grep -q "k8s-etc-hosts"; then
 fi
 kubectl delete job write-etc-hosts --ignore-not-found || exit $?
 
+{% if cluster_cfg['cluster']['docker-registry']['secret-name'] %}
 if kubectl get secret -n default | grep -q "{{ cluster_cfg['cluster']['docker-registry']['secret-name'] }}"; then
     kubectl delete secret {{ cluster_cfg['cluster']['docker-registry']['secret-name'] }} -n default || exit $?
 fi
@@ -51,6 +52,7 @@ fi
 if kubectl get secret -n kube-system | grep -q "{{ cluster_cfg['cluster']['docker-registry']['secret-name'] }}"; then
     kubectl delete secret {{ cluster_cfg['cluster']['docker-registry']['secret-name'] }} -n kube-system || exit $?
 fi
+{% endif %}
 
 if kubectl get priorityclass | grep -q "pai-daemon-priority"; then
     kubectl delete priorityclass pai-daemon-priority || exit $?

@@ -149,8 +149,10 @@ spec:
             - "-c" 
             - "/app/proxy-client.yaml"
 {% endif %}
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
         - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       volumes:
         - name: pylon-configuration
           configMap:

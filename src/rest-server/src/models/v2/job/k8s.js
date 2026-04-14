@@ -661,11 +661,9 @@ const generateTaskRole = (
             key: "node.kubernetes.io/unschedulable",
             operator: "Exists"
           }] : [],
-          imagePullSecrets: [
-            {
-              name: launcherConfig.runtimeImagePullSecrets,
-            },
-          ],
+          imagePullSecrets: launcherConfig.runtimeImagePullSecrets
+            ? [{ name: launcherConfig.runtimeImagePullSecrets }]
+            : [],
           hostNetwork: true,
         },
       },

@@ -55,8 +55,10 @@ spec:
     {%- endif %}
             - name: REPORT_GROUP_EMAIL
               value: "{{ cluster_cfg["alert-manager"]["cluster-utilization"]["report_group_email"] }}"
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
           imagePullSecrets:
           - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
           restartPolicy: OnFailure
           nodeSelector:
             pai-master: "true"

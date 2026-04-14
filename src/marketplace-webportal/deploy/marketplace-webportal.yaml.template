@@ -35,5 +35,7 @@ spec:
           value: "{{ cluster_cfg["marketplace-webportal"]["server-port"] }}"
         - name: NPM_INSTALL_TOKEN
           value: "{{ cluster_cfg["marketplace-webportal"]["npm-install-token"] }}"
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}

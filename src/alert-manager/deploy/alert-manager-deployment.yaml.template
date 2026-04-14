@@ -444,8 +444,10 @@ spec:
           mountPath: /app/config
 {% endif %}
 
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       volumes:
       - name: config-volume
         configMap:

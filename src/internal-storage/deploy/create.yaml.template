@@ -55,5 +55,7 @@ spec:
           hostPath:
             path: {{ cluster_cfg["internal-storage"]["root-path"] }}
             type: DirectoryOrCreate
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}

@@ -58,5 +58,7 @@ spec:
             cpu: 2000m
             memory: "256Mi"
         {%- endif %}
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}

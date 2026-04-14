@@ -75,8 +75,6 @@ class Cluster:
             return False, "domain is miss in service-configuration.yaml -> cluster -> docker-registry -> domain"
         if "tag" not in docker_reg_configuration:
             return False, "tag is miss in service-configuration.yaml -> cluster -> docker-registry -> tag"
-        if "secret-name" not in docker_reg_configuration:
-            return False, "secret-name is miss in service-configuration.yaml -> cluster -> docker-registry -> secret-name"
         if ("username" in docker_reg_configuration) is not ("password" in docker_reg_configuration):
             return False, "username and password should be coexist, or please comment all of them."
         return True, None
@@ -191,6 +189,8 @@ class Cluster:
             cluster_com["docker-registry"]["username"] = None
         if "password" not in cluster_com["docker-registry"]:
             cluster_com["docker-registry"]["password"] = None
+        if "secret-name" not in cluster_com["docker-registry"]:
+            cluster_com["docker-registry"]["secret-name"] = ""
 
         try:
             self.generate_secret_base64code(cluster_com["docker-registry"])
