@@ -60,6 +60,13 @@ const result = template.replace(/\$\{([^}]+)\}/g, (_, key) => process.env[key] |
 fs.mkdirSync("dist", { recursive: true }); \
 fs.writeFileSync("dist/env.js", result);' > /generate-env.js
 
+# Security hardening and image size optimization
+RUN apt-get update && apt upgrade -y && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /usr/local/lib/node_modules
+
 EXPOSE ${SERVER_PORT}
 
 # Generate env.js at startup, then start the server
