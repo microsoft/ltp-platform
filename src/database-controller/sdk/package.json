@@ -25,6 +25,11 @@
   "resolutions": {
     "dottie": "^2.0.7",
     "path-to-regexp": "^8.4.0",
-    "lodash": "^4.18.0"
+    "lodash": "^4.18.0",
+    "flatted": "^3.4.2",
+    "minimatch": "^3.1.4",
+    "validator": "^13.15.22",
+    "semver": "^6.3.1",
+    "brace-expansion": "^1.1.13"
   }
 }

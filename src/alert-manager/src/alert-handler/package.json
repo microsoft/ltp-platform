@@ -51,7 +51,6 @@
   "overrides": {
     "express@*": "5.2.1",
     "body-parser@*": "2.2.1",
-    "nodemailer@*": "7.0.11",
     "@messageformat/runtime@*": "3.0.2",
     "js-yaml@*": "4.1.1",
     "@messageformat/core@* > @messageformat/runtime": "3.0.2",
@@ -61,7 +60,6 @@
     "@messageformat/core@3.4.0 > @messageformat/runtime": "3.0.2"
   },
   "resolutions": {
-    "nodemailer": "^7.0.11",
     "tar-fs": "^3.1.1",
     "@eslint/plugin-kit": "^0.3.3",
     "qs": "^6.14.2",
@@ -72,7 +70,9 @@
     "underscore": "^1.13.8",
     "path-to-regexp": "^8.4.0",
     "brace-expansion": "^5.0.5",
-    "mailparser": "^3.9.3"
+    "mailparser": "^3.9.3",
+    "flatted": "^3.4.2",
+    "ajv": "^6.14.0"
   },
   "scripts": {
     "lint": "eslint .",
