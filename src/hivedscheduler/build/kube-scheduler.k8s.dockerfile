@@ -12,9 +12,18 @@ RUN git clone --branch v1.33.7 --depth 1 https://github.com/kubernetes/kubernete
 
 WORKDIR /go/kubernetes
 
-RUN go get google.golang.org/grpc@v1.79.3 && \
-    go get golang.org/x/crypto@v0.45.0 && \
-    go get go.opentelemetry.io/otel/sdk@v1.43.0 && go mod tidy && if [ -d vendor ]; then go work vendor 2>/dev/null || go mod vendor; fi
+RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
+      dir=$(dirname "$modfile"); \
+      (cd "$dir" && \
+        go get golang.org/x/crypto@v0.45.0 && \
+        go get go.opentelemetry.io/otel/sdk@v1.43.0 \
+      ) || true; \
+    done && \
+    for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
+      dir=$(dirname "$modfile"); \
+      (cd "$dir" && go get google.golang.org/grpc@v1.79.3) || true; \
+    done && \
+    go work vendor
 
 RUN GOTOOLCHAIN=go1.25.9 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
     make WHAT=cmd/kube-scheduler
