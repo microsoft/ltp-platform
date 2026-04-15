@@ -47,6 +47,7 @@ class NodeRecycler:
     _ltp_rest_server_token = os.getenv("REST_SERVER_TOKEN")
     _ltp_validation_image = os.getenv("LTP_VALIDATION_IMAGE")
     _ltp_vmss_ids = os.getenv("LTP_VMSS_IDS", "")
+    _validation_skip_vmss_ids = set(filter(None, os.getenv("VALIDATION_SKIP_VMSS_IDS", "").split(",")))
 
     @classmethod
     def ofr(cls, node_faults=None, status_client=None, action_client=None):
@@ -298,6 +299,9 @@ class NodeRecycler:
 
         return completed
 
+    _validation_max_retries = int(os.getenv("VALIDATION_MAX_RETRIES", "3"))
+    _validation_retries = {}  # hostname -> retry count
+
     @classmethod
     def validate(cls, hostnames=None, filter_state='', status_client=None, action_client=None):
         """Submit validation job for the given nodes and update Kusto accordingly.
@@ -347,16 +351,29 @@ class NodeRecycler:
                 res.raise_for_status()
                 logger.info(f"Submitted validation job for {hostname} with response: {res.json()}")
                 if status_client:
-                    for hostname in hostnames:
-                        status_client.update_node_status(
-                            hostname,
-                            NodeStatus.VALIDATING.value,
-                            time.time(),
-                        )
+                    status_client.update_node_status(
+                        hostname,
+                        NodeStatus.VALIDATING.value,
+                        time.time(),
+                    )
+                # Clear retry count on successful submission
+                cls._validation_retries.pop(hostname, None)
             except Exception as e:
                 logger.error(f"Failed to submit validation job due to:\n{e}")
                 logger.error(f"Original response: {res.text if 'res' in locals() else 'N/A'}")
                 logger.error(f"Config used: {config if 'config' in locals() else 'N/A'}")
+                # Track retries and cordon node after max retries exceeded
+                cls._validation_retries[hostname] = cls._validation_retries.get(hostname, 0) + 1
+                if cls._validation_retries[hostname] >= cls._validation_max_retries:
+                    logger.error(f"Validation for {hostname} failed {cls._validation_retries[hostname]} times, marking as cordoned")
+                    if status_client:
+                        status_client.update_node_status(hostname, NodeStatus.CORDONED.value, time.time())
+                    if action_client:
+                        action_client.update_node_action(
+                            hostname, f"{filter_state}-{NodeStatus.CORDONED.value}",
+                            time.time(), f"Validation job submission failed after {cls._validation_retries[hostname]} attempts", str(e), "",
+                        )
+                    del cls._validation_retries[hostname]
 
     @classmethod
     def ua_and_deallocate_pipeline(cls, status_client, action_client):
@@ -396,6 +413,28 @@ class NodeRecycler:
                     logger.error(f"Error operating on {vmss_id}: {e}")
 
     @classmethod
+    def skip_validation(cls, hostnames, filter_state, status_client=None, action_client=None):
+        """Skip validation for nodes in VMSS that don't need GPU validation.
+        Mark nodes as available directly.
+
+        Args:
+            hostnames (List[str]): List of hostnames to skip validation.
+            filter_state (str): Current state of the nodes.
+            status_client (NodeStatusClient): Node status client in SDK.
+            action_client (NodeActionClient): Node action client in SDK.
+        """
+        for hostname in hostnames:
+            logger.info(f"Skipping GPU validation for {hostname}, marking as available. "
+                        f"Please manually run 'kubectl uncordon {hostname}' to make it schedulable.")
+            if status_client:
+                status_client.update_node_status(hostname, NodeStatus.AVAILABLE.value, time.time())
+            if action_client:
+                action_client.update_node_action(
+                    hostname, f"{filter_state}-{NodeStatus.AVAILABLE.value}",
+                    time.time(), "Skipping GPU validation per VMSS config", "", "",
+                )
+
+    @classmethod
     def start_and_validate_pipeline(cls, status_client, action_client):
         """Pipeline to start deallocated VMs in UA and validate started VMs.
         Update Kusto status and action tables accordingly.
@@ -407,7 +446,9 @@ class NodeRecycler:
         with ThreadPoolExecutor(max_workers=2) as executor:
             futures = []
             for vmss_id in cls._ltp_vmss_ids.split(","):
-                futures.append(
+                futures.append((
+                    vmss_id,
+                    NodeStatus.ALLOCATED_UA.value,
                     executor.submit(
                         cls.operate,
                         vmss_id,
@@ -417,8 +458,10 @@ class NodeRecycler:
                         from_state=NodeStatus.DEALLOCATED_UA.value,
                         to_state=NodeStatus.ALLOCATED_UA.value
                     )
-                )
-                futures.append(
+                ))
+                futures.append((
+                    vmss_id,
+                    NodeStatus.ALLOCATED_PLATFORM.value,
                     executor.submit(
                         cls.operate,
                         vmss_id,
@@ -428,19 +471,24 @@ class NodeRecycler:
                         from_state=NodeStatus.DEALLOCATED_PLATFORM.value,
                         to_state=NodeStatus.ALLOCATED_PLATFORM.value
                     )
-                )
+                ))
 
-            for f in futures:
+            for vmss_id, allocated_state, f in futures:
                 try:
                     started_vms = f.result()
                     if len(started_vms) > 0:
-                        # TODO: check node status in k8s
-                        logger.info(f"Starting to Validate Nodes in {vmss_id}")
-                        cls.validate(
-                            hostnames=[vm["computer_name"] for vm in started_vms],
-                            status_client=status_client,
-                            action_client=action_client,
-                        )
+                        hostnames = [vm["computer_name"] for vm in started_vms]
+                        if vmss_id.strip() in cls._validation_skip_vmss_ids:
+                            logger.info(f"VMSS {vmss_id} is in validation skip list, skipping validation")
+                            cls.skip_validation(hostnames, allocated_state,
+                                                status_client=status_client, action_client=action_client)
+                        else:
+                            logger.info(f"Starting to Validate Nodes in {vmss_id}")
+                            cls.validate(
+                                hostnames=hostnames,
+                                status_client=status_client,
+                                action_client=action_client,
+                            )
                 except Exception as e:
                     logger.error(f"Error operating on {vmss_id}: {e}") 
         # validate previous failed nodes as well

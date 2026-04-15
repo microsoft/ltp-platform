@@ -264,7 +264,10 @@ STATUS_METADATA = {
                    allowed_transitions=[
                        NodeStatus.VALIDATING.value,
                        NodeStatus.DEALLOCATED_UA.value,
-                       NodeStatus.DEALLOCATED_CAPACITY.value
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                       NodeStatus.AVAILABLE.value,
+                       NodeStatus.AVAILABLE_NODATA.value,
+                       NodeStatus.CORDONED.value,
                    ]),
 
     # Platform states metadata
@@ -281,7 +284,9 @@ STATUS_METADATA = {
                    allowed_transitions=[
                        NodeStatus.VALIDATING.value,
                        NodeStatus.DEALLOCATED_PLATFORM.value,
-                       NodeStatus.DEALLOCATED_CAPACITY.value
+                       NodeStatus.DEALLOCATED_CAPACITY.value,
+                       NodeStatus.AVAILABLE.value,
+                       NodeStatus.CORDONED.value,
                    ])
 }
 
