@@ -24,6 +24,8 @@ WORKDIR /app
 RUN apt-get update && apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/*
 
+RUN pip install --upgrade pip
+
 COPY --from=builder /app/venv /app/venv
 ENV PATH="/app/venv/bin:$PATH"
 
