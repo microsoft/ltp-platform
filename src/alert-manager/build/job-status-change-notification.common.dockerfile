@@ -8,18 +8,18 @@ RUN npm install -g npm@latest
 
 WORKDIR /usr/src/app
 
-# Copy all files first (needed for local file dependencies like openpaidbsdk)
-COPY ./src/job-status-change-notification .
+# Copy package files and openpaidbsdk source (needed for file: dependency resolution)
+COPY ./src/job-status-change-notification/package.json ./src/job-status-change-notification/yarn.lock* ./src/job-status-change-notification/.yarnrc.yml ./
+COPY ./src/job-status-change-notification/openpaidbsdk/package.json ./openpaidbsdk/package.json
 
 RUN corepack enable && corepack install -g yarn@4.2.2
+RUN yarn workspaces focus --production
 
-# Install all dependencies including devDependencies
-RUN yarn install
+# Copy application source
+COPY ./src/job-status-change-notification .
 
-# Manually remove devDependencies from node_modules
-RUN for dep in $(node -pe "Object.keys(require('./package.json').devDependencies || {}).join(' ')"); do \
-      rm -rf node_modules/$dep; \
-    done
+# Remove openpaidbsdk/node_modules if brought in by source COPY
+RUN rm -rf openpaidbsdk/node_modules
 
 # Production stage - use slim image
 FROM node:20-slim
@@ -28,9 +28,8 @@ WORKDIR /usr/src/app
 
 ENV NODE_ENV=production
 
-# Copy only production dependencies and application code
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY ./src/job-status-change-notification .
+# Copy everything from builder (clean, no devDependencies)
+COPY --from=builder /usr/src/app .
 
 # Remove npm and corepack to eliminate security warnings
 # Clean up apt cache
