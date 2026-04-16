@@ -4,7 +4,9 @@ RUN git clone --branch v0.68.1 --depth 1 https://github.com/fatedier/frp.git /fr
 WORKDIR /frp
 
 RUN go get github.com/go-jose/go-jose/v4@v4.1.4 && \
-    go get github.com/quic-go/quic-go@v0.57.0 && go mod tidy && if [ -d vendor ]; then go work vendor 2>/dev/null || go mod vendor; fi
+    go get github.com/quic-go/quic-go@v0.57.0 && \
+    go get github.com/pion/dtls/v3@v3.0.11 && \
+    go mod tidy && if [ -d vendor ]; then go work vendor 2>/dev/null || go mod vendor; fi
 
 RUN make frpc
 
