@@ -21,7 +21,7 @@
 #
 
 ARG GOLANG_VERSION=1.25.9
-ARG CILIUM_VERSION=v1.18.8
+ARG CILIUM_VERSION=v1.18.9
 
 # Stage 1: Build operator binary
 FROM golang:${GOLANG_VERSION} AS builder
