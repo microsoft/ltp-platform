@@ -31,13 +31,16 @@ const wrapper = async func => {
   try {
     return await func();
   } catch (err) {
-    if (err.data && err.data.code === 'UnauthorizedUserError') {
+    if (!err.data) {
+      throw err;
+    }
+    if (err.data.code === 'UnauthorizedUserError') {
       alert(err.data.message);
       clearToken();
-    } else if (err.data && err.data.code === 'NoJobConfigError') {
+    } else if (err.data.code === 'NoJobConfigError') {
       throw new NotFoundError(err.data.message);
     } else {
-      throw new Error((err.data && err.data.message) || err.message || 'Unknown error');
+      throw new Error(err.data.message || err.message || 'Unknown error');
     }
   }
 };
@@ -58,6 +61,9 @@ export async function fetchJobInfo(attemptIndex) {
       },
     });
     const result = await res.json();
+    if (!res.ok) {
+      throw new Error(result.message || `HTTP ${res.status}`);
+    }
     return result;
   });
 }

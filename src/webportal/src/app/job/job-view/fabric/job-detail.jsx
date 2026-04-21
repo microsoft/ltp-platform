@@ -91,13 +91,19 @@ class JobDetail extends React.Component {
       reloading: false,
       error: null,
     };
-    const loadJobInfo = async () => {
-      try {
-        nextState.jobInfo = await fetchJobInfo(this.state.selectedAttemptIndex);
-      } catch (err) {
-        nextState.error = `fetch job status failed: ${err.message}`;
+    // Fetch job info first; if it fails (e.g. permission denied),
+    // show the error and skip the remaining requests.
+    try {
+      nextState.jobInfo = await fetchJobInfo(this.state.selectedAttemptIndex);
+    } catch (err) {
+      nextState.error = `fetch job status failed: ${err.message}`;
+      if (alertFlag === true) {
+        alert(nextState.error);
       }
-    };
+      this.setState(nextState);
+      return;
+    }
+
     const loadJobConfig = async () => {
       if (!isNil(jobConfig)) {
         return;
@@ -148,14 +154,10 @@ class JobDetail extends React.Component {
       }
     };
     await Promise.all([
-      loadJobInfo(),
       loadJobConfig(),
       loadRawJobConfig(),
       loadSshInfo(),
     ]);
-    if (alertFlag === true && !isNil(nextState.error)) {
-      alert(nextState.error);
-    }
     if (isNil(this.state.selectedAttemptIndex)) {
       nextState.selectedAttemptIndex = nextState.jobInfo.jobStatus.retries;
     }
@@ -362,6 +364,19 @@ class JobDetail extends React.Component {
     }
     if (loading) {
       return <SpinnerLoading />;
+    } else if (isNil(jobInfo)) {
+      return (
+        <Stack styles={{ root: { margin: '30px' } }} gap='l1'>
+          <Top />
+          {!isEmpty(error) && (
+            <div className={t.bgWhite}>
+              <MessageBar messageBarType={MessageBarType.error}>
+                {error}
+              </MessageBar>
+            </div>
+          )}
+        </Stack>
+      );
     } else {
       return (
         <Context.Provider

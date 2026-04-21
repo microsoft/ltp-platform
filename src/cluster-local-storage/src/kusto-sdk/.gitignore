@@ -15,7 +15,3 @@ downloads/
 eggs/
 .eggs/
 lib/
-
-**/ltp-storage-common/
-**/ltp-kusto-sdk/
-**/postgresql-sdk/
