@@ -1105,13 +1105,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.11":
-  version: 1.15.11
-  resolution: "follow-redirects@npm:1.15.11"
+"follow-redirects@npm:^1.16.0":
+  version: 1.16.0
+  resolution: "follow-redirects@npm:1.16.0"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: 10c0/d301f430542520a54058d4aeeb453233c564aaccac835d29d15e050beb33f339ad67d9bddbce01739c5dc46a6716dbe3d9d0d5134b1ca203effa11a7ef092343
+  checksum: 10c0/a1e2900163e6f1b4d1ed5c221b607f41decbab65534c63fe7e287e40a5d552a6496e7d9d7d976fa4ba77b4c51c11e5e9f683f10b43011ea11e442ff128d0e181
   languageName: node
   linkType: hard
 
@@ -1862,11 +1862,11 @@ __metadata:
 
 "openpaidbsdk@file:./openpaidbsdk::locator=job-status-change-notification%40workspace%3A.":
   version: 1.0.2
-  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=2d3c92&locator=job-status-change-notification%40workspace%3A."
+  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=aa597d&locator=job-status-change-notification%40workspace%3A."
   dependencies:
     pg: "npm:^8.15.6"
     sequelize: "npm:6.37.8"
-  checksum: 10c0/5d6c8beb1bd59a167fa9367a9d0a786ad77970418799cf998e2e8be8b0b54c90a49f0cbe2e808c6c4dacdf9e0c28678a81a823fd4d24b209e691770700371271
+  checksum: 10c0/db57630659b2b6e445c9de70e0a311bb00301ae09ac51a95ce1e8b77df9e6779cc854269932f0182b59ccb08dd7ab55d15f614d7b01c56d7e1e4b4871e4ed21f
   languageName: node
   linkType: hard
 

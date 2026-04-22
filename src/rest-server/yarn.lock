@@ -2580,13 +2580,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.11":
-  version: 1.15.11
-  resolution: "follow-redirects@npm:1.15.11"
+"follow-redirects@npm:^1.16.0":
+  version: 1.16.0
+  resolution: "follow-redirects@npm:1.16.0"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: 10c0/d301f430542520a54058d4aeeb453233c564aaccac835d29d15e050beb33f339ad67d9bddbce01739c5dc46a6716dbe3d9d0d5134b1ca203effa11a7ef092343
+  checksum: 10c0/a1e2900163e6f1b4d1ed5c221b607f41decbab65534c63fe7e287e40a5d552a6496e7d9d7d976fa4ba77b4c51c11e5e9f683f10b43011ea11e442ff128d0e181
   languageName: node
   linkType: hard
 
@@ -4287,11 +4287,11 @@ __metadata:
 
 "openpaidbsdk@file:./openpaidbsdk::locator=pai-rest-server%40workspace%3A.":
   version: 1.0.2
-  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=991c5c&locator=pai-rest-server%40workspace%3A."
+  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=9388b7&locator=pai-rest-server%40workspace%3A."
   dependencies:
     pg: "npm:^8.15.6"
     sequelize: "npm:6.37.8"
-  checksum: 10c0/6276a26fe45ea0129898827a6ed39505c566f19a63c64ad2de8a42e4508f94442bc079ee9f76682a55db7065ceaa334a24af1daaecaea4e43cc7e14adcf0a444
+  checksum: 10c0/67a9079fba9a129a90ead05bdd0feb55a2e3a174bbce95923133d47aeac691165990bdeb159432296c7435170e75a532b28c70754d9e9fe4a104144f28f12e41
   languageName: node
   linkType: hard
 
