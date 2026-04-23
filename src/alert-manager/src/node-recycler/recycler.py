@@ -72,8 +72,19 @@ class NodeRecycler:
             for node in status_client.get_nodes_by_status(from_state):
                 try:
                     hostname, node_id = node.HostName, node.NodeId
-                    result = action_client.get_latest_action_by_state(hostname, node_id, from_state)
                     logger.info(f"INFO: Querying node {hostname} with node id {node_id} in state {from_state}")
+
+                    # Check if OFR was already submitted by looking at the latest
+                    # action for this node.  get_latest_action_by_state uses
+                    # "endswith" which never returns triaged_hardware-ua, so we
+                    # query the latest action separately to detect prior OFR.
+                    latest = action_client.get_latest_node_action(hostname)
+                    if latest and latest.Action == f"{from_state}-{to_state}":
+                        logger.info(f"OFR already submitted for {hostname}, ticket_id={latest.Detail}")
+                        created.append({"hostname": hostname, "node_id": node_id, "ticket_id": latest.Detail})
+                        continue
+
+                    result = action_client.get_latest_action_by_state(hostname, node_id, from_state)
                     if result and result.Action and result.Detail:
                         action, detail = result.Action, result.Detail
                         if action.endswith(from_state):
@@ -87,8 +98,6 @@ class NodeRecycler:
                             except Exception as e:
                                 logger.error(f"Failed to parse action detail {detail} due to: {e}")
                                 continue
-                        if action.startswith(from_state) and action.endswith(to_state):
-                            created.append({"hostname": hostname, "node_id": node_id, "ticket_id": detail})
                     else:
                         logger.warning(f"WARNING: Cannot find action record for node {hostname} with node id {node_id}")
                 except Exception as e:
