@@ -214,10 +214,23 @@ class NodeIssueClassifier:
             
             # Get target status based on category
             to_status = self.get_target_status_from_category(category)
-            
+
             # Create detailed information
             detail = self.create_classified_detail(issue, category, cordoned_node_id)
-            
+
+            # If classified as hardware but no valid Azure FaultCode, downgrade to
+            # triaged_unknown so node-recycler won't submit an OFR that Azure
+            # cannot process.  The original issue/category are preserved in the
+            # action record for manual investigation.
+            if to_status == NodeStatus.TRIAGED_HARDWARE.value:
+                detail_json = json.loads(detail) if detail else {}
+                if not detail_json.get('FaultCode'):
+                    logger.warning(
+                        f"Node {node_name} classified as hardware ({issue}) but has no "
+                        f"Azure FaultCode. Downgrading to triaged_unknown."
+                    )
+                    to_status = NodeStatus.TRIAGED_UNKNOWN.value
+
             return issue, category, to_status, detail
             
         except Exception as e:
