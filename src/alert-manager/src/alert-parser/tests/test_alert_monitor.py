@@ -207,6 +207,34 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
     assert args[2] == 'cordoned'
     
 
+def test_handle_validating_node_with_empty_alerts(monitor, mock_alert_fetcher, mock_alert_mapper, mock_node_updater):
+    """Verify no KeyError when a validating node has zero alerts (empty DataFrame)."""
+    from ltp_storage.data_schema.node_status import NodeStatusRecord
+
+    node = "test-node"
+    timestamp = 1000.0
+    status = -1  # continuously cordoned
+    node_status = NodeStatusRecord(
+        Timestamp=datetime.fromtimestamp(timestamp - 100, tz=timezone.utc),
+        HostName=node,
+        Status='validating',
+        NodeId=node,
+        Endpoint='test-endpoint'
+    )
+
+    # Return empty DataFrame (no columns) — this is what find_node_alerts returns
+    # when Kusto has no alert records for the node
+    empty_alerts = pd.DataFrame()
+    mock_alert_fetcher.find_node_alerts.return_value = empty_alerts
+    mock_alert_fetcher.shrink_alerts.return_value = empty_alerts
+
+    # Should NOT raise KeyError: 'alertname'
+    monitor.handle_node_status_change(node, timestamp, status, empty_alerts, node_status)
+
+    # No status update should happen — node stays in validating
+    mock_node_updater.update_status_action.assert_not_called()
+
+
 def test_monitor_status_changes(monitor, mock_node_updater, mock_alert_fetcher, mock_alert_mapper):
     from ltp_storage.data_schema.node_status import NodeStatusRecord
     
