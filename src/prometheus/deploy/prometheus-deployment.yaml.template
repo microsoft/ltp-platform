@@ -100,7 +100,7 @@ spec:
           - '--web.external-url={{ external_url }}/prometheus/'
           - '--web.route-prefix=prometheus'
           - '--storage.tsdb.path=/prometheus-data'
-          - '--storage.tsdb.retention.size=8TB'
+          - '--storage.tsdb.retention.size={{ cluster_cfg["prometheus"]["retention_size"] }}'
         ports:
         - name: web
           containerPort: {{prometheus_port}}

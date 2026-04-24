@@ -19,6 +19,7 @@ service_type: "common"
 
 port: 9091
 scrape_interval: 30
+retention_size: "8TB"
 
 # # By default, do not enable the remote_write feature, which relies 
 # # on the azure monitor workspace and a managed identity 
