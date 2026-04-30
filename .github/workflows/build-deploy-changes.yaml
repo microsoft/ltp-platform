@@ -63,7 +63,7 @@ jobs:
           # extract service folders under src/
           folders=$(echo "$changed_files" | grep '^src/' \
             |  awk -F'/' '{print $2}' \
-            | sort -u | grep -v '^webportal-dind$' | tr '\n' ' ')
+            | sort -u | grep -v -E '^(webportal-dind|dev-box)$' | tr '\n' ' ')
           echo "Changed folders: $folders"
 
           # export as output for next steps
