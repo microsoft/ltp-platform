@@ -284,6 +284,10 @@ spec:
           value: {{ cluster_cfg["alert-manager"]["node-recycler"]["vmss"]["vmss_ids"] }}
         - name: LTP_VALIDATION_IMAGE
           value: {{ cluster_cfg["alert-manager"]["node-recycler"]["vmss"]["validation_image"] }}
+{% if "validation_skip_vmss_ids" in cluster_cfg["alert-manager"]["node-recycler"]["vmss"] %}
+        - name: VALIDATION_SKIP_VMSS_IDS
+          value: {{ cluster_cfg["alert-manager"]["node-recycler"]["vmss"]["validation_skip_vmss_ids"] }}
+{% endif %}
 {% endif %}
         - name: REST_SERVER_URI
           value: {{ cluster_cfg["rest-server"]["uri"] }}
@@ -444,8 +448,10 @@ spec:
           mountPath: /app/config
 {% endif %}
 
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       volumes:
       - name: config-volume
         configMap:

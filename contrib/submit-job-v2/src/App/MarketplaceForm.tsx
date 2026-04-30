@@ -189,7 +189,7 @@ export default class MarketplaceForm extends React.Component<IMarketplaceProps, 
         const refs = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${paths[0]}`);
         refsData = await refs.json();
       } catch (err) {
-        alert(err.message);
+        alert(err instanceof Error ? err.message : String(err));
       }
       if (Array.isArray(refsData)) {
         for (const i of refsData) {

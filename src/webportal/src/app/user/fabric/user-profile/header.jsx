@@ -20,7 +20,7 @@ import PropTypes from 'prop-types';
 
 import c from 'classnames';
 import { isEmpty } from 'lodash';
-import { FontClassNames, FontWeights } from '@uifabric/styling';
+import { FontClassNames, FontWeights } from '@fluentui/react/lib/Styling';
 import {
   DefaultButton,
   PrimaryButton,
@@ -30,7 +30,7 @@ import {
   TextField,
   Icon,
   TooltipHost,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 import config from '../../../config/webportal.config';
 import { checkEmail, checkPassword } from '../utils';

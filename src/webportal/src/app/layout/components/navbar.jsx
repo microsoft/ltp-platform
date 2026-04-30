@@ -18,7 +18,7 @@ import {
   PersonaSize,
   getTheme,
   PersonaInitialsColor,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 import { userLogout } from '../../user/user-logout/user-logout.component';
 import { NotificationButton } from './alerts';

@@ -3,7 +3,7 @@
 
 import React, { useMemo, useCallback, useContext } from 'react';
 import { BasicSection } from './basic-section';
-import { Dropdown } from 'office-ui-fabric-react';
+import { Dropdown } from '@fluentui/react';
 import { FormShortSection } from './form-page';
 import Context from './context';
 import PropTypes from 'prop-types';

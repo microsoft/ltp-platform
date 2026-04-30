@@ -236,6 +236,73 @@ class TestNodeIssueClassifierScheduler(unittest.TestCase):
         # Verify results
         self.assertEqual(results, {})
 
+    @patch('classifier_scheduler.NodeRecordUpdater')
+    @patch('classifier_scheduler.NodeIssueClassifier')
+    def test_monitor_and_classify_skips_empty_node_id(self, mock_classifier_class, mock_updater_class):
+        """Test that nodes with empty NodeId are skipped and kept in cordoned status"""
+        mock_updater = MagicMock()
+        mock_updater_class.return_value = mock_updater
+
+        mock_classifier = MagicMock()
+        mock_classifier_class.return_value = mock_classifier
+
+        # One node with NodeId, one without
+        cordoned_nodes = [
+            NodeStatusRecord(
+                Timestamp=datetime.now(timezone.utc),
+                HostName='node-with-id',
+                Status=NodeStatus.CORDONED.value,
+                NodeId='valid-node-id',
+                Endpoint='test-endpoint'
+            ),
+            NodeStatusRecord(
+                Timestamp=datetime.now(timezone.utc),
+                HostName='node-without-id',
+                Status=NodeStatus.CORDONED.value,
+                NodeId='',
+                Endpoint='test-endpoint'
+            ),
+        ]
+        mock_updater.get_nodes_by_status.return_value = cordoned_nodes
+        mock_updater.update_status_action.return_value = True
+
+        def get_action_side_effect(node_name):
+            return NodeAction(
+                HostName=node_name,
+                Action='available-cordoned',
+                Timestamp=datetime.now(timezone.utc),
+                Detail=json.dumps([{"alertname": "NodeNotReady", "summary": "Node not ready"}]),
+                NodeId='valid-node-id' if node_name == 'node-with-id' else '',
+                Reason='Test',
+                Category=NodeFailureCategory.hardware,
+                Endpoint='test-endpoint'
+            )
+
+        mock_updater.get_node_latest_action.side_effect = get_action_side_effect
+
+        mock_classifier.classify_node_issue.return_value = (
+            NodeFailure.NodeCrash,
+            NodeFailureCategory.hardware,
+            NodeStatus.TRIAGED_HARDWARE.value,
+            '{"NodeId": "valid-node-id"}'
+        )
+
+        scheduler = NodeIssueClassifierScheduler()
+        scheduler.node_record_updater = mock_updater
+        scheduler.classifier = mock_classifier
+
+        results = scheduler.monitor_and_classify_cordoned_nodes()
+
+        # Only the node with valid NodeId should be classified
+        self.assertEqual(len(results), 1)
+        self.assertIn('node-with-id', results)
+        self.assertNotIn('node-without-id', results)
+
+        # classify_node_issue should only be called once (for node-with-id)
+        mock_classifier.classify_node_issue.assert_called_once()
+        call_args = mock_classifier.classify_node_issue.call_args
+        self.assertEqual(call_args[0][0], 'node-with-id')
+
     @patch.dict(os.environ, {'CLASSIFICATION_INTERVAL_MINUTES': '15'})
     def test_main_with_custom_interval(self):
         """Test main function with custom interval from environment"""

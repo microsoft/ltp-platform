@@ -24,7 +24,7 @@ import {
   Stack,
   StackItem,
   getTheme,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import React, { useRef } from 'react';
 
@@ -59,8 +59,9 @@ const MonacoPanel = ({
           main: [ColorClassNames.neutralPrimaryBackground],
           headerText: [ColorClassNames.white],
           overlay: [ColorClassNames.blackTranslucent40Background],
+          commands: [ColorClassNames.neutralPrimaryBackground],
           content: [t.flex, t.flexAuto, t.flexColumn],
-          scrollableContent: [t.flex, t.flexAuto, { overflowY: 'visible' }],
+          scrollableContent: [t.flex, t.flexAuto, t.flexColumn, { overflowY: 'visible' }],
           closeButton: [
             ColorClassNames.white,
             ColorClassNames.neutralQuaternaryHover,
@@ -84,12 +85,7 @@ const MonacoPanel = ({
             completionItems={completionItems}
             schemas={schemas}
           />
-          <Stack
-            horizontal
-            horizontalAlign='space-between'
-            gap={spacing.m}
-            padding={spacing.m}
-          >
+          <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: spacing.m, padding: spacing.m }}>
             <StackItem grow>
               <div>{footer}</div>
             </StackItem>

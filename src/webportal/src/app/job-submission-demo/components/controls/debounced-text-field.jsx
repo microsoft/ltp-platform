@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { TextField } from 'office-ui-fabric-react';
+import { TextField } from '@fluentui/react';
 
 import PropTypes from 'prop-types';
 import { debounce } from 'lodash';

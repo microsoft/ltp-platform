@@ -7,7 +7,7 @@ import {
   Dialog,
   DialogFooter,
   PrimaryButton,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -19,7 +19,7 @@ function InfoBox({ hidden, title, message, onDismiss, redirectURL }) {
         isBlocking: true,
       }}
     >
-      <Stack gap='m'>
+      <Stack tokens={{ childrenGap: 'm' }}>
         <Text variant='xLarge'>{title}</Text>
         <Text variant='large'>{message}</Text>
       </Stack>

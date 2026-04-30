@@ -68,8 +68,10 @@ spec:
           - "60"
           - "-port"
           - "9101"
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       tolerations:
       - key: node.kubernetes.io/memory-pressure
         operator: "Exists"

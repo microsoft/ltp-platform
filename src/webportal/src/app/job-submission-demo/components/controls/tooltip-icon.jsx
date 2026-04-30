@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from 'office-ui-fabric-react';
+import { Icon } from '@fluentui/react';
 import { Link } from '../../elements';
 import styled from 'styled-components';
 

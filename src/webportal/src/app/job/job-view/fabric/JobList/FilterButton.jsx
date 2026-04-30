@@ -23,7 +23,7 @@ import {
   ColorClassNames,
   getTheme,
   SearchBox,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 const NO_RESULT_KEY = 'NO_RESULT';
 

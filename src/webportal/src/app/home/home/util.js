@@ -16,7 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import { statusColor } from '../../components/theme';
-import { mergeStyles } from 'office-ui-fabric-react';
+import { mergeStyles } from '@fluentui/react';
 
 export const SHARED_VC_COLOR = statusColor.succeeded;
 export const DEDICATED_VC_COLOR = statusColor.running;

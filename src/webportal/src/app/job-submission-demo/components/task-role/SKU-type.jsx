@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { isEmpty, isNil, get } from 'lodash';
 import PropTypes from 'prop-types';
-import { Dropdown } from 'office-ui-fabric-react';
+import { Dropdown } from '@fluentui/react';
 
 const PureSKUType = ({ value, onChange, availableHivedSkuTypes }) => {
   const skuOptions = Object.keys(availableHivedSkuTypes).map(name => {
@@ -52,7 +52,7 @@ const mapStateToProps = state => ({
   availableHivedSkuTypes: state.JobExtraInfo.availableHivedSkuTypes,
 });
 
-const mapDispatchToProps = () => {};
+const mapDispatchToProps = () => ({});
 
 export const SKUType = connect(
   mapStateToProps,

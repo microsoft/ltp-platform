@@ -16,11 +16,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // module dependencies
-
 require('bootstrap');
-require('admin-lte/dist/css/AdminLTE.min.css');
+require('admin-lte/dist/css/adminlte.min.css');
 require('bootstrap/dist/css/bootstrap.css');
-require('font-awesome/css/font-awesome.min.css');
+require('@fortawesome/fontawesome-free/css/all.min.css');
 
 require('./job-submit.component.scss');
 require('json-editor'); /* global JSONEditor */

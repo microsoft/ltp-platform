@@ -17,9 +17,9 @@
 
 import c from 'classnames';
 import { isEmpty } from 'lodash';
-import { Stack, StackItem, Pivot, PivotItem } from 'office-ui-fabric-react';
+import { Stack, StackItem, Pivot, PivotItem } from '@fluentui/react';
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import MediaQuery from 'react-responsive';
 
 import Card from '../components/card';
@@ -95,7 +95,7 @@ const Home = () => {
       <div className={c(t.w100)} style={{ minWidth: 375, overflowY: 'auto' }}>
         {/* small */}
         <MediaQuery maxWidth={BREAKPOINT1}>
-          <Stack padding='l2' gap='l1' styles={{ minHeight: '100%' }}>
+          <Stack tokens={{ padding: 'l2', childrenGap: 'l1' }} styles={{ minHeight: '100%' }}>
             <JobStatus
               style={{ height: 320 }}
               jobStatusNumber={jobStatusNumber}
@@ -120,7 +120,7 @@ const Home = () => {
                     headerText='Abnormal jobs'
                     onRenderItemLink={(link, defaultRenderer) => {
                       return (
-                        <Stack horizontal gap='s1'>
+                        <Stack horizontal tokens={{ childrenGap: 's1' }}>
                           {defaultRenderer(link)}
                         </Stack>
                       );
@@ -146,10 +146,10 @@ const Home = () => {
         </MediaQuery>
         {/* large */}
         <MediaQuery minWidth={BREAKPOINT1 + 1}>
-          <Stack padding='l2' gap='l1' styles={{ root: { height: '100%' } }}>
+          <Stack tokens={{ padding: 'l2', childrenGap: 'l1' }} styles={{ root: { height: '100%' } }}>
             {/* top */}
             <StackItem disableShrink>
-              <Stack gap='l1' horizontal>
+              <Stack tokens={{ childrenGap: 'l1' }} horizontal>
                 <React.Fragment>
                   <JobStatus
                     style={{ width: '33%' }}
@@ -209,6 +209,25 @@ const Home = () => {
   }
 };
 
-const contentWrapper = document.getElementById('content-wrapper');
+// Prevent layout.jsx from auto-initializing since we'll do it ourselves
+window.__LAYOUT_INITIALIZED__ = true;
 
-ReactDOM.render(<Home />, contentWrapper);
+import { Layout } from '../layout/layout';
+
+export { Home };
+
+// For home page, render both Layout and Home together
+const HomePage = () => {
+  return (
+    <Layout>
+      <Home />
+    </Layout>
+  );
+};
+
+const wrapper = document.getElementById('wrapper');
+if (wrapper && !wrapper.hasAttribute('data-root-initialized')) {
+  wrapper.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(wrapper);
+  root.render(<HomePage />);
+}

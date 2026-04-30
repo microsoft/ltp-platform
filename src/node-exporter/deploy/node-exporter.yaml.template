@@ -89,8 +89,10 @@ spec:
         - name: host-root
           mountPath: /host-root/
           readOnly: true
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       volumes:
       - name: host-root
         hostPath:

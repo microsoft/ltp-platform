@@ -23,6 +23,15 @@ const k8sDashboardHtml = k8sComponent({
   k8sDashboardUri: webportalConfig.k8sDashboardUri,
 });
 
+const initK8s = () => {
+  const contentWrapper = document.getElementById('content-wrapper');
+  if (contentWrapper) {
+    $('#content-wrapper').html(k8sDashboardHtml);
+  } else {
+    setTimeout(initK8s, 50);
+  }
+};
+
 $(document).ready(function() {
-  $('#content-wrapper').html(k8sDashboardHtml);
+  initK8s();
 });

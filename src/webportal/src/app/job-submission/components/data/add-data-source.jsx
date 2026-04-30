@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import c from 'classnames';
-import { PrimaryButton } from 'office-ui-fabric-react/lib/Button';
+import { PrimaryButton } from '@fluentui/react/lib/Button';
 import PropTypes from 'prop-types';
 
 import { AddHttp } from './add-http';

@@ -16,6 +16,11 @@ if [ -n "$CLUSTER_LOCAL_STORAGE_WORKER" ]; then
       exit 255
     fi
     ifconfig $iface $ip netmask 255.255.255.0 || exit $?
+    # Ensure subnet route exists (NetworkManager may set noprefixroute, preventing auto route creation)
+    subnet="172.2$i.0.0/24"
+    if ! ip route show dev $iface | grep -q "$subnet"; then
+      ip route add $subnet dev $iface
+    fi
     echo $iface $ip SUCCEED
   done
 fi

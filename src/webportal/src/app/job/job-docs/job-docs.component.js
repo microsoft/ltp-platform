@@ -18,9 +18,9 @@
 // module dependencies
 
 require('bootstrap');
-require('admin-lte/dist/css/AdminLTE.min.css');
+require('admin-lte/dist/css/adminlte.min.css');
 require('bootstrap/dist/css/bootstrap.css');
-require('font-awesome/css/font-awesome.min.css');
+require('@fortawesome/fontawesome-free/css/all.min.css');
 
 const breadcrumbComponent = require('../breadcrumb/breadcrumb.component.ejs');
 const jobDocsComponent = require('./job-docs.component.ejs');

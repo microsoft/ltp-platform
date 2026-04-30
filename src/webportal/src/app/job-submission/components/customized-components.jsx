@@ -24,7 +24,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { SpinButton, Stack } from 'office-ui-fabric-react';
+import { SpinButton, Stack } from '@fluentui/react';
 import PropTypes from 'prop-types';
 import { debounce, isNil } from 'lodash';
 import { TooltipIcon } from './controls/tooltip-icon';
@@ -35,7 +35,7 @@ export const CSpinButton = props => {
     onIncrement,
     onDecrement,
     onValidate,
-    min,
+    min = 0,
     max,
     label,
     tooltip,
@@ -78,10 +78,6 @@ export const CSpinButton = props => {
       />
     </Stack>
   );
-};
-
-CSpinButton.defaultProps = {
-  min: 0,
 };
 
 CSpinButton.propTypes = {

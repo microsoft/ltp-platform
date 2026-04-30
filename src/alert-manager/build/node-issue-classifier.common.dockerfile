@@ -5,6 +5,8 @@ FROM mcr.microsoft.com/azurelinux/base/python:3.12
 
 WORKDIR /app
 
+RUN tdnf update -y && tdnf clean all
+
 # install kusto sdk
 COPY ./src/node-issue-classifier .
 

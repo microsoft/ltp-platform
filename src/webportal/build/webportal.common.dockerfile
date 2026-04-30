@@ -15,8 +15,7 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Build stage - install all dependencies and build
-FROM node:carbon AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /usr/src/app
 
@@ -27,18 +26,17 @@ RUN rm -rf .env && yarn --no-git-tag-version --new-version version \
     "$(cat version/PAI.VERSION)"
 RUN npm install json -g
 RUN json -I -f package.json -e "this.commitVersion=\"`cat version/COMMIT.VERSION`\""
-
+# Fix openpai-js-sdk path for Docker build (point to the .tgz file)
+RUN json -I -f package.json -e "this.dependencies['@microsoft/openpai-js-sdk']='file:./openpai-js-sdk/microsoft-openpai-js-sdk-0.2.0.tgz'"
 # Install all dependencies including devDependencies for building
 RUN yarn install --production=false
-
-# Build the frontend assets
+# Build webportal frontend assets
 RUN npm run build
-
 # Now install only production dependencies in a separate location
 RUN yarn install --production=true --modules-folder ./node_modules_prod
 
 # Production stage - use slim image
-FROM node:carbon-slim
+FROM node:24-slim
 
 WORKDIR /usr/src/app
 
@@ -51,18 +49,25 @@ COPY --from=builder /usr/src/app/node_modules_prod ./node_modules
 # Copy built assets and necessary runtime files
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/server ./server
-COPY --from=builder /usr/src/app/config ./config
 COPY --from=builder /usr/src/app/src/app/env.js.template ./src/app/env.js.template
 COPY --from=builder /usr/src/app/package.json ./package.json
 COPY --from=builder /usr/src/app/version ./version
 
-# Create a simple env.js generator script using Node.js (no npm needed)
+# Create a Node.js script to replace envsub (which is a devDependency)
 RUN echo 'const fs = require("fs"); \
 const template = fs.readFileSync("src/app/env.js.template", "utf8"); \
 const result = template.replace(/\$\{([^}]+)\}/g, (_, key) => process.env[key] || ""); \
+fs.mkdirSync("dist", { recursive: true }); \
 fs.writeFileSync("dist/env.js", result);' > /generate-env.js
+
+# Security hardening and image size optimization
+RUN apt-get update && apt upgrade -y && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /usr/local/lib/node_modules
 
 EXPOSE ${SERVER_PORT}
 
-# Generate env.js at startup using Node.js, then start server
+# Generate env.js at startup, then start the server
 CMD node /generate-env.js && node server

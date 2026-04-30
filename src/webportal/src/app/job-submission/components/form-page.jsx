@@ -24,7 +24,7 @@
  */
 
 import React from 'react';
-import { Stack } from 'office-ui-fabric-react';
+import { Stack } from '@fluentui/react';
 import { getFormPageSytle } from './form-style';
 import PropTypes from 'prop-types';
 
@@ -32,7 +32,7 @@ const { formPageStyle } = getFormPageSytle();
 
 export const FormPage = props => {
   return (
-    <Stack styles={formPageStyle} gap={'l1'}>
+    <Stack styles={formPageStyle} tokens={{ childrenGap: 'l1' }}>
       {props.children}
     </Stack>
   );
@@ -40,7 +40,7 @@ export const FormPage = props => {
 
 export const FormSection = props => {
   return (
-    <Stack horizontal gap={'m'}>
+    <Stack horizontal tokens={{ childrenGap: 'm' }}>
       {props.children}
     </Stack>
   );

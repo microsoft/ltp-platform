@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import { SpinButton } from 'office-ui-fabric-react';
+import { SpinButton } from '@fluentui/react';
 import React from 'react';
 import { debounce, isNil } from 'lodash';
 import PropTypes from 'prop-types';

@@ -6,7 +6,7 @@ import {
   DelayedRender,
   AnimationClassNames,
   FontSizes,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import MonacoEditor from '../../../components/monaco-editor';
 import { isEmpty, isNil, debounce } from 'lodash';

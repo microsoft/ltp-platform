@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Nav, ColorClassNames, getTheme, Icon } from 'office-ui-fabric-react';
+import { Nav, ColorClassNames, getTheme, Icon } from '@fluentui/react';
 import c from 'classnames';
 import cookies from 'js-cookie';
 import qs from 'querystring';

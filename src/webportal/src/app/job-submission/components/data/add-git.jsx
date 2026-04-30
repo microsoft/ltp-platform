@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import React, { useState } from 'react';
-import { IconButton, Stack, TextField } from 'office-ui-fabric-react';
+import { IconButton, Stack, TextField } from '@fluentui/react';
 import { cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -29,7 +29,7 @@ export const AddGit = props => {
   };
 
   return (
-    <Stack horizontal horizontalAlign='space-between' gap='m'>
+    <Stack horizontal horizontalAlign='space-between' tokens={{ childrenGap: 'm' }}>
       <Stack.Item align='baseline'>
         <TextField
           required={true}

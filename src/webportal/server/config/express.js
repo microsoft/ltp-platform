@@ -20,7 +20,6 @@ const path = require('path');
 const morgan = require('morgan');
 const express = require('express');
 const compress = require('compression');
-const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const appRoot = require('app-root-path');
 const favicon = require('serve-favicon');
@@ -30,8 +29,8 @@ const logger = require('./logger');
 const app = express();
 
 app.use(compress());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cookieParser());
 
 // setup the logger for requests

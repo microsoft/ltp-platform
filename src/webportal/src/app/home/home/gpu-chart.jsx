@@ -15,7 +15,7 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import c3 from 'c3';
+import bb, { bar } from 'billboard.js';
 import c from 'classnames';
 import { isNil, merge } from 'lodash';
 import PropTypes from 'prop-types';
@@ -26,14 +26,14 @@ import {
   FontWeights,
   TooltipHost,
   DirectionalHint,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import React, { useEffect, useRef, useMemo } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import MediaQuery from 'react-responsive';
 
 import Card from '../../components/card';
 
-import './c3.scss';
+import 'billboard.js/dist/billboard.css';
 import t from '../../components/tachyons.scss';
 import {
   SHARED_VC_COLOR,
@@ -94,7 +94,12 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
       return prev;
     }, Array.from({ length: maxGpu + 1 }, () => 0));
     stack[1][0] = 'dedicated';
-    const maxValue = Math.max(...stack[0].slice(1), ...stack[1].slice(1)) - 1;
+    let maxValue = Math.max(...stack[0].slice(1), ...stack[1].slice(1));
+    if (maxValue > 0) {
+      maxValue = maxValue - 1;
+    } else {
+      maxValue = 4; // Default scale when no data
+    }
     const ylines = [
       { value: maxValue / 4 },
       { value: (maxValue * 2) / 4 },
@@ -102,12 +107,12 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
       { value: maxValue },
     ];
 
-    // c3 option
+    // billboard.js option
     const defaultOption = {
       bindto: chartRef.current,
       data: {
         columns: stack,
-        type: 'bar',
+        type: bar(),
         groups: [['shared', 'dedicated']],
         labels: {
           format: {
@@ -118,8 +123,10 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
         empty: { label: { text: 'No available GPU nodes now' } },
       },
       padding: {
-        left: 20,
-        bottom: 0,
+        top: 5,
+        right: 10,
+        bottom: 35,
+        left: 70,
       },
       transition: {
         duration: 0,
@@ -128,7 +135,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
         x: {
           label: {
             text: 'Number of available GPUs on the node',
-            position: 'outter-top',
+            position: 'outer-center',
           },
           tick: {
             outer: false,
@@ -140,13 +147,16 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
         y: {
           label: {
             text: 'Amount of nodes',
-            position: 'outter-top',
+            position: 'outer-middle',
           },
           tick: {
             outer: false,
             values: [],
+            show: true,
           },
-          inner: true,
+          show: true,
+          max: maxValue,
+          min: 0,
         },
       },
       grid: {
@@ -172,9 +182,9 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                 padding: spacing.s1,
               }}
             >
-              <Stack gap='s2'>
+              <Stack tokens={{ childrenGap: 's2' }}>
                 {d[0].value > 0 && (
-                  <Stack horizontal gap='s1' verticalAlign='center'>
+                  <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                     <div
                       style={{
                         width: 20,
@@ -189,8 +199,8 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                   </Stack>
                 )}
                 {d[1].value > 0 && (
-                  <Stack gap='s2'>
-                    <Stack horizontal gap='s1' verticalAlign='center'>
+                  <Stack tokens={{ childrenGap: 's2' }}>
+                    <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                       <div
                         style={{
                           width: 20,
@@ -207,8 +217,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                       <Stack
                         key={`dedicated-${name}`}
                         horizontal
-                        gap='s1'
-                        padding='0 l2'
+                        tokens={{ childrenGap: 's1', padding: '0 l2' }}
                         verticalAlign='center'
                       >
                         <div
@@ -233,12 +242,12 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
         pattern: [SHARED_VC_COLOR, DEDICATED_VC_COLOR],
       },
       onresize: () => {
-        // workaround for https://github.com/c3js/c3/issues/1450
+        // workaround for https://github.com/naver/billboard.js/issues/1450
         chartRef.current.style.maxHeight = '';
       },
     };
 
-    // c3 draw
+    // billboard.js draw
     const getSmallFlag = () => chartRef.current.clientWidth < 420;
     let smallFlag = getSmallFlag();
     function draw() {
@@ -282,7 +291,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
         }
       }
 
-      const chart = c3.generate(opt);
+      const chart = bb.generate(opt);
       chart.resize();
       return chart;
     }
@@ -303,7 +312,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
 
   return (
     <Card className={t.ph5} style={style}>
-      <Stack styles={{ root: [{ height: '100%' }] }} gap='l1'>
+      <Stack styles={{ root: [{ height: '100%' }] }} tokens={{ childrenGap: 'l1' }}>
         <Stack.Item>
           <Stack horizontal horizontalAlign='space-between'>
             <div className={FontClassNames.mediumPlus}>Available GPU nodes</div>
@@ -312,8 +321,8 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                 <div>
                   {/* large */}
                   <MediaQuery maxWidth={BREAKPOINT1}>
-                    <Stack gap='s2'>
-                      <Stack horizontal gap='s1' verticalAlign='center'>
+                    <Stack tokens={{ childrenGap: 's2' }}>
+                      <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                         <div
                           style={{
                             width: 20,
@@ -323,7 +332,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                         ></div>
                         <div>Available nodes in shared VC</div>
                       </Stack>
-                      <Stack horizontal gap='s1' verticalAlign='center'>
+                      <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                         <div
                           style={{
                             width: 20,
@@ -337,8 +346,8 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                   </MediaQuery>
                   {/* large */}
                   <MediaQuery minWidth={BREAKPOINT2}>
-                    <Stack gap='s2'>
-                      <Stack horizontal gap='s1' verticalAlign='center'>
+                    <Stack tokens={{ childrenGap: 's2' }}>
+                      <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                         <div
                           style={{
                             width: 20,
@@ -348,7 +357,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                         ></div>
                         <div>Available nodes in shared VC</div>
                       </Stack>
-                      <Stack horizontal gap='s1' verticalAlign='center'>
+                      <Stack horizontal tokens={{ childrenGap: 's1' }} verticalAlign='center'>
                         <div
                           style={{
                             width: 20,
@@ -365,7 +374,7 @@ const GpuChart = ({ style, gpuPerNode, virtualClusters, userInfo }) => {
                     minWidth={BREAKPOINT1 + 1}
                     maxWidth={BREAKPOINT2 - 1}
                   >
-                    <Stack gap='s2'>
+                    <Stack tokens={{ childrenGap: 's2' }}>
                       <TooltipHost
                         calloutProps={{
                           isBeakVisible: false,

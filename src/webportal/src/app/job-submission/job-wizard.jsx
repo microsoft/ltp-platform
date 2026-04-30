@@ -3,13 +3,14 @@
 
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import {
   getTheme,
   DefaultButton,
   Stack,
   FontSizes,
   FontWeights,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { isNil } from 'lodash';
 
 import Card from '../components/card';
@@ -63,20 +64,21 @@ WizardButton.propTypes = {
   onClick: PropTypes.func,
 };
 
-const JobWizard = ({ setYamlText, history }) => {
+const JobWizard = ({ setYamlText }) => {
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // redirect if job clone or local storage
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('op') === 'resubmit') {
-      history.replace('/general');
+      navigate('/general', { replace: true });
     } else if (!isNil(window.localStorage.getItem('marketItem'))) {
-      history.replace('/general');
+      navigate('/general', { replace: true });
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   const { spacing, palette } = getTheme();
   if (loading) {
@@ -86,7 +88,10 @@ const JobWizard = ({ setYamlText, history }) => {
   return (
     <div style={{ display: 'flex', height: '100%' }}>
       <Card style={{ margin: `${spacing.l2}`, width: '100%' }}>
-        <Stack horizontalAlign='center' padding={100} gap={100}>
+        <Stack
+          horizontalAlign='center'
+          tokens={{ padding: 100, childrenGap: 100 }}
+        >
           <div
             style={{
               color: palette.themePrimary,
@@ -101,13 +106,16 @@ const JobWizard = ({ setYamlText, history }) => {
           <Stack
             horizontal
             horizontalAlign='center'
-            gap={120}
+            tokens={{ childrenGap: 120 }}
             style={{ width: '100%', marginTop: 100 }}
           >
-            <Stack horizontalAlign='center' gap={50}>
+            <Stack
+              horizontalAlign='center'
+              tokens={{ childrenGap: 50 }}
+            >
               <WizardButton
                 onClick={() => {
-                  history.push('/yaml-edit');
+                  navigate('/yaml-edit');
                 }}
               >
                 <IconEdit />
@@ -121,10 +129,13 @@ const JobWizard = ({ setYamlText, history }) => {
                 Config Editor
               </div>
             </Stack>
-            <Stack horizontalAlign='center' gap={50}>
+            <Stack
+              horizontalAlign='center'
+              tokens={{ childrenGap: 50 }}
+            >
               <WizardButton
                 onClick={() => {
-                  history.push('/single');
+                  navigate('/single');
                 }}
               >
                 <IconSingle />
@@ -138,10 +149,13 @@ const JobWizard = ({ setYamlText, history }) => {
                 Single Job
               </div>
             </Stack>
-            <Stack horizontalAlign='center' gap={50}>
+            <Stack
+              horizontalAlign='center'
+              tokens={{ childrenGap: 50 }}
+            >
               <WizardButton
                 onClick={() => {
-                  history.push('/general');
+                  navigate('/general');
                 }}
               >
                 <IconDistributed />
@@ -164,7 +178,6 @@ const JobWizard = ({ setYamlText, history }) => {
 
 JobWizard.propTypes = {
   setYamlText: PropTypes.func,
-  history: PropTypes.object,
 };
 
 export default JobWizard;

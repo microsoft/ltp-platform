@@ -62,8 +62,10 @@ spec:
             - /jobstatus/jobok
           initialDelaySeconds: 5
           periodSeconds: 3
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       volumes:
       - name: dshuttle-worker-delete-config
         configMap:

@@ -223,7 +223,9 @@ class NodeAvailabilityMonitor:
                 period_alerts = self.alert_fetcher.find_node_alerts(alerts, node, timestamp, convert_timestamp(start_time, format="timestamp") + self.tolerance_time)
                 shrinked_alerts = self.alert_fetcher.shrink_alerts((period_alerts))
                 logger.info(f'{len(shrinked_alerts)} alerts after shrinking for node {node} at time {timestamp} due to tolerance time')
-                if period_alerts['alertname'].str.contains('CordonValidationFailedNodes').any():
+                if period_alerts.empty:
+                    logger.info(f"Node {node} is continuously unschedulable but in {from_status} with no alerts. No action taken.")
+                elif period_alerts['alertname'].str.contains('CordonValidationFailedNodes').any():
                     validation_alerts = period_alerts[period_alerts['alertname'].str.contains('CordonValidationFailedNodes')]
                     validation_time = validation_alerts['timestamp'].max()
                     to_status = NodeStatus.CORDONED.value

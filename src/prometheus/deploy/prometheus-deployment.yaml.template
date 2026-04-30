@@ -100,7 +100,7 @@ spec:
           - '--web.external-url={{ external_url }}/prometheus/'
           - '--web.route-prefix=prometheus'
           - '--storage.tsdb.path=/prometheus-data'
-          - '--storage.tsdb.retention.size=8TB'
+          - '--storage.tsdb.retention.size={{ cluster_cfg["prometheus"]["retention_size"] }}'
         ports:
         - name: web
           containerPort: {{prometheus_port}}
@@ -113,8 +113,10 @@ spec:
           mountPath: /etc/prometheus-record
         - name: prometheus-data
           mountPath: /prometheus-data
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       volumes:
       - name: config-volume
         configMap:

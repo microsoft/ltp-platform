@@ -16,15 +16,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // module dependencies
-const marked = require('marked');
 const URL = require('url').URL;
 
 const baseUrl = 'https://github.com/Microsoft/pai/tree/master/docs/';
 
-const renderer = new marked.Renderer();
-
-renderer.link = (href, title, text) => {
-  if (marked.options.sanitize) {
+const renderer = {
+  link(href, title, text) {
     try {
       const prot = decodeURIComponent(unescape(href))
         .replace(/[^\w:]/g, '')
@@ -39,19 +36,20 @@ renderer.link = (href, title, text) => {
     } catch (e) {
       return '';
     }
+
+    if (href === text && title == null) {
+      return href;
+    }
+    if (href[0] !== '#') {
+      href = new URL(href, baseUrl).href;
+    }
+    let out = '<a href="' + href + '"';
+    if (title) {
+      out += ' title="' + title + '"';
+    }
+    out += '>' + text + '</a>';
+    return out;
   }
-  if (href === text && title == null) {
-    return href;
-  }
-  if (href[0] !== '#') {
-    href = new URL(href, baseUrl).href;
-  }
-  let out = '<a href="' + href + '"';
-  if (title) {
-    out += ' title="' + title + '"';
-  }
-  out += '>' + text + '</a>';
-  return out;
 };
 
 module.exports = { renderer };

@@ -16,7 +16,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // module dependencies
-const Joi = require('@hapi/joi');
+const Joi = require('joi');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -32,10 +32,10 @@ let config = {
 const configSchema = Joi.object()
   .keys({
     env: Joi.string()
-      .allow(['development', 'production'])
+      .valid('development', 'production')
       .default('development'),
     logLevel: Joi.string()
-      .allow(['error', 'warn', 'info', 'verbose', 'debug', 'silly'])
+      .valid('error', 'warn', 'info', 'verbose', 'debug', 'silly')
       .default('debug'),
     serverPort: Joi.number()
       .integer()
@@ -45,7 +45,7 @@ const configSchema = Joi.object()
   })
   .required();
 
-const { error, value } = Joi.validate(config, configSchema);
+const { error, value } = configSchema.validate(config);
 if (error) {
   throw new Error(`config error\n${error}`);
 }

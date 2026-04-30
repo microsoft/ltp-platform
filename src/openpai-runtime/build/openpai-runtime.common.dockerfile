@@ -34,7 +34,15 @@ RUN /bin/bash ubuntu_build.sh package_cache_info ubuntu22.04
 
 # Package Cache Data Layer Ends
 
-FROM golang:1.22 AS builder
+FROM debian:bookworm-slim AS multilog-builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends wget gcc libc6-dev make ca-certificates && \
+  wget https://untroubled.org/daemontools-encore/daemontools-encore-1.10.tar.gz && \
+  tar xzf daemontools-encore-1.10.tar.gz
+RUN cd daemontools-encore-1.10 && sed -i 's/gcc -s/gcc -s -static/g' conf-ld && make -j && \
+  cp multilog /usr/local/bin/multilog
+
+FROM golang:1.25 AS builder
 
 ENV PROJECT_DIR=/src/
 ENV INSTALL_DIR=/opt/kube-runtime
@@ -45,12 +53,9 @@ COPY src/go/ ${PROJECT_DIR}
 RUN ${PROJECT_DIR}/build/runtime/go-build.sh && \
   mv ${PROJECT_DIR}/dist/runtime/ ${INSTALL_DIR}
 
-RUN wget https://untroubled.org/daemontools-encore/daemontools-encore-1.10.tar.gz && \
-  tar xzvf daemontools-encore-1.10.tar.gz
-RUN cd daemontools-encore-1.10 && sed -i 's/gcc -s/gcc -s -static/g' conf-ld && make -j && \
-  cp multilog ${INSTALL_DIR}
+COPY --from=multilog-builder /usr/local/bin/multilog ${INSTALL_DIR}/multilog
 
-FROM golang:1.24.2-alpine3.21 as barrier-builder
+FROM golang:1.25-alpine3.23 as barrier-builder
 
 ENV GOPATH=/go
 ENV PROJECT_DIR=/src

@@ -23,11 +23,15 @@
  * SOFTWARE.
  */
 
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-import { HashRouter as Router, Route } from 'react-router-dom';
-import { Fabric } from 'office-ui-fabric-react';
+// Prevent layout.jsx from auto-initializing since we'll do it ourselves
+window.__LAYOUT_INITIALIZED__ = true;
 
+import React, { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { Fabric } from '@fluentui/react';
+
+import { Layout } from '../layout/layout';
 import { JobSubmissionPage } from './job-submission-page';
 import { YamlEditPage } from './yaml-edit-page';
 import JobWizard from './job-wizard';
@@ -35,43 +39,30 @@ import JobWizard from './job-wizard';
 const App = () => {
   const [yamlText, setYamlText] = useState();
   return (
-    <Fabric style={{ height: '100%' }}>
-      <Router>
-        <Route
-          path='/'
-          exact
-          render={({ history }) => (
-            <JobWizard setYamlText={setYamlText} history={history} />
-          )}
-        />
-        <Route
-          path='/single'
-          render={({ history }) => (
-            <JobSubmissionPage
-              isSingle={true}
-              history={history}
-              setYamlText={setYamlText}
+    <Layout>
+      <Fabric style={{ height: '100%' }}>
+        <Router>
+          <Routes>
+            <Route path='/' element={<JobWizard setYamlText={setYamlText} />} />
+            <Route
+              path='/single'
+              element={<JobSubmissionPage isSingle={true} setYamlText={setYamlText} />}
             />
-          )}
-        />
-        <Route
-          path='/general'
-          render={({ history }) => (
-            <JobSubmissionPage
-              isSingle={false}
-              yamlText={yamlText}
-              history={history}
+            <Route
+              path='/general'
+              element={<JobSubmissionPage isSingle={false} yamlText={yamlText} />}
             />
-          )}
-        />
-        <Route
-          path='/yaml-edit'
-          render={({ history }) => <YamlEditPage history={history} />}
-        />
-      </Router>
-    </Fabric>
+            <Route path='/yaml-edit' element={<YamlEditPage />} />
+          </Routes>
+        </Router>
+      </Fabric>
+    </Layout>
   );
 };
 
-const contentWrapper = document.getElementById('content-wrapper');
-ReactDOM.render(<App />, contentWrapper);
+const wrapper = document.getElementById("wrapper");
+if (wrapper && !wrapper.hasAttribute('data-root-initialized')) {
+  wrapper.setAttribute('data-root-initialized', 'true');
+  const root = createRoot(wrapper);
+  root.render(<App />);
+}

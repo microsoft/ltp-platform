@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { variant } from 'styled-system';
-import { Icon } from 'office-ui-fabric-react';
+import { Icon } from '@fluentui/react';
 import { Flex, Box, Link } from '../../elements';
 import { Parameters } from './parameters';
 import { Secrets } from './secrets';
@@ -101,6 +101,7 @@ const UnwrapperedSidebar = ({
             item =>
               item.checked && (
                 <SidebarItem
+                  key={item.key}
                   mt='m'
                   mb='m'
                   selected={currentSideKey === item.key}

@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.24.13-alpine3.22 AS builder
+FROM golang:1.25-alpine3.23 AS builder
 
 ARG TEST=false
 ENV GOPATH=/go
@@ -17,7 +17,7 @@ RUN if [ ${TEST} == "true" ]; \
   mv ${PROJECT_DIR}/dist/hivedscheduler/* ${INSTALL_DIR}
 
 
-FROM alpine:3.22
+FROM alpine:3.23
 
 ENV INSTALL_DIR=/opt/hivedscheduler/hivedscheduler
 

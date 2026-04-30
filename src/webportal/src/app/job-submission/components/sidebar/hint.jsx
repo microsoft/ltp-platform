@@ -24,7 +24,7 @@
  */
 
 import styled from 'styled-components';
-import { getTheme, FontSizes } from '@uifabric/styling';
+import { getTheme, FontSizes } from '@fluentui/react/lib/Styling';
 
 const { palette } = getTheme();
 

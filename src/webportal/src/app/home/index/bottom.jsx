@@ -15,9 +15,9 @@
 // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-import { FontClassNames, FontWeights } from '@uifabric/styling';
+import { FontClassNames, FontWeights } from '@fluentui/react/lib/Styling';
 import c from 'classnames';
-import { Link } from 'office-ui-fabric-react';
+import { Link } from '@fluentui/react';
 import React from 'react';
 
 import t from 'tachyons-sass/tachyons.scss';

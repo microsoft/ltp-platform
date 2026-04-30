@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -15,7 +14,7 @@ import {
   DetailsList,
   DetailsListLayoutMode,
   SelectionMode,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import { listUserStorageConfigs, fetchStorageDetails } from '../../utils/conn';
 
 const PureTeamStorage = ({ jobProtocol, onJobProtocolChange }) => {

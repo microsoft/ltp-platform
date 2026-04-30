@@ -63,7 +63,7 @@ jobs:
           # extract service folders under src/
           folders=$(echo "$changed_files" | grep '^src/' \
             |  awk -F'/' '{print $2}' \
-            | sort -u | tr '\n' ' ')
+            | sort -u | grep -v -E '^(webportal-dind|dev-box)$' | tr '\n' ' ')
           echo "Changed folders: $folders"
 
           # export as output for next steps
@@ -182,18 +182,7 @@ jobs:
             --overwrite-existing
           kubelogin convert-kubeconfig -l azurecli
           kubectl config use-context ${{ secrets.KUBERNETES_CLUSTER }}
-            # Replace "webportal" with "webportal-dind" if "webportal" is changed
             services_to_deploy="${{ steps.changes.outputs.folders }}"
-            if echo " $services_to_deploy " | grep -q " webportal "; then
-              tmp=""
-              for s in $services_to_deploy; do
-                [ "$s" = "webportal" ] && continue
-                [ "$s" = "webportal-dind" ] && continue
-                tmp="$tmp $s"
-              done
-              services_to_deploy="$tmp webportal-dind"
-              services_to_deploy=$(echo "$services_to_deploy" | xargs)
-            fi
             echo "Final services to deploy: $services_to_deploy"
           if echo " $services_to_deploy " | grep -q " cluster-local-storage-worker "; then
             sed -i '42s/value: "8"/value: "0"/' $GITHUB_WORKSPACE/src/cluster-local-storage-worker/deploy/cluster-local-storage-worker.yaml.template

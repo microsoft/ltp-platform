@@ -24,7 +24,7 @@ import {
   DirectionalHint,
   DefaultButton,
   getTheme,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 function CustomPassword(props) {
   const { onChange, onFocus, onBlur, componentRef, ...otherProps } = props;

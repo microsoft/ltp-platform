@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 const { PAIV2 } = require('@microsoft/openpai-js-sdk');
 const querystring = require('querystring');
 const webportalConfig = require('../../config/webportal.config.js');

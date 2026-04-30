@@ -5,7 +5,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import PropTypes from 'prop-types';
-import { ColorClassNames, DefaultButton } from 'office-ui-fabric-react';
+import { ColorClassNames, DefaultButton } from '@fluentui/react';
 
 const PureExportConfig = ({ jobProtocol }) => {
   const exportFile = (data, filename, type) => {

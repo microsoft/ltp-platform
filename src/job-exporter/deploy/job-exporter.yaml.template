@@ -162,8 +162,10 @@ spec:
         - name: syslog-mount
           hostPath:
             path: /var/log
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       hostNetwork: true
       hostPID: true # This is required since job-exporter should get list of pid in container
       tolerations:

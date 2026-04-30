@@ -24,7 +24,7 @@
  */
 
 import React from 'react';
-import { Stack } from 'office-ui-fabric-react';
+import { Stack } from '@fluentui/react';
 import PropTypes from 'prop-types';
 import { BasicSection } from '../basic-section';
 import { CSpinButton } from '../customized-components';
@@ -49,8 +49,8 @@ export const CompletionPolicy = React.memo(({ onChange, value }) => {
       sectionTooltip={PROTOCOL_TOOLTIPS.policy}
       sectionOptional
     >
-      <FormShortSection gap='m'>
-        <Stack horizontal gap='s1'>
+      <FormShortSection tokens={{ childrenGap: 'm' }}>
+        <Stack horizontal tokens={{ childrenGap: 's1' }}>
           <CSpinButton
             label={'Min Failed Instances'}
             value={minFailedInstances}

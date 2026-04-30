@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-
 import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Stack } from 'office-ui-fabric-react';
+import { Stack } from '@fluentui/react';
 import { isEmpty, get, isEqual } from 'lodash';
 
 import { TeamStorage } from './team-storage';
@@ -145,31 +144,34 @@ export const DataComponent = React.memo(props => {
     );
 
     setJobData(jobData => {
-      const updatedJobData = new JobData(
+      return new JobData(
         jobData.hdfsClient,
         jobData.customDataList,
         mountDirectories,
         true,
       );
-      onChange(updatedJobData);
-      return updatedJobData;
     });
-  }, [extras, teamStorageConfig, onChange]);
+  }, [extras, teamStorageConfig, props.jobName]);
+
+  // Separate effect to notify parent of jobData changes
+  useEffect(() => {
+    if (jobData) {
+      onChange(jobData);
+    }
+  }, [jobData, onChange]);
 
   const onDataListChange = useCallback(
     dataList => {
       setJobData(jobData => {
-        const updatedJobData = new JobData(
+        return new JobData(
           jobData.hdfsClient,
           dataList,
           jobData.mountDirs,
           true,
         );
-        onChange(updatedJobData);
-        return updatedJobData;
       });
     },
-    [onChange],
+    [],
   );
 
   const onMountDirChange = useCallback(
@@ -202,7 +204,7 @@ export const DataComponent = React.memo(props => {
           dataError.customContainerPathError || dataError.customDataSourceError
         }
       >
-        <Stack gap='m'>
+        <Stack tokens={{ childrenGap: 'm' }}>
           <Hint>
             The data configured here will be mounted or copied into job
             container. You could use them with <code>{'Container Path'}</code>{' '}

@@ -85,7 +85,7 @@ spec:
         - name: LAUNCHER_RUNTIME_IMAGE
           value: {{ cluster_cfg['cluster']['docker-registry']['prefix'] }}openpai-runtime:{{ cluster_cfg['cluster']['docker-registry']['tag'] }}
         - name: LAUNCHER_RUNTIME_IMAGE_PULL_SECRETS
-          value: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+          value: "{{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}"
         - name: LAUNCHER_SCHEDULER
 {% if cluster_cfg['hivedscheduler']['config']|length > 1 %}
           value: hivedscheduler
@@ -185,8 +185,10 @@ spec:
           limits:
             memory: "4Gi"
         {%- endif %}
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       volumes:
       - name: pai-configuration-rest-server
         configMap:

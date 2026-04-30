@@ -17,7 +17,7 @@ import {
   Stack,
   Text,
   FontSizes,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 const style = {
   headerText: {
@@ -71,7 +71,7 @@ export const TensorBoard = props => {
   );
 
   return (
-    <Stack gap='m' styles={{ root: { height: '100%' } }}>
+    <Stack styles={{ root: { height: '100%' } }} tokens={{ childrenGap: 'm' }}>
       <Stack horizontal verticalAlign='baseline'>
         <Text styles={style.headerText}>TensorBoard</Text>
         <TooltipIcon content={PROTOCOL_TOOLTIPS.tensorboard} />

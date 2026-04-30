@@ -3,7 +3,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { debounce } from 'lodash';
-import { TextField } from 'office-ui-fabric-react';
+import { TextField } from '@fluentui/react';
 import { JobProtocol } from '../../models/job-protocol';
 import PropTypes from 'prop-types';
 

@@ -39,5 +39,7 @@ spec:
           hostPath:
             path: '{{ cluster_cfg["marketplace-db"]["data-path"] }}'
             type: DirectoryOrCreate
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}

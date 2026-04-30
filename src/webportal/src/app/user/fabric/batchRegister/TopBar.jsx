@@ -23,7 +23,7 @@ import {
   CommandBar,
   getTheme,
   ColorClassNames,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 import Context from './Context';
 
@@ -36,7 +36,7 @@ function TopBar() {
     ColorClassNames.neutralQuaternaryBackground;
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnBrowse = {
     key: 'browse',
@@ -50,7 +50,7 @@ function TopBar() {
   };
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnDownloadTemplate = {
     key: 'downloadTemplate',
@@ -64,7 +64,7 @@ function TopBar() {
   };
 
   /**
-   * @type {import('office-ui-fabric-react').ICommandBarItemProps}
+   * @type {import('@fluentui/react').ICommandBarItemProps}
    */
   const btnAddNew = {
     key: 'addNew',

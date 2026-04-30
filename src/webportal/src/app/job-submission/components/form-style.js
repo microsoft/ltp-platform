@@ -29,7 +29,7 @@ import {
   getTheme,
   IconFontSizes,
   mergeStyleSets,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 const { spacing, palette } = getTheme();
 

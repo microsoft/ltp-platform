@@ -27,7 +27,7 @@ import {
   DialogFooter,
   PrimaryButton,
   CommandBarButton,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
@@ -92,7 +92,7 @@ const JobEventList = props => {
       isResizable: true,
       onRender: (item, idx) => {
         return (
-          <Stack horizontal gap='m'>
+          <Stack horizontal tokens={{ childrenGap: 'm' }}>
             <Text styles={{ root: { maxWidth: 400 } }} nowrap>
               {item.message}
             </Text>
@@ -167,7 +167,7 @@ const JobEventList = props => {
         selectionMode={SelectionMode.none}
       />
       <Dialog hidden={hideDialog} onDismiss={toggleHideDialog} minWidth='500px'>
-        <Stack gap='m'>
+        <Stack tokens={{ childrenGap: 'm' }}>
           <Text variant='xLarge'>Event Message :</Text>
           <Text variant='large'>{dialogMessage}</Text>
         </Stack>

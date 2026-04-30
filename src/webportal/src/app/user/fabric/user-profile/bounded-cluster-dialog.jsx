@@ -11,7 +11,7 @@ import {
   Dialog,
   DialogFooter,
   TextField,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 import urljoin from 'url-join';
 import t from '../../../components/tachyons.scss';
 import Joi from 'joi-browser';

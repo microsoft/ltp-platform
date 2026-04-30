@@ -119,8 +119,10 @@ spec:
           persistentVolumeClaim:
             claimName: {{ cluster_cfg['log-manager']['remote_storage_pvc'] }}
         {%- endif %}
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       tolerations:
       - key: node.kubernetes.io/memory-pressure
         operator: "Exists"

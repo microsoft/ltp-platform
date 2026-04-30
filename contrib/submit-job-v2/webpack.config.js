@@ -38,11 +38,11 @@ const configuration = {
           {
             loader: "css-loader",
             options: {
-              url: true,
-              modules: true,
               sourceMap: true,
-              camelCase: true,
-              localIdentName: "[name]-[local]--[hash:base64:6]",
+              modules: {
+                localIdentName: "[name]-[local]--[hash:base64:6]",
+                exportLocalsConvention: "camelCase",
+              },
             },
           },
           "sass-loader",
@@ -61,11 +61,35 @@ const configuration = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".json"],
+    alias: {
+      'process/browser': require.resolve('process/browser.js'),
+    },
+    fallback: {
+      fs: false,
+      net: false,
+      tls: false,
+      process: require.resolve('process/browser'),
+      buffer: require.resolve('buffer/'),
+      util: require.resolve("util/"),
+      stream: require.resolve("stream-browserify"),
+      http: false,
+      https: false,
+      zlib: false,
+      path: false,
+      crypto: false,
+      url: false,
+      querystring: false,
+      assert: false,
+    }
   },
   plugins: [
     new webpack.IgnorePlugin({
       resourceRegExp: /^esprima$/,
       contextRegExp: /js-yaml/,
+    }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+      Buffer: ['buffer', 'Buffer'],
     }),
     new MonacoWebpackPlugin({
       languages: ["yaml"],
@@ -75,16 +99,7 @@ const configuration = {
   devServer: {
     host: "0.0.0.0",
     port: 9290,
-    contentBase: false,
-    watchOptions: {
-      ignored: /node_modules/,
-    },
-    disableHostCheck: true,
-  },
-  node: {
-    fs: 'empty',
-    net: 'empty',
-    tls: 'empty',
+    static: false,
   }
 };
 

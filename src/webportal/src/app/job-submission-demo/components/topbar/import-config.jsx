@@ -5,7 +5,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
-import { ColorClassNames, FontWeights, Label } from 'office-ui-fabric-react';
+import { ColorClassNames, FontWeights, Label } from '@fluentui/react';
 import { Button } from '../../elements';
 import { JobProtocol } from '../../models/job-protocol';
 
@@ -73,7 +73,7 @@ const PureImportConfig = ({ onJobProtocolChange }) => {
   );
 };
 
-const mapStateToProps = () => {};
+const mapStateToProps = () => ({});
 
 const mapDispatchToProps = dispatch => ({
   onJobProtocolChange: jobProtocol =>

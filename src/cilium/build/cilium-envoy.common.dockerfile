@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright (c) Microsoft Corporation
 # All rights reserved.
 #
@@ -17,14 +15,16 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-pushd $(dirname "$0") > /dev/null
+# Rebuild cilium-envoy image with latest OS security patches.
+# Base: official cilium-envoy matching cilium v1.18.9
+# This patches OS-level CVEs (libc6, libgnutls30t64, libsystemd0).
+#
 
+ARG CILIUM_ENVOY_TAG=v1.36.6-1776000132-2437d2edeaf4d9b56ef279bd0d71127440c067aa
+FROM quay.io/cilium/cilium-envoy:${CILIUM_ENVOY_TAG}@sha256:ba0ab8adac082d50d525fd2c5ba096c8facea3a471561b7c61c7a5b9c2e0de0d
 
-kubectl apply --overwrite=true -f webportal-dind.yaml || exit $?
-
-sleep 10
-# Wait until the service is ready.
-PYTHONPATH="../../../deployment" python -m  k8sPaiLibrary.monitorTool.check_pod_ready_status -w -k app -v webportal-dind || exit $?
-
-
-popd > /dev/null
+# Apply latest Ubuntu security updates
+RUN apt-get update && \
+    apt-get upgrade -y --no-install-recommends && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

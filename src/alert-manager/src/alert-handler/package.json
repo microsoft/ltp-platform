@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "1.2.0",
-    "axios": "^1.12.0",
+    "axios": "^1.15.0",
     "body-parser": "^2.2.1",
     "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
@@ -44,14 +44,13 @@
     "express-bearer-token": "^3.0.0",
     "joi": "^17.13.3",
     "module-alias": "^2.2.3",
-    "nodemailer": "^7.0.11",
+    "nodemailer": "^8.0.5",
     "winston": "2",
     "ws": "^8.18.2"
   },
   "overrides": {
     "express@*": "5.2.1",
     "body-parser@*": "2.2.1",
-    "nodemailer@*": "7.0.11",
     "@messageformat/runtime@*": "3.0.2",
     "js-yaml@*": "4.1.1",
     "@messageformat/core@* > @messageformat/runtime": "3.0.2",
@@ -61,14 +60,21 @@
     "@messageformat/core@3.4.0 > @messageformat/runtime": "3.0.2"
   },
   "resolutions": {
-    "nodemailer": "^7.0.11",
     "tar-fs": "^3.1.1",
     "@eslint/plugin-kit": "^0.3.3",
     "qs": "^6.14.2",
-    "lodash": "^4.17.23",
-    "axios": "^1.13.5",
-    "minimatch": "^10.2.1",
-    "form-data": "^4.0.4"
+    "lodash": "^4.18.0",
+    "axios": "^1.15.0",
+    "minimatch": "^10.2.3",
+    "form-data": "^4.0.4",
+    "underscore": "^1.13.8",
+    "path-to-regexp": "^8.4.0",
+    "brace-expansion": "^5.0.5",
+    "mailparser": "^3.9.3",
+    "flatted": "^3.4.2",
+    "ajv": "^6.14.0",
+    "nodemailer": "^8.0.5",
+    "follow-redirects": "^1.16.0"
   },
   "scripts": {
     "lint": "eslint .",

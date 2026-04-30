@@ -23,7 +23,7 @@ import {
   Text,
   TextField,
   FontSizes,
-} from 'office-ui-fabric-react';
+} from '@fluentui/react';
 
 const style = {
   headerText: {
@@ -108,7 +108,7 @@ export const JobSSH = ({ extras, onExtrasChange }) => {
   };
 
   return (
-    <Stack gap='m' styles={{ root: { height: '100%' } }}>
+    <Stack styles={{ root: { height: '100%' } }} tokens={{ childrenGap: 'm' }}>
       <Stack horizontal verticalAlign='baseline'>
         <Text styles={style.headerText}>SSH</Text>
         <TooltipIcon content={PROTOCOL_TOOLTIPS.ssh} />
@@ -120,13 +120,13 @@ export const JobSSH = ({ extras, onExtrasChange }) => {
         onChange={_onUsersshEnable}
       />
       {!isEmpty(sshPlugin.userssh) && (
-        <Stack gap='l1'>
+        <Stack tokens={{ childrenGap: 'l1' }}>
           <Hint>
             Your pre-defined SSH public keys on the{' '}
             <a href='/user-profile.html'>User Profile</a> page will be set
             automatically.
           </Hint>
-          <Stack horizontal gap='l1'>
+          <Stack horizontal tokens={{ childrenGap: 'l1' }}>
             <TextField
               Lable='Add additional SSH public key'
               placeholder='Additional SSH public key'

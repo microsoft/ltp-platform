@@ -11,19 +11,60 @@ import {
   Dialog,
   DialogFooter,
   TextField,
-} from 'office-ui-fabric-react';
-import sshpk from 'sshpk';
+} from '@fluentui/react';
 
 import t from '../../../components/tachyons.scss';
 
+/**
+ * Validates SSH public key format
+ * Supports: ssh-rsa, ssh-ed25519, ecdsa-sha2-nistp256, ecdsa-sha2-nistp384, ecdsa-sha2-nistp521
+ */
 const validateSSHPublicKey = keyString => {
   try {
-    const key = sshpk.parseKey(keyString, 'ssh');
-    if (sshpk.Key.isKey(key)) {
-      return true;
-    } else {
+    const trimmed = keyString.trim();
+    if (!trimmed) {
       return false;
     }
+
+    // SSH public key format: <algorithm> <base64-encoded-key> [comment]
+    const parts = trimmed.split(/\s+/);
+
+    // Must have at least algorithm and key
+    if (parts.length < 2) {
+      return false;
+    }
+
+    const algorithm = parts[0];
+    const keyData = parts[1];
+
+    // Check for valid algorithm
+    const validAlgorithms = [
+      'ssh-rsa',
+      'ssh-ed25519',
+      'ecdsa-sha2-nistp256',
+      'ecdsa-sha2-nistp384',
+      'ecdsa-sha2-nistp521',
+      'ssh-dss',
+    ];
+
+    if (!validAlgorithms.includes(algorithm)) {
+      return false;
+    }
+
+    // Validate base64 format
+    const base64Regex = /^[A-Za-z0-9+/]+=*$/;
+    if (!base64Regex.test(keyData)) {
+      return false;
+    }
+
+    // Try to decode base64 to ensure it's valid
+    try {
+      atob(keyData);
+    } catch (e) {
+      return false;
+    }
+
+    return true;
   } catch (error) {
     return false;
   }

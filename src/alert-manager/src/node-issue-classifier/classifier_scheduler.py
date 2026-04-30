@@ -134,6 +134,17 @@ class NodeIssueClassifierScheduler:
                     logger.warning(f"Node {node_name} is cordoned but last action is not to cordoned. Skipping classification.")
                     continue
                 
+                # Skip classification if NodeId is empty — OFR requires NodeId to create IcM tickets.
+                # Keep the node in cordoned status so classifier retries on the next cycle.
+                if not node_status.NodeId:
+                    logger.warning(
+                        f"Node {node_name} has empty NodeId (HostName={node_name}, "
+                        f"last_action={node_action.Action}). "
+                        f"Skipping classification to keep cordoned status. "
+                        f"OFR cannot proceed without a valid NodeId."
+                    )
+                    continue
+
                 # Classify the node issue
                 issue, category, to_status, detail = self.classifier.classify_node_issue(node_name, node_status, node_action)
                 

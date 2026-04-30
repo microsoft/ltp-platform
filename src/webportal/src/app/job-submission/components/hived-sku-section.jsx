@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useEffect } from 'react';
 import { get, isEmpty } from 'lodash';
-import { Dropdown, Stack } from 'office-ui-fabric-react';
+import { Dropdown, Stack } from '@fluentui/react';
 import PropTypes from 'prop-types';
 import { BasicSection } from './basic-section';
 import { CSpinButton } from './customized-components';
@@ -32,7 +32,30 @@ export const HivedSkuSection = React.memo(props => {
     [hivedSkuTypes],
   );
 
-  const _setSku = () => {
+  const _onSkuNumChange = useCallback(
+    num => {
+      onChange({
+        ...value,
+        skuNum: num,
+      });
+    },
+    [onChange, value],
+  );
+
+  const _onSkuTypeChange = useCallback(
+    (_, item) => {
+      onChange({
+        ...value,
+        skuType: item.key,
+        sku: item.sku,
+      });
+    },
+    [onChange, value],
+  );
+
+  // Use useEffect to handle SKU initialization and updates
+  // This prevents setState during render
+  useEffect(() => {
     if (value.skuType != null) {
       const selected = skuOptions.find(option => option.key === value.skuType);
       if (selected == null) {
@@ -47,36 +70,14 @@ export const HivedSkuSection = React.memo(props => {
         sku: skuOptions[0].sku,
       });
     }
-  };
+  }, [value.skuType, value.sku, skuOptions, onChange, value]);
 
-  const _onSkuNumChange = useCallback(
-    num => {
-      onChange({
-        ...value,
-        skuNum: num,
-      });
-    },
-    [onChange],
-  );
-
-  const _onSkuTypeChange = useCallback(
-    (_, item) => {
-      onChange({
-        ...value,
-        skuType: item.key,
-        sku: item.sku,
-      });
-    },
-    [onChange],
-  );
-
-  _setSku();
   return (
     <BasicSection
       sectionLabel='Resources SKU'
       sectionTooltip={PROTOCOL_TOOLTIPS.hivedSkuType}
     >
-      <FormShortSection gap='m'>
+      <FormShortSection tokens={{ childrenGap: 'm' }}>
         <Stack horizontal verticalAlign='baseline'>
           <div style={{ width: '20%' }}>SKU count</div>
           <Stack.Item grow>

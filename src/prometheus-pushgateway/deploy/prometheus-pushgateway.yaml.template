@@ -61,8 +61,10 @@ spec:
             value: "{{ cluster_cfg['prometheus-pushgateway']['metrics-cleaner']['job-time-to-live'] }}"
           - name: CLEAN_INTERVAL
             value: "{{ cluster_cfg['prometheus-pushgateway']['metrics-cleaner']['clean-interval'] }}"
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
       - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
       tolerations:
       - key: node.kubernetes.io/memory-pressure
         operator: "Exists"

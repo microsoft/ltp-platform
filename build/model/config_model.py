@@ -49,7 +49,8 @@ class ConfigModel:
             self.buildConfigDict["dockerRegistryInfo"]["dockerTag"] = \
                 buildConfigContent["cluster"]["docker-registry-info"]["docker-tag"]
             self.buildConfigDict["dockerRegistryInfo"]["secretName"] = \
-                buildConfigContent["cluster"]["docker-registry-info"]["secret-name"]
+                buildConfigContent["cluster"]["docker-registry-info"]["secret-name"] \
+                if "secret-name" in buildConfigContent["cluster"]["docker-registry-info"] else ""
 
         else:
             self.buildConfigDict["dockerRegistryInfo"] = buildConfigContent["cluster"]["docker-registry"]
@@ -66,6 +67,7 @@ class ConfigModel:
             self.buildConfigDict["dockerRegistryInfo"]["dockerTag"] = \
                 buildConfigContent["cluster"]["docker-registry"]["tag"]
             self.buildConfigDict["dockerRegistryInfo"]["secretName"] = \
-                buildConfigContent["cluster"]["docker-registry"]["secret-name"]
+                buildConfigContent["cluster"]["docker-registry"]["secret-name"] \
+                if "secret-name" in buildConfigContent["cluster"]["docker-registry"] else ""
 
         return self.buildConfigDict

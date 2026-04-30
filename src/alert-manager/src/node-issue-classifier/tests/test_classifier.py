@@ -340,6 +340,51 @@ class TestNodeIssueClassifier(unittest.TestCase):
         detail_dict = json.loads(detail)
         self.assertEqual(detail_dict['NodeId'], 'test-node-id')
 
+    def test_classify_node_issue_hardware_without_faultcode_downgrades_to_unknown(self):
+        """Test that hardware issues without a valid Azure FaultCode are downgraded to triaged_unknown."""
+        from datetime import datetime, timezone
+        from ltp_storage.data_schema.node_status import NodeStatusRecord
+        from ltp_storage.data_schema.node_action import NodeAction
+
+        classifier = NodeIssueClassifier()
+
+        # FrontendNetworkIssue is categorized as hardware but has no entry
+        # in hardware_issue_to_faultcode, so FaultCode will be empty.
+        node_action = NodeAction(
+            HostName='test-node',
+            NodeId='test-node-id',
+            Action='available-cordoned',
+            Timestamp=datetime.now(timezone.utc),
+            Reason='Test',
+            Detail=json.dumps([{
+                "alertname": "FrontendNetworkIssue",
+                "summary": "Frontend network issue",
+                "severity": "critical"
+            }]),
+            Category='',
+            Endpoint='test-endpoint'
+        )
+
+        node_status = NodeStatusRecord(
+            Timestamp=datetime.now(timezone.utc),
+            HostName='test-node',
+            Status=NodeStatus.CORDONED.value,
+            NodeId='test-node-id',
+            Endpoint='test-endpoint'
+        )
+
+        issue, category, to_status, detail = classifier.classify_node_issue('test-node', node_status, node_action)
+
+        # Issue and category should reflect the original classification
+        self.assertEqual(issue, NodeFailure.FrontendNetworkIssue)
+        self.assertEqual(category, NodeFailureCategory.hardware)
+        # But to_status should be downgraded to triaged_unknown
+        self.assertEqual(to_status, NodeStatus.TRIAGED_UNKNOWN.value)
+        # Detail should still contain the empty FaultCode for traceability
+        detail_dict = json.loads(detail)
+        self.assertEqual(detail_dict['FaultCode'], '')
+        self.assertEqual(detail_dict['NodeId'], 'test-node-id')
+
     def test_classify_node_issue_no_action_detail(self):
         """Test node classification when no action detail is available"""
         from datetime import datetime, timezone

@@ -34,8 +34,10 @@ spec:
             - name: LUCIA_DIAGNOSTIC_TIME_OFFSET
               value: "{{ cluster_cfg["alert-manager"]["abnormal-detector"]["diagnostic-time-offset"] }}"
             {%- endif %}
+{%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
           imagePullSecrets:
           - name: {{ cluster_cfg["cluster"]["docker-registry"]["secret-name"] }}
+{%- endif %}
           restartPolicy: OnFailure
           nodeSelector:
             pai-master: "true"
