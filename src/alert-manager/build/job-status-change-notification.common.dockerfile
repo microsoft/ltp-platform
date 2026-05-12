@@ -10,7 +10,7 @@ WORKDIR /usr/src/app
 
 # Copy package files and openpaidbsdk source (needed for file: dependency resolution)
 COPY ./src/job-status-change-notification/package.json ./src/job-status-change-notification/yarn.lock* ./src/job-status-change-notification/.yarnrc.yml ./
-COPY ./src/job-status-change-notification/openpaidbsdk/package.json ./openpaidbsdk/package.json
+COPY ./src/job-status-change-notification/openpaidbsdk ./openpaidbsdk
 
 RUN corepack enable && corepack install -g yarn@4.2.2
 RUN yarn workspaces focus --production
