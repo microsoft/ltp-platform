@@ -21,6 +21,7 @@ wait_for_dpkg_lock() {
         echo "Timed out waiting for dpkg lock."
         exit 124
     fi
+    dpkg --configure -a || true
     bash -c 'exec "$@"' -- "$@"
 }
 
