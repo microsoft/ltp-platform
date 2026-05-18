@@ -13,7 +13,7 @@ from kubernetes import client, config
 
 
 def revoke_all_tokens_via_api(cluster_name, bearer_token):
-    url = f"https://{cluster_name}.ltp.hpc-lucia.com/rest-server/api/v2/token"
+    url = f"https://{cluster_name}.ltp.hpc-lucia.com/rest-server/api/v1/token"
     headers = {
         "Authorization": f"Bearer {bearer_token}",
         "Content-Type": "application/json"
