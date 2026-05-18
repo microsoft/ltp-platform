@@ -12,8 +12,8 @@ import requests
 from kubernetes import client, config
 
 
-def revoke_all_tokens_via_api(cluster_name, bearer_token):
-    url = f"https://{cluster_name}.ltp.hpc-lucia.com/rest-server/api/v1/token"
+def revoke_all_tokens_via_api(cluster_url, bearer_token):
+    url = f"https://{cluster_url}/rest-server/api/v1/token"
     headers = {
         "Authorization": f"Bearer {bearer_token}",
         "Content-Type": "application/json"
@@ -133,9 +133,9 @@ if __name__ == "__main__":
     print("\n⚠️  WARNING: This will cause service disruptions during execution!")
     print("=" * 70)
 
-    cluster_name = input("\nEnter the cluster name: ")
-    if not cluster_name:
-        print("Cluster name cannot be empty.")
+    cluster_url = input("\nEnter the cluster URL (e.g. example.ltp.hpc-lucia.com): ")
+    if not cluster_url:
+        print("Cluster URL cannot be empty.")
         sys.exit(1)
 
     admin_token = input("Enter an admin bearer token: ")
@@ -171,7 +171,7 @@ if __name__ == "__main__":
     print("Step 2: Revoking all tokens via REST API")
     print("=" * 70)
 
-    if not revoke_all_tokens_via_api(cluster_name, admin_token):
+    if not revoke_all_tokens_via_api(cluster_url, admin_token):
         sys.exit(1)
 
     # Step 3: Add alert-manager token back
