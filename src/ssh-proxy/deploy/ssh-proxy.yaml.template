@@ -73,6 +73,10 @@ kind: Service
 metadata:
   name: ssh-proxy-service
 spec:
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+  - IPv4
+  - IPv6
   ports:
   - port: 22
     protocol: TCP
