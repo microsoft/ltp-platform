@@ -19,7 +19,7 @@ resource aksAcrUai 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31'
 
 var kubeconfig = base64ToString(aks.listClusterUserCredential().kubeconfigs[0].value)
 
-var kubeletversion = aks.properties.kubernetesVersion
+var kubeletversion = aks.properties.currentKubernetesVersion ?? aks.properties.kubernetesVersion
 
 var fqdn = aks.properties.fqdn
 var cert = split(substring(kubeconfig, indexOf(kubeconfig, 'certificate-authority-data: ') + 28), '\n')[0]
@@ -121,9 +121,11 @@ var bootstrapscripts = {
 
   Standard_E8ds_v4: [
     waitdnsready
+    installfusescript
     '${containerdscript} runc'
     kubeletmsiscript
     '${kubeletscript} Standard_E8ds_v4 cpu ${tenant().tenantId} ${hubsub} ${hubgroup} ${aksAcrUai.properties.clientId}'
+    blobproxyscript
   ]
 }
 

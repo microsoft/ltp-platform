@@ -95,6 +95,24 @@ resource aksNsg 'Microsoft.Network/networkSecurityGroups@2023-11-01' = {
           direction: 'Inbound'
         }
       }
+      {
+        name: 'AllowCorpIPv6WebInbound'
+        properties: {
+          priority: 1002
+          protocol: '*'
+          sourcePortRange: '*'
+          sourceAddressPrefixes: [
+            '2404:f801::/32'
+          ]
+          destinationPortRanges: [
+            '80'
+            '443'
+          ]
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          direction: 'Inbound'
+        }
+      }
     ]
   }
 }
@@ -339,6 +357,14 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-03-02-preview' = {
       networkPlugin: 'none'
       dnsServiceIP: '10.0.0.10'
       serviceCidr: '10.0.0.0/16'
+      ipFamilies: [
+        'IPv4'
+        'IPv6'
+      ]
+      serviceCidrs: [
+        '10.0.0.0/16'
+        'fd12:3456:789a::/108'
+      ]
     }
 
     autoUpgradeProfile: {

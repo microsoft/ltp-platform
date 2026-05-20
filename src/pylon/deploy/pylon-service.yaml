@@ -4,6 +4,10 @@ metadata:
   name: pylon-service
   namespace: default
 spec:
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+  - IPv4
+  - IPv6
   ports:
   - port: 443
     protocol: TCP

@@ -67,6 +67,7 @@ http {
 
   server {
     listen      80;
+    listen      [::]:80;
     server_name localhost;
     client_max_body_size 0; # Disable checking of client request body size.
     client_body_buffer_size 256M;
@@ -85,6 +86,7 @@ http {
   {% if SSL_ENABLE %}
   server {
     listen  443 ssl;
+    listen  [::]:443 ssl;
     server_name  localhost;
 
     ssl_certificate /root/{{CRT_NAME}};

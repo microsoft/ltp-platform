@@ -38,7 +38,7 @@ spec:
         - --conntrack-max-per-core=0
         - --metrics-bind-address=0.0.0.0:10249
         - --kubeconfig=/var/lib/kubelet/kubeconfig
-        - --cluster-cidr=100.64.0.0/10
+        - --cluster-cidr=10.20.0.0/16,fd20::/48
         - --detect-local-mode=ClusterCIDR
         - --pod-interface-name-prefix=
         - --v=3
