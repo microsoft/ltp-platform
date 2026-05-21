@@ -16,19 +16,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Build cilium agent from source with updated Go.
-# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.25.9
+# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.25.10
 # (latest 1.25.x patch). All Go binaries (cilium, hubble, CNI plugins) are
 # compiled from source so no pre-built binaries from the base image are used.
 # Runtime base is the official cilium-runtime image (Ubuntu 24.04 + LLVM + BPF tools)
 # with OS-level security patches applied.
 #
 
-ARG GOLANG_VERSION=1.25.9
-ARG CILIUM_VERSION=v1.18.9
+ARG GOLANG_VERSION=1.25.10
+ARG CILIUM_VERSION=v1.18.10
 ARG CNI_PLUGINS_VERSION=v1.9.0
 ARG GOPS_VERSION=v0.3.27
-ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:13e905399a00ec93849808d5dc775ccc4a6a91a6@sha256:86dfbe17994adef8e7817b8d97351fd0120576a5fc845198f7d39a2788b891e9
-ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.36.6-1776000132-2437d2edeaf4d9b56ef279bd0d71127440c067aa@sha256:ba0ab8adac082d50d525fd2c5ba096c8facea3a471561b7c61c7a5b9c2e0de0d
+ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:5615e8b62b0b47ad5a586bf459d0c072eaa0442a@sha256:5edc984f0a8f4ae208d60490a3234d1950b5497d2646980328e69f4a73c50e85
+ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.36.6-1778235340-b87d1e32f522b33bd51701c6476d199326f01496@sha256:71d4fa0ec45e8d546dbd5604e169dc77fe92be63b799313bff031d00d89762e3
 
 # Stage 1: Build all Go binaries from source with Go 1.25.9
 FROM golang:${GOLANG_VERSION} AS builder
