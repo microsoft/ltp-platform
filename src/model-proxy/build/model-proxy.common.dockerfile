@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.25.9 AS builder
+FROM golang:1.25.10 AS builder
 WORKDIR /app
 
 COPY ./src /app/model-proxy

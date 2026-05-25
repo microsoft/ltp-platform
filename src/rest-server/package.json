@@ -87,14 +87,18 @@
     "qs": "^6.14.2",
     "minimatch": ">=10.2.3",
     "ajv": "^8.18.0",
-    "fast-xml-parser": "^5.5.9",
+    "fast-xml-parser": "^5.7.0",
     "form-data": "^4.0.4",
     "path-to-regexp": "^8.4.1",
     "flatted": "^3.4.2",
     "dottie": ">=2.0.7",
     "serialize-javascript": ">=7.0.3",
     "sequelize": ">=6.37.8",
-    "follow-redirects": "^1.16.0"
+    "follow-redirects": "^1.16.0",
+    "axios": "^1.15.1",
+    "fast-uri": "^3.1.1",
+    "ip-address": "^10.1.1",
+    "fast-xml-builder": "^1.1.7"
   },
   "_moduleAliases": {
     "@pai": "src"
