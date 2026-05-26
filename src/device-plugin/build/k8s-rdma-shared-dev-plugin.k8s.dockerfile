@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.25-alpine3.23 as builder
+FROM golang:1.25.10-alpine3.23 as builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -21,7 +21,9 @@ ENV HTTPS_PROXY $https_proxy
 RUN apk add --no-cache --virtual build-base linux-headers
 WORKDIR /usr/src/k8s-rdma-shared-dp
 
-RUN make clean && \
+RUN go get golang.org/x/net@v0.53.0 && \
+    go mod tidy && \
+    make clean && \
     make build
 
 FROM alpine:3.23
