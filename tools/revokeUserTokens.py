@@ -8,7 +8,23 @@ import sys
 import jwt
 import base64
 import uuid
+import requests
 from kubernetes import client, config
+
+
+def revoke_all_tokens_via_api(cluster_url, bearer_token):
+    url = f"https://{cluster_url}/rest-server/api/v1/token"
+    headers = {
+        "Authorization": f"Bearer {bearer_token}",
+        "Content-Type": "application/json"
+    }
+    response = requests.delete(url, headers=headers)
+    if response.status_code == 200:
+        print("✓ All tokens revoked via REST API (cache cleared).")
+        return True
+    else:
+        print(f"✗ Failed to revoke tokens. Status: {response.status_code}, Response: {response.text}")
+        return False
 
 
 def get_application_token(namespace="default", deployment_name="alertmanager", container_name="job-status-change-notification"):
@@ -50,38 +66,6 @@ def get_application_token(namespace="default", deployment_name="alertmanager", c
         return None
 
 
-def delete_all_token_secrets(namespace="pai-user-token"):
-    """
-    Delete all secrets in the token namespace.
-
-    Args:
-        namespace: Kubernetes namespace (default: pai-user-token)
-
-    Returns:
-        Number of secrets deleted, or -1 on error
-    """
-    try:
-        config.load_kube_config()
-        v1 = client.CoreV1Api()
-
-        # List all secrets in the namespace
-        secrets = v1.list_namespaced_secret(namespace=namespace)
-
-        deleted_count = 0
-        for secret in secrets.items:
-            secret_name = secret.metadata.name
-            try:
-                v1.delete_namespaced_secret(name=secret_name, namespace=namespace)
-                print(f"  Deleted secret: {secret_name}")
-                deleted_count += 1
-            except Exception as e:
-                print(f"  Failed to delete secret {secret_name}: {e}")
-
-        return deleted_count
-
-    except Exception as e:
-        print(f"Error deleting secrets: {e}")
-        return -1
 
 
 def add_token_to_k8s_secret(token_string, namespace="pai-user-token"):
@@ -144,9 +128,20 @@ if __name__ == "__main__":
     print("=" * 70)
     print("Token Revocation and Restoration Tool")
     print("=" * 70)
-    print("\nThis tool will delete all the user tokens but keep the application token.")
+    print("\nThis tool will revoke all user tokens via REST API (clearing cache)")
+    print("and restore the application token.")
     print("\n⚠️  WARNING: This will cause service disruptions during execution!")
     print("=" * 70)
+
+    cluster_url = input("\nEnter the cluster URL (e.g. example.ltp.hpc-lucia.com): ")
+    if not cluster_url:
+        print("Cluster URL cannot be empty.")
+        sys.exit(1)
+
+    admin_token = input("Enter an admin bearer token: ")
+    if not admin_token:
+        print("Bearer token cannot be empty.")
+        sys.exit(1)
 
     confirm = input("\nType 'yes' to proceed: ")
     if confirm.lower() != 'yes':
@@ -158,11 +153,7 @@ if __name__ == "__main__":
     print("Step 1: Retrieving PAI_BEARER_TOKEN from alert-manager")
     print("=" * 70)
 
-    alert_namespace = "default"
-    alert_deployment = "alertmanager"
-    alert_container = "job-status-change-notification"
-
-    alert_token = get_application_token(alert_namespace, alert_deployment, alert_container)
+    alert_token = get_application_token()
 
     if not alert_token:
         print("\n✗ Failed to retrieve alert-manager token.")
@@ -175,18 +166,12 @@ if __name__ == "__main__":
         print(f"✓ Successfully retrieved alert-manager token")
         print(f"Token (truncated): {alert_token[:20]}...{alert_token[-20:]}")
 
-    # Step 2: Delete all token secrets
+    # Step 2: Revoke all tokens via REST API (clears cache)
     print("\n" + "=" * 70)
-    print("Step 2: Deleting all token secrets")
+    print("Step 2: Revoking all tokens via REST API")
     print("=" * 70)
 
-    token_namespace = "pai-user-token"
-
-    deleted_count = delete_all_token_secrets(token_namespace)
-    if deleted_count >= 0:
-        print(f"✓ Successfully deleted {deleted_count} secrets.")
-    else:
-        print(f"✗ Failed to delete secrets.")
+    if not revoke_all_tokens_via_api(cluster_url, admin_token):
         sys.exit(1)
 
     # Step 3: Add alert-manager token back
@@ -195,7 +180,7 @@ if __name__ == "__main__":
         print("Step 3: Adding alert-manager token back")
         print("=" * 70)
 
-        if add_token_to_k8s_secret(alert_token, token_namespace):
+        if add_token_to_k8s_secret(alert_token):
             print("✓ Alert-manager token has been restored successfully.")
         else:
             print("✗ Failed to restore alert-manager token.")
