@@ -42,12 +42,13 @@ def modify(yaml_url):
             node_selector_terms = data['spec']['template']['spec']['affinity']['nodeAffinity']['requiredDuringSchedulingIgnoredDuringExecution']['nodeSelectorTerms']
             node_selector_terms[0]['matchExpressions'].extend(node_affinity_config['matchExpressions'])
 
-    # Convert the modified YAML content back to a string
+    # Convert the modified YAML content back to a string, filtering out empty documents
+    documents = [doc for doc in documents if doc]
     modified_yaml_content = yaml.dump_all(documents, default_flow_style=False)
     return modified_yaml_content
 
 if __name__ == "__main__":
-    url = sys.argv[1] if len(sys.argv) > 1 else "https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/heads/master/deploy/csi-blob-node.yaml"
+    url = sys.argv[1] if len(sys.argv) > 1 else "https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/tags/v1.27.4/deploy/csi-blob-node.yaml"
     output_file = sys.argv[2] if len(sys.argv) > 2 else "modified_csi-blob-node.yaml"
     modified_yaml_content = modify(url)
     with open(output_file, 'w') as yaml_file:

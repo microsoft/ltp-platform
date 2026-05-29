@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.25 as build
+FROM golang:1.25.10 as build
 ARG TARGETOS
 ARG TARGETARCH
 
@@ -13,15 +13,15 @@ RUN git clone --branch 1.31.4-0.1.0 --single-branch https://github.com/everpeace
 
 WORKDIR /go/src/k8s-host-device-plugin
 
-RUN go mod edit -go=1.25 -toolchain=go1.25
+RUN go mod edit -go=1.25.10 -toolchain=go1.25.10
 
 RUN go mod edit \
     -require=github.com/fsnotify/fsnotify@v1.9.0 \
-    -require=golang.org/x/net@v0.40.0 \
+    -require=golang.org/x/net@v0.53.0 \
     -require=google.golang.org/grpc@v1.79.3 \
     -require=k8s.io/kubelet@v0.33.1
 
-RUN go mod tidy -go=1.25
+RUN go mod tidy -go=1.25.10
 
 RUN go install -ldflags="-s -w"
 
