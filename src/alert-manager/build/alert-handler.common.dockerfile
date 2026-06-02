@@ -11,7 +11,10 @@ WORKDIR /usr/src/app
 COPY ./src/alert-handler/package.json ./src/alert-handler/yarn.lock* ./src/alert-handler/.yarnrc.yml ./
 
 RUN corepack enable && corepack install -g yarn@4.2.2
-RUN yarn workspaces focus --production
+RUN yarn install
+RUN for dep in $(node -pe "Object.keys(require('./package.json').devDependencies || {}).join(' ')"); do \
+      rm -rf node_modules/$dep; \
+    done
 
 COPY ./src/alert-handler .
 

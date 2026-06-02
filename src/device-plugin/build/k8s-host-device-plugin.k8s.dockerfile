@@ -17,7 +17,8 @@ RUN go mod edit -go=1.25.10 -toolchain=go1.25.10
 
 RUN go mod edit \
     -require=github.com/fsnotify/fsnotify@v1.9.0 \
-    -require=golang.org/x/net@v0.53.0 \
+    -require=golang.org/x/net@v0.55.0 \
+    -require=golang.org/x/crypto@v0.52.0 \
     -require=google.golang.org/grpc@v1.79.3 \
     -require=k8s.io/kubelet@v0.33.1
 

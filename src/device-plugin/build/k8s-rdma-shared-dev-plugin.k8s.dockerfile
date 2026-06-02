@@ -21,7 +21,8 @@ ENV HTTPS_PROXY $https_proxy
 RUN apk add --no-cache --virtual build-base linux-headers
 WORKDIR /usr/src/k8s-rdma-shared-dp
 
-RUN go get golang.org/x/net@v0.53.0 && \
+RUN go get golang.org/x/net@v0.55.0 && \
+    go get golang.org/x/crypto@v0.52.0 && \
     go mod tidy && \
     make clean && \
     make build

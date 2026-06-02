@@ -34,7 +34,10 @@ WORKDIR /usr/src/plugin
 RUN git clone --branch ${PLUGINVERSION} --depth 1 https://github.com/grafana/grafana-infinity-datasource.git /usr/src/plugin
 
 RUN go get google.golang.org/grpc@v1.79.3 && \
-    go get go.opentelemetry.io/otel/sdk@v1.43.0 && go mod tidy
+    go get go.opentelemetry.io/otel/sdk@v1.43.0 && \
+    go get golang.org/x/crypto@v0.52.0 && \
+    go get golang.org/x/net@v0.55.0 && \
+    go mod tidy
 
 RUN go install github.com/magefile/mage@latest
 

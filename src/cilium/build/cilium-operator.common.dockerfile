@@ -35,6 +35,11 @@ WORKDIR /go/src/github.com/cilium/cilium
 RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
     https://github.com/cilium/cilium.git .
 
+RUN go get golang.org/x/crypto@v0.52.0 && \
+    go get golang.org/x/net@v0.55.0 && \
+    go mod tidy && \
+    go mod vendor
+
 RUN mkdir -p /out && \
     make -C operator cilium-operator-generic && \
     mv operator/cilium-operator-generic /out/cilium-operator-generic

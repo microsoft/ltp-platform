@@ -13,7 +13,10 @@ COPY ./src/job-status-change-notification/package.json ./src/job-status-change-n
 COPY ./src/job-status-change-notification/openpaidbsdk ./openpaidbsdk
 
 RUN corepack enable && corepack install -g yarn@4.2.2
-RUN yarn workspaces focus --production
+RUN yarn install
+RUN for dep in $(node -pe "Object.keys(require('./package.json').devDependencies || {}).join(' ')"); do \
+      rm -rf node_modules/$dep; \
+    done
 
 # Copy application source
 COPY ./src/job-status-change-notification .

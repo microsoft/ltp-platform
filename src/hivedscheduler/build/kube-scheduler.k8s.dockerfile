@@ -15,7 +15,8 @@ WORKDIR /go/kubernetes
 RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       dir=$(dirname "$modfile"); \
       (cd "$dir" && \
-        go get golang.org/x/crypto@v0.45.0 && \
+        go get golang.org/x/crypto@v0.52.0 && \
+        go get golang.org/x/net@v0.55.0 && \
         go get go.opentelemetry.io/otel/sdk@v1.43.0 \
       ) || true; \
     done && \
