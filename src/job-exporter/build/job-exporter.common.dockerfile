@@ -133,7 +133,7 @@ RUN set -eux; \
     python3 -m pip install --no-cache-dir \
         --no-index --find-links=/wheels \
         prometheus_client psutil filelock && \
-    # Set environment variable to allow sudo removal during autoremove
+    apt-get remove -y python3-pip && \
     SUDO_FORCE_REMOVE=yes apt-get autoremove -y; \
     apt-get clean; \
     rm -rf /wheels /root/.cache /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*

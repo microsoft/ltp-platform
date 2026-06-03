@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "1.2.0",
-    "axios": "^1.15.0",
+    "axios": "^1.16.0",
     "body-parser": "^2.2.1",
     "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
@@ -64,7 +64,7 @@
     "@eslint/plugin-kit": "^0.3.3",
     "qs": "^6.14.2",
     "lodash": "^4.18.0",
-    "axios": "^1.15.0",
+    "axios": "^1.16.0",
     "minimatch": "^10.2.3",
     "form-data": "^4.0.4",
     "underscore": "^1.13.8",
