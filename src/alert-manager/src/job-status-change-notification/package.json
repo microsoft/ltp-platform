@@ -61,7 +61,8 @@
     "semver": "^6.3.1",
     "follow-redirects": "^1.16.0",
     "axios": "^1.15.1",
-    "fast-uri": "^3.1.1"
+    "fast-uri": "^3.1.1",
+    "uuid": "11.1.1"
   },
   "scripts": {
     "lint": "eslint .",
