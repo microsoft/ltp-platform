@@ -130,6 +130,11 @@ jobs:
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
             -s $changed_services
 
+      - name: Login to Azure with Managed Identity
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
+
       - name: Push Images of Changed Services to ACR
         if: steps.check.outputs.has_changed == 'true'
         run: |
@@ -137,7 +142,8 @@ jobs:
           echo "Pushing: $changed_services"
           $GITHUB_WORKSPACE/build/pai_build.py push \
             -c $GITHUB_WORKSPACE/config/cluster-configuration \
-            -s $changed_services
+            -s $changed_services \
+            --managed-identity-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
 
       - name: Push Images of Changed Service to GHCR
         if: steps.check.outputs.has_changed == 'true'
