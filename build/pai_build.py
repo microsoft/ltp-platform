@@ -179,7 +179,7 @@ def main():
             config_model['dockerRegistryInfo']['managedIdentityId'] = args.managed_identity_id
         if hasattr(args, 'docker_tag') and args.docker_tag is not None:
             config_model['dockerRegistryInfo']['dockerTag'] = args.docker_tag
-
+    
     args.func(args, config_model)
 
     endtime = datetime.datetime.now()
