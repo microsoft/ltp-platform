@@ -104,6 +104,16 @@ jobs:
           mv $GITHUB_WORKSPACE/config/auth-configuration /tmp/
           ls -l /tmp/auth-configuration
 
+      - name: Debug - Print docker registry config (temporary)
+        if: steps.check.outputs.has_changed == 'true'
+        run: |
+          echo "=== Docker registry config ==="
+          find $GITHUB_WORKSPACE/config/cluster-configuration -type f | xargs grep -l "docker-registry" || true
+          for f in $(find $GITHUB_WORKSPACE/config/cluster-configuration -type f -name "*.yaml" -o -name "*.yml"); do
+            echo "--- $f ---"
+            cat "$f" | sed 's/docker-password:.*/docker-password: ***REDACTED***/'
+          done
+
       - name: Login to GHCR
         if: steps.check.outputs.has_changed == 'true'
         run: |
