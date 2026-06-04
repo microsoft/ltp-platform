@@ -177,11 +177,9 @@ def main():
             config_model['dockerRegistryInfo']['dockerPassword'] = args.docker_password
         if hasattr(args, 'managed_identity_id') and args.managed_identity_id is not None:
             config_model['dockerRegistryInfo']['managedIdentityId'] = args.managed_identity_id
-            config_model['dockerRegistryInfo']['dockerUserName'] = ''
-            config_model['dockerRegistryInfo']['dockerPassword'] = ''
         if hasattr(args, 'docker_tag') and args.docker_tag is not None:
             config_model['dockerRegistryInfo']['dockerTag'] = args.docker_tag
-    
+
     args.func(args, config_model)
 
     endtime = datetime.datetime.now()

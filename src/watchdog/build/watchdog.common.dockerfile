@@ -1,6 +1,5 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
-# ci-test: verify managed identity ACR push
 
 FROM golang:1.25.10-alpine3.23 as builder
 
