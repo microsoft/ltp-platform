@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 120
     environment: auto-test
     container:
-      image: ubuntu:latest
+      image: ubuntu:24.04
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
     env:
