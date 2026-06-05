@@ -82,7 +82,7 @@ class Machine:
 
             if "k8s-role" not in host:
                 return False, "k8s-role is miss in the host [{0}]".format(str(host))
-            if "k8s-role" is "master":
+            if "k8s-role" == "master":
                 if "etcdid" not in host:
                     return False, "etcdid is miss in one of the host with the [k8s-role: master]."
                 if host["etcdid"] in etcd_id_visited:
