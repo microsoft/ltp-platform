@@ -66,7 +66,7 @@
     "underscore": "^1.13.8",
     "url": "^0.11.4",
     "winston": "2",
-    "ws": "^8.18.2",
+    "ws": "^8.20.1",
     "xml2js": "~0.6.2"
   },
   "overrides": {
@@ -84,7 +84,7 @@
     "tar-fs": "^3.1.1",
     "@eslint/plugin-kit": "^0.3.3",
     "mocha/diff": "^8.0.3",
-    "qs": "^6.14.2",
+    "qs": "^6.15.2",
     "minimatch": ">=10.2.3",
     "ajv": "^8.18.0",
     "fast-xml-parser": "^5.7.0",
@@ -98,7 +98,10 @@
     "axios": "^1.15.1",
     "fast-uri": "^3.1.1",
     "ip-address": "^10.1.1",
-    "fast-xml-builder": "^1.1.7"
+    "fast-xml-builder": "^1.1.7",
+    "brace-expansion": "^5.0.6",
+    "uuid": "11.1.1",
+    "ws": "^8.20.1"
   },
   "_moduleAliases": {
     "@pai": "src"

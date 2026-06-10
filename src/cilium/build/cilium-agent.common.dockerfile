@@ -23,7 +23,7 @@
 # with OS-level security patches applied.
 #
 
-ARG GOLANG_VERSION=1.25.10
+ARG GOLANG_VERSION=1.25.11
 ARG CILIUM_VERSION=v1.18.10
 ARG CNI_PLUGINS_VERSION=v1.9.0
 ARG GOPS_VERSION=v0.3.27
@@ -43,6 +43,11 @@ RUN apt-get update && \
 WORKDIR /go/src/github.com/cilium/cilium
 RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
     https://github.com/cilium/cilium.git .
+
+RUN go get golang.org/x/crypto@v0.52.0 && \
+    go get golang.org/x/net@v0.55.0 && \
+    go mod tidy && \
+    go mod vendor
 
 # Build all cilium-agent container binaries:
 #   cilium-dbg, daemon (cilium-agent), cilium-health, bugtool,

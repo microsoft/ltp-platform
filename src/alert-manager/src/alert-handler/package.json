@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "1.2.0",
-    "axios": "^1.15.0",
+    "axios": "^1.16.0",
     "body-parser": "^2.2.1",
     "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
@@ -46,7 +46,7 @@
     "module-alias": "^2.2.3",
     "nodemailer": "^8.0.5",
     "winston": "2",
-    "ws": "^8.18.2"
+    "ws": "^8.20.1"
   },
   "overrides": {
     "express@*": "5.2.1",
@@ -62,20 +62,22 @@
   "resolutions": {
     "tar-fs": "^3.1.1",
     "@eslint/plugin-kit": "^0.3.3",
-    "qs": "^6.14.2",
+    "qs": "^6.15.2",
     "lodash": "^4.18.0",
-    "axios": "^1.15.0",
+    "axios": "^1.16.0",
     "minimatch": "^10.2.3",
     "form-data": "^4.0.4",
     "underscore": "^1.13.8",
     "path-to-regexp": "^8.4.0",
-    "brace-expansion": "^5.0.5",
+    "brace-expansion": "^5.0.6",
     "mailparser": "^3.9.3",
     "flatted": "^3.4.2",
     "ajv": "^6.14.0",
     "nodemailer": "^8.0.5",
     "follow-redirects": "^1.16.0",
-    "ip-address": "^10.1.1"
+    "ip-address": "^10.1.1",
+    "ws": "^8.20.1",
+    "uuid": "11.1.1"
   },
   "scripts": {
     "lint": "eslint .",

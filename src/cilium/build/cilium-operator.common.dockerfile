@@ -20,7 +20,7 @@
 # (latest 1.25.x patch). The operator is a pure Go binary (CGO_ENABLED=0, scratch base).
 #
 
-ARG GOLANG_VERSION=1.25.10
+ARG GOLANG_VERSION=1.25.11
 ARG CILIUM_VERSION=v1.18.10
 
 # Stage 1: Build operator binary
@@ -34,6 +34,11 @@ RUN apt-get update && \
 WORKDIR /go/src/github.com/cilium/cilium
 RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
     https://github.com/cilium/cilium.git .
+
+RUN go get golang.org/x/crypto@v0.52.0 && \
+    go get golang.org/x/net@v0.55.0 && \
+    go mod tidy && \
+    go mod vendor
 
 RUN mkdir -p /out && \
     make -C operator cilium-operator-generic && \

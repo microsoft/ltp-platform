@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.25.10 AS builder
+FROM golang:1.25.11 AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -15,7 +15,8 @@ WORKDIR /go/kubernetes
 RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       dir=$(dirname "$modfile"); \
       (cd "$dir" && \
-        go get golang.org/x/crypto@v0.45.0 && \
+        go get golang.org/x/crypto@v0.52.0 && \
+        go get golang.org/x/net@v0.55.0 && \
         go get go.opentelemetry.io/otel/sdk@v1.43.0 \
       ) || true; \
     done && \
@@ -25,7 +26,7 @@ RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
     done && \
     go work vendor
 
-RUN GOTOOLCHAIN=go1.25.10 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
+RUN GOTOOLCHAIN=go1.25.11 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
     make WHAT=cmd/kube-scheduler
 
 FROM registry.k8s.io/build-image/go-runner:v2.4.0-go1.25.10-bookworm.0

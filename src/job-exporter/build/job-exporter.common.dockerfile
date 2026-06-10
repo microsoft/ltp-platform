@@ -46,7 +46,7 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 ############################
 # nerdctl-builder: build nerdctl from source
 ############################
-FROM golang:1.26.3 AS nerdctl-builder
+FROM golang:1.26.4 AS nerdctl-builder
 
 ARG TARGETARCH
 ARG NERDCTL_VERSION=2.3.1
@@ -55,6 +55,9 @@ WORKDIR /build
 
 RUN set -eux; \
     git clone --depth 1 --branch v${NERDCTL_VERSION} https://github.com/containerd/nerdctl.git .; \
+    go get golang.org/x/crypto@v0.52.0; \
+    go get golang.org/x/net@v0.55.0; \
+    go mod tidy; \
     make binaries; \
     mkdir -p /opt/nerdctl; \
     cp _output/nerdctl /opt/nerdctl/nerdctl; \
@@ -130,8 +133,7 @@ RUN set -eux; \
     python3 -m pip install --no-cache-dir \
         --no-index --find-links=/wheels \
         prometheus_client psutil filelock && \
-    # Set environment variable to allow sudo removal during autoremove
-    SUDO_FORCE_REMOVE=yes apt-get autoremove -y; \
+    dpkg --purge --force-depends python3-pip && \
     apt-get clean; \
     rm -rf /wheels /root/.cache /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
 
