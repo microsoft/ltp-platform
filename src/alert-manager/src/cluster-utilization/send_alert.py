@@ -408,8 +408,8 @@ def main():
                 os.environ.get("LUCIA_BEARER_TOKEN"),
                 trace_id
             )
-        except Exception as e:
-            logging.error(f"Failed to collect report from Lucia: {e}")
+        except Exception:
+            logging.exception("Failed to collect report from Lucia")
             return
         alerts = generate_alerts_from_lucia(message, lucia_url, trace_id)
     else:
