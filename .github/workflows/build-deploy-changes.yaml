@@ -123,7 +123,7 @@ jobs:
             $GITHUB_WORKSPACE/build/pai_build.py build \
               -n \
               -c $GITHUB_WORKSPACE/config/cluster-configuration \
-              -s alert-manager
+              -s alert-manager \
               -i abnormal-detector,alert-handler,alert-parser,cert-expiration-checker,cluster-utilization,job-data-recorder,job-status-change-notification,node-failure-detection,node-issue-classifier,nvidia-gpu-low-perf-fixer,redis-monitoring
           fi
 
