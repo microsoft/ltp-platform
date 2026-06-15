@@ -402,13 +402,24 @@ def main():
         trace_id = str(uuid.uuid4())
         lucia_url = os.environ.get("LUCIA_URL")
         # collect cluster gpu usage information
-        message = collect_report_from_lucia(
-            lucia_url,
-            os.environ.get("LUCIA_BEARER_TOKEN"),
-            trace_id
-        )
+        try:
+            message = collect_report_from_lucia(
+                lucia_url,
+                os.environ.get("LUCIA_BEARER_TOKEN"),
+                trace_id
+            )
+        except Exception:
+            logging.exception("Failed to collect report from Lucia")
+            return
         alerts = generate_alerts_from_lucia(message, lucia_url, trace_id)
-    send_alert(PAI_URI, alerts)
+    else:
+        logging.error(f"Unknown REPORT_SOURCE: {REPORT_SOURCE}")
+        return
+
+    try:
+        send_alert(PAI_URI, alerts)
+    except Exception as e:
+        logging.error(f"Failed to send alerts: {e}")
 
 if __name__ == "__main__":
     logging.basicConfig(
