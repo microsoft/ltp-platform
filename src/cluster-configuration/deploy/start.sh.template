@@ -42,36 +42,54 @@ kubectl apply --overwrite=true -f priority-class.yaml || exit $?
 kubectl apply -f write-etc-hosts.yaml || exit $?
 
 # Add `pai-master`, `pai-worker`, `pai-storage` label to corresponding nodes and remove irrelant labels
+# Skip nodes that no longer exist in the cluster to avoid deploy failure
+all_nodes=$(kubectl get nodes -o custom-columns=NAME:.metadata.name --no-headers) || exit $?
+existing_nodes=""
+
+{%- for host in cluster_cfg['layout']['machine-list'] %}
+    {%- set hostname = cluster_cfg['layout']['machine-list'][host]['hostname'] %}
+if echo "$all_nodes" | grep -Fxq "{{ hostname }}"; then
+    existing_nodes="${existing_nodes}{{ hostname }}"$'\n'
+else
+    echo "WARNING: node {{ hostname }} not found, skipping" >&2
+fi
+{%- endfor %}
+
 (
 {%- for host in cluster_cfg['layout']['machine-list'] %}
+    {%- set hostname = cluster_cfg['layout']['machine-list'][host]['hostname'] %}
+if printf '%s' "$existing_nodes" | grep -Fxq "{{ hostname }}"; then
     {%- if 'pai-master' in cluster_cfg['layout']['machine-list'][host] and cluster_cfg['layout']['machine-list'][host]['pai-master'] == 'true' %}
-echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} pai-master=true pai-worker=false || exit $?
+echo "kubectl label --overwrite=true nodes {{ hostname }} pai-master=true pai-worker=false || exit \$?"
     {%- else %}
-echo kubectl label nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} pai-master- || exit $?
+echo "kubectl label nodes {{ hostname }} pai-master- || exit \$?"
     {%- endif %}
+
     {%- if 'pai-worker' in cluster_cfg['layout']['machine-list'][host] and cluster_cfg['layout']['machine-list'][host]['pai-worker'] == 'true' %}
-echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} pai-worker=true || exit $?
+echo "kubectl label --overwrite=true nodes {{ hostname }} pai-worker=true || exit \$?"
         {%- set machine_type = cluster_cfg['layout']['machine-list'][host]['machine-type'] %}
         {%- if machine_type in cluster_cfg['layout']['machine-sku'] and 'computing-device' in cluster_cfg['layout']['machine-sku'][machine_type] %}
             {%- set device_type = cluster_cfg['layout']['machine-sku'][machine_type]['computing-device']['type'] %}
             {%- if device_type == 'nvidia.com/gpu' %}
-echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} vendor=nvidia || exit $?
+echo "kubectl label --overwrite=true nodes {{ hostname }} vendor=nvidia || exit \$?"
             {%- elif device_type == 'amd.com/gpu' %}
-echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} vendor=amd || exit $?
+echo "kubectl label --overwrite=true nodes {{ hostname }} vendor=amd || exit \$?"
             {%- else %}
-echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} vendor=unknown || exit $?
+echo "kubectl label --overwrite=true nodes {{ hostname }} vendor=unknown || exit \$?"
             {%- endif %}
         {%- else %}
-echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} vendor=cpu || exit $?
+echo "kubectl label --overwrite=true nodes {{ hostname }} vendor=cpu || exit \$?"
         {%- endif %}
     {%- else %}
-echo kubectl label nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} pai-worker- || exit $?
+echo "kubectl label nodes {{ hostname }} pai-worker- || exit \$?"
     {%- endif %}
+
     {%- if 'pai-storage' in cluster_cfg['layout']['machine-list'][host] and cluster_cfg['layout']['machine-list'][host]['pai-storage'] == 'true' %}
-echo kubectl label --overwrite=true nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} pai-storage=true || exit $?
+echo "kubectl label --overwrite=true nodes {{ hostname }} pai-storage=true || exit \$?"
     {%- else %}
-echo kubectl label nodes {{ cluster_cfg['layout']['machine-list'][host]['hostname'] }} pai-storage- || exit $?
+echo "kubectl label nodes {{ hostname }} pai-storage- || exit \$?"
     {%- endif %}
+fi
 {%- endfor %}
 ) | parallel || exit $?
 
