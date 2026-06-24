@@ -49,7 +49,7 @@ existing_nodes=""
 {%- for host in cluster_cfg['layout']['machine-list'] %}
     {%- set hostname = cluster_cfg['layout']['machine-list'][host]['hostname'] %}
 if echo "$all_nodes" | grep -Fxq "{{ hostname }}"; then
-    existing_nodes="$existing_nodes {{ hostname }}"
+    existing_nodes="${existing_nodes}{{ hostname }}"$'\n'
 else
     echo "WARNING: node {{ hostname }} not found, skipping" >&2
 fi
@@ -58,7 +58,7 @@ fi
 (
 {%- for host in cluster_cfg['layout']['machine-list'] %}
     {%- set hostname = cluster_cfg['layout']['machine-list'][host]['hostname'] %}
-if echo "$existing_nodes" | grep -Fwq "{{ hostname }}"; then
+if printf '%s' "$existing_nodes" | grep -Fxq "{{ hostname }}"; then
     {%- if 'pai-master' in cluster_cfg['layout']['machine-list'][host] and cluster_cfg['layout']['machine-list'][host]['pai-master'] == 'true' %}
 echo "kubectl label --overwrite=true nodes {{ hostname }} pai-master=true pai-worker=false || exit \$?"
     {%- else %}
