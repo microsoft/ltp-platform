@@ -44,7 +44,7 @@
     "express-bearer-token": "^3.0.0",
     "joi": "^17.13.3",
     "module-alias": "^2.2.3",
-    "nodemailer": "^7.0.3",
+    "nodemailer": "^9.0.1",
     "winston": "2",
     "ws": "^8.18.2"
   },
