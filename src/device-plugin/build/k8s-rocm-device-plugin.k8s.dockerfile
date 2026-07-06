@@ -29,7 +29,7 @@ RUN go mod edit \
     -require=k8s.io/apimachinery@v0.33.1 \
     -require=k8s.io/kubelet@v0.33.1 \
     -require=sigs.k8s.io/controller-runtime@v0.21.0
-RUN go mod tidy -go=1.25.10
+RUN go mod tidy -go=1.25.11
 
 WORKDIR /go/src/github.com/ROCm/k8s-device-plugin/cmd/k8s-device-plugin
 
