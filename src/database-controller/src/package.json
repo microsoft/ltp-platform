@@ -37,10 +37,10 @@
   "overrides": {
     "express@*": "5.2.1",
     "body-parser@*": "2.2.1",
-    "js-yaml@*": "4.1.1",
+    "js-yaml@*": "4.2.0",
     "express@* > body-parser": "2.2.1",
-    "@eslint/eslintrc@* > js-yaml": "4.1.1",
-    "@kubernetes/client-node@* > js-yaml": "4.1.1"
+    "@eslint/eslintrc@* > js-yaml": "4.2.0",
+    "@kubernetes/client-node@* > js-yaml": "4.2.0"
   },
   "resolutions": {
     "tar-fs": "^3.1.1",

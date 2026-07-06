@@ -52,11 +52,11 @@
     "express@*": "5.2.1",
     "body-parser@*": "2.2.1",
     "@messageformat/runtime@*": "3.0.2",
-    "js-yaml@*": "4.1.1",
+    "js-yaml@*": "4.2.0",
     "@messageformat/core@* > @messageformat/runtime": "3.0.2",
     "express@* > body-parser": "2.2.1",
-    "@eslint/eslintrc@* > js-yaml": "4.1.1",
-    "@kubernetes/client-node@* > js-yaml": "4.1.1",
+    "@eslint/eslintrc@* > js-yaml": "4.2.0",
+    "@kubernetes/client-node@* > js-yaml": "4.2.0",
     "@messageformat/core@3.4.0 > @messageformat/runtime": "3.0.2"
   },
   "resolutions": {
