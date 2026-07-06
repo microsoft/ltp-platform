@@ -49,12 +49,12 @@
     "lodash": "^4.18.0",
     "minimatch": "^10.2.3",
     "ajv": "^8.18.0",
-    "form-data": "^4.0.4",
+    "form-data": "^4.0.6",
     "dottie": ">=2.0.7",
     "flatted": "^3.4.2",
     "underscore": ">=1.13.8",
     "path-to-regexp": ">=8.4.0",
-    "nodemailer": ">=8.0.4",
+    "nodemailer": ">=8.0.9",
     "brace-expansion": "5.0.6",
     "mailparser": ">=3.9.3",
     "validator": "^13.15.22",
@@ -62,7 +62,8 @@
     "follow-redirects": "^1.16.0",
     "axios": "^1.15.1",
     "fast-uri": "^3.1.1",
-    "uuid": "11.1.1"
+    "uuid": "11.1.1",
+    "joi": ">=17.13.4"
   },
   "scripts": {
     "lint": "eslint .",

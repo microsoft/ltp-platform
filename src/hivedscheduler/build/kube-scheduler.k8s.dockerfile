@@ -29,6 +29,6 @@ RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
 RUN GOTOOLCHAIN=go1.25.11 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
     make WHAT=cmd/kube-scheduler
 
-FROM registry.k8s.io/build-image/go-runner:v2.4.0-go1.25.10-bookworm.0
+FROM registry.k8s.io/build-image/go-runner:v2.4.0-go1.25.11-bookworm.0
 
 COPY --from=builder /go/kubernetes/_output/local/go/bin/kube-scheduler /usr/local/bin/kube-scheduler

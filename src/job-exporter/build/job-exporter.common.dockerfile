@@ -49,15 +49,12 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 FROM golang:1.26.4 AS nerdctl-builder
 
 ARG TARGETARCH
-ARG NERDCTL_VERSION=2.3.1
+ARG NERDCTL_VERSION=2.3.4
 
 WORKDIR /build
 
 RUN set -eux; \
     git clone --depth 1 --branch v${NERDCTL_VERSION} https://github.com/containerd/nerdctl.git .; \
-    go get golang.org/x/crypto@v0.52.0; \
-    go get golang.org/x/net@v0.55.0; \
-    go mod tidy; \
     make binaries; \
     mkdir -p /opt/nerdctl; \
     cp _output/nerdctl /opt/nerdctl/nerdctl; \

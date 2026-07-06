@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM docker.io/golang:1.25.10-alpine as builder
+FROM docker.io/golang:1.25.11-alpine as builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -17,7 +17,7 @@ RUN git clone --branch v1.31.0.7 --single-branch https://github.com/ROCm/k8s-dev
 
 WORKDIR /go/src/github.com/ROCm/k8s-device-plugin
 
-RUN go mod edit -go=1.25.10 -toolchain=go1.25.10
+RUN go mod edit -go=1.25.11 -toolchain=go1.25.11
 
 RUN go mod edit \
     -require=github.com/go-logr/logr@v1.4.3 \
