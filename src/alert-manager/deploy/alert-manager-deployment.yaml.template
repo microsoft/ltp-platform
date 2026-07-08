@@ -89,23 +89,6 @@ spec:
         - name: POSTGRES_SCHEMA
           value: "{{ cluster_cfg['alert-manager']['postgresql'].get('schema', 'ltp_sdk') }}"
 {% endif %}
-{% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
-        - name: EMAIL_CONFIGS_ADMIN_RECEIVER
-          value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["admin-receiver"] }}
-        - name: EMAIL_CONFIGS_SMTP_HOST
-          value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["smtp-host"] }}
-        - name: EMAIL_CONFIGS_SMTP_PORT
-          value: "{{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["smtp-port"] }}"
-        - name: EMAIL_CONFIGS_SMTP_FROM
-          value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["smtp-from"] }}
-        - name: EMAIL_CONFIGS_SMTP_AUTH_USERNAME
-          value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["smtp-auth-username"] }}
-        - name: EMAIL_CONFIGS_SMTP_AUTH_PASSWORD
-          value: {{ cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["smtp-auth-password"] }}
-        volumeMounts:
-        - name: templates-volume
-          mountPath: /etc/alerthandler/templates
-{% endif %}
 {% endif %}
 {% if cluster_cfg["alert-manager"]["job-status-change-notification"]["configured"] %}
       - name: job-status-change-notification
@@ -457,18 +440,6 @@ spec:
         configMap:
           name: alertmanager-configmap
 {% if cluster_cfg["alert-manager"]["alert-handler"]["configured"] %}
-{% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - name: templates-volume
-        configMap:
-          name: alert-templates
-          items:
-          {% for template in cluster_cfg["alert-manager"]["alert-handler"]["email-configs"]["templates"] -%}
-          - key: {{ template }}-html.ejs
-            path: {{ template }}/html.ejs
-          - key: {{ template }}-subject.ejs
-            path: {{ template }}/subject.ejs
-          {% endfor -%}
-{% endif %}
 {% endif %}
 {% if cluster_cfg["alert-manager"]["node-recycler"]["configured"] %}
 {% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}

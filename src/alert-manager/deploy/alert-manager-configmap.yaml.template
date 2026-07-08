@@ -153,10 +153,6 @@ data:
     receivers:
     - name: "pai-email-admin"
       webhook_configs:
-      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
-        send_resolved: true
-      {% endif %}
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
 
@@ -164,48 +160,26 @@ data:
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
-      {% if 'cert-expiration-checker' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-group/?template=cert-expiration'
-        send_resolved: false
-      {% endif %}
 
     - name: pai-cluster-usage
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
-      {% if 'email-group' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-group/?template=cluster-usage'
-        send_resolved: false
-      {% endif %}
 
     - name: pai-job-status-change
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
-      {% if 'email-user' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-user/?template=job-status-change'
-        send_resolved: false
-        http_config:
-          bearer_token: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
-      {% endif %}
-    
+
     - name: pai-prod-job-status-change
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
-      {% if 'email-group' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-group/?template=job-status-change'
-        send_resolved: false
-      {% endif %}
 
     - name: pai-unvalidate-nodes
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
-      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
-        send_resolved: false
-      {% endif %}
 
     - name: pai-cordon-nodes
       webhook_configs:
@@ -215,11 +189,7 @@ data:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/cordon-nodes'
         send_resolved: false
       {% endif %}
-      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
-        send_resolved: true
-      {% endif %}
-    
+
     - name: pai-uncordon-nodes
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
@@ -228,11 +198,7 @@ data:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/uncordon-nodes'
         send_resolved: false
       {% endif %}
-      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
-        send_resolved: true
-      {% endif %}
-    
+
     - name: pai-reboot-nodes
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
@@ -240,10 +206,6 @@ data:
       {% if 'reboot-nodes' in cluster_cfg["alert-manager"]["actions-available"] %}
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/reboot-nodes'
         send_resolved: false
-      {% endif %}
-      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
-        send_resolved: true
       {% endif %}
 
     - name: pai-drain-nodes
@@ -254,21 +216,12 @@ data:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/drain-nodes'
         send_resolved: false
       {% endif %}
-      {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin'
-        send_resolved: true
-      {% endif %}
 
     - name: pai-abnormal-job-email
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
-      {% if 'email-user' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-user/?template=kill-low-efficiency-job-alert'
-        send_resolved: false
-        http_config:
-          bearer_token: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
-      {% endif %}
+
     - name: pai-abnormal-job-terminate
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
@@ -295,37 +248,12 @@ data:
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
-      {% if 'email-user' in cluster_cfg["alert-manager"]["actions-available"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-user/?template=adjust-user-quota'
-        send_resolved: false
-        http_config:
-          bearer_token: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
-      {% endif %}
 
     {% for receiver in cluster_cfg["alert-manager"]["customized-receivers"] %}
     - name: {{ receiver.name}}
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
-      {% if (receiver["actions"]["email-admin"] is defined) and ('email-admin' in cluster_cfg["alert-manager"]["actions-available"]) %}
-      {% set template = receiver["actions"]["email-admin"]["template"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-admin/?template={{ template }}'
-        send_resolved: true
-      {% endif %}
-
-      {% if (receiver["actions"]["email-group"] is defined) and ('email-group' in cluster_cfg["alert-manager"]["actions-available"]) %}
-      {% set template = receiver["actions"]["email-group"]["template"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-group/?template={{ template }}'
-        send_resolved: false
-      {% endif %}
-
-      {% if (receiver["actions"]["email-user"] is defined) and ('email-user' in cluster_cfg["alert-manager"]["actions-available"]) %}
-      {% set template = receiver["actions"]["email-user"]["template"] %}
-      - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-user/?template={{ template }}'
-        send_resolved: false
-        http_config:
-          bearer_token: {{ cluster_cfg["alert-manager"]["pai-bearer-token"] }}
-      {% endif %}
 
       {% if (receiver["actions"]["stop-jobs"] is defined) and ('stop-jobs' in cluster_cfg["alert-manager"]["actions-available"]) %}
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/stop-jobs'

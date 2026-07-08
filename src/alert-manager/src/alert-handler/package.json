@@ -38,26 +38,20 @@
     "axios": "^1.16.0",
     "body-parser": "^2.2.1",
     "cookie-parser": "^1.4.7",
-    "ejs": "^3.1.10",
-    "email-templates": "^12.0.2",
     "express": "^5.2.0",
     "express-bearer-token": "^3.0.0",
     "joi": "^17.13.3",
     "module-alias": "^2.2.3",
-    "nodemailer": "^8.0.5",
     "winston": "2",
     "ws": "^8.20.1"
   },
   "overrides": {
     "express@*": "5.2.1",
     "body-parser@*": "2.2.1",
-    "@messageformat/runtime@*": "3.0.2",
     "js-yaml@*": "4.1.1",
-    "@messageformat/core@* > @messageformat/runtime": "3.0.2",
     "express@* > body-parser": "2.2.1",
     "@eslint/eslintrc@* > js-yaml": "4.1.1",
-    "@kubernetes/client-node@* > js-yaml": "4.1.1",
-    "@messageformat/core@3.4.0 > @messageformat/runtime": "3.0.2"
+    "@kubernetes/client-node@* > js-yaml": "4.1.1"
   },
   "resolutions": {
     "tar-fs": "^3.1.1",
@@ -70,10 +64,8 @@
     "underscore": "^1.13.8",
     "path-to-regexp": "^8.4.0",
     "brace-expansion": "^5.0.6",
-    "mailparser": "^3.9.3",
     "flatted": "^3.4.2",
     "ajv": "^6.14.0",
-    "nodemailer": "^8.0.5",
     "follow-redirects": "^1.16.0",
     "ip-address": "^10.1.1",
     "ws": "^8.20.1",

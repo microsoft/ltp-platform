@@ -16,29 +16,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 const express = require('express');
-const emailController = require('@alert-handler/controllers/mail');
 const jobController = require('@alert-handler/controllers/job');
 const nodeController = require('@alert-handler/controllers/node');
 const userController = require('@alert-handler/controllers/user');
 const logController = require('@alert-handler/controllers/log');
 
 const router = express.Router();
-
-// email
-router
-  .route('/alert-handler/send-email-to-admin')
-  /** POST /alert-handler/send-email-to-admin */
-  .post(emailController.sendEmailToAdmin);
-
-router
-  .route('/alert-handler/send-email-to-group')
-  /** POST /alert-handler/send-email-to-admin */
-  .post(emailController.sendEmailToGroup);
-
-router
-  .route('/alert-handler/send-email-to-user')
-  /** POST /alert-handler/send-email-to-user */
-  .post(emailController.sendEmailToUser);
 
 // job
 router
