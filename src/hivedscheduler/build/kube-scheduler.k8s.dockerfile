@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.25.11 AS builder
+FROM golang:1.25.12 AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -26,9 +26,9 @@ RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
     done && \
     go work vendor
 
-RUN GOTOOLCHAIN=go1.25.11 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
+RUN GOTOOLCHAIN=go1.25.12 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
     make WHAT=cmd/kube-scheduler
 
-FROM registry.k8s.io/build-image/go-runner:v2.4.0-go1.25.11-bookworm.0
+FROM registry.k8s.io/build-image/go-runner:v2.4.0-go1.25.12-bookworm.0
 
 COPY --from=builder /go/kubernetes/_output/local/go/bin/kube-scheduler /usr/local/bin/kube-scheduler

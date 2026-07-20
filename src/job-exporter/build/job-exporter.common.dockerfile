@@ -46,7 +46,7 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 ############################
 # nerdctl-builder: build nerdctl from source
 ############################
-FROM golang:1.26.4 AS nerdctl-builder
+FROM golang:1.26.5 AS nerdctl-builder
 
 ARG TARGETARCH
 ARG NERDCTL_VERSION=2.3.4

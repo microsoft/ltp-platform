@@ -14,17 +14,17 @@
 # NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-FROM golang:1.25.11 AS gosu
+FROM golang:1.25.12 AS gosu
 
 WORKDIR /src
 
 RUN git clone --branch 1.19 --depth 1 https://github.com/tianon/gosu.git .
 
-RUN go mod edit -go=1.25.11 \
- && go mod edit -toolchain=go1.25.11 \
- && go mod tidy -compat=1.25.11
+RUN go mod edit -go=1.25.12 \
+ && go mod edit -toolchain=go1.25.12 \
+ && go mod tidy -compat=1.25.12
 
-RUN go get -u ./... && go mod tidy -compat=1.25.11
+RUN go get -u ./... && go mod tidy -compat=1.25.12
 
 RUN go mod download
 

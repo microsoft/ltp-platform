@@ -16,14 +16,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Build cilium agent from source with updated Go.
-# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.25.11
+# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.25.12
 # (latest 1.25.x patch). All Go binaries (cilium, hubble, CNI plugins) are
 # compiled from source so no pre-built binaries from the base image are used.
 # Runtime base is the official cilium-runtime image (Ubuntu 24.04 + LLVM + BPF tools)
 # with OS-level security patches applied.
 #
 
-ARG GOLANG_VERSION=1.25.11
+ARG GOLANG_VERSION=1.25.12
 ARG CILIUM_VERSION=v1.18.10
 ARG CNI_PLUGINS_VERSION=v1.9.0
 ARG GOPS_VERSION=v0.3.27

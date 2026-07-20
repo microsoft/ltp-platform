@@ -1,4 +1,4 @@
-FROM golang:1.25.11 AS builder
+FROM golang:1.25.12 AS builder
 
 RUN git clone --branch v0.68.1 --depth 1 https://github.com/fatedier/frp.git /frp
 WORKDIR /frp
