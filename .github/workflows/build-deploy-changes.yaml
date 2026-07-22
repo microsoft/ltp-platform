@@ -7,6 +7,12 @@ permissions:
 on:
   pull_request:
     branches: [main, dev, "release/*"]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Push images and deploy to cluster"
+        type: boolean
+        default: false
 
 env:
   TAG: ${{ github.run_number }}
@@ -137,7 +143,7 @@ jobs:
           fi
 
       - name: Push Images of Changed Services to ACR
-        if: steps.check.outputs.has_changed == 'true'
+        if: steps.check.outputs.has_changed == 'true' && github.event.inputs.deploy == 'true'
         shell: bash
         run: |
           changed_services="${{ steps.changes.outputs.folders }}"
@@ -162,7 +168,7 @@ jobs:
           fi
 
       - name: Push Images of Changed Service to GHCR
-        if: steps.check.outputs.has_changed == 'true'
+        if: steps.check.outputs.has_changed == 'true' && github.event.inputs.deploy == 'true'
         shell: bash
         run: |
           changed_services="${{ steps.changes.outputs.folders }}"
@@ -197,7 +203,7 @@ jobs:
           fi
 
       - name: Azure CLI get credentials and deploy
-        if: steps.check.outputs.has_changed == 'true'
+        if: steps.check.outputs.has_changed == 'true' && github.event.inputs.deploy == 'true'
         run: |
           az version
           az login --identity --client-id ${{ secrets.AZURE_MANAGED_IDENTITY_CLIENT_ID }}
@@ -227,6 +233,7 @@ jobs:
   test:
     name: Test rest-server
     needs: build
+    if: github.event.inputs.deploy == 'true'
     runs-on: [self-hosted, paicicd]
     environment: auto-test
     steps:

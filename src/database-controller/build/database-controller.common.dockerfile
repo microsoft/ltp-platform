@@ -4,7 +4,7 @@
 # Build stage
 FROM node:20 AS builder
 
-RUN npm install -g npm@latest
+RUN npm install -g npm@11
 
 WORKDIR /database-controller
 
