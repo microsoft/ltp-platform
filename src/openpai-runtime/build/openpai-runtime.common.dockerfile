@@ -67,7 +67,7 @@ COPY src/frameworkcontroller ${PROJECT_DIR}
 RUN ${PROJECT_DIR}/build/frameworkbarrier/go-build.sh && \
   mv ${PROJECT_DIR}/dist/frameworkbarrier/* ${INSTALL_DIR}
 
-FROM python:3.10-alpine
+FROM python:3.12-alpine
 
 RUN mkdir -p /opt/package_cache
 COPY --from=ubuntu_20_04_cache /package_cache /opt/package_cache/
