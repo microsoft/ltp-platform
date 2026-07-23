@@ -2,35 +2,40 @@
 // All rights reserved.
 
 const axios = require('axios');
-const nodemailer = require('nodemailer');
-const Email = require('email-templates');
 const logger = require('@alert-handler/common/logger');
 const path = require('path');
 
-// create reusable transporter object using the default SMTP transport
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_CONFIGS_SMTP_HOST,
-  port: parseInt(process.env.EMAIL_CONFIGS_SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_CONFIGS_SMTP_AUTH_USERNAME,
-    pass: process.env.EMAIL_CONFIGS_SMTP_AUTH_PASSWORD,
-  },
-});
+let _email = null;
 
-const email = new Email({
-  message: {
-    from: process.env.EMAIL_CONFIGS_SMTP_FROM,
-  },
-  send: true,
-  preview: false,
-  transport: transporter,
-  views: {
-    options: {
-      extension: 'ejs',
-    },
-  },
-});
+function getEmailClient() {
+  if (!_email) {
+    const nodemailer = require('nodemailer');
+    const Email = require('email-templates');
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_CONFIGS_SMTP_HOST,
+      port: parseInt(process.env.EMAIL_CONFIGS_SMTP_PORT),
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_CONFIGS_SMTP_AUTH_USERNAME,
+        pass: process.env.EMAIL_CONFIGS_SMTP_AUTH_PASSWORD,
+      },
+    });
+    _email = new Email({
+      message: {
+        from: process.env.EMAIL_CONFIGS_SMTP_FROM,
+      },
+      send: true,
+      preview: false,
+      transport: transporter,
+      views: {
+        options: {
+          extension: 'ejs',
+        },
+      },
+    });
+  }
+  return _email;
+}
 
 // OpenPAI handbook troubleshooting
 const troubleshootingURL =
@@ -38,7 +43,7 @@ const troubleshootingURL =
 
 const sendEmail = async (template, receiver, alerts, req) => {
   try {
-    await email.send({
+    await getEmailClient().send({
       template: path.join('/etc/alerthandler/templates/', template),
       message: {
         to: receiver,

@@ -19,8 +19,8 @@ FROM node:20 AS build
 ARG TARGETOS
 ARG TARGETARCH
 
-ENV GOVERSION=1.25.11
-ENV PLUGINVERSION=v3.7.0
+ENV GOVERSION=1.26.5
+ENV PLUGINVERSION=v3.11.0
 
 ENV GOPATH=/usr/local/go
 ENV GOBIN=$GOPATH/bin
@@ -32,12 +32,6 @@ RUN wget https://go.dev/dl/go${GOVERSION}.linux-${TARGETARCH}.tar.gz && \
 WORKDIR /usr/src/plugin
 
 RUN git clone --branch ${PLUGINVERSION} --depth 1 https://github.com/grafana/grafana-infinity-datasource.git /usr/src/plugin
-
-RUN go get google.golang.org/grpc@v1.79.3 && \
-    go get go.opentelemetry.io/otel/sdk@v1.43.0 && \
-    go get golang.org/x/crypto@v0.52.0 && \
-    go get golang.org/x/net@v0.55.0 && \
-    go mod tidy
 
 RUN go install github.com/magefile/mage@latest
 
@@ -59,7 +53,7 @@ ENV \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
-  UPGRADEALL=true
+  UPGRADEALL=false
 
 
 RUN \
