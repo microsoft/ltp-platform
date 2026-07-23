@@ -118,13 +118,27 @@ declare -A IMAGE_MAP=(
     ["cilium-envoy:latest"]="${NAMESPACE}/cilium-envoy:${ENVOY_VERSION}-update"
 )
 
+FAILED=0
 for local_img in "${!IMAGE_MAP[@]}"; do
     remote_img="${REGISTRY}/${IMAGE_MAP[$local_img]}"
+    if ! docker image inspect "$local_img" &>/dev/null; then
+        echo "Skipping ${local_img} (not found locally)"
+        echo ""
+        continue
+    fi
     echo "Tagging ${local_img} -> ${remote_img}"
     docker tag "$local_img" "$remote_img"
     echo "Pushing ${remote_img} ..."
-    docker push "$remote_img"
+    if ! docker push "$remote_img"; then
+        echo "Error: failed to push ${remote_img}"
+        FAILED=1
+    fi
     echo ""
 done
 
-echo "Done. Tagged and pushed ${#IMAGE_MAP[@]} images."
+if [ "$FAILED" -ne 0 ]; then
+    echo "Warning: some images failed to push."
+    exit 1
+fi
+
+echo "Done."
