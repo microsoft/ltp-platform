@@ -14,7 +14,7 @@
 # NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-FROM node:20 AS build
+FROM node:24 AS build
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -35,7 +35,7 @@ RUN git clone --branch ${PLUGINVERSION} --depth 1 https://github.com/grafana/gra
 
 RUN go install github.com/magefile/mage@latest
 
-RUN yarn && yarn build
+RUN corepack enable && yarn && yarn build
 
 RUN if [ "$TARGETARCH" = "amd64" ]; then \
   mage build:linux; \

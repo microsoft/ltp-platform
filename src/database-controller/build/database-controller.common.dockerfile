@@ -2,9 +2,9 @@
 # Licensed under the MIT License.
 
 # Build stage
-FROM node:20 AS builder
+FROM node:24 AS builder
 
-RUN npm install -g npm@11
+RUN npm install -g npm@latest
 
 WORKDIR /database-controller
 
@@ -23,7 +23,7 @@ RUN json -I -f package.json -e "this.paiVersion=\"`cat ../version/PAI.VERSION`\"
 RUN json -I -f package.json -e "this.paiCommitVersion=\"`cat ../version/COMMIT.VERSION`\""
 
 # Production stage - use slim image
-FROM node:20-slim
+FROM node:24-slim
 
 WORKDIR /database-controller/src
 
