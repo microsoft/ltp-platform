@@ -86,8 +86,9 @@ const eventHandler = (eventType, apiObject) => {
 async function assertDiskUsageHealthy() {
   try {
     const stats = await statfs(config.diskPath);
-    const available = stats.bavail * stats.bsize;
-    const total = stats.blocks * stats.bsize;
+    const blockSize = stats.frsize ?? stats.bsize;
+    const available = stats.bavail * blockSize;
+    const total = stats.blocks * blockSize;
     const currentUsage = ((total - available) / total) * 100;
     logger.info(`Current internal storage usage is ${currentUsage}% .`);
     if (currentUsage > config.maxDiskUsagePercent) {
