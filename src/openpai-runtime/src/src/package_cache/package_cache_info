@@ -1,10 +1,10 @@
 # group_name, os, packages(space-gapped)
 # "#" can be used for comments
-ssh,ubuntu20.04,openssh-client openssh-server
 ssh,ubuntu22.04,openssh-client openssh-server
-nfs,ubuntu20.04,nfs-common
+ssh,ubuntu24.04,openssh-client openssh-server
 nfs,ubuntu22.04,nfs-common
-samba,ubuntu20.04,cifs-utils
+nfs,ubuntu24.04,nfs-common
 samba,ubuntu22.04,cifs-utils
-azurefile,ubuntu20.04,cifs-utils sshpass
+samba,ubuntu24.04,cifs-utils
 azurefile,ubuntu22.04,cifs-utils sshpass
+azurefile,ubuntu24.04,cifs-utils sshpass
