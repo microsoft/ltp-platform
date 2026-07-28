@@ -55,6 +55,9 @@ WORKDIR /build
 
 RUN set -eux; \
     git clone --depth 1 --branch v${NERDCTL_VERSION} https://github.com/containerd/nerdctl.git .; \
+    go get golang.org/x/text@v0.39.0 && \
+    go get google.golang.org/grpc@v1.82.1 && \
+    go mod tidy; \
     make binaries; \
     mkdir -p /opt/nerdctl; \
     cp _output/nerdctl /opt/nerdctl/nerdctl; \

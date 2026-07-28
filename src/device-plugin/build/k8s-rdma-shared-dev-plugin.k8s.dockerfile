@@ -21,11 +21,12 @@ ENV HTTPS_PROXY $https_proxy
 RUN apk add --no-cache --virtual build-base linux-headers
 WORKDIR /usr/src/k8s-rdma-shared-dp
 
-RUN go get golang.org/x/net@v0.55.0 && \
-    go get golang.org/x/crypto@v0.52.0 && \
-    go mod tidy && \
-    make clean && \
-    make build
+RUN go get golang.org/x/text@v0.39.0 && \
+    go get google.golang.org/grpc@v1.82.1 && \
+    go get golang.org/x/crypto@v0.53.0 && \
+    go get golang.org/x/net@v0.56.0
+
+RUN CGO_ENABLED=0 go build -o build/k8s-rdma-shared-dp -tags no_openssl -mod=mod -ldflags "-s -w" ./cmd/k8s-rdma-shared-dp
 
 FROM alpine:3.23
 RUN apk add --no-cache hwdata-pci
