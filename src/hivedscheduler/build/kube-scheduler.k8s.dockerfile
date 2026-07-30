@@ -24,6 +24,7 @@ RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
     for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       dir=$(dirname "$modfile"); \
       (cd "$dir" && go get google.golang.org/grpc@v1.82.1) || true; \
+      (cd "$dir" && go get github.com/google/cel-go@v0.29.0) || true; \
     done && \
     go work vendor
 
