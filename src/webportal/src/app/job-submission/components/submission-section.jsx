@@ -25,7 +25,7 @@
 import PropTypes from 'prop-types';
 import { isNil, debounce, isEqual, isEmpty, cloneDeep } from 'lodash';
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import {
   Stack,
   DefaultButton,
