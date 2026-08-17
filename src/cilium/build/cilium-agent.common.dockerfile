@@ -45,8 +45,12 @@ RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
     https://github.com/cilium/cilium.git .
 
 RUN go get golang.org/x/crypto@v0.52.0 && \
-    go get golang.org/x/net@v0.55.0 && \
+    go get golang.org/x/net@v0.56.0 && \
+    go get golang.org/x/text@v0.39.0 && \
+    go get google.golang.org/grpc@v1.82.1 && \
+    go get github.com/google/cel-go@v0.29.0 && \
     go get go.mongodb.org/mongo-driver@v1.17.7 && \
+    go get github.com/gopacket/gopacket@v1.6.1 && \
     go mod tidy && \
     go mod vendor
 

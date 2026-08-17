@@ -16,13 +16,15 @@ RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       dir=$(dirname "$modfile"); \
       (cd "$dir" && \
         go get golang.org/x/crypto@v0.52.0 && \
-        go get golang.org/x/net@v0.55.0 && \
+        go get golang.org/x/net@v0.56.0 && \
+        go get golang.org/x/text@v0.39.0 && \
         go get go.opentelemetry.io/otel/sdk@v1.43.0 \
       ) || true; \
     done && \
     for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       dir=$(dirname "$modfile"); \
-      (cd "$dir" && go get google.golang.org/grpc@v1.79.3) || true; \
+      (cd "$dir" && go get google.golang.org/grpc@v1.82.1) || true; \
+      (cd "$dir" && go get github.com/google/cel-go@v0.29.0) || true; \
     done && \
     go work vendor
 

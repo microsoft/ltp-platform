@@ -28,7 +28,7 @@ window.__LAYOUT_INITIALIZED__ = true;
 
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router';
 import { Fabric } from '@fluentui/react';
 
 import { Layout } from '../layout/layout';
