@@ -17,7 +17,7 @@
     "url": "https://github.com/Microsoft/pai/issues"
   },
   "engines": {
-    "node": "^20"
+    "node": "^24"
   },
   "_moduleAliases": {
     "@alert-handler": "."

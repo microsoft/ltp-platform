@@ -16,9 +16,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Build stage
-FROM node:20 AS builder
+FROM node:24 AS builder
 
-RUN npm install -g npm@11
+RUN npm install -g npm@latest
 
 WORKDIR /usr/src/app
 
@@ -38,7 +38,7 @@ RUN for dep in $(node -pe "Object.keys(require('./package.json').devDependencies
     done
 
 # Production stage - use slim image
-FROM node:20-slim
+FROM node:24-slim
 
 WORKDIR /usr/src/app
 

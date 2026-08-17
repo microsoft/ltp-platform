@@ -4302,11 +4302,11 @@ __metadata:
 
 "openpaidbsdk@file:./openpaidbsdk::locator=pai-rest-server%40workspace%3A.":
   version: 1.0.2
-  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=9a36d0&locator=pai-rest-server%40workspace%3A."
+  resolution: "openpaidbsdk@file:./openpaidbsdk#./openpaidbsdk::hash=e146c8&locator=pai-rest-server%40workspace%3A."
   dependencies:
     pg: "npm:^8.15.6"
     sequelize: "npm:6.37.8"
-  checksum: 10c0/59e6c0f200a02f4e312e220d845b1daeaa2fa96cf089876c6a76f10375a20650ac4b66c60c1b9317ae61b0d62e7b9a1dd21cbb0016df11549d9cc8a276997a07
+  checksum: 10c0/e40aa120c1c2bcf0236ffe40fad7f5a0d7ce0d4e6dadd5c968b390d4e143cddae6b4db029080cbb6ff7c8075781ffe7c9c6b97b0161ffe2b97284aac96619887
   languageName: node
   linkType: hard
 

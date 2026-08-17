@@ -17,20 +17,20 @@
 
 # Package Cache Data Layer Starts
 
-FROM ubuntu:20.04 AS ubuntu_20_04_cache
-
-WORKDIR /src
-COPY src/src/package_cache ./
-RUN chmod -R +x ./
-RUN /bin/bash ubuntu_build.sh package_cache_info ubuntu20.04
-
-
 FROM ubuntu:22.04 AS ubuntu_22_04_cache
 
 WORKDIR /src
 COPY src/src/package_cache ./
 RUN chmod -R +x ./
 RUN /bin/bash ubuntu_build.sh package_cache_info ubuntu22.04
+
+
+FROM ubuntu:24.04 AS ubuntu_24_04_cache
+
+WORKDIR /src
+COPY src/src/package_cache ./
+RUN chmod -R +x ./
+RUN /bin/bash ubuntu_build.sh package_cache_info ubuntu24.04
 
 # Package Cache Data Layer Ends
 
@@ -67,11 +67,11 @@ COPY src/frameworkcontroller ${PROJECT_DIR}
 RUN ${PROJECT_DIR}/build/frameworkbarrier/go-build.sh && \
   mv ${PROJECT_DIR}/dist/frameworkbarrier/* ${INSTALL_DIR}
 
-FROM python:3.10-alpine
+FROM python:3.12-alpine
 
 RUN mkdir -p /opt/package_cache
-COPY --from=ubuntu_20_04_cache /package_cache /opt/package_cache/
 COPY --from=ubuntu_22_04_cache /package_cache /opt/package_cache/
+COPY --from=ubuntu_24_04_cache /package_cache /opt/package_cache/
 
 ENV INSTALL_DIR=/opt/kube-runtime
 ARG BARRIER_DIR=/opt/frameworkcontroller/frameworkbarrier

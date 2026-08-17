@@ -12,7 +12,7 @@ require('@dbc/common/init');
 const logger = require('@dbc/common/logger');
 const { getEventInformer } = require('@dbc/common/k8s');
 const { alwaysRetryDecorator } = require('@dbc/common/util');
-const disk = require('diskusage');
+const { statfs } = require('fs/promises');
 const config = require('@dbc/watcher/cluster-event/config');
 
 // Here, we use AsyncLock to control the concurrency of events with the same uid;
@@ -85,7 +85,10 @@ const eventHandler = (eventType, apiObject) => {
 
 async function assertDiskUsageHealthy() {
   try {
-    const { available, total } = await disk.check(config.diskPath);
+    const stats = await statfs(config.diskPath);
+    const blockSize = stats.frsize ?? stats.bsize;
+    const available = stats.bavail * blockSize;
+    const total = stats.blocks * blockSize;
     const currentUsage = ((total - available) / total) * 100;
     logger.info(`Current internal storage usage is ${currentUsage}% .`);
     if (currentUsage > config.maxDiskUsagePercent) {
