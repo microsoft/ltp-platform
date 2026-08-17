@@ -164,7 +164,7 @@ data:
       webhook_configs:
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/log-alerts'
         send_resolved: false
-      {% if 'cert-expiration-checker' in cluster_cfg["alert-manager"]["actions-available"] %}
+      {% if cluster_cfg["alert-manager"]["cert-expiration-checker"].get("alert_group_email") %}
       - url: 'http://localhost:{{ cluster_cfg["alert-manager"]["alert-handler"]["port"] }}/alert-handler/send-email-to-group/?template=cert-expiration'
         send_resolved: false
       {% endif %}
