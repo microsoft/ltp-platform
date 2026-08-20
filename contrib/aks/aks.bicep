@@ -236,7 +236,7 @@ resource prometheusContainer 'Microsoft.Storage/storageAccounts/blobServices/con
 }
 
 // AKS
-resource aks 'Microsoft.ContainerService/managedClusters@2024-03-02-preview' = {
+resource aks 'Microsoft.ContainerService/managedClusters@2024-05-01' = {
   name: 'aks-openpai'
   location: location
   dependsOn: [
