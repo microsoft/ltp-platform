@@ -2,7 +2,7 @@ param hubsub string
 param hubgroup string
 param extversion string
 
-resource aks 'Microsoft.ContainerService/managedClusters@2024-03-02-preview' existing = {
+resource aks 'Microsoft.ContainerService/managedClusters@2024-05-01' existing = {
   name: 'aks-openpai'
   scope: resourceGroup(hubsub, hubgroup)
 }
