@@ -480,36 +480,46 @@ class TestNodeFilterPolicy:
         assert filtered_2 == ["node-a"]
         assert mock_load_layout.call_count == 1
 
-    def test_layout_load_failure_falls_back_to_original_behavior(self, recycler):
+    def test_layout_load_failure_raises_runtime_error(self, recycler):
         recycler._layout_nodes_loaded = False
         recycler._layout_nodes_load_success = False
         recycler._layout_nodes_cache = set()
 
         with patch.object(recycler, "_load_layout_nodes", return_value=(set(), False)):
-            filtered, ok = recycler._filter_nodes_by_policy(
-                ["node-a", "node-b"],
-                stage="test-layout-fail-fallback",
-                require_layout=True,
-                require_live=False,
-            )
+            with pytest.raises(RuntimeError, match="failed to initialize layout nodes"):
+                recycler._filter_nodes_by_policy(
+                    ["node-a", "node-b"],
+                    stage="test-layout-fail",
+                    require_layout=True,
+                    require_live=False,
+                )
 
-        assert ok is True
-        assert filtered == ["node-a", "node-b"]
+    def test_empty_layout_raises_runtime_error(self, recycler):
+        recycler._layout_nodes_loaded = False
+        recycler._layout_nodes_load_success = False
+        recycler._layout_nodes_cache = set()
 
-    def test_empty_layout_falls_back_to_original_behavior(self, recycler):
+        with patch.object(recycler, "_load_layout_nodes", return_value=(set(), True)):
+            with pytest.raises(RuntimeError, match="layout contains no usable nodes"):
+                recycler._filter_nodes_by_policy(
+                    ["node-a", "node-b"],
+                    stage="test-layout-empty",
+                    require_layout=True,
+                    require_live=False,
+                )
+
+    def test_empty_layout_cache_after_load_raises_runtime_error(self, recycler):
         recycler._layout_nodes_loaded = True
         recycler._layout_nodes_load_success = True
         recycler._layout_nodes_cache = set()
 
-        filtered, ok = recycler._filter_nodes_by_policy(
-            ["node-a", "node-b"],
-            stage="test-layout-empty-fallback",
-            require_layout=True,
-            require_live=False,
-        )
-
-        assert ok is True
-        assert filtered == ["node-a", "node-b"]
+        with pytest.raises(RuntimeError, match="layout cache is empty"):
+            recycler._filter_nodes_by_policy(
+                ["node-a"],
+                stage="test-layout-empty-cache",
+                require_layout=True,
+                require_live=False,
+            )
 
     def test_no_layout_load_when_not_required(self, recycler):
         with patch.object(recycler, "_load_layout_nodes") as mock_load_layout:

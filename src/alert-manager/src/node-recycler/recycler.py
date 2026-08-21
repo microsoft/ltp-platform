@@ -58,18 +58,33 @@ class NodeRecycler:
 
     @classmethod
     def _initialize_layout_nodes(cls) -> bool:
-        """Load layout nodes once and cache the result for process lifetime."""
+        """Load and validate layout nodes once for process lifetime."""
         if cls._layout_nodes_loaded:
+            if not cls._layout_nodes_load_success:
+                raise RuntimeError(
+                    f"layout initialization previously failed from {cls._layout_config_path}"
+                )
+            if not cls._layout_nodes_cache:
+                raise RuntimeError(
+                    f"layout cache is empty from {cls._layout_config_path}"
+                )
             return cls._layout_nodes_load_success
 
         layout_nodes, layout_ok = cls._load_layout_nodes()
-        cls._layout_nodes_cache = layout_nodes
-        cls._layout_nodes_load_success = layout_ok
-        cls._layout_nodes_loaded = True
-
         if not layout_ok:
-            logger.error("Failed to initialize layout nodes from %s", cls._layout_config_path)
-        return cls._layout_nodes_load_success
+            raise RuntimeError(
+                f"failed to initialize layout nodes from {cls._layout_config_path}"
+            )
+        if not layout_nodes:
+            raise RuntimeError(
+                f"layout contains no usable nodes at {cls._layout_config_path}"
+            )
+
+        cls._layout_nodes_cache = layout_nodes
+        cls._layout_nodes_load_success = True
+        cls._layout_nodes_loaded = True
+        logger.info("Initialized %d layout nodes from %s", len(layout_nodes), cls._layout_config_path)
+        return True
 
     @classmethod
     def _load_layout_nodes(cls) -> tuple[set[str], bool]:
@@ -175,17 +190,9 @@ class NodeRecycler:
             return [], True
 
         layout_nodes = set()
-        layout_filter_enabled = require_layout
         if require_layout:
-            layout_ok = cls._initialize_layout_nodes()
-            if not layout_ok:
-                logger.warning("[%s] layout nodes unavailable, skipping layout filter and continuing", stage)
-                layout_filter_enabled = False
-            else:
-                layout_nodes = cls._layout_nodes_cache
-                if not layout_nodes:
-                    logger.warning("[%s] layout nodes is empty, skipping layout filter and continuing", stage)
-                    layout_filter_enabled = False
+            cls._initialize_layout_nodes()
+            layout_nodes = cls._layout_nodes_cache
 
         live_nodes, ready_nodes, live_ok = set(), set(), True
         if require_live or require_ready:
@@ -198,7 +205,7 @@ class NodeRecycler:
         skipped = []
         for hostname in normalized:
             reasons = []
-            if layout_filter_enabled and hostname not in layout_nodes:
+            if require_layout and hostname not in layout_nodes:
                 reasons.append("not_in_layout")
             if require_live and hostname not in live_nodes:
                 reasons.append("not_live")

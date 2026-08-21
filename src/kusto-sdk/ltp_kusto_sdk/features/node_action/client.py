@@ -255,6 +255,7 @@ class NodeActionClient(KustoBaseClient):
             List of NodeAction records for triaged actions, or empty list if none found
         """
         try:
+            endpoint = self.endpoint.replace("'", "''")
             # Get node actions in time range
             start_time = convert_timestamp(launched_time_ms / 1000, "str")
             end_time = convert_timestamp(completed_time_ms / 1000, "str")
@@ -275,16 +276,19 @@ class NodeActionClient(KustoBaseClient):
             # Query triaged actions using KQL
             query = f"""
             let node_name = '{node_name}';
+            let endpoint = '{endpoint}';
             let cordoned_ts = datetime({cordoned_timestamp});
             let next_available_ts = toscalar(
                 {self.table_name}
                 | where HostName == node_name
+                | where Endpoint == endpoint
                 | where Action endswith '-available' and Action != 'available-cordoned'
                 | where Timestamp > cordoned_ts
                 | summarize min(Timestamp)
             );
             {self.table_name}
             | where HostName == node_name
+            | where Endpoint == endpoint
             | where Timestamp >= cordoned_ts
             | where isnull(next_available_ts) or Timestamp <= next_available_ts
             | where Action in ('cordoned-triaged_platform', 'cordoned-triaged_hardware', 'cordoned-triaged_user', 'cordoned-triaged_unknown')

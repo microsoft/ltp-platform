@@ -233,3 +233,21 @@ class TestNodeActionClient:
         assert not client.is_valid_action("InvalidAction")
         assert not client.is_valid_action("Cordoned")
         assert not client.is_valid_action("available")
+
+    def test_find_triaged_failure_scopes_endpoint(self, client, mock_kusto_client):
+        """find_triaged_failure should scope all table scans by endpoint."""
+        action = MagicMock()
+        action.Action = "available-cordoned"
+        action.Timestamp = "2026-01-01T00:00:00Z"
+
+        with patch.object(client, "get_node_actions", return_value=[action]):
+            mock_kusto_client.execute_command.return_value = []
+            client.find_triaged_failure(
+                node_name="test-node",
+                completed_time_ms=1704067500000,
+                launched_time_ms=1704067200000,
+            )
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert "let endpoint = 'test-wcu'" in query
+        assert query.count("| where Endpoint == endpoint") == 2
