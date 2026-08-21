@@ -154,17 +154,13 @@ class NodeActionClient(KustoBaseClient):
             raise RuntimeError(f"Failed to update node action: {str(e)}")
 
     def get_node_actions(self, node: str, start_time: str,
-                         end_time: str,
-                         use_current_endpoint: bool = False) -> List[NodeAction]:
+                         end_time: str) -> List[NodeAction]:
         """Get action history for a node in a time range"""
         try:
-            endpoint_condition = ""
-            if use_current_endpoint:
-                escaped_endpoint = str(self.endpoint).replace("'", "''")
-                endpoint_condition = f"| where Endpoint == '{escaped_endpoint}'"
+            escaped_endpoint = str(self.endpoint).replace("'", "''")
             query = f"""
             {self.table_name}
-            {endpoint_condition}
+            | where Endpoint == '{escaped_endpoint}'
             | where HostName == '{node}'
             | where Timestamp between (datetime({start_time}) .. datetime({end_time}))
             | order by Timestamp desc
@@ -174,18 +170,13 @@ class NodeActionClient(KustoBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to get node actions: {str(e)}")
 
-    def get_latest_node_action(self,
-                               node: str,
-                               use_current_endpoint: bool = False) -> Optional[NodeAction]:
+    def get_latest_node_action(self, node: str) -> Optional[NodeAction]:
         """Get the most recent action for a node"""
         try:
-            endpoint_condition = ""
-            if use_current_endpoint:
-                escaped_endpoint = str(self.endpoint).replace("'", "''")
-                endpoint_condition = f"| where Endpoint == '{escaped_endpoint}'"
+            escaped_endpoint = str(self.endpoint).replace("'", "''")
             query = f"""
             {self.table_name}
-            {endpoint_condition}
+            | where Endpoint == '{escaped_endpoint}'
             | where HostName == '{node}'
             | top 1 by Timestamp desc
             """

@@ -157,22 +157,12 @@ class TestNodeActionClient:
         assert action.Action == "available-cordoned"
         assert action.Endpoint == TEST_ENDPOINT
 
-    def test_get_latest_node_action_without_endpoint_filter(self, client,
-                                                            mock_kusto_client):
-        """get_latest_node_action should not filter endpoint by default."""
+    def test_get_latest_node_action_scopes_by_endpoint(self, client,
+                                                       mock_kusto_client):
+        """get_latest_node_action should filter by client endpoint."""
         mock_kusto_client.execute_command.return_value = []
 
         client.get_latest_node_action("test-node")
-
-        query = mock_kusto_client.execute_command.call_args[0][0]
-        assert "Endpoint ==" not in query
-
-    def test_get_latest_node_action_with_endpoint_filter(self, client,
-                                                         mock_kusto_client):
-        """get_latest_node_action should filter endpoint when provided."""
-        mock_kusto_client.execute_command.return_value = []
-
-        client.get_latest_node_action("test-node", use_current_endpoint=True)
 
         query = mock_kusto_client.execute_command.call_args[0][0]
         assert f"Endpoint == '{TEST_ENDPOINT}'" in query
@@ -224,9 +214,9 @@ class TestNodeActionClient:
         assert actions[0].Action == "available-cordoned"
         assert actions[1].Action == "cordoned-triaged_hardware"
 
-    def test_get_node_actions_with_endpoint_filter(self, client,
-                                                   mock_kusto_client):
-        """get_node_actions should filter endpoint when provided."""
+    def test_get_node_actions_scopes_by_endpoint(self, client,
+                                                 mock_kusto_client):
+        """get_node_actions should filter by client endpoint."""
         start_time = datetime.utcnow() - timedelta(hours=1)
         end_time = datetime.utcnow()
         mock_kusto_client.execute_command.return_value = []
@@ -235,7 +225,6 @@ class TestNodeActionClient:
             node="test-node",
             start_time=start_time.isoformat(),
             end_time=end_time.isoformat(),
-            use_current_endpoint=True,
         )
 
         query = mock_kusto_client.execute_command.call_args[0][0]

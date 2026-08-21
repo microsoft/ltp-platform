@@ -153,28 +153,13 @@ class TestNodeStatusClient:
         query = mock_kusto_client.execute_command.call_args[0][0]
         assert TEST_STATUS_TABLE in query
         assert test_node in query
-        assert "Endpoint ==" not in query
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
 
         # Verify result
         assert isinstance(result, NodeStatusRecord)
         assert result.Status == NodeStatus.AVAILABLE.value
         assert result.HostName == test_node
         assert result.Endpoint == TEST_ENDPOINT
-
-    def test_get_node_status_with_explicit_endpoint_filter(self, client,
-                                                           mock_kusto_client):
-        """get_node_status should apply endpoint filter only when provided."""
-        timestamp = datetime.utcnow()
-        mock_kusto_client.execute_command.return_value = []
-
-        client.get_node_status(
-            "test-node",
-            timestamp.timestamp(),
-            use_current_endpoint=True,
-        )
-
-        query = mock_kusto_client.execute_command.call_args[0][0]
-        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
 
     def test_get_node_status_new(self, client, mock_kusto_client, mock_node):
         """Test get_node_status method for new node"""

@@ -138,16 +138,14 @@ class NodeStatusClient(KustoBaseClient):
 
     def get_node_status(self,
                         hostname: str,
-                        timestamp: datetime = None,
-                        use_current_endpoint: bool = False) -> Optional[NodeStatusRecord]:
+                        timestamp: datetime = None) -> Optional[NodeStatusRecord]:
         """Get node status at a specific time"""
         timestamp_str = None
         if timestamp is not None:
             timestamp_str = convert_timestamp(timestamp, format="str")
         query = f"{self.table_name} | where HostName == '{hostname}'"
-        if use_current_endpoint:
-            escaped_endpoint = str(self.endpoint).replace("'", "''")
-            query += f" | where Endpoint == '{escaped_endpoint}'"
+        escaped_endpoint = str(self.endpoint).replace("'", "''")
+        query += f" | where Endpoint == '{escaped_endpoint}'"
         if timestamp_str is not None:
             query += f" | where Timestamp <= datetime({timestamp_str})"
         query += " | summarize arg_max(Timestamp, *) by HostName"

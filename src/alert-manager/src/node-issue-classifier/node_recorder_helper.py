@@ -37,10 +37,7 @@ class NodeRecordUpdater:
         self.retries = 3
         
     def get_node_latest_status(self, node):
-        node_status = self.node_status_client.get_node_status(
-            node,
-            use_current_endpoint=True,
-        )
+        node_status = self.node_status_client.get_node_status(node)
         return node_status
     
     def get_nodes_by_status(self, status, as_of_time=None):
@@ -48,10 +45,7 @@ class NodeRecordUpdater:
         return nodes
     
     def get_node_latest_action(self, node):
-        node_action = self.node_action_client.get_latest_node_action(
-            node,
-            use_current_endpoint=True,
-        )
+        node_action = self.node_action_client.get_latest_node_action(node)
         return node_action
     
     def update_status_action(self, node, from_status, to_status, timestamp, reason, detail, category=''): 

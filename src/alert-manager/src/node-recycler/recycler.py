@@ -278,7 +278,6 @@ class NodeRecycler:
                     # query the latest action separately to detect prior OFR.
                     latest = action_client.get_latest_node_action(
                         hostname,
-                        use_current_endpoint=True,
                     )
                     if latest and latest.Action == f"{from_state}-{to_state}":
                         logger.info(f"OFR already submitted for {hostname}, ticket_id={latest.Detail}")

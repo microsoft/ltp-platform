@@ -39,11 +39,7 @@ class NodeRecordUpdater:
         self.retries = 3        
         
     def get_node_latest_status(self, node, as_of_time=None):
-        node_status = self.node_status_client.get_node_status(
-            node,
-            as_of_time,
-            use_current_endpoint=True,
-        )
+        node_status = self.node_status_client.get_node_status(node, as_of_time)
         if not node_status:
             logger.info(f"No status found for node {node} as of {as_of_time}")
             return None
