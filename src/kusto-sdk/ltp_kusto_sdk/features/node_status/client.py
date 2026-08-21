@@ -139,14 +139,14 @@ class NodeStatusClient(KustoBaseClient):
     def get_node_status(self,
                         hostname: str,
                         timestamp: datetime = None,
-                        endpoint: Optional[str] = None) -> Optional[NodeStatusRecord]:
+                        use_current_endpoint: bool = False) -> Optional[NodeStatusRecord]:
         """Get node status at a specific time"""
         timestamp_str = None
         if timestamp is not None:
             timestamp_str = convert_timestamp(timestamp, format="str")
         query = f"{self.table_name} | where HostName == '{hostname}'"
-        if endpoint:
-            escaped_endpoint = str(endpoint).replace("'", "''")
+        if use_current_endpoint:
+            escaped_endpoint = str(self.endpoint).replace("'", "''")
             query += f" | where Endpoint == '{escaped_endpoint}'"
         if timestamp_str is not None:
             query += f" | where Timestamp <= datetime({timestamp_str})"
@@ -163,7 +163,7 @@ class NodeStatusClient(KustoBaseClient):
         """Update node status"""
         timestamp = convert_timestamp(timestamp, format="datetime")
         current_record = self.get_node_status(hostname, timestamp,
-                                              endpoint=self.endpoint)
+                                              use_current_endpoint=True)
 
         # Validate status transition
         if current_record and not NodeStatus.can_transition(
@@ -191,7 +191,7 @@ class NodeStatusClient(KustoBaseClient):
             self,
             status: str,
             as_of_time: Optional[datetime] = None,
-            endpoint: Optional[str] = None) -> List[NodeStatusRecord]:
+            use_current_endpoint: bool = False) -> List[NodeStatusRecord]:
         """Get all nodes whose latest/current status is exactly the specified status.
 
         Args:
@@ -214,8 +214,8 @@ class NodeStatusClient(KustoBaseClient):
             if as_of_time:
                 timestamp_str = convert_timestamp(as_of_time, format="str")
                 timestamp_condition = f"| where Timestamp <= datetime({timestamp_str})"
-            if endpoint:
-                escaped_endpoint = str(endpoint).replace("'", "''")
+            if use_current_endpoint:
+                escaped_endpoint = str(self.endpoint).replace("'", "''")
                 endpoint_condition = f"| where Endpoint == '{escaped_endpoint}'"
 
             query = f"""

@@ -119,10 +119,9 @@ class TestNodeActionClient:
             "Test details", "Test", TEST_ENDPOINT
         ])
 
-    def test_update_node_action_endpoint_filter_is_optional(self, client,
-                                                            mock_kusto_client,
-                                                            mock_node):
-        """update_node_action duplicate-check should scope endpoint only when provided."""
+    def test_update_node_action_scopes_duplicate_check_by_client_endpoint(
+            self, client, mock_kusto_client, mock_node):
+        """update_node_action should use client endpoint for duplicate check."""
         timestamp = datetime.utcnow().isoformat()
         mock_kusto_client.execute_command.reset_mock()
         mock_kusto_client.execute_command.return_value = [{"Count": 0}]
@@ -135,22 +134,9 @@ class TestNodeActionClient:
             detail="d",
             category="c",
         )
-        first_query = mock_kusto_client.execute_command.call_args_list[0][0][0]
-        assert "Endpoint ==" not in first_query
 
-        mock_kusto_client.execute_command.reset_mock()
-        mock_kusto_client.execute_command.return_value = [{"Count": 0}]
-        client.update_node_action(
-            node="test-node",
-            action="available-cordoned",
-            timestamp=timestamp,
-            reason="r",
-            detail="d",
-            category="c",
-            endpoint=TEST_ENDPOINT,
-        )
-        second_query = mock_kusto_client.execute_command.call_args_list[0][0][0]
-        assert f"Endpoint == '{TEST_ENDPOINT}'" in second_query
+        query = mock_kusto_client.execute_command.call_args_list[0][0][0]
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
 
     def test_update_node_action_invalid_action(self, client):
         """Test update_node_action method with invalid action"""
@@ -205,7 +191,7 @@ class TestNodeActionClient:
         """get_latest_node_action should filter endpoint when provided."""
         mock_kusto_client.execute_command.return_value = []
 
-        client.get_latest_node_action("test-node", endpoint=TEST_ENDPOINT)
+        client.get_latest_node_action("test-node", use_current_endpoint=True)
 
         query = mock_kusto_client.execute_command.call_args[0][0]
         assert f"Endpoint == '{TEST_ENDPOINT}'" in query
@@ -268,7 +254,7 @@ class TestNodeActionClient:
             node="test-node",
             start_time=start_time.isoformat(),
             end_time=end_time.isoformat(),
-            endpoint=TEST_ENDPOINT,
+            use_current_endpoint=True,
         )
 
         query = mock_kusto_client.execute_command.call_args[0][0]
@@ -316,7 +302,7 @@ class TestNodeActionClient:
                 node_name="test-node",
                 completed_time_ms=1704067500000,
                 launched_time_ms=1704067200000,
-                endpoint=TEST_ENDPOINT,
+                use_current_endpoint=True,
             )
 
         query = mock_kusto_client.execute_command.call_args[0][0]

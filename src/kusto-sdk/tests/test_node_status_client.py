@@ -167,7 +167,11 @@ class TestNodeStatusClient:
         timestamp = datetime.utcnow()
         mock_kusto_client.execute_command.return_value = []
 
-        client.get_node_status("test-node", timestamp.timestamp(), endpoint=TEST_ENDPOINT)
+        client.get_node_status(
+            "test-node",
+            timestamp.timestamp(),
+            use_current_endpoint=True,
+        )
 
         query = mock_kusto_client.execute_command.call_args[0][0]
         assert f"Endpoint == '{TEST_ENDPOINT}'" in query
@@ -256,6 +260,9 @@ class TestNodeStatusClient:
         first_query = mock_kusto_client.execute_command.call_args[0][0]
         assert "Endpoint ==" not in first_query
 
-        client.get_nodes_by_status(NodeStatus.CORDONED.value, endpoint=TEST_ENDPOINT)
+        client.get_nodes_by_status(
+            NodeStatus.CORDONED.value,
+            use_current_endpoint=True,
+        )
         second_query = mock_kusto_client.execute_command.call_args[0][0]
         assert f"Endpoint == '{TEST_ENDPOINT}'" in second_query

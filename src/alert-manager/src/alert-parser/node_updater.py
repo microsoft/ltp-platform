@@ -42,7 +42,7 @@ class NodeRecordUpdater:
         node_status = self.node_status_client.get_node_status(
             node,
             as_of_time,
-            endpoint=self.endpoint,
+            use_current_endpoint=True,
         )
         if not node_status:
             logger.info(f"No status found for node {node} as of {as_of_time}")
@@ -54,12 +54,13 @@ class NodeRecordUpdater:
         nodes = self.node_status_client.get_nodes_by_status(
             status,
             as_of_time,
-            endpoint=self.endpoint,
+            use_current_endpoint=True,
         )
         return nodes
     
     def get_last_actions_update_time(self):
-        time = self.node_action_client.get_last_update_time(endpoint=self.endpoint)
+        time = self.node_action_client.get_last_update_time(
+            use_current_endpoint=True)
         return time
 
     
@@ -91,7 +92,6 @@ class NodeRecordUpdater:
                     reason,
                     detail,
                     category='',
-                    endpoint=self.endpoint,
                 )
                 logger.info(f"Updated node action to {action} for node {node} on {timestamp}")
                 status_updated = True

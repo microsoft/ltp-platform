@@ -139,7 +139,6 @@ class TestSkipValidation:
             "node-a", "allocated_ua-available",
             pytest.approx(time.time(), abs=5),
             "Skipping GPU validation per VMSS config", "", "",
-            endpoint="test-endpoint",
         )
 
     def test_log_contains_uncordon_hint(self, recycler, status_client, action_client, caplog):

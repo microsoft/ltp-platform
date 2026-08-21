@@ -39,7 +39,7 @@ class NodeRecordUpdater:
     def get_node_latest_status(self, node):
         node_status = self.node_status_client.get_node_status(
             node,
-            endpoint=self.endpoint,
+            use_current_endpoint=True,
         )
         return node_status
     
@@ -47,14 +47,14 @@ class NodeRecordUpdater:
         nodes = self.node_status_client.get_nodes_by_status(
             status,
             as_of_time,
-            endpoint=self.endpoint,
+            use_current_endpoint=True,
         )
         return nodes
     
     def get_node_latest_action(self, node):
         node_action = self.node_action_client.get_latest_node_action(
             node,
-            endpoint=self.endpoint,
+            use_current_endpoint=True,
         )
         return node_action
     
@@ -75,7 +75,6 @@ class NodeRecordUpdater:
                     reason,
                     detail,
                     category=category,
-                    endpoint=self.endpoint,
                 )
                 logger.info(f"Updated node action to {action} for node {node} on {timestamp} with category {category}")
                 status_updated = True
