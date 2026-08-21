@@ -138,16 +138,16 @@ class NodeStatusClient(KustoBaseClient):
 
     def get_node_status(self,
                         hostname: str,
-                        timestamp: datetime = None) -> NodeStatusRecord:
+                        timestamp: datetime = None,
+                        endpoint: Optional[str] = None) -> Optional[NodeStatusRecord]:
         """Get node status at a specific time"""
         timestamp_str = None
         if timestamp is not None:
             timestamp_str = convert_timestamp(timestamp, format="str")
-        query = (
-            f"{self.table_name}"
-            f" | where HostName == '{hostname}'"
-            f" | where Endpoint == '{self.endpoint}'"
-        )
+        query = f"{self.table_name} | where HostName == '{hostname}'"
+        if endpoint:
+            escaped_endpoint = str(endpoint).replace("'", "''")
+            query += f" | where Endpoint == '{escaped_endpoint}'"
         if timestamp_str is not None:
             query += f" | where Timestamp <= datetime({timestamp_str})"
         query += " | summarize arg_max(Timestamp, *) by HostName"
@@ -162,7 +162,8 @@ class NodeStatusClient(KustoBaseClient):
                            timestamp: datetime | str | int) -> str:
         """Update node status"""
         timestamp = convert_timestamp(timestamp, format="datetime")
-        current_record = self.get_node_status(hostname, timestamp)
+        current_record = self.get_node_status(hostname, timestamp,
+                                              endpoint=self.endpoint)
 
         # Validate status transition
         if current_record and not NodeStatus.can_transition(
@@ -189,7 +190,8 @@ class NodeStatusClient(KustoBaseClient):
     def get_nodes_by_status(
             self,
             status: str,
-            as_of_time: Optional[datetime] = None) -> List[NodeStatusRecord]:
+            as_of_time: Optional[datetime] = None,
+            endpoint: Optional[str] = None) -> List[NodeStatusRecord]:
         """Get all nodes whose latest/current status is exactly the specified status.
 
         Args:
@@ -208,13 +210,17 @@ class NodeStatusClient(KustoBaseClient):
         """
         try:
             timestamp_condition = ""
+            endpoint_condition = ""
             if as_of_time:
                 timestamp_str = convert_timestamp(as_of_time, format="str")
                 timestamp_condition = f"| where Timestamp <= datetime({timestamp_str})"
+            if endpoint:
+                escaped_endpoint = str(endpoint).replace("'", "''")
+                endpoint_condition = f"| where Endpoint == '{escaped_endpoint}'"
 
             query = f"""
             {self.table_name}
-            | where Endpoint == '{self.endpoint}'
+            {endpoint_condition}
             {timestamp_condition}
             | summarize arg_max(Timestamp, *) by HostName
             | where Status == '{status}'

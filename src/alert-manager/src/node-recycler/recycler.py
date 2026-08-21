@@ -50,6 +50,7 @@ class NodeRecycler:
     _ltp_validation_image = os.getenv("LTP_VALIDATION_IMAGE")
     _ltp_vmss_ids = os.getenv("LTP_VMSS_IDS", "")
     _validation_skip_vmss_ids = set(filter(None, os.getenv("VALIDATION_SKIP_VMSS_IDS", "").split(",")))
+    _cluster_id = os.getenv("CLUSTER_ID")
     _live_nodes_retry_attempts = int(os.getenv("LIVE_NODES_RETRY_ATTEMPTS", "3"))
     _live_nodes_retry_interval_seconds = int(os.getenv("LIVE_NODES_RETRY_INTERVAL_SECONDS", "1"))
     _layout_nodes_cache = set()
@@ -249,7 +250,10 @@ class NodeRecycler:
         created = []
         if not node_faults and status_client and action_client:
             node_faults = []
-            status_nodes = status_client.get_nodes_by_status(from_state)
+            status_nodes = status_client.get_nodes_by_status(
+                from_state,
+                endpoint=cls._cluster_id,
+            )
             candidates = [n.HostName for n in status_nodes]
             filtered_candidates, ok = cls._filter_nodes_by_policy(
                 candidates,
@@ -276,13 +280,21 @@ class NodeRecycler:
                     # action for this node.  get_latest_action_by_state uses
                     # "endswith" which never returns triaged_hardware-ua, so we
                     # query the latest action separately to detect prior OFR.
-                    latest = action_client.get_latest_node_action(hostname)
+                    latest = action_client.get_latest_node_action(
+                        hostname,
+                        endpoint=cls._cluster_id,
+                    )
                     if latest and latest.Action == f"{from_state}-{to_state}":
                         logger.info(f"OFR already submitted for {hostname}, ticket_id={latest.Detail}")
                         created.append({"hostname": hostname, "node_id": node_id, "ticket_id": latest.Detail})
                         continue
 
-                    result = action_client.get_latest_action_by_state(hostname, node_id, from_state)
+                    result = action_client.get_latest_action_by_state(
+                        hostname,
+                        node_id,
+                        from_state,
+                        endpoint=cls._cluster_id,
+                    )
                     if result and result.Action and result.Detail:
                         action, detail = result.Action, result.Detail
                         if action.endswith(from_state):
@@ -342,6 +354,7 @@ class NodeRecycler:
                     action_client.update_node_action(
                         hostname, f"{from_state}-{to_state}",
                         time.time(), ofr_str, ticket_id, "",
+                        endpoint=cls._cluster_id,
                     )
             except Exception as e:
                 logger.error(f"Error occured when creating OFR ticket for node {node_id} ({hostname}): {e}")
@@ -426,7 +439,12 @@ class NodeRecycler:
             raise ValueError(f"Unsupported operation: {operation}")
 
         if not hostnames and status_client:
-            hostnames = [n.HostName for n in status_client.get_nodes_by_status(from_state)]
+            hostnames = [
+                n.HostName for n in status_client.get_nodes_by_status(
+                    from_state,
+                    endpoint=cls._cluster_id,
+                )
+            ]
 
         hostnames, ok = cls._filter_nodes_by_policy(
             hostnames or [],
@@ -488,6 +506,7 @@ class NodeRecycler:
                     action_client.update_node_action(
                         name, f"{from_state}-{to_state}",
                         time.time(), f"{op.title()}ing VM", "", "",
+                        endpoint=cls._cluster_id,
                     )
         except Exception as e:
             logger.error(f"List instances in VMSS failed due to: {e}")
@@ -534,7 +553,12 @@ class NodeRecycler:
         if not filter_state:
             filter_state = NodeStatus.ALLOCATED_UA.value
         if not hostnames and status_client:
-            hostnames = [n.HostName for n in status_client.get_nodes_by_status(filter_state)]
+            hostnames = [
+                n.HostName for n in status_client.get_nodes_by_status(
+                    filter_state,
+                    endpoint=cls._cluster_id,
+                )
+            ]
 
         hostnames, ok = cls._filter_nodes_by_policy(
             hostnames or [],
@@ -578,6 +602,7 @@ class NodeRecycler:
                         hostname,
                         f"{filter_state}-{NodeStatus.VALIDATING.value}",
                         time.time(), "Submitting validation job for VM", "", "",
+                        endpoint=cls._cluster_id,
                     )
                 res.raise_for_status()
                 logger.info(f"Submitted validation job for {hostname} with response: {res.json()}")
@@ -603,6 +628,7 @@ class NodeRecycler:
                         action_client.update_node_action(
                             hostname, f"{filter_state}-{NodeStatus.CORDONED.value}",
                             time.time(), f"Validation job submission failed after {cls._validation_retries[hostname]} attempts", str(e), "",
+                            endpoint=cls._cluster_id,
                         )
                     del cls._validation_retries[hostname]
 
@@ -663,6 +689,7 @@ class NodeRecycler:
                 action_client.update_node_action(
                     hostname, f"{filter_state}-{NodeStatus.AVAILABLE.value}",
                     time.time(), "Skipping GPU validation per VMSS config", "", "",
+                    endpoint=cls._cluster_id,
                 )
 
     @classmethod

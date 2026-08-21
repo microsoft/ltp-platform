@@ -72,7 +72,8 @@ class StorageUtil:
             triaged_actions = self.node_action_client.find_triaged_failure(
                 node_name=node_name,
                 completed_time_ms=completedTime,
-                launched_time_ms=launchedTime
+                launched_time_ms=launchedTime,
+                endpoint=self.endpoint,
             )
             
             if not triaged_actions:

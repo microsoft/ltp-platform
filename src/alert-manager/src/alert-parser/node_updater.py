@@ -39,7 +39,11 @@ class NodeRecordUpdater:
         self.retries = 3        
         
     def get_node_latest_status(self, node, as_of_time=None):
-        node_status = self.node_status_client.get_node_status(node, as_of_time)
+        node_status = self.node_status_client.get_node_status(
+            node,
+            as_of_time,
+            endpoint=self.endpoint,
+        )
         if not node_status:
             logger.info(f"No status found for node {node} as of {as_of_time}")
             return None
@@ -47,11 +51,15 @@ class NodeRecordUpdater:
         return node_status
     
     def get_nodes_by_status(self, status, as_of_time=None):
-        nodes = self.node_status_client.get_nodes_by_status(status, as_of_time)
+        nodes = self.node_status_client.get_nodes_by_status(
+            status,
+            as_of_time,
+            endpoint=self.endpoint,
+        )
         return nodes
     
     def get_last_actions_update_time(self):
-        time = self.node_action_client.get_last_update_time()
+        time = self.node_action_client.get_last_update_time(endpoint=self.endpoint)
         return time
 
     
@@ -76,7 +84,15 @@ class NodeRecordUpdater:
         action = self.node_status_client.get_transition_action(from_status, to_status)
         for i in range(self.retries):
             try:
-                self.node_action_client.update_node_action(node, action, timestamp, reason, detail, category='')
+                self.node_action_client.update_node_action(
+                    node,
+                    action,
+                    timestamp,
+                    reason,
+                    detail,
+                    category='',
+                    endpoint=self.endpoint,
+                )
                 logger.info(f"Updated node action to {action} for node {node} on {timestamp}")
                 status_updated = True
                 break

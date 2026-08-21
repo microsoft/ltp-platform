@@ -56,6 +56,7 @@ def mock_env(monkeypatch):
     monkeypatch.setenv("LTP_VMSS_IDS", "vmss-gpu-1,vmss-cpu-1")
     monkeypatch.setenv("VALIDATION_SKIP_VMSS_IDS", "vmss-cpu-1")
     monkeypatch.setenv("VALIDATION_MAX_RETRIES", "3")
+    monkeypatch.setenv("CLUSTER_ID", "test-endpoint")
 
 
 @pytest.fixture
@@ -79,6 +80,7 @@ def recycler(mock_env):
     cls._azure_client_id = "test-client-id"
     cls._ltp_vmss_ids = "vmss-gpu-1,vmss-cpu-1"
     cls._validation_skip_vmss_ids = {"vmss-cpu-1"}
+    cls._cluster_id = "test-endpoint"
     cls._validation_max_retries = 3
     cls._validation_retries = {}
     cls._live_nodes_retry_attempts = 3
@@ -137,6 +139,7 @@ class TestSkipValidation:
             "node-a", "allocated_ua-available",
             pytest.approx(time.time(), abs=5),
             "Skipping GPU validation per VMSS config", "", "",
+            endpoint="test-endpoint",
         )
 
     def test_log_contains_uncordon_hint(self, recycler, status_client, action_client, caplog):

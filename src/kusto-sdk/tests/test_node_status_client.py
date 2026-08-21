@@ -153,13 +153,24 @@ class TestNodeStatusClient:
         query = mock_kusto_client.execute_command.call_args[0][0]
         assert TEST_STATUS_TABLE in query
         assert test_node in query
-        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
+        assert "Endpoint ==" not in query
 
         # Verify result
         assert isinstance(result, NodeStatusRecord)
         assert result.Status == NodeStatus.AVAILABLE.value
         assert result.HostName == test_node
         assert result.Endpoint == TEST_ENDPOINT
+
+    def test_get_node_status_with_explicit_endpoint_filter(self, client,
+                                                           mock_kusto_client):
+        """get_node_status should apply endpoint filter only when provided."""
+        timestamp = datetime.utcnow()
+        mock_kusto_client.execute_command.return_value = []
+
+        client.get_node_status("test-node", timestamp.timestamp(), endpoint=TEST_ENDPOINT)
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
 
     def test_get_node_status_new(self, client, mock_kusto_client, mock_node):
         """Test get_node_status method for new node"""
@@ -235,3 +246,16 @@ class TestNodeStatusClient:
         with pytest.raises(ValueError) as exc_info:
             client.update_node_status(test_node, NodeStatus.TRIAGED_HARDWARE.value,
                                       timestamp.timestamp())
+
+    def test_get_nodes_by_status_with_optional_endpoint(self, client,
+                                                        mock_kusto_client):
+        """get_nodes_by_status should only scope endpoint when provided."""
+        mock_kusto_client.execute_command.return_value = []
+
+        client.get_nodes_by_status(NodeStatus.CORDONED.value)
+        first_query = mock_kusto_client.execute_command.call_args[0][0]
+        assert "Endpoint ==" not in first_query
+
+        client.get_nodes_by_status(NodeStatus.CORDONED.value, endpoint=TEST_ENDPOINT)
+        second_query = mock_kusto_client.execute_command.call_args[0][0]
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in second_query

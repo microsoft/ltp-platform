@@ -119,6 +119,39 @@ class TestNodeActionClient:
             "Test details", "Test", TEST_ENDPOINT
         ])
 
+    def test_update_node_action_endpoint_filter_is_optional(self, client,
+                                                            mock_kusto_client,
+                                                            mock_node):
+        """update_node_action duplicate-check should scope endpoint only when provided."""
+        timestamp = datetime.utcnow().isoformat()
+        mock_kusto_client.execute_command.reset_mock()
+        mock_kusto_client.execute_command.return_value = [{"Count": 0}]
+
+        client.update_node_action(
+            node="test-node",
+            action="available-cordoned",
+            timestamp=timestamp,
+            reason="r",
+            detail="d",
+            category="c",
+        )
+        first_query = mock_kusto_client.execute_command.call_args_list[0][0][0]
+        assert "Endpoint ==" not in first_query
+
+        mock_kusto_client.execute_command.reset_mock()
+        mock_kusto_client.execute_command.return_value = [{"Count": 0}]
+        client.update_node_action(
+            node="test-node",
+            action="available-cordoned",
+            timestamp=timestamp,
+            reason="r",
+            detail="d",
+            category="c",
+            endpoint=TEST_ENDPOINT,
+        )
+        second_query = mock_kusto_client.execute_command.call_args_list[0][0][0]
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in second_query
+
     def test_update_node_action_invalid_action(self, client):
         """Test update_node_action method with invalid action"""
         with pytest.raises(RuntimeError) as exc_info:
@@ -156,6 +189,26 @@ class TestNodeActionClient:
         assert action.HostName == test_node
         assert action.Action == "available-cordoned"
         assert action.Endpoint == TEST_ENDPOINT
+
+    def test_get_latest_node_action_without_endpoint_filter(self, client,
+                                                            mock_kusto_client):
+        """get_latest_node_action should not filter endpoint by default."""
+        mock_kusto_client.execute_command.return_value = []
+
+        client.get_latest_node_action("test-node")
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert "Endpoint ==" not in query
+
+    def test_get_latest_node_action_with_endpoint_filter(self, client,
+                                                         mock_kusto_client):
+        """get_latest_node_action should filter endpoint when provided."""
+        mock_kusto_client.execute_command.return_value = []
+
+        client.get_latest_node_action("test-node", endpoint=TEST_ENDPOINT)
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
 
     def test_get_latest_node_action_no_actions(self, client,
                                                mock_kusto_client):
@@ -204,6 +257,23 @@ class TestNodeActionClient:
         assert actions[0].Action == "available-cordoned"
         assert actions[1].Action == "cordoned-triaged_hardware"
 
+    def test_get_node_actions_with_endpoint_filter(self, client,
+                                                   mock_kusto_client):
+        """get_node_actions should filter endpoint when provided."""
+        start_time = datetime.utcnow() - timedelta(hours=1)
+        end_time = datetime.utcnow()
+        mock_kusto_client.execute_command.return_value = []
+
+        client.get_node_actions(
+            node="test-node",
+            start_time=start_time.isoformat(),
+            end_time=end_time.isoformat(),
+            endpoint=TEST_ENDPOINT,
+        )
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
+
     def test_get_node_actions_empty_result(self, client, mock_kusto_client):
         """Test get_node_actions method with no results"""
         mock_kusto_client.execute_command.return_value = []
@@ -235,7 +305,26 @@ class TestNodeActionClient:
         assert not client.is_valid_action("available")
 
     def test_find_triaged_failure_scopes_endpoint(self, client, mock_kusto_client):
-        """find_triaged_failure should scope all table scans by endpoint."""
+        """find_triaged_failure should scope endpoint only when provided."""
+        action = MagicMock()
+        action.Action = "available-cordoned"
+        action.Timestamp = "2026-01-01T00:00:00Z"
+
+        with patch.object(client, "get_node_actions", return_value=[action]):
+            mock_kusto_client.execute_command.return_value = []
+            client.find_triaged_failure(
+                node_name="test-node",
+                completed_time_ms=1704067500000,
+                launched_time_ms=1704067200000,
+                endpoint=TEST_ENDPOINT,
+            )
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert "let endpoint = 'test-wcu'" in query
+        assert query.count("| where Endpoint == endpoint") == 2
+
+    def test_find_triaged_failure_without_endpoint(self, client, mock_kusto_client):
+        """find_triaged_failure should not inject endpoint filter by default."""
         action = MagicMock()
         action.Action = "available-cordoned"
         action.Timestamp = "2026-01-01T00:00:00Z"
@@ -249,5 +338,5 @@ class TestNodeActionClient:
             )
 
         query = mock_kusto_client.execute_command.call_args[0][0]
-        assert "let endpoint = 'test-wcu'" in query
-        assert query.count("| where Endpoint == endpoint") == 2
+        assert "let endpoint =" not in query
+        assert "| where Endpoint == endpoint" not in query
