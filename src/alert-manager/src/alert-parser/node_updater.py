@@ -51,16 +51,11 @@ class NodeRecordUpdater:
         return node_status
     
     def get_nodes_by_status(self, status, as_of_time=None):
-        nodes = self.node_status_client.get_nodes_by_status(
-            status,
-            as_of_time,
-            use_current_endpoint=True,
-        )
+        nodes = self.node_status_client.get_nodes_by_status(status, as_of_time)
         return nodes
     
     def get_last_actions_update_time(self):
-        time = self.node_action_client.get_last_update_time(
-            use_current_endpoint=True)
+        time = self.node_action_client.get_last_update_time()
         return time
 
     

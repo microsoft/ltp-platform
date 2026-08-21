@@ -250,19 +250,3 @@ class TestNodeStatusClient:
         with pytest.raises(ValueError) as exc_info:
             client.update_node_status(test_node, NodeStatus.TRIAGED_HARDWARE.value,
                                       timestamp.timestamp())
-
-    def test_get_nodes_by_status_with_optional_endpoint(self, client,
-                                                        mock_kusto_client):
-        """get_nodes_by_status should only scope endpoint when provided."""
-        mock_kusto_client.execute_command.return_value = []
-
-        client.get_nodes_by_status(NodeStatus.CORDONED.value)
-        first_query = mock_kusto_client.execute_command.call_args[0][0]
-        assert "Endpoint ==" not in first_query
-
-        client.get_nodes_by_status(
-            NodeStatus.CORDONED.value,
-            use_current_endpoint=True,
-        )
-        second_query = mock_kusto_client.execute_command.call_args[0][0]
-        assert f"Endpoint == '{TEST_ENDPOINT}'" in second_query

@@ -132,7 +132,6 @@ class NodeActionClient(KustoBaseClient):
             # Check for existing record to avoid duplicates
             check_query = f"""
             {self.table_name}
-            | where Endpoint == '{self.endpoint}'
             | where HostName == '{node}' and Timestamp == datetime('{timestamp}') and Action == '{action}'
             | count
             """
@@ -195,17 +194,12 @@ class NodeActionClient(KustoBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to get latest node action: {str(e)}")
 
-    def get_last_update_time(self,
-                             use_current_endpoint: bool = False) -> Optional[datetime]:
+    def get_last_update_time(self) -> Optional[datetime]:
         """Get the last update time for the node action table"""
         try:  
-            endpoint_condition = ""
-            if use_current_endpoint:
-                escaped_endpoint = str(self.endpoint).replace("'", "''")
-                endpoint_condition = f"| where Endpoint == '{escaped_endpoint}'"
             query = f"""
             {self.table_name}
-            {endpoint_condition}
+            | where Endpoint == '{self.endpoint}'
             | summarize arg_max(Timestamp, *) by HostName
             | top 1 by Timestamp desc
             """
@@ -218,8 +212,7 @@ class NodeActionClient(KustoBaseClient):
         self,
         hostname: str,
         node_id: str,
-        state: str,
-        use_current_endpoint: bool = False
+        state: str
     ) -> Optional[Dict[str, Any]]:
         """
         Get the latest action that ends with the specified state for a given hostname and node_id.
@@ -242,13 +235,8 @@ class NodeActionClient(KustoBaseClient):
             ...     print(f"Action: {result['Action']}, Detail: {result['Detail']}")
         """
         try:
-            endpoint_condition = ""
-            if use_current_endpoint:
-                escaped_endpoint = str(self.endpoint).replace("'", "''")
-                endpoint_condition = f"| where Endpoint == '{escaped_endpoint}'"
             query = f"""
             {self.table_name}
-            {endpoint_condition}
             | where Action endswith '{state}'
             | where HostName == '{hostname}' and NodeId == '{node_id}'
             | top 1 by Timestamp desc
@@ -261,11 +249,7 @@ class NodeActionClient(KustoBaseClient):
         except Exception as e:
             raise RuntimeError(f"Failed to get latest action by state: {str(e)}")
 
-    def find_triaged_failure(self,
-                             node_name: str,
-                             completed_time_ms: int,
-                             launched_time_ms: int,
-                             use_current_endpoint: bool = False) -> List[NodeAction]:
+    def find_triaged_failure(self, node_name: str, completed_time_ms: int, launched_time_ms: int) -> List[NodeAction]:
         """
         Find triaged actions for a node between job launch and completion.
         
@@ -284,10 +268,7 @@ class NodeActionClient(KustoBaseClient):
             start_time = convert_timestamp(launched_time_ms / 1000, "str")
             end_time = convert_timestamp(completed_time_ms / 1000, "str")
             
-            node_actions = self.get_node_actions(node_name,
-                                                 start_time,
-                                                 end_time,
-                                                 use_current_endpoint=use_current_endpoint)
+            node_actions = self.get_node_actions(node_name, start_time, end_time)
             
             # Check if there's available-cordoned action
             cordoned_timestamp = None
@@ -301,28 +282,18 @@ class NodeActionClient(KustoBaseClient):
                 return []
             
             # Query triaged actions using KQL
-            endpoint_declare = ""
-            endpoint_condition = ""
-            if use_current_endpoint:
-                escaped_endpoint = str(self.endpoint).replace("'", "''")
-                endpoint_declare = f"let endpoint = '{escaped_endpoint}';"
-                endpoint_condition = "| where Endpoint == endpoint"
-
             query = f"""
             let node_name = '{node_name}';
-            {endpoint_declare}
             let cordoned_ts = datetime({cordoned_timestamp});
             let next_available_ts = toscalar(
                 {self.table_name}
                 | where HostName == node_name
-                {endpoint_condition}
                 | where Action endswith '-available' and Action != 'available-cordoned'
                 | where Timestamp > cordoned_ts
                 | summarize min(Timestamp)
             );
             {self.table_name}
             | where HostName == node_name
-            {endpoint_condition}
             | where Timestamp >= cordoned_ts
             | where isnull(next_available_ts) or Timestamp <= next_available_ts
             | where Action in ('cordoned-triaged_platform', 'cordoned-triaged_hardware', 'cordoned-triaged_user', 'cordoned-triaged_unknown')

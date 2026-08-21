@@ -73,7 +73,6 @@ class StorageUtil:
                 node_name=node_name,
                 completed_time_ms=completedTime,
                 launched_time_ms=launchedTime,
-                use_current_endpoint=True,
             )
             
             if not triaged_actions:

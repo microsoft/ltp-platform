@@ -119,25 +119,6 @@ class TestNodeActionClient:
             "Test details", "Test", TEST_ENDPOINT
         ])
 
-    def test_update_node_action_scopes_duplicate_check_by_client_endpoint(
-            self, client, mock_kusto_client, mock_node):
-        """update_node_action should use client endpoint for duplicate check."""
-        timestamp = datetime.utcnow().isoformat()
-        mock_kusto_client.execute_command.reset_mock()
-        mock_kusto_client.execute_command.return_value = [{"Count": 0}]
-
-        client.update_node_action(
-            node="test-node",
-            action="available-cordoned",
-            timestamp=timestamp,
-            reason="r",
-            detail="d",
-            category="c",
-        )
-
-        query = mock_kusto_client.execute_command.call_args_list[0][0][0]
-        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
-
     def test_update_node_action_invalid_action(self, client):
         """Test update_node_action method with invalid action"""
         with pytest.raises(RuntimeError) as exc_info:
@@ -289,40 +270,3 @@ class TestNodeActionClient:
         assert not client.is_valid_action("InvalidAction")
         assert not client.is_valid_action("Cordoned")
         assert not client.is_valid_action("available")
-
-    def test_find_triaged_failure_scopes_endpoint(self, client, mock_kusto_client):
-        """find_triaged_failure should scope endpoint only when provided."""
-        action = MagicMock()
-        action.Action = "available-cordoned"
-        action.Timestamp = "2026-01-01T00:00:00Z"
-
-        with patch.object(client, "get_node_actions", return_value=[action]):
-            mock_kusto_client.execute_command.return_value = []
-            client.find_triaged_failure(
-                node_name="test-node",
-                completed_time_ms=1704067500000,
-                launched_time_ms=1704067200000,
-                use_current_endpoint=True,
-            )
-
-        query = mock_kusto_client.execute_command.call_args[0][0]
-        assert "let endpoint = 'test-wcu'" in query
-        assert query.count("| where Endpoint == endpoint") == 2
-
-    def test_find_triaged_failure_without_endpoint(self, client, mock_kusto_client):
-        """find_triaged_failure should not inject endpoint filter by default."""
-        action = MagicMock()
-        action.Action = "available-cordoned"
-        action.Timestamp = "2026-01-01T00:00:00Z"
-
-        with patch.object(client, "get_node_actions", return_value=[action]):
-            mock_kusto_client.execute_command.return_value = []
-            client.find_triaged_failure(
-                node_name="test-node",
-                completed_time_ms=1704067500000,
-                launched_time_ms=1704067200000,
-            )
-
-        query = mock_kusto_client.execute_command.call_args[0][0]
-        assert "let endpoint =" not in query
-        assert "| where Endpoint == endpoint" not in query

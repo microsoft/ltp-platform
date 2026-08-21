@@ -249,10 +249,7 @@ class NodeRecycler:
         created = []
         if not node_faults and status_client and action_client:
             node_faults = []
-            status_nodes = status_client.get_nodes_by_status(
-                from_state,
-                use_current_endpoint=True,
-            )
+            status_nodes = status_client.get_nodes_by_status(from_state)
             candidates = [n.HostName for n in status_nodes]
             filtered_candidates, ok = cls._filter_nodes_by_policy(
                 candidates,
@@ -292,7 +289,6 @@ class NodeRecycler:
                         hostname,
                         node_id,
                         from_state,
-                        use_current_endpoint=True,
                     )
                     if result and result.Action and result.Detail:
                         action, detail = result.Action, result.Detail
@@ -438,10 +434,7 @@ class NodeRecycler:
 
         if not hostnames and status_client:
             hostnames = [
-                n.HostName for n in status_client.get_nodes_by_status(
-                    from_state,
-                    use_current_endpoint=True,
-                )
+                n.HostName for n in status_client.get_nodes_by_status(from_state)
             ]
 
         hostnames, ok = cls._filter_nodes_by_policy(
@@ -551,10 +544,7 @@ class NodeRecycler:
             filter_state = NodeStatus.ALLOCATED_UA.value
         if not hostnames and status_client:
             hostnames = [
-                n.HostName for n in status_client.get_nodes_by_status(
-                    filter_state,
-                    use_current_endpoint=True,
-                )
+                n.HostName for n in status_client.get_nodes_by_status(filter_state)
             ]
 
         hostnames, ok = cls._filter_nodes_by_policy(
