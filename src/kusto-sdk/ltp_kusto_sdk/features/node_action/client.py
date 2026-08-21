@@ -132,6 +132,7 @@ class NodeActionClient(KustoBaseClient):
             # Check for existing record to avoid duplicates
             check_query = f"""
             {self.table_name}
+            | where Endpoint == '{self.endpoint}'
             | where HostName == '{node}' and Timestamp == datetime('{timestamp}') and Action == '{action}'
             | count
             """
@@ -159,6 +160,7 @@ class NodeActionClient(KustoBaseClient):
         try:
             query = f"""
             {self.table_name}
+            | where Endpoint == '{self.endpoint}'
             | where HostName == '{node}'
             | where Timestamp between (datetime({start_time}) .. datetime({end_time}))
             | order by Timestamp desc
@@ -173,6 +175,7 @@ class NodeActionClient(KustoBaseClient):
         try:
             query = f"""
             {self.table_name}
+            | where Endpoint == '{self.endpoint}'
             | where HostName == '{node}'
             | top 1 by Timestamp desc
             """
@@ -224,6 +227,7 @@ class NodeActionClient(KustoBaseClient):
         try:
             query = f"""
             {self.table_name}
+            | where Endpoint == '{self.endpoint}'
             | where Action endswith '{state}'
             | where HostName == '{hostname}' and NodeId == '{node_id}'
             | top 1 by Timestamp desc

@@ -143,7 +143,11 @@ class NodeStatusClient(KustoBaseClient):
         timestamp_str = None
         if timestamp is not None:
             timestamp_str = convert_timestamp(timestamp, format="str")
-        query = f"{self.table_name} | where HostName == '{hostname}'"
+        query = (
+            f"{self.table_name}"
+            f" | where HostName == '{hostname}'"
+            f" | where Endpoint == '{self.endpoint}'"
+        )
         if timestamp_str is not None:
             query += f" | where Timestamp <= datetime({timestamp_str})"
         query += " | summarize arg_max(Timestamp, *) by HostName"
@@ -187,16 +191,16 @@ class NodeStatusClient(KustoBaseClient):
             status: str,
             as_of_time: Optional[datetime] = None) -> List[NodeStatusRecord]:
         """Get all nodes whose latest/current status is exactly the specified status.
-        
+
         Args:
             status (str): The status to filter nodes by
             as_of_time (datetime, optional): The reference time to check status.
                                           If not provided, uses current time.
-                                          
+
         Returns:
             List[NodeStatusRecord]: List of node records whose latest status matches.
                                 Each record contains Timestamp, HostName, Status, NodeId, and Endpoint.
-                                
+
         Example:
             >>> client = NodeStatusClient()
             >>> current_cordoned_nodes = client.get_nodes_by_status('cordoned')
@@ -209,18 +213,11 @@ class NodeStatusClient(KustoBaseClient):
                 timestamp_condition = f"| where Timestamp <= datetime({timestamp_str})"
 
             query = f"""
-            let latest_status = {self.table_name}
+            {self.table_name}
+            | where Endpoint == '{self.endpoint}'
             {timestamp_condition}
-            | summarize arg_max(Timestamp, Status) by HostName;
-            latest_status
+            | summarize arg_max(Timestamp, *) by HostName
             | where Status == '{status}'
-            | join kind=inner (
-                {self.table_name}
-                | where Status == '{status}'
-                | where Endpoint == '{self.endpoint}'
-                | summarize arg_max(Timestamp, *) by HostName
-            ) on HostName
-            | project Timestamp=Timestamp1, HostName, Status=Status1, NodeId, Endpoint
             """
 
             results = self.execute_query(query)

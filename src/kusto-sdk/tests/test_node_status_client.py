@@ -153,6 +153,7 @@ class TestNodeStatusClient:
         query = mock_kusto_client.execute_command.call_args[0][0]
         assert TEST_STATUS_TABLE in query
         assert test_node in query
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
 
         # Verify result
         assert isinstance(result, NodeStatusRecord)

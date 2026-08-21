@@ -72,6 +72,7 @@ def action_client():
 def recycler(mock_env):
     """Configure NodeRecycler for testing."""
     cls = recycler_module.NodeRecycler
+    default_nodes = {"node-a", "node-b", "test-node", "gpu-node-1", "cpu-node-1"}
     cls._ltp_rest_server_uri = "http://test-server"
     cls._ltp_rest_server_token = "test-token"
     cls._ltp_validation_image = "test-image:latest"
@@ -80,6 +81,12 @@ def recycler(mock_env):
     cls._validation_skip_vmss_ids = {"vmss-cpu-1"}
     cls._validation_max_retries = 3
     cls._validation_retries = {}
+    cls._live_nodes_retry_attempts = 3
+    cls._live_nodes_retry_interval_seconds = 0
+    cls._layout_nodes_cache = set(default_nodes)
+    cls._layout_nodes_loaded = True
+    cls._layout_nodes_load_success = True
+    cls._load_live_nodes = classmethod(lambda _cls: (set(default_nodes), set(default_nodes), True))
     return cls
 
 
@@ -299,12 +306,15 @@ class TestStartAndValidatePipeline:
              patch.object(recycler, "validate") as mock_validate, \
              patch.object(recycler, "skip_validation") as mock_skip:
 
-            # operate is called 4 times (2 VMSS x 2 states)
-            # vmss-gpu-1 DEALLOCATED_UA -> returns gpu_vms
-            # vmss-gpu-1 DEALLOCATED_PLATFORM -> returns []
-            # vmss-cpu-1 DEALLOCATED_UA -> returns cpu_vms
-            # vmss-cpu-1 DEALLOCATED_PLATFORM -> returns []
-            mock_operate.side_effect = [gpu_vms, [], cpu_vms, []]
+            def operate_side_effect(vmss_id, **kwargs):
+                from_state = kwargs.get("from_state")
+                if vmss_id == "vmss-gpu-1" and from_state == "deallocated_ua":
+                    return gpu_vms
+                if vmss_id == "vmss-cpu-1" and from_state == "deallocated_ua":
+                    return cpu_vms
+                return []
+
+            mock_operate.side_effect = operate_side_effect
 
             recycler.start_and_validate_pipeline(status_client, action_client)
 
@@ -330,7 +340,13 @@ class TestStartAndValidatePipeline:
              patch.object(recycler, "validate") as mock_validate, \
              patch.object(recycler, "skip_validation") as mock_skip:
 
-            mock_operate.side_effect = [vms, [], [], []]
+            def operate_side_effect(vmss_id, **kwargs):
+                from_state = kwargs.get("from_state")
+                if vmss_id == "vmss-gpu-1" and from_state == "deallocated_ua":
+                    return vms
+                return []
+
+            mock_operate.side_effect = operate_side_effect
             recycler.start_and_validate_pipeline(status_client, action_client)
 
         mock_skip.assert_not_called()
@@ -360,9 +376,13 @@ class TestStartAndValidatePipeline:
              patch.object(recycler, "validate") as mock_validate, \
              patch.object(recycler, "skip_validation") as mock_skip:
 
-            # vmss-gpu-1: both return empty
-            # vmss-cpu-1: DEALLOCATED_UA returns [], DEALLOCATED_PLATFORM returns cpu_vms
-            mock_operate.side_effect = [[], [], [], cpu_vms]
+            def operate_side_effect(vmss_id, **kwargs):
+                from_state = kwargs.get("from_state")
+                if vmss_id == "vmss-cpu-1" and from_state == "deallocated_platform":
+                    return cpu_vms
+                return []
+
+            mock_operate.side_effect = operate_side_effect
 
             recycler.start_and_validate_pipeline(status_client, action_client)
 
@@ -432,3 +452,120 @@ class TestOfrDedup:
 
             # Should create exactly one incident
             mock_icm_api.create_incident.assert_called_once()
+
+
+class TestNodeFilterPolicy:
+    def test_layout_only_loads_once(self, recycler):
+        recycler._layout_nodes_loaded = False
+        recycler._layout_nodes_load_success = False
+        recycler._layout_nodes_cache = set()
+
+        with patch.object(recycler, "_load_layout_nodes", return_value=({"node-a"}, True)) as mock_load_layout:
+            filtered_1, ok_1 = recycler._filter_nodes_by_policy(
+                ["node-a"],
+                stage="test-stage-1",
+                require_layout=True,
+                require_live=False,
+            )
+            filtered_2, ok_2 = recycler._filter_nodes_by_policy(
+                ["node-a"],
+                stage="test-stage-2",
+                require_layout=True,
+                require_live=False,
+            )
+
+        assert ok_1 is True
+        assert ok_2 is True
+        assert filtered_1 == ["node-a"]
+        assert filtered_2 == ["node-a"]
+        assert mock_load_layout.call_count == 1
+
+    def test_layout_load_failure_falls_back_to_original_behavior(self, recycler):
+        recycler._layout_nodes_loaded = False
+        recycler._layout_nodes_load_success = False
+        recycler._layout_nodes_cache = set()
+
+        with patch.object(recycler, "_load_layout_nodes", return_value=(set(), False)):
+            filtered, ok = recycler._filter_nodes_by_policy(
+                ["node-a", "node-b"],
+                stage="test-layout-fail-fallback",
+                require_layout=True,
+                require_live=False,
+            )
+
+        assert ok is True
+        assert filtered == ["node-a", "node-b"]
+
+    def test_empty_layout_falls_back_to_original_behavior(self, recycler):
+        recycler._layout_nodes_loaded = True
+        recycler._layout_nodes_load_success = True
+        recycler._layout_nodes_cache = set()
+
+        filtered, ok = recycler._filter_nodes_by_policy(
+            ["node-a", "node-b"],
+            stage="test-layout-empty-fallback",
+            require_layout=True,
+            require_live=False,
+        )
+
+        assert ok is True
+        assert filtered == ["node-a", "node-b"]
+
+    def test_no_layout_load_when_not_required(self, recycler):
+        with patch.object(recycler, "_load_layout_nodes") as mock_load_layout:
+            filtered, ok = recycler._filter_nodes_by_policy(
+                ["node-a"],
+                stage="test-no-layout",
+                require_layout=False,
+                require_live=False,
+            )
+
+        assert ok is True
+        assert filtered == ["node-a"]
+        mock_load_layout.assert_not_called()
+
+    def test_live_nodes_retry_success(self, recycler):
+        recycler._live_nodes_retry_attempts = 3
+        recycler._live_nodes_retry_interval_seconds = 0
+
+        with patch.object(
+            recycler,
+            "_load_live_nodes",
+            side_effect=[
+                (set(), set(), False),
+                (set(), set(), False),
+                ({"node-a"}, {"node-a"}, True),
+            ],
+        ) as mock_load_live, patch("recycler.time.sleep") as mock_sleep:
+            filtered, ok = recycler._filter_nodes_by_policy(
+                ["node-a"],
+                stage="test-live-retry-success",
+                require_layout=True,
+                require_live=True,
+            )
+
+        assert ok is True
+        assert filtered == ["node-a"]
+        assert mock_load_live.call_count == 3
+        assert mock_sleep.call_count == 2
+
+    def test_live_nodes_retry_exhausted_skip_stage(self, recycler):
+        recycler._live_nodes_retry_attempts = 3
+        recycler._live_nodes_retry_interval_seconds = 0
+
+        with patch.object(
+            recycler,
+            "_load_live_nodes",
+            return_value=(set(), set(), False),
+        ) as mock_load_live, patch("recycler.time.sleep") as mock_sleep:
+            filtered, ok = recycler._filter_nodes_by_policy(
+                ["node-a"],
+                stage="test-live-retry-fail",
+                require_layout=True,
+                require_live=True,
+            )
+
+        assert ok is False
+        assert filtered == []
+        assert mock_load_live.call_count == 3
+        assert mock_sleep.call_count == 2
