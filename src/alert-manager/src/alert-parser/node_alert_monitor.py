@@ -228,7 +228,7 @@ class NodeAvailabilityMonitor:
                 elif period_alerts['alertname'].str.contains('CordonValidationFailedNodes').any():
                     validation_alerts = period_alerts[period_alerts['alertname'].str.contains('CordonValidationFailedNodes')]
                     validation_time = validation_alerts['timestamp'].max()
-                    to_status = NodeStatus.CORDONED.value
+                    to_status = NodeStatus.TRIAGED_UNKNOWN.value
                     reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
                     self.node_updater.update_status_action(node, from_status, to_status, validation_time, reason, detail)
                 elif period_alerts['alertname'].str.contains('RecoverValidatedNodes').any():

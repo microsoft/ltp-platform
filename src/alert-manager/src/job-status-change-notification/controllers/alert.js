@@ -87,7 +87,7 @@ const uncordonNodes = async (nodeList) => {
     status: "firing",
     labels: {
       alertname: "RecoverValidatedNodes",
-      severity: "info",
+      severity: "error",
       node_name: node,
     },
     annotations: {
@@ -109,7 +109,7 @@ const cordonNodes = async (nodeList) => {
     status: "firing",
     labels: {
       alertname: "CordonValidationFailedNodes",
-      severity: "info",
+      severity: "error",
       node_name: node.name,
     },
     annotations: {

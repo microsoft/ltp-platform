@@ -178,7 +178,7 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
     mock_alert_fetcher.reset_mock()
     mock_alert_mapper.reset_mock()
     
-    # case 3: Node status change from validating to cordoned
+    # case 4: Validation failure moves the node to triaged_unknown
     status = -1 
     node_status = NodeStatusRecord(
         Timestamp=datetime.fromtimestamp(timestamp - 100, tz=timezone.utc),
@@ -204,7 +204,31 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
     args = mock_node_updater.update_status_action.call_args.args
     assert args[0] == node
     assert args[1] == 'validating'
-    assert args[2] == 'cordoned'
+    assert args[2] == 'triaged_unknown'
+
+    # Reset mocks for next test
+    mock_node_updater.reset_mock()
+    mock_alert_fetcher.reset_mock()
+    mock_alert_mapper.reset_mock()
+
+    # case 5: Validation success moves the node to available_nodata
+    alerts = pd.DataFrame({
+        'alertname': ['RecoverValidatedNodes'],
+        'timestamp': [datetime.fromtimestamp(timestamp, tz=timezone.utc)],
+        'node_name': [node],
+        'summary': [f'{node} passed validation']
+    })
+    mock_alert_fetcher.find_node_alerts.return_value = alerts
+    mock_alert_fetcher.shrink_alerts.return_value = alerts
+    mock_alert_mapper.summary_events_into_reason_detail.return_value = ("reason", "detail")
+
+    monitor.handle_node_status_change(node, timestamp, status, alerts, node_status)
+
+    assert mock_node_updater.update_status_action.called
+    args = mock_node_updater.update_status_action.call_args.args
+    assert args[0] == node
+    assert args[1] == 'validating'
+    assert args[2] == 'available_nodata'
     
 
 def test_handle_validating_node_with_empty_alerts(monitor, mock_alert_fetcher, mock_alert_mapper, mock_node_updater):
