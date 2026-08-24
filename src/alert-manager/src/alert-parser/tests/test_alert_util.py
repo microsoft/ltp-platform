@@ -118,6 +118,22 @@ class TestAlertFetcher(unittest.TestCase):
         self.assertEqual(result.iloc[0]['node_name'], 'mi300-00007n')
         self.assertEqual(result.iloc[0]['alertname'], 'RecoverValidatedNodes')
 
+    def test_fetch_logs_forwards_alertname(self):
+        self.fetcher.client.query_alerts.reset_mock()
+        self.fetcher.client.query_alerts.return_value = []
+
+        self.fetcher.fetch_logs(
+            end_time_stamp=1000,
+            time_offset="5m",
+            nodes=["test-node"],
+            alertname="RecoverValidatedNodes",
+        )
+
+        kwargs = self.fetcher.client.query_alerts.call_args.kwargs
+        self.assertEqual(kwargs["nodes"], ["test-node"])
+        self.assertEqual(kwargs["alertname"], "RecoverValidatedNodes")
+        self.assertIsNone(kwargs["severity"])
+
 @pytest.fixture(scope='module')
 def mock_kusto_client():
     """Mock alert client for testing purposes"""

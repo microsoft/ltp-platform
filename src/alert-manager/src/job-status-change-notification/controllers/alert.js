@@ -80,9 +80,9 @@ const sendAlerts = async (alerts) => {
 };
 
 const uncordonNodes = async (nodeList) => {
-  logger.info(`Uncordoning nodes: ${nodeList.join(", ")} ...`);
+  logger.info(`Reporting successfully validated nodes: ${nodeList.join(", ")} ...`);
 
-  // create alerts for uncordon nodes
+  // create alerts for nodes that are ready for data synchronization
   const alerts = nodeList.map(node => ({
     status: "firing",
     labels: {
@@ -91,13 +91,13 @@ const uncordonNodes = async (nodeList) => {
       node_name: node,
     },
     annotations: {
-      summary: `The node ${node} has been validated and be uncordoned.`,
+      summary: `The node ${node} has passed validation and is ready for data synchronization.`,
     },
   }));
 
   await sendAlerts(alerts);
 
-  logger.info(`Successfully uncordoned nodes: ${nodeList.join(", ")}`);
+  logger.info(`Successfully reported validated nodes: ${nodeList.join(", ")}`);
 }
 
 const cordonNodes = async (nodeList) => {
@@ -109,7 +109,7 @@ const cordonNodes = async (nodeList) => {
     status: "firing",
     labels: {
       alertname: "CordonValidationFailedNodes",
-      severity: "info",
+      severity: "error",
       node_name: node.name,
     },
     annotations: {
