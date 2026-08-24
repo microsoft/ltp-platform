@@ -206,23 +206,17 @@ class NodeStatusClient(KustoBaseClient):
         """
         try:
             timestamp_condition = ""
+            escaped_endpoint = str(self.endpoint).replace("'", "''")
             if as_of_time:
                 timestamp_str = convert_timestamp(as_of_time, format="str")
                 timestamp_condition = f"| where Timestamp <= datetime({timestamp_str})"
 
             query = f"""
-            let latest_status = {self.table_name}
+            {self.table_name}
+            | where Endpoint == '{escaped_endpoint}'
             {timestamp_condition}
-            | summarize arg_max(Timestamp, Status) by HostName;
-            latest_status
+            | summarize arg_max(Timestamp, *) by HostName
             | where Status == '{status}'
-            | join kind=inner (
-                {self.table_name}
-                | where Status == '{status}'
-                | where Endpoint == '{self.endpoint}'
-                | summarize arg_max(Timestamp, *) by HostName
-            ) on HostName
-            | project Timestamp=Timestamp1, HostName, Status=Status1, NodeId, Endpoint
             """
 
             results = self.execute_query(query)

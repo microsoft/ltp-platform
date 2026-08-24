@@ -216,7 +216,7 @@ class TestNodeActionClient:
 
     def test_get_node_actions_scopes_by_endpoint(self, client,
                                                  mock_kusto_client):
-        """get_node_actions should filter by client endpoint."""
+        """get_node_actions should scope by client endpoint."""
         start_time = datetime.utcnow() - timedelta(hours=1)
         end_time = datetime.utcnow()
         mock_kusto_client.execute_command.return_value = []

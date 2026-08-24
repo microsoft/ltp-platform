@@ -235,3 +235,15 @@ class TestNodeStatusClient:
         with pytest.raises(ValueError) as exc_info:
             client.update_node_status(test_node, NodeStatus.TRIAGED_HARDWARE.value,
                                       timestamp.timestamp())
+
+    def test_get_nodes_by_status_filters_endpoint_before_arg_max(
+            self, client, mock_kusto_client):
+        """get_nodes_by_status should scope endpoint before arg_max."""
+        mock_kusto_client.execute_command.return_value = []
+
+        client.get_nodes_by_status(NodeStatus.CORDONED.value)
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
+        assert "| summarize arg_max(Timestamp, *) by HostName" in query
+        assert "join kind=inner" not in query
