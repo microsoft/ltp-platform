@@ -58,14 +58,7 @@ class NodeRecordUpdater:
         action = self.node_status_client.get_transition_action(from_status, to_status)
         for i in range(self.retries):
             try:
-                self.node_action_client.update_node_action(
-                    node,
-                    action,
-                    timestamp,
-                    reason,
-                    detail,
-                    category=category,
-                )
+                self.node_action_client.update_node_action(node, action, timestamp, reason, detail, category=category)
                 logger.info(f"Updated node action to {action} for node {node} on {timestamp} with category {category}")
                 status_updated = True
                 break
