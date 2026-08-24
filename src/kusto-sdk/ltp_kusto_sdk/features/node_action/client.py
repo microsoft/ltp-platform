@@ -226,8 +226,10 @@ class NodeActionClient(KustoBaseClient):
             ...     print(f"Action: {result['Action']}, Detail: {result['Detail']}")
         """
         try:
+            escaped_endpoint = str(self.endpoint).replace("'", "''")
             query = f"""
             {self.table_name}
+            | where Endpoint == '{escaped_endpoint}'
             | where Action endswith '{state}'
             | where HostName == '{hostname}' and NodeId == '{node_id}'
             | top 1 by Timestamp desc
@@ -271,20 +273,24 @@ class NodeActionClient(KustoBaseClient):
             
             if not cordoned_timestamp:
                 return []
-            
+
             # Query triaged actions using KQL
+            escaped_endpoint = str(self.endpoint).replace("'", "''")
             query = f"""
             let node_name = '{node_name}';
+            let endpoint = '{escaped_endpoint}';
             let cordoned_ts = datetime({cordoned_timestamp});
             let next_available_ts = toscalar(
                 {self.table_name}
                 | where HostName == node_name
+                | where Endpoint == endpoint
                 | where Action endswith '-available' and Action != 'available-cordoned'
                 | where Timestamp > cordoned_ts
                 | summarize min(Timestamp)
             );
             {self.table_name}
             | where HostName == node_name
+            | where Endpoint == endpoint
             | where Timestamp >= cordoned_ts
             | where isnull(next_available_ts) or Timestamp <= next_available_ts
             | where Action in ('cordoned-triaged_platform', 'cordoned-triaged_hardware', 'cordoned-triaged_user', 'cordoned-triaged_unknown')

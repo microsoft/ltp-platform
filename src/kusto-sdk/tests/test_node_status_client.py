@@ -247,3 +247,5 @@ class TestNodeStatusClient:
         assert f"Endpoint == '{TEST_ENDPOINT}'" in query
         assert "| summarize arg_max(Timestamp, *) by HostName" in query
         assert "join kind=inner" not in query
+        assert query.index(f"Endpoint == '{TEST_ENDPOINT}'") < query.index(
+            "| summarize arg_max(Timestamp, *) by HostName")
