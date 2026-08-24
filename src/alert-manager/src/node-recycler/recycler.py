@@ -21,6 +21,7 @@ import logging
 
 import icm
 import requests
+import yaml
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.compute import ComputeManagementClient
 
@@ -34,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 class NodeRecycler:
+    _layout_config_path = os.getenv("PAI_LAYOUT_PATH", "/pai-cluster-config/layout.yaml")
     _icm_host = os.getenv("ICM_HOST", "prod.microsofticm.com")
     _icm_cert_path = os.getenv("ICM_CERT_PATH", "cert.pem")
     _icm_key_path = os.getenv("ICM_KEY_PATH", "key.pem")
@@ -48,6 +50,184 @@ class NodeRecycler:
     _ltp_validation_image = os.getenv("LTP_VALIDATION_IMAGE")
     _ltp_vmss_ids = os.getenv("LTP_VMSS_IDS", "")
     _validation_skip_vmss_ids = set(filter(None, os.getenv("VALIDATION_SKIP_VMSS_IDS", "").split(",")))
+    _live_nodes_retry_attempts = int(os.getenv("LIVE_NODES_RETRY_ATTEMPTS", "3"))
+    _live_nodes_retry_interval_seconds = int(os.getenv("LIVE_NODES_RETRY_INTERVAL_SECONDS", "1"))
+    _layout_nodes_cache = set()
+    _layout_nodes_loaded = False
+    _layout_nodes_load_success = False
+
+    @classmethod
+    def _initialize_layout_nodes(cls) -> bool:
+        """Load and validate layout nodes once for process lifetime."""
+        if cls._layout_nodes_loaded:
+            if not cls._layout_nodes_load_success:
+                raise RuntimeError(
+                    f"layout initialization previously failed from {cls._layout_config_path}"
+                )
+            if not cls._layout_nodes_cache:
+                raise RuntimeError(
+                    f"layout cache is empty from {cls._layout_config_path}"
+                )
+            return cls._layout_nodes_load_success
+
+        layout_nodes, layout_ok = cls._load_layout_nodes()
+        if not layout_ok:
+            raise RuntimeError(
+                f"failed to initialize layout nodes from {cls._layout_config_path}"
+            )
+        if not layout_nodes:
+            raise RuntimeError(
+                f"layout contains no usable nodes at {cls._layout_config_path}"
+            )
+
+        cls._layout_nodes_cache = layout_nodes
+        cls._layout_nodes_load_success = True
+        cls._layout_nodes_loaded = True
+        logger.info("Initialized %d layout nodes from %s", len(layout_nodes), cls._layout_config_path)
+        return True
+
+    @classmethod
+    def _load_layout_nodes(cls) -> tuple[set[str], bool]:
+        """Load node names from cluster layout file.
+
+        Returns:
+            tuple[set[str], bool]: (node names, success flag)
+        """
+        try:
+            with open(cls._layout_config_path, "r") as f:
+                layout = yaml.safe_load(f) or {}
+            machine_list = layout.get("machine-list", [])
+            nodes = {
+                str(machine.get("nodename", "")).strip().lower()
+                for machine in machine_list
+                if machine.get("nodename")
+            }
+            logger.info("Loaded %d nodes from layout file %s", len(nodes), cls._layout_config_path)
+            return nodes, True
+        except Exception as e:
+            logger.error("Failed to load layout nodes from %s: %s", cls._layout_config_path, e)
+            return set(), False
+
+    @classmethod
+    def _load_live_nodes(cls) -> tuple[set[str], set[str], bool]:
+        """Load live and ready node names from rest-server kubernetes API.
+
+        Returns:
+            tuple[set[str], set[str], bool]: (live nodes, ready nodes, success flag)
+        """
+        if not cls._ltp_rest_server_uri or not cls._ltp_rest_server_token:
+            logger.error("REST_SERVER_URI or REST_SERVER_TOKEN is not configured")
+            return set(), set(), False
+
+        url = f"{cls._ltp_rest_server_uri}/api/v1/kubernetes/nodes"
+        headers = {"Authorization": f"Bearer {cls._ltp_rest_server_token}"}
+
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            response.raise_for_status()
+            payload = response.json() or {}
+            items = payload.get("items", [])
+
+            live_nodes = set()
+            ready_nodes = set()
+            for node in items:
+                name = str(node.get("metadata", {}).get("name", "")).strip().lower()
+                if not name:
+                    continue
+                live_nodes.add(name)
+                conditions = node.get("status", {}).get("conditions", [])
+                ready_condition = next((c for c in conditions if c.get("type") == "Ready"), None)
+                if ready_condition and ready_condition.get("status") == "True":
+                    ready_nodes.add(name)
+
+            logger.info("Loaded %d live nodes (%d ready) from %s", len(live_nodes), len(ready_nodes), url)
+            return live_nodes, ready_nodes, True
+        except Exception as e:
+            logger.error("Failed to load live nodes from %s: %s", url, e)
+            return set(), set(), False
+
+    @classmethod
+    def _load_live_nodes_with_retry(cls, stage: str) -> tuple[set[str], set[str], bool]:
+        """Load live nodes with retries. Returns failure after max attempts."""
+        attempts = max(1, cls._live_nodes_retry_attempts)
+        interval_seconds = max(0, cls._live_nodes_retry_interval_seconds)
+
+        for attempt in range(1, attempts + 1):
+            live_nodes, ready_nodes, ok = cls._load_live_nodes()
+            if ok:
+                return live_nodes, ready_nodes, True
+
+            if attempt < attempts:
+                wait_seconds = interval_seconds * (2 ** (attempt - 1))
+                logger.warning(
+                    "[%s] failed to load live nodes (attempt %d/%d), retrying in %ss",
+                    stage,
+                    attempt,
+                    attempts,
+                    wait_seconds,
+                )
+                time.sleep(wait_seconds)
+
+        logger.error("[%s] failed to load live nodes after %d attempts", stage, attempts)
+        return set(), set(), False
+
+    @classmethod
+    def _filter_nodes_by_policy(
+        cls,
+        hostnames: list[str],
+        stage: str,
+        require_layout: bool,
+        require_live: bool,
+        require_ready: bool = False,
+    ) -> tuple[list[str], bool]:
+        """Filter nodes by stage policy and return filtered list.
+
+        Returns:
+            tuple[list[str], bool]: (filtered hostnames, success flag)
+        """
+        normalized = [h.strip().lower() for h in hostnames if h and h.strip()]
+        if not normalized:
+            return [], True
+
+        layout_nodes = set()
+        if require_layout:
+            cls._initialize_layout_nodes()
+            layout_nodes = cls._layout_nodes_cache
+
+        live_nodes, ready_nodes, live_ok = set(), set(), True
+        if require_live or require_ready:
+            live_nodes, ready_nodes, live_ok = cls._load_live_nodes_with_retry(stage)
+            if not live_ok:
+                logger.error("[%s] skipping stage because live nodes cannot be loaded", stage)
+                return [], False
+
+        kept = []
+        skipped = []
+        for hostname in normalized:
+            reasons = []
+            if require_layout and hostname not in layout_nodes:
+                reasons.append("not_in_layout")
+            if require_live and hostname not in live_nodes:
+                reasons.append("not_live")
+            if require_ready and hostname not in ready_nodes:
+                reasons.append("not_ready")
+
+            if reasons:
+                skipped.append((hostname, ",".join(reasons)))
+            else:
+                kept.append(hostname)
+
+        logger.info(
+            "[%s] candidate filtering: raw=%d kept=%d skipped=%d",
+            stage,
+            len(normalized),
+            len(kept),
+            len(skipped),
+        )
+        for hostname, reason in skipped[:20]:
+            logger.info("[%s] skipped node %s: %s", stage, hostname, reason)
+
+        return kept, True
 
     @classmethod
     def ofr(cls, node_faults=None, status_client=None, action_client=None):
@@ -69,7 +249,25 @@ class NodeRecycler:
         created = []
         if not node_faults and status_client and action_client:
             node_faults = []
-            for node in status_client.get_nodes_by_status(from_state):
+            status_nodes = status_client.get_nodes_by_status(from_state)
+            candidates = [n.HostName for n in status_nodes]
+            filtered_candidates, ok = cls._filter_nodes_by_policy(
+                candidates,
+                stage="ofr-triaged_hardware",
+                require_layout=True,
+                require_live=True,
+                require_ready=False,
+            )
+            if not ok:
+                logger.error("[ofr-triaged_hardware] skipping OFR stage due to filtering prerequisite failure")
+                return
+
+            nodes_by_hostname = {str(n.HostName).strip().lower(): n for n in status_nodes}
+            for hostname in filtered_candidates:
+                node = nodes_by_hostname.get(hostname)
+                if node is None:
+                    logger.warning("[%s] node %s disappeared from status query after filtering", "ofr-triaged_hardware", hostname)
+                    continue
                 try:
                     hostname, node_id = node.HostName, node.NodeId
                     logger.info(f"INFO: Querying node {hostname} with node id {node_id} in state {from_state}")
@@ -78,13 +276,19 @@ class NodeRecycler:
                     # action for this node.  get_latest_action_by_state uses
                     # "endswith" which never returns triaged_hardware-ua, so we
                     # query the latest action separately to detect prior OFR.
-                    latest = action_client.get_latest_node_action(hostname)
+                    latest = action_client.get_latest_node_action(
+                        hostname,
+                    )
                     if latest and latest.Action == f"{from_state}-{to_state}":
                         logger.info(f"OFR already submitted for {hostname}, ticket_id={latest.Detail}")
                         created.append({"hostname": hostname, "node_id": node_id, "ticket_id": latest.Detail})
                         continue
 
-                    result = action_client.get_latest_action_by_state(hostname, node_id, from_state)
+                    result = action_client.get_latest_action_by_state(
+                        hostname,
+                        node_id,
+                        from_state,
+                    )
                     if result and result.Action and result.Detail:
                         action, detail = result.Action, result.Detail
                         if action.endswith(from_state):
@@ -228,7 +432,21 @@ class NodeRecycler:
             raise ValueError(f"Unsupported operation: {operation}")
 
         if not hostnames and status_client:
-            hostnames = [n.HostName for n in status_client.get_nodes_by_status(from_state)]
+            hostnames = [
+                n.HostName for n in status_client.get_nodes_by_status(from_state)
+            ]
+
+        hostnames, ok = cls._filter_nodes_by_policy(
+            hostnames or [],
+            stage=f"operate-{from_state}-to-{to_state}",
+            require_layout=(from_state in (NodeStatus.UA.value, NodeStatus.DEALLOCATED_UA.value)),
+            require_live=False,
+            require_ready=False,
+        )
+        if not ok:
+            logger.error("[operate-%s-to-%s] skipping VM operation due to filtering prerequisite failure", from_state, to_state)
+            return []
+
         if not hostnames:
             return []
         logger.info(f"Operating on {hostnames} hostnames in VMSS {vmss_id} with operation {op}")
@@ -324,7 +542,21 @@ class NodeRecycler:
         if not filter_state:
             filter_state = NodeStatus.ALLOCATED_UA.value
         if not hostnames and status_client:
-            hostnames = [n.HostName for n in status_client.get_nodes_by_status(filter_state)]
+            hostnames = [
+                n.HostName for n in status_client.get_nodes_by_status(filter_state)
+            ]
+
+        hostnames, ok = cls._filter_nodes_by_policy(
+            hostnames or [],
+            stage=f"validate-{filter_state}",
+            require_layout=True,
+            require_live=True,
+            require_ready=True,
+        )
+        if not ok:
+            logger.error("[validate-%s] skipping validation stage due to filtering prerequisite failure", filter_state)
+            return
+
         if not hostnames:
             return
 
@@ -519,6 +751,7 @@ class NodeRecycler:
         """
         status_client = create_node_status_client()
         action_client = create_node_action_client()
+        cls._initialize_layout_nodes()
         logger.info("Created storage clients for node status and action tables")
         while True:
             logger.info(f"{datetime.now()} Starting to UA and Deallocate Nodes")

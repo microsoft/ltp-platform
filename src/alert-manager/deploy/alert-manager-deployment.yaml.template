@@ -312,6 +312,8 @@ spec:
         volumeMounts:
         - name: config-volume
           mountPath: /app/config
+        - name: pai-configuration
+          mountPath: /pai-cluster-config
 {% if "icm" in cluster_cfg["alert-manager"]["node-recycler"] %}
         - name: icm-certs
           mountPath: /etc/icm/certs
@@ -456,6 +458,9 @@ spec:
       - name: config-volume
         configMap:
           name: alertmanager-configmap
+      - name: pai-configuration
+        configMap:
+          name: pai-configuration
 {% if cluster_cfg["alert-manager"]["alert-handler"]["configured"] %}
 {% if 'email-admin' in cluster_cfg["alert-manager"]["actions-available"] %}
       - name: templates-volume

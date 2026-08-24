@@ -157,6 +157,16 @@ class TestNodeActionClient:
         assert action.Action == "available-cordoned"
         assert action.Endpoint == TEST_ENDPOINT
 
+    def test_get_latest_node_action_scopes_by_endpoint(self, client,
+                                                       mock_kusto_client):
+        """get_latest_node_action should filter by client endpoint."""
+        mock_kusto_client.execute_command.return_value = []
+
+        client.get_latest_node_action("test-node")
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
+
     def test_get_latest_node_action_no_actions(self, client,
                                                mock_kusto_client):
         """Test get_latest_node_action method when no actions exist"""
@@ -164,6 +174,17 @@ class TestNodeActionClient:
 
         action = client.get_latest_node_action("test-node")
         assert action is None
+
+    def test_get_latest_action_by_state_scopes_and_escapes_endpoint(
+            self, client, mock_kusto_client):
+        """get_latest_action_by_state should scope and escape endpoint."""
+        client.endpoint = "test'wcu"
+        mock_kusto_client.execute_command.return_value = []
+
+        client.get_latest_action_by_state("test-node", "node-123", "cordoned")
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert "Endpoint == 'test''wcu'" in query
 
     def test_get_node_actions(self, client, mock_kusto_client):
         """Test get_node_actions method with time range"""
@@ -204,6 +225,22 @@ class TestNodeActionClient:
         assert actions[0].Action == "available-cordoned"
         assert actions[1].Action == "cordoned-triaged_hardware"
 
+    def test_get_node_actions_scopes_by_endpoint(self, client,
+                                                 mock_kusto_client):
+        """get_node_actions should scope by client endpoint."""
+        start_time = datetime.utcnow() - timedelta(hours=1)
+        end_time = datetime.utcnow()
+        mock_kusto_client.execute_command.return_value = []
+
+        client.get_node_actions(
+            node="test-node",
+            start_time=start_time.isoformat(),
+            end_time=end_time.isoformat(),
+        )
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert f"Endpoint == '{TEST_ENDPOINT}'" in query
+
     def test_get_node_actions_empty_result(self, client, mock_kusto_client):
         """Test get_node_actions method with no results"""
         mock_kusto_client.execute_command.return_value = []
@@ -223,6 +260,44 @@ class TestNodeActionClient:
                                     start_time=datetime.utcnow().isoformat(),
                                     end_time=datetime.utcnow().isoformat())
         assert "Failed to get node actions" in str(exc_info.value)
+
+    def test_find_triaged_failure_scopes_both_kql_scans_by_endpoint(
+            self, client, mock_kusto_client):
+        """find_triaged_failure should scope endpoint for both table scans."""
+        action = MagicMock()
+        action.Action = "available-cordoned"
+        action.Timestamp = "2026-01-01T00:00:00Z"
+
+        with patch.object(client, "get_node_actions", return_value=[action]):
+            mock_kusto_client.execute_command.return_value = []
+            client.find_triaged_failure(
+                node_name="test-node",
+                completed_time_ms=1704067500000,
+                launched_time_ms=1704067200000,
+            )
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert f"let endpoint = '{TEST_ENDPOINT}';" in query
+        assert query.count("| where Endpoint == endpoint") == 2
+
+    def test_find_triaged_failure_escapes_endpoint_literal(self, client,
+                                                           mock_kusto_client):
+        """find_triaged_failure should escape endpoint single quote in KQL."""
+        client.endpoint = "test'wcu"
+        action = MagicMock()
+        action.Action = "available-cordoned"
+        action.Timestamp = "2026-01-01T00:00:00Z"
+
+        with patch.object(client, "get_node_actions", return_value=[action]):
+            mock_kusto_client.execute_command.return_value = []
+            client.find_triaged_failure(
+                node_name="test-node",
+                completed_time_ms=1704067500000,
+                launched_time_ms=1704067200000,
+            )
+
+        query = mock_kusto_client.execute_command.call_args[0][0]
+        assert "let endpoint = 'test''wcu';" in query
 
     def test_validate_action_format(self, client):
         """Test action format validation"""
