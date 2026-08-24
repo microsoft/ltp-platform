@@ -225,16 +225,20 @@ class NodeAvailabilityMonitor:
                 logger.info(f'{len(shrinked_alerts)} alerts after shrinking for node {node} at time {timestamp} due to tolerance time')
                 if period_alerts.empty:
                     logger.info(f"Node {node} is continuously unschedulable but in {from_status} with no alerts. No action taken.")
-                elif period_alerts['alertname'].str.contains('CordonValidationFailedNodes').any():
-                    validation_alerts = period_alerts[period_alerts['alertname'].str.contains('CordonValidationFailedNodes')]
+                elif (period_alerts['alertname'] == 'CordonValidationFailedNodes').any():
+                    validation_alerts = period_alerts[period_alerts['alertname'] == 'CordonValidationFailedNodes']
                     validation_time = validation_alerts['timestamp'].max()
+                    shrinked_validation_alerts = self.alert_fetcher.shrink_alerts(validation_alerts)
                     to_status = NodeStatus.TRIAGED_UNKNOWN.value
-                    reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
+                    reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_validation_alerts)
                     self.node_updater.update_status_action(node, from_status, to_status, validation_time, reason, detail)
-                elif period_alerts['alertname'].str.contains('RecoverValidatedNodes').any():
+                elif (period_alerts['alertname'] == 'RecoverValidatedNodes').any():
+                    recovery_alerts = period_alerts[period_alerts['alertname'] == 'RecoverValidatedNodes']
+                    recovery_time = recovery_alerts['timestamp'].max()
+                    shrinked_recovery_alerts = self.alert_fetcher.shrink_alerts(recovery_alerts)
                     to_status = NodeStatus.AVAILABLE_NODATA.value
-                    reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_alerts)
-                    self.node_updater.update_status_action(node, from_status, to_status, timestamp, reason, detail)
+                    reason, detail = self.alert_mapper.summary_events_into_reason_detail(shrinked_recovery_alerts)
+                    self.node_updater.update_status_action(node, from_status, to_status, recovery_time, reason, detail)
                 # TODO check validation job status
                 elif len(shrinked_new_alerts) > 0 and not period_alerts['alertname'].str.contains('NodeNotReady').any() and not period_alerts['alertname'].str.contains('RecoverValidatedNodes').any():
                     to_status = NodeStatus.CORDONED.value
@@ -283,6 +287,23 @@ class NodeAvailabilityMonitor:
             alerts = self.alert_fetcher.get_node_alert_records(
                 end_time, f"{time_offset}s", nodes=[node], severity="error"
             )
+            if node_status.Status == NodeStatus.VALIDATING.value:
+                recovery_alerts = self.alert_fetcher.get_node_alert_records(
+                    end_time,
+                    f"{time_offset}s",
+                    nodes=[node],
+                    alertname="RecoverValidatedNodes",
+                )
+                alert_frames = [
+                    frame for frame in (alerts, recovery_alerts)
+                    if frame is not None and not frame.empty
+                ]
+                alerts = (
+                    pd.concat(alert_frames, ignore_index=True)
+                    .drop_duplicates()
+                    .sort_values("timestamp")
+                    if alert_frames else None
+                )
 
             sorted_changes = sorted(changes.items(), key=lambda x: x[0])
             for timestamp, status in sorted_changes:

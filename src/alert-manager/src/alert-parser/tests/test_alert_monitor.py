@@ -187,14 +187,18 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
         NodeId=node,
         Endpoint='test-endpoint'
     )
+    validation_failure_time = timestamp - 20
     alerts = pd.DataFrame({
-        'alertname': ['CordonValidationFailedNodes'],
-        'timestamp': [datetime.fromtimestamp(timestamp, tz=timezone.utc)],
-        'node_name': [node],
-        'summary': [f'{node} should be cordoned']
+        'alertname': ['NodeNotReady', 'CordonValidationFailedNodes'],
+        'timestamp': [
+            datetime.fromtimestamp(timestamp - 30, tz=timezone.utc),
+            datetime.fromtimestamp(validation_failure_time, tz=timezone.utc),
+        ],
+        'node_name': [node, node],
+        'summary': [f'{node} was not ready', f'{node} failed validation']
     })
     mock_alert_fetcher.find_node_alerts.return_value = alerts
-    mock_alert_fetcher.shrink_alerts.return_value = alerts
+    mock_alert_fetcher.shrink_alerts.side_effect = lambda frame: frame
     mock_alert_mapper.summary_events_into_reason_detail.return_value = ("reason", "detail")
     
     monitor.handle_node_status_change(node, timestamp, status, alerts, node_status)
@@ -205,6 +209,9 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
     assert args[0] == node
     assert args[1] == 'validating'
     assert args[2] == 'triaged_unknown'
+    assert args[3] == datetime.fromtimestamp(validation_failure_time, tz=timezone.utc)
+    reason_alerts = mock_alert_mapper.summary_events_into_reason_detail.call_args.args[0]
+    assert reason_alerts['alertname'].tolist() == ['CordonValidationFailedNodes']
 
     # Reset mocks for next test
     mock_node_updater.reset_mock()
@@ -212,14 +219,18 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
     mock_alert_mapper.reset_mock()
 
     # case 5: Validation success moves the node to available_nodata
+    recovery_time = timestamp - 10
     alerts = pd.DataFrame({
-        'alertname': ['RecoverValidatedNodes'],
-        'timestamp': [datetime.fromtimestamp(timestamp, tz=timezone.utc)],
-        'node_name': [node],
-        'summary': [f'{node} passed validation']
+        'alertname': ['NodeNotReady', 'RecoverValidatedNodes'],
+        'timestamp': [
+            datetime.fromtimestamp(timestamp - 30, tz=timezone.utc),
+            datetime.fromtimestamp(recovery_time, tz=timezone.utc),
+        ],
+        'node_name': [node, node],
+        'summary': [f'{node} was not ready', f'{node} passed validation']
     })
     mock_alert_fetcher.find_node_alerts.return_value = alerts
-    mock_alert_fetcher.shrink_alerts.return_value = alerts
+    mock_alert_fetcher.shrink_alerts.side_effect = lambda frame: frame
     mock_alert_mapper.summary_events_into_reason_detail.return_value = ("reason", "detail")
 
     monitor.handle_node_status_change(node, timestamp, status, alerts, node_status)
@@ -229,6 +240,62 @@ def test_handle_node_status_change(monitor, mock_alert_fetcher, mock_alert_mappe
     assert args[0] == node
     assert args[1] == 'validating'
     assert args[2] == 'available_nodata'
+    assert args[3] == datetime.fromtimestamp(recovery_time, tz=timezone.utc)
+    reason_alerts = mock_alert_mapper.summary_events_into_reason_detail.call_args.args[0]
+    assert reason_alerts['alertname'].tolist() == ['RecoverValidatedNodes']
+
+
+def test_process_validating_node_fetches_recovery_alerts(
+    monitor, mock_alert_fetcher, mock_node_updater
+):
+    from ltp_storage.data_schema.node_status import NodeStatusRecord
+
+    node = "test-node"
+    end_time = 1100.0
+    node_status = NodeStatusRecord(
+        Timestamp=datetime.fromtimestamp(900, tz=timezone.utc),
+        HostName=node,
+        Status='validating',
+        NodeId=node,
+        Endpoint='test-endpoint'
+    )
+    error_alert = pd.DataFrame({
+        'alertname': ['NodeNotReady'],
+        'timestamp': [datetime.fromtimestamp(1000, tz=timezone.utc)],
+        'node_name': [node],
+        'summary': ['node not ready'],
+        'severity': ['error'],
+    })
+    recovery_alert = pd.DataFrame({
+        'alertname': ['RecoverValidatedNodes'],
+        'timestamp': [datetime.fromtimestamp(1050, tz=timezone.utc)],
+        'node_name': [node],
+        'summary': ['validation passed'],
+        'severity': ['info'],
+    })
+    mock_node_updater.get_node_latest_status.return_value = node_status
+    mock_alert_fetcher.get_node_alert_records.side_effect = [
+        error_alert,
+        recovery_alert,
+    ]
+
+    with patch.object(monitor, 'handle_node_status_change') as mock_handle:
+        monitor.process_node_changes(node, {end_time: -1}, end_time)
+
+    assert mock_alert_fetcher.get_node_alert_records.call_count == 2
+    assert mock_alert_fetcher.get_node_alert_records.call_args_list[0].kwargs == {
+        'nodes': [node],
+        'severity': 'error',
+    }
+    assert mock_alert_fetcher.get_node_alert_records.call_args_list[1].kwargs == {
+        'nodes': [node],
+        'alertname': 'RecoverValidatedNodes',
+    }
+    merged_alerts = mock_handle.call_args.args[3]
+    assert merged_alerts['alertname'].tolist() == [
+        'NodeNotReady',
+        'RecoverValidatedNodes',
+    ]
     
 
 def test_handle_validating_node_with_empty_alerts(monitor, mock_alert_fetcher, mock_alert_mapper, mock_node_updater):
