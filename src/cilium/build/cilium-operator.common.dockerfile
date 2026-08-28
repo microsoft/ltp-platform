@@ -16,11 +16,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Build cilium-operator-generic from source with updated Go.
-# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.25.12
+# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.25.13
 # (latest 1.25.x patch). The operator is a pure Go binary (CGO_ENABLED=0, scratch base).
 #
 
-ARG GOLANG_VERSION=1.25.12
+ARG GOLANG_VERSION=1.25.13
 ARG CILIUM_VERSION=v1.18.10
 
 # Stage 1: Build operator binary

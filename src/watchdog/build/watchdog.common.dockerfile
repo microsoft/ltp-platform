@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.25.12-alpine3.23 as builder
+FROM golang:1.25.13-alpine3.23 as builder
 
 ENV PROJECT_DIR=/src
 ENV INSTALL_DIR=/opt/watchdog

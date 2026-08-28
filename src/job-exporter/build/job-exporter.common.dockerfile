@@ -46,7 +46,7 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 ############################
 # nerdctl-builder: build nerdctl from source
 ############################
-FROM golang:1.26.5 AS nerdctl-builder
+FROM golang:1.26.6 AS nerdctl-builder
 
 ARG TARGETARCH
 ARG NERDCTL_VERSION=2.3.4
@@ -55,6 +55,7 @@ WORKDIR /build
 
 RUN set -eux; \
     git clone --depth 1 --branch v${NERDCTL_VERSION} https://github.com/containerd/nerdctl.git .; \
+    go get github.com/cilium/ebpf@v0.22.0 && \
     go get golang.org/x/text@v0.39.0 && \
     go get google.golang.org/grpc@v1.82.1 && \
     go mod tidy; \

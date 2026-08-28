@@ -16,21 +16,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Build cilium agent from source with updated Go.
-# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.25.12
+# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.25.13
 # (latest 1.25.x patch). All Go binaries (cilium, hubble, CNI plugins) are
 # compiled from source so no pre-built binaries from the base image are used.
 # Runtime base is the official cilium-runtime image (Ubuntu 24.04 + LLVM + BPF tools)
 # with OS-level security patches applied.
 #
 
-ARG GOLANG_VERSION=1.25.12
+ARG GOLANG_VERSION=1.25.13
 ARG CILIUM_VERSION=v1.18.10
 ARG CNI_PLUGINS_VERSION=v1.9.0
 ARG GOPS_VERSION=v0.3.27
 ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:5615e8b62b0b47ad5a586bf459d0c072eaa0442a@sha256:5edc984f0a8f4ae208d60490a3234d1950b5497d2646980328e69f4a73c50e85
 ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.36.6-1778235340-b87d1e32f522b33bd51701c6476d199326f01496@sha256:71d4fa0ec45e8d546dbd5604e169dc77fe92be63b799313bff031d00d89762e3
 
-# Stage 1: Build all Go binaries from source with Go 1.25.9
+# Stage 1: Build all Go binaries from source with the patched Go toolchain
 FROM golang:${GOLANG_VERSION} AS builder
 ARG CILIUM_VERSION
 ARG CNI_PLUGINS_VERSION
@@ -50,7 +50,8 @@ RUN go get golang.org/x/crypto@v0.52.0 && \
     go get google.golang.org/grpc@v1.82.1 && \
     go get github.com/google/cel-go@v0.29.0 && \
     go get go.mongodb.org/mongo-driver@v1.17.7 && \
-    go get github.com/gopacket/gopacket@v1.6.1 && \
+    go get github.com/gopacket/gopacket@v1.7.1 && \
+    go get github.com/cilium/ebpf@v0.22.0 && \
     go mod tidy && \
     go mod vendor
 
