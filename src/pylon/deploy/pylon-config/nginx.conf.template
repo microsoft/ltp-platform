@@ -15,10 +15,10 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-worker_processes  1;
+worker_processes 1;
 
 events {
-  worker_connections  1024;
+  worker_connections  65535;
 }
 
 http {
@@ -65,8 +65,21 @@ http {
   # allow 10.1.0.0/16;
   # deny all;
 
+  {%- if MODEL_PROXY_URI %}
+  # Upstream keepalive pool for model-proxy.
+  # Reuses persistent connections and enables automatic stale-connection retry
+  # before nginx has committed to the client response -- eliminating the race
+  # that causes [Errno 104] Connection reset by peer under high concurrency.
+  upstream model_proxy_upstream {
+    server {{MODEL_PROXY_URI | replace('http://', '') | replace('https://', '')}};
+    keepalive 32;
+    keepalive_requests 1000;
+    keepalive_timeout 60s;
+  }
+  {%- endif %}
+
   server {
-    listen      80;
+    listen      80 backlog=4096;
     server_name localhost;
     client_max_body_size 0; # Disable checking of client request body size.
     client_body_buffer_size 256M;
@@ -84,7 +97,7 @@ http {
 
   {% if SSL_ENABLE %}
   server {
-    listen  443 ssl;
+    listen  443 ssl backlog=4096;
     server_name  localhost;
 
     ssl_certificate /root/{{CRT_NAME}};
