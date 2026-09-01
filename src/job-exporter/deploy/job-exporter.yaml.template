@@ -88,6 +88,7 @@ spec:
           name: main
       - name: moneo-gpu-exporter
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        imagePullPolicy: Always
         securityContext:
           privileged: true
           capabilities:
@@ -105,6 +106,7 @@ spec:
           name: gpu
       - name: moneo-net-exporter
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        imagePullPolicy: Always
         securityContext:
           privileged: true
           capabilities:
@@ -123,6 +125,7 @@ spec:
           name: net
       - name: moneo-node-exporter
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
+        imagePullPolicy: Always
         securityContext:
           privileged: true
           capabilities:
