@@ -105,7 +105,8 @@
     "morgan": ">=1.11.0",
     "joi": ">=17.13.4",
     "js-yaml": "^4.3.1",
-    "body-parser": "^2.3.0"
+    "body-parser": "^2.3.0",
+    "browserslist": ">=4.28.7"
   },
   "_moduleAliases": {
     "@pai": "src"
