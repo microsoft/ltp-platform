@@ -59,6 +59,7 @@ RUN set -eux; \
     go get golang.org/x/mod@v0.40.0 && \
     go get golang.org/x/text@v0.39.0 && \
     go get google.golang.org/grpc@v1.82.1 && \
+    go get golang.org/x/crypto@v0.55.0 && \
     go mod tidy; \
     make binaries; \
     mkdir -p /opt/nerdctl; \

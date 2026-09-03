@@ -33,7 +33,9 @@ WORKDIR /usr/src/plugin
 
 RUN git clone --branch ${PLUGINVERSION} --depth 1 https://github.com/grafana/grafana-infinity-datasource.git /usr/src/plugin
 
-RUN go get google.golang.org/grpc@v1.82.1 && go mod tidy
+RUN go get golang.org/x/crypto@v0.55.0 && \
+    go get google.golang.org/grpc@v1.82.1 && \
+    go mod tidy
 
 RUN go install github.com/magefile/mage@latest
 

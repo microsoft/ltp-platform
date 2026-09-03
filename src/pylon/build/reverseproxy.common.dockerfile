@@ -4,6 +4,7 @@ RUN git clone --branch v0.70.1 --depth 1 https://github.com/fatedier/frp.git /fr
 WORKDIR /frp
 
 RUN go get github.com/Azure/go-ntlmssp@v0.1.1 && \
+    go get golang.org/x/crypto@v0.55.0 && \
     go mod tidy && \
     if [ -d vendor ]; then go work vendor 2>/dev/null || go mod vendor; fi
 
