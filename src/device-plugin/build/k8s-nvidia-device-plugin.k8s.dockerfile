@@ -19,11 +19,8 @@ WORKDIR /usr/src/k8s-nvidia-device-plugin
 
 RUN make PREFIX=/artifacts cmds
 
-FROM debian:trixie-slim AS shell
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends busybox-static && \
-    rm -rf /var/lib/apt/lists/* && \
-    mkdir /busybox && \
+FROM busybox:1.38.0-glibc AS shell
+RUN mkdir /busybox && \
     cp /bin/busybox /busybox/busybox && \
     /busybox/busybox --install -s /busybox
 

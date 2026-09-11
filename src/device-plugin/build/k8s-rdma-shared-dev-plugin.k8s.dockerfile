@@ -22,7 +22,7 @@ RUN apk add --no-cache --virtual build-base linux-headers
 WORKDIR /usr/src/k8s-rdma-shared-dp
 
 RUN go get golang.org/x/text@v0.39.0 && \
-    go get google.golang.org/grpc@v1.82.1 && \
+    go get google.golang.org/grpc@v1.83.1 && \
     go get golang.org/x/crypto@v0.53.0 && \
     go get golang.org/x/net@v0.56.0 && \
     go get golang.org/x/mod@v0.40.0

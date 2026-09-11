@@ -20,7 +20,7 @@ RUN go mod edit \
     -require=golang.org/x/net@v0.56.0 \
     -require=golang.org/x/text@v0.39.0 \
     -require=golang.org/x/crypto@v0.52.0 \
-    -require=google.golang.org/grpc@v1.82.1 \
+    -require=google.golang.org/grpc@v1.83.1 \
     -require=k8s.io/kubelet@v0.33.1
 
 RUN go mod tidy -go=1.25.13

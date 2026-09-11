@@ -83,8 +83,9 @@
   "resolutions": {
     "tar-fs": "^3.1.1",
     "@eslint/plugin-kit": "^0.3.3",
+    "@humanfs/node": "^0.16.8",
     "mocha/diff": "^8.0.3",
-    "qs": "^6.15.2",
+    "qs": "^6.16.0",
     "minimatch": ">=10.2.3",
     "ajv": "^8.18.0",
     "fast-xml-parser": "^5.7.0",
