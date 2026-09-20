@@ -9,7 +9,7 @@ ARG GO_RUNNER_COMMIT=b044ae2b55cf464c150607d70e29f4b2d772d505
 
 WORKDIR /go
 
-RUN git clone --branch v1.33.7 --depth 1 https://github.com/kubernetes/kubernetes.git kubernetes
+RUN git clone --branch v1.33.12 --depth 1 https://github.com/kubernetes/kubernetes.git kubernetes
 
 WORKDIR /go/kubernetes
 
@@ -23,7 +23,7 @@ RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
     done && \
     for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       dir=$(dirname "$modfile"); \
-      (cd "$dir" && go get google.golang.org/grpc@v1.83.1) || true; \
+      (cd "$dir" && go get google.golang.org/grpc@v1.83.2) || true; \
       (cd "$dir" && go get github.com/google/cel-go@v0.29.0) || true; \
       (cd "$dir" && go get golang.org/x/crypto@v0.56.0) || true; \
     done && \

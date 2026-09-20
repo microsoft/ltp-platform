@@ -20,7 +20,7 @@ ARG TARGETOS
 ARG TARGETARCH
 
 ENV GOVERSION=1.26.6
-ENV PLUGINVERSION=v3.11.0
+ENV PLUGINVERSION=v3.11.3
 
 ENV GOPATH=/usr/local/go
 ENV GOBIN=$GOPATH/bin
@@ -34,7 +34,7 @@ WORKDIR /usr/src/plugin
 RUN git clone --branch ${PLUGINVERSION} --depth 1 https://github.com/grafana/grafana-infinity-datasource.git /usr/src/plugin
 
 RUN go get golang.org/x/crypto@v0.56.0 && \
-    go get google.golang.org/grpc@v1.83.1 && \
+    go get google.golang.org/grpc@v1.83.2 && \
     go mod tidy
 
 RUN go install github.com/magefile/mage@latest

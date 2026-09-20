@@ -16,19 +16,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Build cilium agent from source with updated Go.
-# This fixes Go stdlib and module vulnerabilities by compiling with Go 1.26.6.
+# This fixes Go stdlib and module vulnerabilities by compiling with Go 1.26.8.
 # All Go binaries (cilium, hubble, CNI plugins) are
 # compiled from source so no pre-built binaries from the base image are used.
-# Runtime base is the official cilium-runtime image (Ubuntu 24.04 + LLVM + BPF tools)
+# Runtime base is the official cilium-runtime image (Ubuntu + LLVM + BPF tools)
 # with OS-level security patches applied.
 #
 
-ARG GOLANG_VERSION=1.26.6
-ARG CILIUM_VERSION=v1.18.10
-ARG CNI_PLUGINS_VERSION=v1.9.0
-ARG GOPS_VERSION=v0.3.27
-ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:5615e8b62b0b47ad5a586bf459d0c072eaa0442a@sha256:5edc984f0a8f4ae208d60490a3234d1950b5497d2646980328e69f4a73c50e85
-ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.36.6-1778235340-b87d1e32f522b33bd51701c6476d199326f01496@sha256:71d4fa0ec45e8d546dbd5604e169dc77fe92be63b799313bff031d00d89762e3
+ARG GOLANG_VERSION=1.26.8
+ARG CILIUM_VERSION=v1.20.2
+ARG CNI_PLUGINS_VERSION=v1.9.1
+ARG GOPS_VERSION=v0.3.29
+ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:13953be3b88431ba8d71634e240280b1148e6d20@sha256:9f0f69b62f64cc2ce7668c2f07332dd3fc7523e39446f185aa34f26c8f760af9
+ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463
 
 # Stage 1: Build all Go binaries from source with the patched Go toolchain
 FROM golang:${GOLANG_VERSION} AS builder
@@ -46,7 +46,7 @@ RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
 
 RUN go get golang.org/x/net@v0.56.0 && \
     go get golang.org/x/text@v0.39.0 && \
-    go get google.golang.org/grpc@v1.83.1 && \
+    go get google.golang.org/grpc@v1.83.2 && \
     go get github.com/google/cel-go@v0.29.0 && \
     go get go.mongodb.org/mongo-driver@v1.17.7 && \
     go get github.com/gopacket/gopacket@v1.7.1 && \

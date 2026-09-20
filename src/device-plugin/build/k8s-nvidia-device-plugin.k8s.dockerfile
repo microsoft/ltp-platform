@@ -17,6 +17,10 @@ RUN git clone --branch ${VERSION} --single-branch https://github.com/NVIDIA/k8s-
 RUN mkdir /artifacts
 WORKDIR /usr/src/k8s-nvidia-device-plugin
 
+RUN go get google.golang.org/grpc@v1.83.2 && \
+    go mod tidy && \
+    go mod vendor
+
 RUN make PREFIX=/artifacts cmds
 
 FROM busybox:1.38.0-glibc AS shell
@@ -24,7 +28,7 @@ RUN mkdir /busybox && \
     cp /bin/busybox /busybox/busybox && \
     /busybox/busybox --install -s /busybox
 
-FROM nvcr.io/nvidia/distroless/go:v4.1.2 AS application
+FROM nvcr.io/nvidia/distroless/go:v4.1.4 AS application
 
 USER 0:0
 

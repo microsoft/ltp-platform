@@ -49,7 +49,7 @@ RUN python3 -m pip install --no-cache-dir -U pip wheel && \
 FROM golang:1.26.6 AS nerdctl-builder
 
 ARG TARGETARCH
-ARG NERDCTL_VERSION=2.3.4
+ARG NERDCTL_VERSION=2.3.5
 
 WORKDIR /build
 
@@ -58,7 +58,8 @@ RUN set -eux; \
     go get github.com/cilium/ebpf@v0.22.0 && \
     go get golang.org/x/mod@v0.40.0 && \
     go get golang.org/x/text@v0.39.0 && \
-    go get google.golang.org/grpc@v1.83.1 && \
+    go get github.com/containerd/containerd/v2@v2.3.5 && \
+    go get google.golang.org/grpc@v1.83.2 && \
     go get golang.org/x/crypto@v0.56.0 && \
     go mod tidy; \
     make binaries; \
