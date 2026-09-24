@@ -29,7 +29,8 @@ WORKDIR /go/src/github.com/prometheus/prometheus
 RUN git clone --depth 1 --branch ${PROMETHEUS_VERSION} \
     https://github.com/prometheus/prometheus.git .
 
-RUN go get golang.org/x/crypto@v0.56.0 \
+RUN go get github.com/go-openapi/swag/jsonutils@v0.27.1 \
+      golang.org/x/crypto@v0.56.0 \
       google.golang.org/grpc@v1.83.2 && \
     go mod tidy && \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} make build PREFIX=/out
