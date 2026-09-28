@@ -35,7 +35,7 @@
   "dependencies": {
     "axios": "^1.18.0",
     "interval-promise": "^1.4.0",
-    "joi": "^17.13.3",
+    "joi": "^18.2.6",
     "module-alias": "^2.2.3",
     "openpaidbsdk": "file:./openpaidbsdk",
     "sequelize": "^6.37.8",
@@ -60,9 +60,10 @@
     "semver": "^6.3.1",
     "follow-redirects": "^1.16.0",
     "axios": "^1.18.0",
-    "fast-uri": "^3.1.5",
+    "fast-uri": "^3.1.8",
     "uuid": "11.1.1",
-    "joi": ">=17.13.4",
+    "joi": "^18.2.6",
+    "moment": "^2.31.0",
     "js-yaml": "^4.3.1"
   },
   "scripts": {
