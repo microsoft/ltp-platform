@@ -2,6 +2,17 @@
 # Licensed under the MIT License.
 
 
+FROM golang:1.26.6 AS azcopy-builder
+
+ARG AZCOPY_VERSION=10.32.8
+
+WORKDIR /src
+RUN git clone --depth 1 --branch "v${AZCOPY_VERSION}" \
+        https://github.com/Azure/azure-storage-azcopy.git . && \
+    go get golang.org/x/crypto@v0.56.0 && \
+    go mod tidy && \
+    CGO_ENABLED=0 go build -tags netgo -o /azcopy
+
 FROM python:3.12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -18,7 +29,7 @@ RUN apt-get update && \
     rsync && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-RUN curl -sL https://aka.ms/downloadazcopy-v10-linux | tar -xz --strip-components=1 -C /usr/local/bin
+COPY --from=azcopy-builder /azcopy /usr/local/bin/azcopy
 
 ENV SSHD_PORT=23333 \
     RSYNC_PORT=8873

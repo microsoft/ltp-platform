@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.25.12 AS build
+FROM golang:1.26.6 AS build
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -9,28 +9,39 @@ ARG TARGETARCH
 ARG GOOS=${TARGETOS}
 ARG GOARCH=${TARGETARCH}
 
-ARG VERSION="v0.18.0"
-ARG GIT_COMMIT="3c9ffca94"
+ARG VERSION="v0.20.0"
+ARG GIT_COMMIT="1b826acc6"
 
 RUN git clone --branch ${VERSION} --single-branch https://github.com/NVIDIA/k8s-device-plugin.git /usr/src/k8s-nvidia-device-plugin
 
 RUN mkdir /artifacts
 WORKDIR /usr/src/k8s-nvidia-device-plugin
 
+RUN go get google.golang.org/grpc@v1.83.2 && \
+    go mod tidy && \
+    go mod vendor
+
 RUN make PREFIX=/artifacts cmds
 
-FROM nvcr.io/nvidia/distroless/go:v4.0.0-dev AS application
+FROM busybox:1.38.0-glibc AS shell
+RUN mkdir /busybox && \
+    cp /bin/busybox /busybox/busybox && \
+    /busybox/busybox --install -s /busybox
+
+FROM nvcr.io/nvidia/distroless/go:v4.1.4 AS application
 
 USER 0:0
-SHELL ["/busybox/sh", "-c"]
-RUN ln -s /busybox/sh /bin/sh
+
+COPY --from=shell /busybox /busybox
+RUN ["/busybox/ln", "-s", "/busybox/sh", "/bin/sh"]
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/busybox
 
 ENV NVIDIA_DISABLE_REQUIRE="true"
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
-ARG VERSION="v0.18.0"
-ARG GIT_COMMIT="3c9ffca94"
+ARG VERSION="v0.20.0"
+ARG GIT_COMMIT="1b826acc6"
 
 LABEL io.k8s.display-name="NVIDIA Device Plugin"
 LABEL name="NVIDIA Device Plugin"
