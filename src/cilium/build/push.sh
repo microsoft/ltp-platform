@@ -4,13 +4,14 @@
 # Local images are expected to be built as:
 #   cilium-agent:latest, cilium-operator:latest, cilium-envoy:latest
 #
-# Usage: ./push.sh -c <config_dir> [-n <namespace>]
-#   e.g.: ./push.sh -c ~/configs/config-auto
-#   e.g.: ./push.sh -c ~/configs/config-auto -n @config
-#   e.g.: ./push.sh -c ~/configs/config-auto -n my-namespace
+# Usage: ./push.sh -c <config_dir> -d <YYYYMMDD> [-n <namespace>]
+#   e.g.: ./push.sh -c ~/configs/config-auto -d 20260918
+#   e.g.: ./push.sh -c ~/configs/config-auto -d 20260918 -n @config
+#   e.g.: ./push.sh -c ~/configs/config-auto -d 20260918 -n my-namespace
 #
 # Options:
 #   -c <config_dir>   Path to pai config directory (required)
+#   -d <YYYYMMDD>     Image build date used in version-date tags (required)
 #   -n <namespace>    Image namespace (default: cilium)
 #                     Use "@config" to read namespace from services-configuration.yaml
 #   -h                Show this help message
@@ -20,30 +21,33 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 usage() {
-    echo "Usage: $0 -c <config_dir> [-n <namespace>]"
+    echo "Usage: $0 -c <config_dir> -d <YYYYMMDD> [-n <namespace>]"
     echo ""
     echo "Push cilium images to ACR with version-based tags."
     echo "Expects local images: cilium-agent:latest, cilium-operator:latest, cilium-envoy:latest"
     echo ""
     echo "Options:"
     echo "  -c <config_dir>   Path to pai config directory (required)"
+    echo "  -d <YYYYMMDD>     Image build date used in version-date tags (required)"
     echo "  -n <namespace>    Image namespace (default: cilium)"
     echo "                    Use \"@config\" to read namespace from services-configuration.yaml"
     echo "  -h                Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0 -c ~/configs/config-auto"
-    echo "  $0 -c ~/configs/config-auto -n @config"
-    echo "  $0 -c ~/configs/config-auto -n my-namespace"
+    echo "  $0 -c ~/configs/config-auto -d 20260918"
+    echo "  $0 -c ~/configs/config-auto -d 20260918 -n @config"
+    echo "  $0 -c ~/configs/config-auto -d 20260918 -n my-namespace"
 }
 
 # Parse arguments
 CONFIG_DIR=""
+IMAGE_DATE=""
 NAMESPACE="cilium"
 
-while getopts "c:n:h" opt; do
+while getopts "c:d:n:h" opt; do
     case $opt in
         c) CONFIG_DIR="$OPTARG" ;;
+        d) IMAGE_DATE="$OPTARG" ;;
         n) NAMESPACE="$OPTARG" ;;
         h) usage; exit 0 ;;
         *) usage; exit 1 ;;
@@ -51,6 +55,11 @@ while getopts "c:n:h" opt; do
 done
 
 if [ -z "$CONFIG_DIR" ]; then
+    usage
+    exit 1
+fi
+if [[ ! "$IMAGE_DATE" =~ ^[0-9]{8}$ ]]; then
+    echo "Error: -d must be an 8-digit date in YYYYMMDD format"
     usage
     exit 1
 fi
@@ -100,6 +109,7 @@ echo "Registry:  $REGISTRY"
 echo "Namespace: $NAMESPACE"
 echo "Cilium:    $CILIUM_VERSION"
 echo "Envoy:     $ENVOY_VERSION"
+echo "Date:      $IMAGE_DATE"
 echo ""
 
 # Login to ACR
@@ -113,9 +123,9 @@ echo ""
 
 # Map: local_image -> remote_image
 declare -A IMAGE_MAP=(
-    ["cilium-agent:latest"]="${NAMESPACE}/cilium:${CILIUM_VERSION}-update"
-    ["cilium-operator:latest"]="${NAMESPACE}/operator-generic:${CILIUM_VERSION}-update"
-    ["cilium-envoy:latest"]="${NAMESPACE}/cilium-envoy:${ENVOY_VERSION}-update"
+    ["cilium-agent:latest"]="${NAMESPACE}/cilium:${CILIUM_VERSION}-${IMAGE_DATE}"
+    ["cilium-operator:latest"]="${NAMESPACE}/operator-generic:${CILIUM_VERSION}-${IMAGE_DATE}"
+    ["cilium-envoy:latest"]="${NAMESPACE}/cilium-envoy:${ENVOY_VERSION}-${IMAGE_DATE}"
 )
 
 FAILED=0
