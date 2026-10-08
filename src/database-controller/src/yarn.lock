@@ -1395,10 +1395,10 @@ interval-promise@^1.4.0:
   resolved "https://registry.yarnpkg.com/interval-promise/-/interval-promise-1.4.0.tgz#eef1a3633c6c6560488d8ca4b2f52cf901e16f8d"
   integrity sha512-PUwEmGqUglJhb6M01JNvMDvxr4DA8FCeYoYCLHPEcBBZiq/8yOpCchfs1VJui7fXj69l170gAxzF1FeSA0nSlg==
 
-ip-address@^10.1.1, ip-address@^10.3.1:
-  version "10.5.0"
-  resolved "https://registry.yarnpkg.com/ip-address/-/ip-address-10.5.0.tgz#fcd6d7dfe9e68416b7cb71afe9bc960b3e38c13b"
-  integrity sha512-R5SnVLJmgYYvf2F2ZgwSBnelz5G4q5AxIC277GDfUaNbrZKNANcBC7RHqYYePlszf4kBolVkJauG0ZjHHFh55g==
+ip-address@^10.1.1, ip-address@^10.7.1:
+  version "10.7.3"
+  resolved "https://registry.yarnpkg.com/ip-address/-/ip-address-10.7.3.tgz#4cb77d274a4e2484a3ea438cfe98dbe0c502e8c5"
+  integrity sha512-A1kdq/tSb5QjvKvAMgIoEvDBIgL7qaqVP/jkvSwYYRZ9iEzvPpopxp2wQfu3SuZRHtpHNxMn8Fs0bS+gf5Xmwg==
 
 ipaddr.js@1.9.1:
   version "1.9.1"

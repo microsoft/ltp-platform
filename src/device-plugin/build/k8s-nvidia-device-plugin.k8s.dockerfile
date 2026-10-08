@@ -28,7 +28,7 @@ RUN mkdir /busybox && \
     cp /bin/busybox /busybox/busybox && \
     /busybox/busybox --install -s /busybox
 
-FROM nvcr.io/nvidia/distroless/go:v4.1.4 AS application
+FROM nvcr.io/nvidia/distroless/go:v4.1.5 AS application
 
 USER 0:0
 

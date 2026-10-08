@@ -35,10 +35,11 @@ WORKDIR /go/src/github.com/cilium/cilium
 RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
     https://github.com/cilium/cilium.git .
 
-RUN go get golang.org/x/crypto@v0.56.0 && \
-    go get golang.org/x/net@v0.56.0 && \
-    go get golang.org/x/text@v0.39.0 && \
-    go get google.golang.org/grpc@v1.83.2 && \
+RUN go get \
+      golang.org/x/crypto@v0.56.0 \
+      golang.org/x/net@v0.58.0 \
+      golang.org/x/text@v0.41.0 \
+      google.golang.org/grpc@v1.83.2 && \
     go mod tidy && \
     go mod vendor
 
