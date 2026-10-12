@@ -8,8 +8,18 @@ const querystring = require('querystring');
 const axios = require('axios');
 const createError = require('@pai/utils/error');
 const jwt = require('jsonwebtoken');
+const { getLoginRedirect, getFromRedirect } = require('@pai/utils/oidcRedirect');
 
 const requestAuthCode = async (req, res, next) => {
+  let state;
+  try {
+    state = {
+      redirect: getLoginRedirect(req.query.redirect_uri),
+      from: getFromRedirect(req.query.from),
+    };
+  } catch (error) {
+    return next(createError.unknown(error));
+  }
   const clientId = authnConfig.OIDCConfig.clientID;
   const responseType = 'code';
   const redirectUri = authnConfig.OIDCConfig.redirectUrl;
@@ -17,14 +27,6 @@ const requestAuthCode = async (req, res, next) => {
   let scope = `openid offline_access https://${authnConfig.OIDCConfig.msgraph_host}/user.read`;
   if (authnConfig.groupConfig.groupDataSource === 'ms-graph') {
     scope = `${scope} https://${authnConfig.OIDCConfig.msgraph_host}/directory.read.all`;
-  }
-  const state = {};
-  state.redirect = process.env.WEBPORTAL_URL + '/index.html';
-  if (req.query.redirect_uri) {
-    state.redirect = req.query.redirect_uri;
-  }
-  if (req.query.from) {
-    state.from = req.query.from;
   }
   const requestURL = authnConfig.OIDCConfig.authorization_endpoint;
   return res.redirect(
@@ -42,6 +44,31 @@ const requestAuthCode = async (req, res, next) => {
 
 const requestTokenWithCode = async (req, res, next) => {
   try {
+    let state;
+    try {
+      state = JSON.parse(req.body.state);
+    } catch (error) {
+      throw createError(
+        'Bad Request',
+        'InvalidOidcState',
+        'OIDC state must be a JSON object with a redirect URL.',
+      );
+    }
+    if (
+      !state ||
+      typeof state !== 'object' ||
+      Array.isArray(state) ||
+      typeof state.redirect !== 'string'
+    ) {
+      throw createError(
+        'Bad Request',
+        'InvalidOidcState',
+        'OIDC state must be a JSON object with a redirect URL.',
+      );
+    }
+    // State is client-controlled, so validate before exchanging the code.
+    req.returnBackURI = getLoginRedirect(state.redirect);
+    req.fromURI = getFromRedirect(state.from);
     const authCode = req.body.code;
     let scope = `https://${authnConfig.OIDCConfig.msgraph_host}/user.read`;
     if (authnConfig.groupConfig.groupDataSource === 'ms-graph') {
@@ -104,9 +131,6 @@ const requestTokenWithCode = async (req, res, next) => {
     req.accessToken = jwt.decode(response.data.access_token);
     req.undecodedRefreshToken = response.data.refresh_token;
     req.refreshToken = jwt.decode(response.data.refresh_token);
-    const state = JSON.parse(req.body.state);
-    req.returnBackURI = state.redirect;
-    req.fromURI = state.from;
     next();
   } catch (error) {
     return next(createError.unknown(error));

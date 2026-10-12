@@ -37,6 +37,30 @@ In this section, we will cover how to set up the integration step by step.
 - Previous user data in webportal is required to be mapping/migrate to AAD. Once the integration is enabled, instead of using basic user authentication, OpenPAI will switch to use (and only use) AAD as the user authentication mechanism. 
 - To set up AAD, please follow the instructions [here](./basic-management-operations.md#how-to-set-up-https) to set up HTTPS access for OpenPAI first.
 
+### Portal return URLs
+
+The application-level `redirect_uri` accepted by `/api/v1/authn/oidc/login`
+and `/api/v2/authn/oidc/login` must be the configured portal's `/index.html`
+URL. If omitted, it defaults to that URL. REST Server derives this address
+from `WEBPORTAL_URL`, generated from the Pylon configuration; configure
+`pylon.domain` to match the public hostname used by browsers. Default ports
+are normalized, so HTTPS URLs with and without `:443` are equivalent.
+Different hostnames, schemes, non-default ports, paths, query strings and
+fragments are not accepted as login completion addresses.
+
+The optional `from` parameter may reference a page on the same portal
+origin, preserving its path, query string and fragment. Root-relative
+portal paths are also supported. External return locations are rejected
+with a bad-request error. The callback validates these parameters again
+before exchanging the authorization code, and error redirects cannot
+target another origin. Custom OIDC clients must use the configured portal
+completion address rather than their own external return URLs.
+
+This restriction prevents forwarding cluster credentials to arbitrary
+hosts. It does not introduce browser-bound OAuth state or remove bearer
+tokens from the trusted portal's login URL; those require a separate
+login-protocol change.
+
 ### Configuration AAD
 
 - Login into the [Azure Web portal](https://ms.portal.azure.com/), select Azure Acive Directory -> App registrations -> New registration
