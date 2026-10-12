@@ -29,7 +29,7 @@ const config = require('@pai/config');
 const logger = require('@pai/config/logger');
 const authnConfig = require('@pai/config/authn');
 const limiter = require('@pai/config/rate-limit');
-const querystring = require('querystring');
+const { handleCallbackError } = require('@pai/middlewares/oidc');
 const createError = require('@pai/utils/error');
 const routers = {
   internal: require('@pai/routes/internal/index'),
@@ -74,15 +74,7 @@ app.use((req, res, next) => {
 
 if (authnConfig.authnMethod === 'OIDC') {
   // error handler for /api/v1/authn/oidc/return
-  app.use('/api/v1/authn/oidc/return', function (err, req, res, next) {
-    logger.warn(err);
-    const qsData = {
-      errorMessage: err.message,
-    };
-    let redirectURI = err.targetURI ? err.targetURI : process.env.WEBPORTAL_URL;
-    redirectURI = redirectURI + '?' + querystring.stringify(qsData);
-    return res.redirect(redirectURI);
-  });
+  app.use('/api/v1/authn/oidc/return', handleCallbackError);
 }
 
 // error handler
