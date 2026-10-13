@@ -138,12 +138,14 @@ class NodeStatusClient(KustoBaseClient):
 
     def get_node_status(self,
                         hostname: str,
-                        timestamp: datetime = None) -> NodeStatusRecord:
+                        timestamp: datetime = None) -> Optional[NodeStatusRecord]:
         """Get node status at a specific time"""
         timestamp_str = None
         if timestamp is not None:
             timestamp_str = convert_timestamp(timestamp, format="str")
         query = f"{self.table_name} | where HostName == '{hostname}'"
+        escaped_endpoint = str(self.endpoint).replace("'", "''")
+        query += f" | where Endpoint == '{escaped_endpoint}'"
         if timestamp_str is not None:
             query += f" | where Timestamp <= datetime({timestamp_str})"
         query += " | summarize arg_max(Timestamp, *) by HostName"
@@ -187,16 +189,16 @@ class NodeStatusClient(KustoBaseClient):
             status: str,
             as_of_time: Optional[datetime] = None) -> List[NodeStatusRecord]:
         """Get all nodes whose latest/current status is exactly the specified status.
-        
+
         Args:
             status (str): The status to filter nodes by
             as_of_time (datetime, optional): The reference time to check status.
                                           If not provided, uses current time.
-                                          
+
         Returns:
             List[NodeStatusRecord]: List of node records whose latest status matches.
                                 Each record contains Timestamp, HostName, Status, NodeId, and Endpoint.
-                                
+
         Example:
             >>> client = NodeStatusClient()
             >>> current_cordoned_nodes = client.get_nodes_by_status('cordoned')
@@ -204,23 +206,17 @@ class NodeStatusClient(KustoBaseClient):
         """
         try:
             timestamp_condition = ""
+            escaped_endpoint = str(self.endpoint).replace("'", "''")
             if as_of_time:
                 timestamp_str = convert_timestamp(as_of_time, format="str")
                 timestamp_condition = f"| where Timestamp <= datetime({timestamp_str})"
 
             query = f"""
-            let latest_status = {self.table_name}
+            {self.table_name}
+            | where Endpoint == '{escaped_endpoint}'
             {timestamp_condition}
-            | summarize arg_max(Timestamp, Status) by HostName;
-            latest_status
+            | summarize arg_max(Timestamp, *) by HostName
             | where Status == '{status}'
-            | join kind=inner (
-                {self.table_name}
-                | where Status == '{status}'
-                | where Endpoint == '{self.endpoint}'
-                | summarize arg_max(Timestamp, *) by HostName
-            ) on HostName
-            | project Timestamp=Timestamp1, HostName, Status=Status1, NodeId, Endpoint
             """
 
             results = self.execute_query(query)
