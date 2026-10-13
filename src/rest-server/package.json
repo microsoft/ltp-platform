@@ -117,7 +117,8 @@
     "preinstall": "npx ncp ../database-controller/sdk openpaidbsdk || echo skip copying openpaidbsdk",
     "postinstall": "rimraf openpaidbsdk",
     "start": "node index.js",
-    "test": "npm run lint && nyc npm run mocha"
+    "test": "npm run lint && nyc npm run mocha",
+    "test:oidc": "mocha --require module-alias/register --timeout 5000 test/oidcRedirect.js"
   },
   "devDependencies": {
     "eslint": "^9.27.0",

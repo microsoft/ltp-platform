@@ -22,6 +22,7 @@ const groupModel = require('@pai/models/v2/group');
 const tokenModel = require('@pai/models/token');
 const createError = require('@pai/utils/error');
 const { encrypt } = require('@pai/utils/manager/user/user');
+const { getLoginRedirect, getFromRedirect } = require('@pai/utils/oidcRedirect');
 
 /**
  * Get the token.
@@ -72,13 +73,14 @@ const get = async (req, res, next) => {
  */
 const getAAD = async (req, res, next) => {
   try {
+    const returnBackURI = getLoginRedirect(req.returnBackURI);
+    const fromURI = getFromRedirect(req.fromURI);
     const username = req.username;
     const userInfo = await userModel.getUser(username);
     const admin = await userModel.checkAdmin(username);
     const token = await tokenModel.create(username);
-    const fromURI = req.fromURI;
     return res.redirect(
-      req.returnBackURI +
+      returnBackURI +
         '?' +
         querystring.stringify({
           user: userInfo.username,
