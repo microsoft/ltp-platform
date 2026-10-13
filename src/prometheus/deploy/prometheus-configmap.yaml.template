@@ -23,10 +23,13 @@ metadata:
   name: prometheus-configmap
 data:
   prometheus.yml: |-
-    {% if prom_info["remote_write"] %}
     global:
+      metric_name_validation_scheme: legacy
+    {% if prom_info["remote_write"] %}
       external_labels:
         cluster: {{ prom_info["remote_write"]["cluster_label"] }}
+    {% endif %}
+    {% if prom_info["remote_write"] %}
     remote_write:
     {% if prom_info["remote_write"]["local_url"] %}
       - url: {{ prom_info["remote_write"]["local_url"] }}

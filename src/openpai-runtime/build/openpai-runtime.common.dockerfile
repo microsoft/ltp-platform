@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends wget gcc libc6-
 RUN cd daemontools-encore-1.10 && sed -i 's/gcc -s/gcc -s -static/g' conf-ld && make -j && \
   cp multilog /usr/local/bin/multilog
 
-FROM golang:1.25.12 AS builder
+FROM golang:1.25.13 AS builder
 
 ENV PROJECT_DIR=/src/
 ENV INSTALL_DIR=/opt/kube-runtime
@@ -55,7 +55,7 @@ RUN ${PROJECT_DIR}/build/runtime/go-build.sh && \
 
 COPY --from=multilog-builder /usr/local/bin/multilog ${INSTALL_DIR}/multilog
 
-FROM golang:1.25.12-alpine3.23 as barrier-builder
+FROM golang:1.25.13-alpine3.23 as barrier-builder
 
 ENV GOPATH=/go
 ENV PROJECT_DIR=/src
