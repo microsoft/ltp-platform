@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -92,20 +93,32 @@ with open(os.environ["COMMANDS"], "a") as log:
         path.write_text(content)
         path.chmod(0o755)
 
-    def run_helper(self, *options, **env):
+    def run_helper(self, *options, input="yes\n", **env):
         return subprocess.run([str(self.script), "-c", str(self.config), *options],
-                              env=dict(self.env, **env), text=True, capture_output=True)
+                              env=dict(self.env, **env), input=input, text=True, capture_output=True)
 
     def commands(self):
         return [json.loads(line) for line in self.log.read_text().splitlines()] if self.log.exists() else []
 
     def test_default_republication_keeps_manifest_unchanged(self):
         before = self.manifest.read_text()
-        result = self.run_helper()
+        output = self.root / "result.json"
+        result = self.run_helper("--result-file", str(output), input="")
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertEqual(before, self.manifest.read_text())
         self.assertEqual(3, sum(command[1] == "push" for command in self.commands()))
         self.assertIn("manifest references unchanged", result.stderr)
+        self.assertNotIn("Update contrib/", result.stderr)
+        self.assertEqual("unchanged", json.loads(output.read_text())["manifest_status"])
+
+    def test_publication_does_not_acquire_the_previous_publication_lock(self):
+        lock = self.repo / ".git/ltp-image-tools/cilium-publish.lock"
+        lock.parent.mkdir()
+        with lock.open("a") as held:
+            fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            result = self.run_helper()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(3, sum(command[1] == "push" for command in self.commands()))
 
     def test_preflight_failure_has_no_publication(self):
         for missing in ("agent", "operator", "envoy"):
@@ -145,13 +158,62 @@ with open(os.environ["COMMANDS"], "a") as log:
 
     def test_explicit_date_updates_every_occurrence_and_result(self):
         output = self.root / "result.json"
-        result = self.run_helper("-d", "20261014", "--result-file", str(output))
+        result = self.run_helper("-d", "20261014", "--result-file", str(output), input="Y\n")
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertEqual(4, self.manifest.read_text().count("-20261014"))
         self.assertTrue(self.manifest.read_text().startswith("# preserved comment"))
         record = json.loads(output.read_text())
         self.assertEqual("changed", record["manifest_status"])
         self.assertEqual(3, len(record["images"]))
+
+    def test_declining_manifest_update_records_publication_without_writing(self):
+        before = self.manifest.read_text()
+        for index, answer in enumerate(("no\n", "n\n", "\n")):
+            with self.subTest(answer=answer):
+                output = self.root / f"result-{index}.json"
+                result = self.run_helper("-d", "20261014", "--result-file", str(output), input=answer)
+                self.assertEqual(0, result.returncode, result.stderr)
+                self.assertEqual(before, self.manifest.read_text())
+                self.assertIn("Update contrib/aks/k8s-deploy/cilium.yaml? [y/N]", result.stderr)
+                self.assertIn("manifest update declined", result.stderr)
+                self.assertEqual("skipped", json.loads(output.read_text())["manifest_status"])
+        self.assertEqual(9, sum(command[1] == "push" for command in self.commands()))
+
+    def test_missing_or_invalid_confirmation_does_not_write_manifest_or_result(self):
+        before = self.manifest.read_text()
+        output = self.root / "result.json"
+        for answer, error in (("", "No confirmation input available"), ("maybe\n", "Expected y/yes or n/no")):
+            with self.subTest(answer=answer):
+                result = self.run_helper("-d", "20261014", "--result-file", str(output), input=answer)
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn(error, result.stderr)
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertEqual(before, self.manifest.read_text())
+                self.assertFalse(output.exists())
+        self.assertEqual(6, sum(command[1] == "push" for command in self.commands()))
+
+    def test_edit_while_awaiting_confirmation_is_not_overwritten(self):
+        output = self.root / "result.json"
+        prompt = self.root / "prompt.log"
+        before = self.manifest.read_text()
+        with prompt.open("w") as log, subprocess.Popen(
+                [str(self.script), "-c", str(self.config), "-d", "20261014", "--result-file", str(output)],
+                env=self.env, text=True, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=log) as process:
+            try:
+                deadline = time.monotonic() + 5
+                while ("Update contrib/aks/k8s-deploy/cilium.yaml? [y/N]" not in prompt.read_text()
+                       and process.poll() is None and time.monotonic() < deadline):
+                    time.sleep(0.02)
+                self.assertIn("Update contrib/aks/k8s-deploy/cilium.yaml? [y/N]", prompt.read_text())
+                self.manifest.write_text(before + "# edit while awaiting confirmation\n")
+                process.communicate(input="y\n", timeout=10)
+            finally:
+                if process.poll() is None:
+                    process.communicate(input="no\n", timeout=10)
+        self.assertNotEqual(0, process.returncode)
+        self.assertIn("changed while awaiting confirmation", prompt.read_text())
+        self.assertEqual(before + "# edit while awaiting confirmation\n", self.manifest.read_text())
+        self.assertFalse(output.exists())
 
     def test_saved_plan_pins_ids_even_if_latest_changes(self):
         planned = self.run_helper("--plan-json")
@@ -242,10 +304,43 @@ if os.environ.get("BLOCK_BATCH_PHASE") == sys.argv[1]:
 """)
         return tool
 
-    def run_batch(self, tool, *args):
-        return subprocess.run([str(tool), *args], env=self.env, text=True, capture_output=True)
+    def run_batch(self, tool, *args, input="yes\n"):
+        return subprocess.run([str(tool), *args], env=self.env, input=input, text=True, capture_output=True)
 
-    def test_batch_lock_covers_reset_build_and_push_without_blocking_read_only_commands(self):
+    def test_batch_declined_manifest_continues_and_resumes_without_republishing(self):
+        tool = self.prepare_batch()
+        demo = self.repo / "src/demo/build"
+        demo.mkdir(parents=True)
+        (demo / "demo.common.dockerfile").write_text("FROM scratch\n")
+        options = ["push", "-c", str(self.config), "--cilium-date", "20261014"]
+        before = self.manifest.read_text()
+        result = self.run_batch(tool, *options, input="no\n")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(before, self.manifest.read_text())
+        self.assertTrue(any(command[:2] == ["pai_build", "push"] for command in self.commands()))
+        saved = self.repo / ".git/ltp-image-tools/cilium-push.json"
+        self.assertEqual("skipped", json.loads(saved.read_text())["manifest_status"])
+        result = self.run_batch(tool, *options, input="")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn("[SKIP] Cilium group", result.stdout)
+        self.assertIn("manifest update was previously declined", result.stderr)
+        self.assertEqual(3, sum(command[:2] == ["docker", "push"] for command in self.commands()))
+        result = self.run_batch(tool, *options, "--from", "1")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(6, sum(command[:2] == ["docker", "push"] for command in self.commands()))
+        self.assertEqual(4, self.manifest.read_text().count("-20261014"))
+        self.assertEqual("changed", json.loads(saved.read_text())["manifest_status"])
+
+    def test_batch_missing_confirmation_does_not_record_completion(self):
+        tool = self.prepare_batch()
+        result = self.run_batch(tool, "push", "-c", str(self.config),
+                                "--cilium-date", "20261014", input="")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("No confirmation input available", result.stderr)
+        self.assertFalse((self.repo / ".git/ltp-image-tools/cilium-push.json").exists())
+        self.assertEqual(3, sum(command[1] == "push" for command in self.commands()))
+
+    def test_batch_concurrent_invocations_are_not_locked(self):
         tool = self.prepare_batch()
         demo = self.repo / "src/demo/build"
         demo.mkdir(parents=True)
@@ -267,19 +362,15 @@ if os.environ.get("BLOCK_BATCH_PHASE") == sys.argv[1]:
                         while not started.exists() and first.poll() is None and time.monotonic() < deadline:
                             time.sleep(0.02)
                         self.assertTrue(started.exists(), "First workflow did not reach the selected phase")
-                        before = {path.name: path.read_bytes() for path in progress.iterdir()
-                                  if path.name != "workflow.lock"}
                         commands = self.commands()
                         for read_only in ("--status", "--list"):
                             result = self.run_batch(tool, "all", "--skip-cilium", read_only)
                             self.assertEqual(0, result.returncode, result.stderr)
                         result = subprocess.run([str(tool), *options, "--reset"], env=self.env,
                                                 text=True, capture_output=True, timeout=3)
-                        self.assertNotEqual(0, result.returncode)
-                        self.assertIn("lock", result.stderr.lower())
-                        self.assertEqual(commands, self.commands())
-                        self.assertEqual(before, {path.name: path.read_bytes() for path in progress.iterdir()
-                                                 if path.name != "workflow.lock"})
+                        self.assertEqual(0, result.returncode, result.stderr)
+                        self.assertGreater(len(self.commands()), len(commands))
+                        self.assertFalse((progress / "workflow.lock").exists())
                     finally:
                         release.touch()
                         _, error = first.communicate(timeout=20)

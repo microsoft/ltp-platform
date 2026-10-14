@@ -1,12 +1,12 @@
 #!/bin/bash
-# Push the complete Cilium image group and update its fixed deployment manifest.
+# Push the complete Cilium image group and offer to update its fixed manifest.
 # Python uses the existing PyYAML dependency to preserve YAML source formatting.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec python3 - "$SCRIPT_DIR" "$@" <<'PY'
+# Preserve caller input separately from Python's source on stdin.
+exec python3 - "$SCRIPT_DIR" "$@" 3<&0 <<'PY'
 import argparse
 import datetime
-import fcntl
 import hashlib
 import json
 import os
@@ -211,21 +211,41 @@ def publish(args, plan):
     for (start, end), replacement in sorted(replacements.items(), reverse=True):
         updated = updated[:start] + replacement + updated[end:]
     changed = updated != text
+    manifest_status = "unchanged"
     if changed:
         for old, new in sorted({(node.value, targets[role]) for role, node in nodes if node.value != targets[role]}):
             print(f"Manifest: {old} -> {new}", file=sys.stderr)
-        try:
-            atomic_write(MANIFEST, updated, MANIFEST.stat().st_mode & 0o777)
-        except OSError:
-            print("All images published, but manifest update failed.", file=sys.stderr)
-            raise
-        print(f"Changed {MANIFEST.relative_to(ROOT)}; review and check in this change.",
-              file=sys.stderr)
+        print("All images published. Do not edit the manifest concurrently.", file=sys.stderr)
+        print(f"Update {MANIFEST.relative_to(ROOT)}? [y/N]", file=sys.stderr, flush=True)
+        with os.fdopen(3) as confirmation:
+            answer = confirmation.readline()
+        if not answer:
+            raise ValueError("No confirmation input available; images are published, but the manifest "
+                             "was not updated. Rerun with confirmation input.")
+        answer = answer.strip().lower()
+        if answer in ("y", "yes"):
+            if context(args, date)[5] != guards:
+                raise ValueError("Images published, but inputs changed while awaiting confirmation; "
+                                 "manifest was not overwritten")
+            try:
+                atomic_write(MANIFEST, updated, MANIFEST.stat().st_mode & 0o777)
+            except OSError:
+                print("All images published, but manifest update failed.", file=sys.stderr)
+                raise
+            manifest_status = "changed"
+            print(f"Changed {MANIFEST.relative_to(ROOT)}; review and check in this change.",
+                  file=sys.stderr)
+        elif answer in ("", "n", "no"):
+            manifest_status = "skipped"
+            print("Images published; manifest update declined. Deployment references remain unchanged.",
+                  file=sys.stderr)
+        else:
+            raise ValueError("Expected y/yes or n/no; images are published, but the manifest was not updated")
     else:
         print("Images republished; manifest references unchanged.", file=sys.stderr)
     result = {key: plan[key] for key in
               ("schema_version", "operation_id", "publication_identity", "images")}
-    result["manifest_status"] = "changed" if changed else "unchanged"
+    result["manifest_status"] = manifest_status
     if args.result_file:
         try:
             atomic_write(args.result_file, json.dumps(result, sort_keys=True) + "\n")
@@ -237,7 +257,7 @@ def publish(args, plan):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Publish all Cilium images and update the fixed manifest.")
+    parser = argparse.ArgumentParser(description="Publish all Cilium images and offer to update the fixed manifest.")
     parser.add_argument("-c", "--config", required=True)
     parser.add_argument("-d", "--date", help="YYYYMMDD; defaults to the manifest date")
     parser.add_argument("-n", "--namespace", default="cilium", help='Namespace, or "@config"')
@@ -251,14 +271,8 @@ def main():
     if args.plan_json:
         print(json.dumps(make_plan(args), sort_keys=True))
         return
-    git_dir = (ROOT / command(["git", "-C", str(ROOT), "rev-parse", "--git-common-dir"],
-                              capture=True).stdout.strip()).resolve()
-    lock_path = git_dir / "ltp-image-tools/cilium-publish.lock"
-    lock_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(lock_path, "a") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        plan = json.loads(args.publish_plan.read_text()) if args.publish_plan else make_plan(args)
-        publish(args, plan)
+    plan = json.loads(args.publish_plan.read_text()) if args.publish_plan else make_plan(args)
+    publish(args, plan)
 
 
 try:

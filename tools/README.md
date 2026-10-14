@@ -13,7 +13,7 @@ Tasks are sorted by Dockerfile path. Progress is stored under
 The script resolves the repository root from its own location, so it can be
 invoked from outside the repository.
 
-Building/pushing requires Bash, Git, Docker, `flock` (util-linux), and the existing
+Building/pushing requires Bash, Git, Docker, and the existing
 dependencies of `build/pai_build.py`. Supply a configuration directory containing
 `services-configuration.yaml`. Cilium publishing additionally requires Python 3
 with PyYAML and Azure CLI with permission to log in to the target ACR.
@@ -35,11 +35,11 @@ tools/build_and_push_images.sh all --list
 on the first failure; fix the error and rerun the same command to resume.
 Builds disable the Docker cache by default.
 
-Modifying batch invocations acquire a nonblocking `workflow.lock` under the
-progress directory before resetting progress and hold it through all requested
-build/push phases. A concurrent invocation fails without resetting progress or
-running image commands. `--list` and `--status` remain available while it runs.
-This lock does not coordinate image commands launched outside the batch tool.
+Build/push workflows and the standalone Cilium publisher do not acquire locks.
+Users are responsible for avoiding overlapping operations on shared Docker
+tags, registry destinations, progress files and the Cilium manifest. Concurrent
+invocations are not rejected and can overwrite progress or each other's work;
+the scripts do not guarantee concurrency safety.
 
 | Option | Behavior |
 | --- | --- |
@@ -75,9 +75,24 @@ dates fail when no explicit date is supplied. Image versions come from the
 Cilium Dockerfiles; Agent and Operator must have the same `CILIUM_VERSION`,
 otherwise planning/publication fails before inspecting or publishing images.
 Envoy keeps its separate version. Destination tags are `<version>-<YYYYMMDD>`.
-After all pushes succeed it atomically updates every applicable image reference
-in that fixed manifest, including repeated Agent/init-container references,
-and requests review/check-in only if the manifest changed.
+After all pushes succeed, if the fixed manifest needs changes, the helper shows
+the old/new image references and asks whether to update it. Only `y` or `yes`
+(case-insensitive) authorizes replacement, including repeated
+Agent/init-container references. It requests review/check-in after updating.
+No prompt is needed when the references already match.
+
+Choosing `n`, `no`, or an empty answer leaves the manifest unchanged, records
+publication success with `manifest_status: skipped`, and lets the batch continue.
+The cluster will still use the manifest's old references until you update them.
+EOF/no available input or an invalid answer leaves it unchanged, reports an
+error and stops the batch without recording new Cilium completion, even though
+all three images have already been pushed.
+
+Confirmation authorizes a write; it is not a lock or a compare-and-swap.
+Do not edit the manifest or change publication inputs concurrently. Detected
+input changes, including changes while awaiting confirmation, abort writeback,
+but the check and atomic replacement are separate operations and do not
+guarantee protection against every external edit.
 
 The registry domain comes from the supplied configuration. The image namespace
 defaults to `cilium`, including batch invocations. Standalone calls support
@@ -98,7 +113,10 @@ immutable image identity.
 
 Cilium batch push completion uses destination references and image IDs, not old
 name-only records. A group is skipped only when its saved completion matches the
-current destinations/IDs and the manifest already references those targets.
+current destinations/IDs and either the manifest already references those
+targets or its update was explicitly declined for that publication.
+To request confirmation again after declining, run the standalone helper or
+use batch `--from N` at a Cilium task; this republishes the image group.
 A same-date rebuild with different IDs is pushed again. Build progress still
 controls whether builds run: `--reset` resets the selected phases, not just
 Cilium. With `--skip-cilium`, historical Cilium progress is preserved even when

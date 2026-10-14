@@ -220,14 +220,17 @@ try:
             raise ValueError("Unsupported Cilium completion schema")
         matches = (previous.get("images") == images
                    and previous.get("publication_identity") == identity
-                   and previous.get("manifest_status") in ("changed", "unchanged")
-                   and plan["manifest_matches_targets"] is True)
+                   and previous.get("manifest_status") in ("changed", "unchanged", "skipped")
+                   and (plan["manifest_matches_targets"] is True
+                        or previous["manifest_status"] == "skipped"))
+        if matches and previous["manifest_status"] == "skipped" and not plan["manifest_matches_targets"]:
+            print("Cilium images already published; manifest update was previously declined.", file=sys.stderr)
         sys.exit(0 if matches else 1)
     result = json.loads(Path(result_path).read_text())
     if (not isinstance(result, dict) or result["schema_version"] != 1 or result["images"] != images
             or result["publication_identity"] != identity
             or result["operation_id"] != plan["operation_id"]
-            or result["manifest_status"] not in ("changed", "unchanged")):
+            or result["manifest_status"] not in ("changed", "unchanged", "skipped")):
         raise ValueError("Helper result does not match the publication plan")
     path = Path(state_path)
     fd, temporary = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".")
@@ -518,18 +521,8 @@ if [[ ! -f "$CONFIG_DIR/services-configuration.yaml" ]]; then
 fi
 CONFIG_DIR="$(cd "$CONFIG_DIR" && pwd)"
 
-if ! command -v flock >/dev/null; then
-    echo "Error: flock is required to prevent overlapping image workflows." >&2
-    exit 1
-fi
-mkdir -p "$PROGRESS_DIR"
-exec 9>"$PROGRESS_DIR/workflow.lock"
-if ! flock -n 9; then
-    echo "Error: cannot acquire image workflow lock; another invocation may be running." >&2
-    exit 1
-fi
-
 if [[ "$RESET" == true ]]; then
+    mkdir -p "$PROGRESS_DIR"
     if [[ "$ACTION" == "build" || "$ACTION" == "all" ]]; then
         reset_progress build
     fi
