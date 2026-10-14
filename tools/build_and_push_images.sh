@@ -518,8 +518,18 @@ if [[ ! -f "$CONFIG_DIR/services-configuration.yaml" ]]; then
 fi
 CONFIG_DIR="$(cd "$CONFIG_DIR" && pwd)"
 
+if ! command -v flock >/dev/null; then
+    echo "Error: flock is required to prevent overlapping image workflows." >&2
+    exit 1
+fi
+mkdir -p "$PROGRESS_DIR"
+exec 9>"$PROGRESS_DIR/workflow.lock"
+if ! flock -n 9; then
+    echo "Error: cannot acquire image workflow lock; another invocation may be running." >&2
+    exit 1
+fi
+
 if [[ "$RESET" == true ]]; then
-    mkdir -p "$PROGRESS_DIR"
     if [[ "$ACTION" == "build" || "$ACTION" == "all" ]]; then
         reset_progress build
     fi

@@ -129,10 +129,14 @@ def context(args, selected_date=None):
         match = re.search(rf"^ARG {variable}=([^\s]+)$", source, re.MULTILINE)
         if not match:
             raise ValueError(f"Missing {variable} in {file.name}")
-        versions[role] = re.sub(r"-[a-f0-9]{40}$", "", match.group(1))
+        versions[role] = match.group(1)
         if not re.fullmatch(r"[A-Za-z0-9_.-]+", versions[role]):
             raise ValueError(f"Invalid {role} version")
         guards[file.name] = digest(source)
+    if versions["agent"] != versions["operator"]:
+        raise ValueError("Agent and Operator CILIUM_VERSION must match: "
+                         f"agent={versions['agent']}, operator={versions['operator']}")
+    versions = {role: re.sub(r"-[a-f0-9]{40}$", "", version) for role, version in versions.items()}
     targets = {role: f"{registry}/{namespace}/{name}:{versions[role]}-{date}"
                for role, name in ROLES.items()}
     guards["targets"] = digest(json.dumps(targets, sort_keys=True))

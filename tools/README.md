@@ -13,8 +13,8 @@ Tasks are sorted by Dockerfile path. Progress is stored under
 The script resolves the repository root from its own location, so it can be
 invoked from outside the repository.
 
-Building/pushing requires Bash, Git, Docker and the existing dependencies of
-`build/pai_build.py`. Supply a configuration directory containing
+Building/pushing requires Bash, Git, Docker, `flock` (util-linux), and the existing
+dependencies of `build/pai_build.py`. Supply a configuration directory containing
 `services-configuration.yaml`. Cilium publishing additionally requires Python 3
 with PyYAML and Azure CLI with permission to log in to the target ACR.
 `--list` and `--status` do not require a configuration directory.
@@ -34,6 +34,12 @@ tools/build_and_push_images.sh all --list
 `all` finishes the build phase before starting the push phase. Both phases stop
 on the first failure; fix the error and rerun the same command to resume.
 Builds disable the Docker cache by default.
+
+Modifying batch invocations acquire a nonblocking `workflow.lock` under the
+progress directory before resetting progress and hold it through all requested
+build/push phases. A concurrent invocation fails without resetting progress or
+running image commands. `--list` and `--status` remain available while it runs.
+This lock does not coordinate image commands launched outside the batch tool.
 
 | Option | Behavior |
 | --- | --- |
@@ -66,7 +72,9 @@ Without a date argument it reuses the consistent date in
 `contrib/aks/k8s-deploy/cilium.yaml`; an explicit date overrides it.
 It never automatically selects today's date. Missing or conflicting manifest
 dates fail when no explicit date is supplied. Image versions come from the
-Cilium Dockerfiles; destination tags are `<version>-<YYYYMMDD>`.
+Cilium Dockerfiles; Agent and Operator must have the same `CILIUM_VERSION`,
+otherwise planning/publication fails before inspecting or publishing images.
+Envoy keeps its separate version. Destination tags are `<version>-<YYYYMMDD>`.
 After all pushes succeed it atomically updates every applicable image reference
 in that fixed manifest, including repeated Agent/init-container references,
 and requests review/check-in only if the manifest changed.

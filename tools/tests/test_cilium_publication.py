@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 
 
@@ -119,6 +120,29 @@ with open(os.environ["COMMANDS"], "a") as log:
                 self.assertFalse(any(command[0] == "az" or command[1] in ("tag", "push")
                                      for command in self.commands()))
 
+    def test_mismatched_agent_operator_versions_fail_before_inspect_or_publication(self):
+        before = self.manifest.read_text()
+        output = self.root / "result.json"
+        for role, version in (("agent", "v1.20.3"), ("operator", "v1.20.3"),
+                              ("agent", "v1.20.2-" + "a" * 40)):
+            dockerfile = self.build / f"cilium-{role}.common.dockerfile"
+            original = dockerfile.read_text()
+            for options in (("--plan-json",), ("-d", "20261014", "--result-file", str(output))):
+                with self.subTest(role=role, version=version, options=options):
+                    dockerfile.write_text(original.replace("v1.20.2", version))
+                    try:
+                        result = self.run_helper(*options)
+                        self.assertNotEqual(0, result.returncode)
+                        self.assertIn("Agent and Operator", result.stderr)
+                        self.assertEqual([], self.commands())
+                        self.assertEqual(before, self.manifest.read_text())
+                        self.assertFalse(output.exists())
+                    finally:
+                        dockerfile.write_text(original)
+                        self.manifest.write_text(before)
+                        self.log.unlink(missing_ok=True)
+                        output.unlink(missing_ok=True)
+
     def test_explicit_date_updates_every_occurrence_and_result(self):
         output = self.root / "result.json"
         result = self.run_helper("-d", "20261014", "--result-file", str(output))
@@ -204,14 +228,64 @@ with open(os.environ["COMMANDS"], "a") as log:
         shutil.copy2(ROOT / "tools/build_and_push_images.sh", tool)
         (self.repo / "build").mkdir()
         self.executable(self.repo / "build/pai_build.py", """#!/usr/bin/env python3
-import json, os, sys
+import json, os, sys, time
+from pathlib import Path
 with open(os.environ["COMMANDS"], "a") as log:
     log.write(json.dumps(["pai_build"] + sys.argv[1:]) + "\\n")
+if os.environ.get("BLOCK_BATCH_PHASE") == sys.argv[1]:
+    Path(os.environ["BATCH_STARTED"]).write_text("started")
+    deadline = time.monotonic() + 15
+    while not Path(os.environ["BATCH_RELEASE"]).exists():
+        if time.monotonic() >= deadline:
+            sys.exit(9)
+        time.sleep(0.02)
 """)
         return tool
 
     def run_batch(self, tool, *args):
         return subprocess.run([str(tool), *args], env=self.env, text=True, capture_output=True)
+
+    def test_batch_lock_covers_reset_build_and_push_without_blocking_read_only_commands(self):
+        tool = self.prepare_batch()
+        demo = self.repo / "src/demo/build"
+        demo.mkdir(parents=True)
+        (demo / "demo.common.dockerfile").write_text("FROM scratch\n")
+        progress = self.repo / ".git/ltp-image-tools"
+        progress.mkdir()
+        options = ["all", "-c", str(self.config), "--skip-cilium"]
+        for phase in ("build", "push"):
+            with self.subTest(phase=phase):
+                for name in ("build.progress", "push.progress", "cilium-push.json"):
+                    (progress / name).write_text("preserve historical progress\n")
+                started, release = self.root / f"{phase}.started", self.root / f"{phase}.release"
+                env = dict(self.env, BLOCK_BATCH_PHASE=phase,
+                           BATCH_STARTED=str(started), BATCH_RELEASE=str(release))
+                with subprocess.Popen([str(tool), *options, "--from", "1"], env=env,
+                                      text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as first:
+                    try:
+                        deadline = time.monotonic() + 5
+                        while not started.exists() and first.poll() is None and time.monotonic() < deadline:
+                            time.sleep(0.02)
+                        self.assertTrue(started.exists(), "First workflow did not reach the selected phase")
+                        before = {path.name: path.read_bytes() for path in progress.iterdir()
+                                  if path.name != "workflow.lock"}
+                        commands = self.commands()
+                        for read_only in ("--status", "--list"):
+                            result = self.run_batch(tool, "all", "--skip-cilium", read_only)
+                            self.assertEqual(0, result.returncode, result.stderr)
+                        result = subprocess.run([str(tool), *options, "--reset"], env=self.env,
+                                                text=True, capture_output=True, timeout=3)
+                        self.assertNotEqual(0, result.returncode)
+                        self.assertIn("lock", result.stderr.lower())
+                        self.assertEqual(commands, self.commands())
+                        self.assertEqual(before, {path.name: path.read_bytes() for path in progress.iterdir()
+                                                 if path.name != "workflow.lock"})
+                    finally:
+                        release.touch()
+                        _, error = first.communicate(timeout=20)
+                self.assertEqual(0, first.returncode, error)
+                result = self.run_batch(tool, *options)
+                self.assertEqual(0, result.returncode, result.stderr)
 
     def test_batch_skip_removes_tasks_and_mutations(self):
         tool = self.prepare_batch()
