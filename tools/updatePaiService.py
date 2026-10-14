@@ -205,7 +205,14 @@ def run_command(command, timeout=TIMEOUT, cwd=None):
     try:
         return subprocess.run(command, text=True, capture_output=True, check=True, timeout=timeout, cwd=cwd)
     except subprocess.CalledProcessError as error:
-        raise CommandError(f"{command[0]} {command[1:3]} failed (exit {error.returncode})") from error
+        details = (error.stderr or "").strip()
+        # A failed raw kubeconfig export may already contain credentials on stdout.
+        if not details and not (command[:3] == ["kubectl", "config", "view"] and "--raw" in command):
+            details = (error.stdout or "").strip()
+        message = f"{command[0]} {command[1:3]} failed (exit {error.returncode})"
+        if details:
+            message += "\n" + details
+        raise CommandError(message) from error
 
 
 def lifecycle_input(command, cluster_name):

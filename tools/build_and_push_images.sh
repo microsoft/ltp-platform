@@ -492,6 +492,12 @@ case "$ACTION" in
 esac
 
 discover_tasks
+task_count=${#TASKS[@]}
+# Reject oversized numbers before evaluating the input as shell arithmetic.
+if [[ ${#START_FROM} -gt ${#task_count} || "$START_FROM" -gt "$task_count" ]]; then
+    echo "Error: --from must be between 1 and $task_count for the discovered tasks (got $START_FROM)." >&2
+    exit 1
+fi
 if [[ "$SKIP_CILIUM" == true ]]; then
     echo "Cilium excluded by --skip-cilium"
 fi

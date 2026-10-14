@@ -307,6 +307,41 @@ if os.environ.get("BLOCK_BATCH_PHASE") == sys.argv[1]:
     def run_batch(self, tool, *args, input="yes\n"):
         return subprocess.run([str(tool), *args], env=self.env, input=input, text=True, capture_output=True)
 
+    def test_batch_out_of_range_from_does_not_reset_progress_or_execute(self):
+        tool = self.prepare_batch()
+        demo = self.repo / "src/demo/build"
+        demo.mkdir(parents=True)
+        (demo / "demo.common.dockerfile").write_text("FROM scratch\n")
+        progress = self.repo / ".git/ltp-image-tools"
+        progress.mkdir()
+        for name in ("build.progress", "push.progress", "cilium-push.json"):
+            (progress / name).write_text("preserve historical progress\n")
+        before = {path.name: path.read_bytes() for path in progress.iterdir()}
+        for action in ("build", "push", "all"):
+            for skip, count in (([], 4), (["--skip-cilium"], 1)):
+                for start in (str(count + 1), "18446744073709551617"):
+                    with self.subTest(action=action, skip=skip, start=start):
+                        result = self.run_batch(tool, action, "-c", str(self.config),
+                                                "--from", start, "--reset", *skip)
+                        self.assertNotEqual(0, result.returncode)
+                        self.assertIn("--from", result.stderr)
+                        self.assertIn(str(count), result.stderr)
+                        self.assertEqual([], self.commands())
+                        self.assertEqual(before, {path.name: path.read_bytes() for path in progress.iterdir()})
+
+    def test_batch_from_accepts_first_and_last_filtered_task(self):
+        tool = self.prepare_batch()
+        demo = self.repo / "src/demo/build"
+        demo.mkdir(parents=True)
+        (demo / "demo.common.dockerfile").write_text("FROM scratch\n")
+        for skip, start, expected in (([], "1", 4), ([], "4", 1), (["--skip-cilium"], "1", 1)):
+            with self.subTest(skip=skip, start=start):
+                self.log.unlink(missing_ok=True)
+                result = self.run_batch(tool, "build", "-c", str(self.config), "--from", start, *skip)
+                self.assertEqual(0, result.returncode, result.stderr)
+                self.assertEqual(expected, len(self.commands()))
+                self.assertTrue(all(command[:2] == ["pai_build", "build"] for command in self.commands()))
+
     def test_batch_declined_manifest_continues_and_resumes_without_republishing(self):
         tool = self.prepare_batch()
         demo = self.repo / "src/demo/build"

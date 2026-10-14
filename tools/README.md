@@ -56,6 +56,8 @@ Builds and non-Cilium pushes use saved `service/image` completion markers.
 They do not automatically detect source, configuration or local-image changes.
 Use `--reset` or `--from N` when intentionally repeating recorded work.
 Use the same filtering options with `--list` to find the current task numbers.
+`--from N` must be within that filtered task list. Out-of-range values fail
+before resetting progress or running image commands.
 
 Cilium images are pushed through `src/cilium/build/push.sh`; all other images
 use `build/pai_build.py`.
@@ -180,6 +182,10 @@ inherit an unfinished plan; explicit stage conflicts fail without discarding
 it. Configuration, image and source repairs do not invalidate progress.
 After a completed run, another invocation creates a new plan rather than
 skipping the entire update.
+
+Failed preflight commands report their exit status and captured stderr, falling
+back to stdout when stderr is empty. Raw kubeconfig stdout is never included
+in failure messages because it can contain credentials.
 
 Lifecycle commands use a private kubeconfig whose selected context is normalized
 to `default`, matching unqualified paictl scripts; the user's kubeconfig is not

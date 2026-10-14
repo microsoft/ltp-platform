@@ -3,6 +3,7 @@
 
 import json
 import re
+import subprocess
 import unittest
 from unittest.mock import patch
 
@@ -126,6 +127,52 @@ class ReviewerRegressionTest(unittest.TestCase):
             self.updater.collect_result(step)
         self.assertEqual(before, self.updater.path.read_bytes())
         self.assertTrue(path.exists())
+
+
+class CommandErrorTest(unittest.TestCase):
+    def test_command_failure_includes_stderr_and_exit_context(self):
+        for command in (["kubectl", "get", "deployment"], ["paictl.py", "config", "get-id"]):
+            with self.subTest(command=command):
+                error = subprocess.CalledProcessError(
+                    9, command, output="less useful stdout", stderr="  credentials expired; log in again\n")
+                with patch.object(tool.subprocess, "run", side_effect=error), \
+                        self.assertRaises(tool.CommandError) as raised:
+                    tool.run_command(command)
+                self.assertIn(command[0], str(raised.exception))
+                self.assertIn("exit 9", str(raised.exception))
+                self.assertIn("credentials expired; log in again", str(raised.exception))
+                self.assertNotIn("less useful stdout", str(raised.exception))
+
+    def test_command_failure_falls_back_to_stdout_when_stderr_is_empty(self):
+        command = ["paictl.py", "config", "get-id"]
+        for stderr in (None, "", " \n"):
+            with self.subTest(stderr=stderr):
+                error = subprocess.CalledProcessError(
+                    2, command, output="  configuration download failed\n", stderr=stderr)
+                with patch.object(tool.subprocess, "run", side_effect=error), \
+                        self.assertRaisesRegex(tool.CommandError, "configuration download failed"):
+                    tool.run_command(command)
+
+    def test_raw_kubeconfig_failure_never_includes_stdout(self):
+        command = ["kubectl", "config", "view", "--minify", "--flatten", "--raw"]
+        for stderr in ("raw export failed", None):
+            with self.subTest(stderr=stderr):
+                error = subprocess.CalledProcessError(
+                    3, command, output="synthetic-kubeconfig-credential", stderr=stderr)
+                with patch.object(tool.subprocess, "run", side_effect=error), \
+                        self.assertRaises(tool.CommandError) as raised:
+                    tool.run_command(command)
+                self.assertNotIn("synthetic-kubeconfig-credential", str(raised.exception))
+                self.assertIn("exit 3", str(raised.exception))
+                if stderr:
+                    self.assertIn(stderr, str(raised.exception))
+
+    def test_command_failure_without_output_still_includes_exit_context(self):
+        command = ["kubectl", "get", "deployment"]
+        error = subprocess.CalledProcessError(4, command)
+        with patch.object(tool.subprocess, "run", side_effect=error), \
+                self.assertRaisesRegex(tool.CommandError, "exit 4"):
+            tool.run_command(command)
 
 
 if __name__ == "__main__":
