@@ -17,11 +17,29 @@
 
 import os
 from hashlib import md5
+from urllib.parse import urlsplit
 from jinja2 import Template
 
 env = {}
 for key in os.environ:
     env[key] = os.environ[key]
+
+if env.get('MODEL_PROXY_URI'):
+    model_proxy = urlsplit(env['MODEL_PROXY_URI'])
+    if (model_proxy.scheme not in ('http', 'https') or not model_proxy.hostname
+            or model_proxy.username is not None or model_proxy.password is not None
+            or model_proxy.query or model_proxy.fragment):
+        raise ValueError('MODEL_PROXY_URI must be an HTTP(S) URL without credentials, query, or fragment')
+    model_proxy_port = model_proxy.port
+    if model_proxy_port is None:
+        model_proxy_port = 443 if model_proxy.scheme == 'https' else 80
+    model_proxy_host = model_proxy.hostname
+    if ':' in model_proxy_host:
+        model_proxy_host = '[{}]'.format(model_proxy_host)
+    env['MODEL_PROXY_UPSTREAM_SCHEME'] = model_proxy.scheme
+    env['MODEL_PROXY_UPSTREAM_ADDRESS'] = '{}:{}'.format(model_proxy_host, model_proxy_port)
+    env['MODEL_PROXY_UPSTREAM_HOST'] = model_proxy.hostname
+    env['MODEL_PROXY_UPSTREAM_PATH'] = model_proxy.path.rstrip('/')
 
 templateString = open('/pylon-config/nginx.conf.template', 'r').read()
 locationCfgTemplateString = open('/pylon-config/location.conf.template', 'r').read()

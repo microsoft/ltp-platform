@@ -65,7 +65,7 @@ async def worker(session, url, model, file):
 async def run_for_model(model, args, file, headers):
     connector = aiohttp.TCPConnector(
         limit=args.concurrency,
-        force_close=True
+        force_close=args.force_close,
     )
     timeout = aiohttp.ClientTimeout(total=args.timeout)
 
@@ -111,15 +111,12 @@ async def main_async(args):
 
     models = args.models
 
-    # ====== 打开失败日志文件 ======
     with open(args.failed_log, "w") as f:
 
-        # 👉 每个 model 独立并发执行
         results = await asyncio.gather(
             *[run_for_model(m, args, f, headers) for m in models]
         )
 
-    # ====== 打印统计 ======
     print("\n=== PER MODEL STATS ===")
     total_requests = 0
     total_time = 0
@@ -153,6 +150,11 @@ def main():
     parser.add_argument("--requests", type=int, default=600)
     parser.add_argument("--concurrency", type=int, default=50)
     parser.add_argument("--timeout", type=float, default=500)
+    parser.add_argument(
+        "--force-close",
+        action="store_true",
+        help="Disable connection reuse to test short-lived client connections",
+    )
 
     parser.add_argument(
         "--models",

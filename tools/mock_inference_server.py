@@ -2,7 +2,6 @@ import random
 import string
 import time
 import asyncio
-from typing import List
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -12,7 +11,6 @@ import json
 
 app = FastAPI()
 
-# ====== 全局配置 ======
 CONFIG = {
     "models": ["mock-gpt-4"],
     "min_delay": 0.1,
@@ -81,13 +79,16 @@ def build_chat_response(model: str, content: str):
 
 async def stream_response(model: str, full_text: str):
     chunk_size = 5
+    completion_id = f"chatcmpl-{random_text(12)}"
+    created = int(time.time())
 
     for i in range(0, len(full_text), chunk_size):
         chunk = full_text[i : i + chunk_size]
 
         data = {
-            "id": f"chatcmpl-{random_text(12)}",
+            "id": completion_id,
             "object": "chat.completion.chunk",
+            "created": created,
             "model": model,
             "choices": [
                 {
@@ -112,11 +113,9 @@ async def chat_completions(request: Request):
     model = validate_model(body.get("model", CONFIG["models"][0]))
     stream = body.get("stream", False)
 
-    # 随机输出
     token_len = random.randint(CONFIG["min_tokens"], CONFIG["max_tokens"])
     content = random_text(token_len)
 
-    # 随机延迟
     await asyncio.sleep(random_delay())
 
     if stream:

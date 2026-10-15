@@ -67,12 +67,10 @@ http {
   # deny all;
 
   {%- if MODEL_PROXY_URI %}
-  # Upstream keepalive pool for model-proxy.
-  # Reuses persistent connections and enables automatic stale-connection retry
-  # before nginx has committed to the client response -- eliminating the race
-  # that causes [Errno 104] Connection reset by peer under high concurrency.
+  # Reuse connections from Pylon to model-proxy.
+  # This does not guarantee recovery from resets or interrupted streams.
   upstream model_proxy_upstream {
-    server {{MODEL_PROXY_URI | replace('http://', '') | replace('https://', '')}};
+    server {{MODEL_PROXY_UPSTREAM_ADDRESS}};
     keepalive 32;
     keepalive_requests 1000;
     keepalive_timeout 60s;
