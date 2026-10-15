@@ -77,6 +77,7 @@ location ~ ^/model-proxy/(.*)$ {
   proxy_pass {{MODEL_PROXY_UPSTREAM_SCHEME}}://model_proxy_upstream{{MODEL_PROXY_UPSTREAM_PATH}}/$1$is_args$args;
   proxy_http_version 1.1;
   proxy_set_header Connection "";
+  proxy_set_header Host {{MODEL_PROXY_UPSTREAM_ADDRESS}};
   {% if MODEL_PROXY_UPSTREAM_SCHEME == 'https' %}
   proxy_ssl_server_name on;
   proxy_ssl_name {{MODEL_PROXY_UPSTREAM_HOST}};

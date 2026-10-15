@@ -54,6 +54,8 @@ async def list_models():
 
 # ====== response ======
 def build_chat_response(model: str, content: str):
+    prompt_tokens = random.randint(5, 20)
+    completion_tokens = len(content)
     return {
         "id": f"chatcmpl-{random_text(12)}",
         "object": "chat.completion",
@@ -70,9 +72,9 @@ def build_chat_response(model: str, content: str):
             }
         ],
         "usage": {
-            "prompt_tokens": random.randint(5, 20),
-            "completion_tokens": len(content),
-            "total_tokens": len(content) + random.randint(5, 20),
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": prompt_tokens + completion_tokens,
         },
     }
 

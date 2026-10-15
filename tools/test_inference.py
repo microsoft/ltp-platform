@@ -81,19 +81,16 @@ async def run_for_model(model, args, file, headers):
         headers=headers,
     ) as session:
 
-        tasks = []
+        request_ids = iter(range(args.requests))
 
-        for _ in range(args.requests):
-            tasks.append(worker(session, args.url, model, file))
+        async def run_worker():
+            for _ in request_ids:
+                await worker(session, args.url, model, file)
+                stats["requests"] += 1
 
-            if len(tasks) >= args.concurrency:
-                await asyncio.gather(*tasks)
-                stats["requests"] += len(tasks)
-                tasks = []
-
-        if tasks:
-            await asyncio.gather(*tasks)
-            stats["requests"] += len(tasks)
+        await asyncio.gather(*(
+            run_worker() for _ in range(min(args.concurrency, args.requests))
+        ))
 
     stats["duration"] = time.time() - stats["start"]
     return stats
@@ -176,6 +173,10 @@ def main():
     )
 
     args = parser.parse_args()
+    if args.concurrency < 1:
+        parser.error("--concurrency must be at least 1")
+    if args.requests < 0:
+        parser.error("--requests must not be negative")
 
     asyncio.run(main_async(args))
 

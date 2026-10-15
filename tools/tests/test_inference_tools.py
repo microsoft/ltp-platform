@@ -16,6 +16,33 @@ CONFIG_DIR = ROOT / "src" / "pylon" / "deploy" / "pylon-config"
 
 
 class InferenceToolsTests(unittest.TestCase):
+    def test_mock_usage_totals(self):
+        module = runpy.run_path(str(ROOT / "tools" / "mock_inference_server.py"))
+        for content in ("", "hello", "longer mock response"):
+            with self.subTest(content=content):
+                with patch.object(module["random"], "randint", return_value=7) as randint:
+                    usage = module["build_chat_response"]("mock-gpt-4", content)["usage"]
+                randint.assert_called_once_with(5, 20)
+                self.assertEqual(usage["prompt_tokens"], 7)
+                self.assertEqual(usage["completion_tokens"], len(content))
+                self.assertEqual(
+                    usage["total_tokens"],
+                    usage["prompt_tokens"] + usage["completion_tokens"],
+                )
+
+    def test_invalid_load_arguments(self):
+        module = runpy.run_path(str(ROOT / "tools" / "test_inference.py"))
+        for args in [
+            ["--concurrency", "0"], ["--concurrency", "-1"],
+            ["--requests", "-1"],
+        ]:
+            with self.subTest(args=args):
+                with patch("sys.argv", ["test_inference.py"] + args):
+                    with patch("sys.stderr", new_callable=io.StringIO):
+                        with self.assertRaises(SystemExit) as error:
+                            module["main"]()
+                self.assertEqual(error.exception.code, 2)
+
     def test_model_defaults_and_connection_mode(self):
         module = runpy.run_path(str(ROOT / "tools" / "test_inference.py"))
         captured = []
@@ -40,6 +67,72 @@ class InferenceToolsTests(unittest.TestCase):
 
 
 class AsyncInferenceToolsTests(unittest.IsolatedAsyncioTestCase):
+    async def test_worker_pool_refills_before_slow_request_finishes(self):
+        module = runpy.run_path(str(ROOT / "tools" / "test_inference.py"))
+        slow_started = asyncio.Event()
+        refilled = asyncio.Event()
+        release_slow = asyncio.Event()
+        started = 0
+        active = 0
+        peak_active = 0
+
+        async def controlled_worker(session, url, model, file):
+            nonlocal started, active, peak_active
+            started += 1
+            request_id = started
+            active += 1
+            peak_active = max(peak_active, active)
+            try:
+                if request_id == 1:
+                    slow_started.set()
+                    await release_slow.wait()
+                else:
+                    await slow_started.wait()
+                    if request_id == 3:
+                        refilled.set()
+            finally:
+                active -= 1
+
+        args = SimpleNamespace(
+            url="http://127.0.0.1", requests=7, concurrency=2,
+            timeout=5, force_close=False,
+        )
+        with patch.dict(module["run_for_model"].__globals__, worker=controlled_worker):
+            task = asyncio.create_task(module["run_for_model"](
+                "mock-gpt-4", args, io.StringIO(), {},
+            ))
+            try:
+                await asyncio.wait_for(refilled.wait(), timeout=2)
+                self.assertFalse(release_slow.is_set())
+            finally:
+                release_slow.set()
+                stats = await asyncio.wait_for(task, timeout=2)
+        self.assertEqual(stats["requests"], 7)
+        self.assertEqual(started, 7)
+        self.assertEqual(peak_active, 2)
+        self.assertEqual(active, 0)
+
+    async def test_worker_pool_request_counts(self):
+        module = runpy.run_path(str(ROOT / "tools" / "test_inference.py"))
+        for requests, concurrency in [(0, 2), (1, 5), (7, 3)]:
+            with self.subTest(requests=requests, concurrency=concurrency):
+                completed = []
+
+                async def record_worker(session, url, model, file):
+                    completed.append(model)
+                    await asyncio.sleep(0)
+
+                args = SimpleNamespace(
+                    url="http://127.0.0.1", requests=requests,
+                    concurrency=concurrency, timeout=5, force_close=False,
+                )
+                with patch.dict(module["run_for_model"].__globals__, worker=record_worker):
+                    stats = await module["run_for_model"](
+                        "mock-gpt-4", args, io.StringIO(), {},
+                    )
+                self.assertEqual(stats["requests"], requests)
+                self.assertEqual(len(completed), requests)
+
     async def test_stream_metadata_is_stable_per_completion(self):
         module = runpy.run_path(str(ROOT / "tools" / "mock_inference_server.py"))
 
@@ -138,6 +231,7 @@ class PylonRenderingTests(unittest.TestCase):
                     f"proxy_pass {scheme}://model_proxy_upstream{path}/$1$is_args$args;",
                     location,
                 )
+                self.assertIn(f"proxy_set_header Host {address};", location)
                 self.assertEqual("proxy_ssl_server_name on;" in location, scheme == "https")
                 if scheme == "https":
                     self.assertIn(f"proxy_ssl_name {host};", location)
