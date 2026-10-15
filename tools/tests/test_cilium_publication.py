@@ -179,6 +179,46 @@ with open(os.environ["COMMANDS"], "a") as log:
                         self.log.unlink(missing_ok=True)
                         output.unlink(missing_ok=True)
 
+    def test_all_roles_strip_source_hash_and_republish_same_tags(self):
+        before = self.manifest.read_text()
+        expected = {
+            "agent": "registry.azurecr.io/cilium/cilium:v1.20.2-20261008",
+            "operator": "registry.azurecr.io/cilium/operator-generic:v1.20.2-20261008",
+            "envoy": "registry.azurecr.io/cilium/cilium-envoy:v1.37.6-123-20261008",
+        }
+        for index, commit in enumerate(("d" * 40, "e" * 40)):
+            with self.subTest(commit=commit):
+                for role in ("agent", "operator", "envoy"):
+                    variable = "CILIUM_ENVOY_TAG" if role == "envoy" else "CILIUM_VERSION"
+                    version = "v1.37.6-123" if role == "envoy" else "v1.20.2"
+                    (self.build / f"cilium-{role}.common.dockerfile").write_text(
+                        f"ARG {variable}={version}-{commit}\nFROM scratch\n"
+                    )
+                self.images.write_text(json.dumps({
+                    f"cilium-{role}:latest": "sha256:" + letter * 64
+                    for role, letter in zip(("agent", "operator", "envoy"),
+                                            ("a", "b", "c") if index == 0 else ("d", "e", "f"))
+                }))
+                planned = self.run_helper("--plan-json")
+                self.assertEqual(0, planned.returncode, planned.stderr)
+                plan = json.loads(planned.stdout)
+                self.assertEqual(expected, {
+                    image["role"]: image["destination"] for image in plan["images"]
+                })
+                self.assertTrue(plan["manifest_matches_targets"])
+                output = self.root / f"normalized-result-{index}.json"
+                result = self.run_helper("--result-file", str(output), input="")
+                self.assertEqual(0, result.returncode, result.stderr)
+                self.assertEqual(before, self.manifest.read_text())
+                self.assertEqual("unchanged", json.loads(output.read_text())["manifest_status"])
+        tagged = [command for command in self.commands() if command[1] == "tag"]
+        self.assertEqual(6, len(tagged))
+        self.assertEqual([image[3] for image in tagged[:3]],
+                         [image[3] for image in tagged[3:]])
+        self.assertNotEqual([image[2] for image in tagged[:3]],
+                            [image[2] for image in tagged[3:]])
+        self.assertEqual(6, sum(command[1] == "push" for command in self.commands()))
+
     def test_explicit_date_updates_every_occurrence_and_result(self):
         output = self.root / "result.json"
         result = self.run_helper("-d", "20261014", "--result-file", str(output), input="Y\n")

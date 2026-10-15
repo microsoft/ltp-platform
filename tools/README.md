@@ -79,6 +79,11 @@ dates fail when no explicit date is supplied. Image versions come from the
 Cilium Dockerfiles; Agent and Operator must have the same `CILIUM_VERSION`,
 otherwise planning/publication fails before inspecting or publishing images.
 Envoy keeps its separate version. Destination tags are `<version>-<YYYYMMDD>`.
+For all three images, a trailing 40-character lowercase hexadecimal Git commit
+suffix is removed from the version. This is an intentional shared tag policy:
+different source commits with the same normalized version and date publish to
+the same tag, and a later push replaces that tag. Agent and Operator versions
+must match before normalization, including any commit suffix.
 After all pushes succeed, if the fixed manifest needs changes, the helper shows
 the old/new image references and asks whether to update it. Only `y` or `yes`
 (case-insensitive) authorizes replacement, including repeated
