@@ -97,7 +97,7 @@ def locked(path):
 def process_identity(pid):
     try:
         fields = Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()
-    except FileNotFoundError:
+    except (FileNotFoundError, ProcessLookupError):
         return None
     return {"pid": int(pid), "state": fields[0], "pgid": int(fields[2]),
             "session": int(fields[3]), "start": fields[19]}

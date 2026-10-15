@@ -5,6 +5,7 @@ import json
 import re
 import subprocess
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 import test_service_update_recovery as fixtures
@@ -127,6 +128,35 @@ class ReviewerRegressionTest(unittest.TestCase):
             self.updater.collect_result(step)
         self.assertEqual(before, self.updater.path.read_bytes())
         self.assertTrue(path.exists())
+
+
+class ProcessIdentityTest(unittest.TestCase):
+    def test_vanished_process_returns_none(self):
+        for error in (FileNotFoundError, ProcessLookupError):
+            with self.subTest(error=error), \
+                    patch.object(Path, "read_text", side_effect=error):
+                self.assertIsNone(tool.process_identity(123))
+
+    def test_other_read_errors_are_not_suppressed(self):
+        for error in (PermissionError, OSError):
+            with self.subTest(error=error), \
+                    patch.object(Path, "read_text", side_effect=error), \
+                    self.assertRaises(error):
+                tool.process_identity(123)
+
+    def test_session_scan_continues_after_process_disappears(self):
+        fields = ["S", "1", "123", "456"] + ["0"] * 15 + ["789"]
+        stat = "124 (command with spaces) " + " ".join(fields)
+        for error in (FileNotFoundError, ProcessLookupError):
+            with self.subTest(error=error), \
+                    patch.object(Path, "iterdir", return_value=iter(
+                        [Path("/proc/123"), Path("/proc/124")]
+                    )), \
+                    patch.object(Path, "read_text", side_effect=[error(), stat]):
+                self.assertEqual(
+                    [{"pid": 124, "state": "S", "pgid": 123, "session": 456, "start": "789"}],
+                    tool.session_members({"session": 456}),
+                )
 
 
 class CommandErrorTest(unittest.TestCase):
