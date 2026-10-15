@@ -90,6 +90,8 @@ def image_nodes(text):
                 walk(child)
 
     for document in yaml.compose_all(text):
+        # Node IDs can be reused after an earlier document is released.
+        visited.clear()
         walk(document)
     if {role for role, _ in found} != set(ROLES):
         raise ValueError("Manifest must contain Agent, Operator and Envoy image references")

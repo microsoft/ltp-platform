@@ -72,6 +72,8 @@ before the batch's first push.
 
 Without a date argument it reuses the consistent date in
 `contrib/aks/k8s-deploy/cilium.yaml`; an explicit date overrides it.
+Multi-document manifests are supported; YAML aliases within a document are
+rejected to keep image-reference updates unambiguous.
 It never automatically selects today's date. Missing or conflicting manifest
 dates fail when no explicit date is supplied. Image versions come from the
 Cilium Dockerfiles; Agent and Operator must have the same `CILIUM_VERSION`,

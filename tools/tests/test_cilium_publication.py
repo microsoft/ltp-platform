@@ -111,6 +111,29 @@ with open(os.environ["COMMANDS"], "a") as log:
         self.assertNotIn("Update contrib/", result.stderr)
         self.assertEqual("unchanged", json.loads(output.read_text())["manifest_status"])
 
+    def test_repository_multidocument_manifest_publication(self):
+        shutil.copy2(ROOT / "contrib/aks/k8s-deploy/cilium.yaml", self.manifest)
+        for role in ("agent", "operator", "envoy"):
+            name = f"cilium-{role}.common.dockerfile"
+            shutil.copy2(ROOT / "src/cilium/build" / name, self.build / name)
+        before = self.manifest.read_text().replace(
+            "luciaopenpai.azurecr.io/", "registry.azurecr.io/"
+        )
+        self.manifest.write_text(before)
+        result = self.run_helper(input="")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(before, self.manifest.read_text())
+        self.assertIn("manifest references unchanged", result.stderr)
+        image_count = before.count("image:")
+        self.assertEqual(9, image_count)
+        result = self.run_helper("-d", "20261015")
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(image_count, self.manifest.read_text().count("-20261015"))
+        self.assertEqual(
+            before.replace("-20261008", "-20261015"), self.manifest.read_text()
+        )
+        self.assertEqual(6, sum(command[1] == "push" for command in self.commands()))
+
     def test_publication_does_not_acquire_the_previous_publication_lock(self):
         lock = self.repo / ".git/ltp-image-tools/cilium-publish.lock"
         lock.parent.mkdir()
