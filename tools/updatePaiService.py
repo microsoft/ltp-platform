@@ -18,8 +18,6 @@ import tempfile
 import time
 import uuid
 
-import yaml
-
 
 SERVICE_ORDER = (
     "node-exporter", "job-exporter", "log-manager", "copilot-chat",
@@ -222,19 +220,6 @@ def lifecycle_input(command, cluster_name):
     return confirmation + cluster_name + "\n"
 
 
-def execution_kubeconfig(content):
-    config = yaml.safe_load(content)
-    if (not isinstance(config, dict) or not isinstance(config.get("contexts"), list)
-            or not isinstance(config.get("current-context"), str)
-            or any(not isinstance(item, dict) for item in config["contexts"])):
-        raise ValueError("Invalid kubeconfig: contexts are missing")
-    selected = [item for item in config["contexts"] if item.get("name") == config.get("current-context")]
-    if len(selected) != 1 or not isinstance(selected[0].get("context"), dict):
-        raise ValueError("Invalid kubeconfig: selected context is missing or ambiguous")
-    selected[0]["context"]["namespace"] = "default"
-    return yaml.safe_dump(config, sort_keys=False)
-
-
 class Updater:
     def __init__(self, root, args, state_dir):
         self.root, self.args, self.directory = root, args, state_dir
@@ -242,15 +227,14 @@ class Updater:
         self.operation_lock = self.path.with_suffix(".operation.lock")
         self.state = None
         self.manifest = root / "contrib/aks/k8s-deploy/cilium.yaml"
-        self.kubeconfig = None
 
     def save(self):
         self.state["updated_at"] = time.time()
         atomic_json(self.path, self.state)
 
     def gate(self):
-        result = run_command([str(self.root / "paictl.py"), "config", "get-id",
-                              "-c", str(self.kubeconfig)], cwd=self.root, timeout=self.args.timeout)
+        result = run_command([str(self.root / "paictl.py"), "config", "get-id"],
+                             cwd=self.root, timeout=self.args.timeout)
         ids = {value.strip() for value in re.findall(
             r"Cluster-id is: ([^\r\n]+)", result.stdout + "\n" + result.stderr)}
         if ids != {self.args.cluster_name}:
@@ -460,7 +444,7 @@ class Updater:
                 command += ["--ignore-not-found", "--wait=true", f"--timeout={self.args.timeout}s"]
         else:
             command = [str(self.root / "paictl.py"), "service", action,
-                       "-n", service, "-c", str(self.kubeconfig)]
+                       "-n", service]
         self.execute(step, command)
         step["state"] = "succeeded"
         self.save()
@@ -477,47 +461,33 @@ class Updater:
 
     def run(self):
         existing, selected = self.selections()
+        self.gate()
+        self.prepare(existing, selected)
+        if self.args.plan:
+            print(json.dumps({"cluster_name": self.args.cluster_name, "selected": selected,
+                              "service_order": self.state["service_order"],
+                              "phase": self.state["phase"],
+                              "steps": [{k: step[k] for k in ("service", "action", "state")}
+                                        for step in self.state["steps"]]}, indent=2))
+            return
         with tempfile.TemporaryDirectory(prefix="pai-update-") as temporary:
-            directory = Path(temporary)
-            self.kubeconfig = directory / "kubeconfig"
-            content = run_command(["kubectl", "config", "view", "--minify", "--flatten", "--raw"],
-                                  cwd=self.root, timeout=self.args.timeout).stdout
-            self.kubeconfig.write_text(execution_kubeconfig(content))
-            self.kubeconfig.chmod(0o600)
-            original_kubeconfig = os.environ.get("KUBECONFIG")
-            os.environ["KUBECONFIG"] = str(self.kubeconfig)
-            try:
-                self.gate()
-                self.prepare(existing, selected)
-                if self.args.plan:
-                    print(json.dumps({"cluster_name": self.args.cluster_name, "selected": selected,
-                                      "service_order": self.state["service_order"],
-                                      "phase": self.state["phase"],
-                                      "steps": [{k: step[k] for k in ("service", "action", "state")}
-                                                for step in self.state["steps"]]}, indent=2))
-                    return
-                manifest_copy = directory / "cilium.yaml"
-                self.save()
-                for step in self.state["steps"]:
-                    if step["state"] != "succeeded":
-                        self.state["phase"] = (step["service"] if step["service"] in OPTIONAL_STAGES else
-                                               "stopping" if step["action"] == "stop" else "starting")
-                        self.save()
-                    try:
-                        self.perform(step, manifest_copy)
-                    except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired, KeyboardInterrupt) as error:
-                        step["state"] = "failed"
-                        step["error"] = f"{type(error).__name__}: operation failed; see console"
-                        self.save()
-                        raise
-                self.state["phase"] = "complete"
-                self.save()
-                print("All planned service commands completed successfully.")
-            finally:
-                if original_kubeconfig is None:
-                    os.environ.pop("KUBECONFIG", None)
-                else:
-                    os.environ["KUBECONFIG"] = original_kubeconfig
+            manifest_copy = Path(temporary) / "cilium.yaml"
+            self.save()
+            for step in self.state["steps"]:
+                if step["state"] != "succeeded":
+                    self.state["phase"] = (step["service"] if step["service"] in OPTIONAL_STAGES else
+                                           "stopping" if step["action"] == "stop" else "starting")
+                    self.save()
+                try:
+                    self.perform(step, manifest_copy)
+                except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired, KeyboardInterrupt) as error:
+                    step["state"] = "failed"
+                    step["error"] = f"{type(error).__name__}: operation failed; see console"
+                    self.save()
+                    raise
+            self.state["phase"] = "complete"
+            self.save()
+            print("All planned service commands completed successfully.")
 
 
 def parse_args():
@@ -558,7 +528,7 @@ def main():
         with locked(updater.path.with_suffix(".lock")):
             updater.run()
         return 0
-    except (RuntimeError, OSError, ValueError, KeyError, TypeError, yaml.YAMLError,
+    except (RuntimeError, OSError, ValueError, KeyError, TypeError,
             subprocess.TimeoutExpired, KeyboardInterrupt) as error:
         print(f"[ERROR] {error or 'Interrupted; progress preserved'}", file=sys.stderr)
         if updater:

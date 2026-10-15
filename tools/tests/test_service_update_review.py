@@ -38,12 +38,6 @@ class ReviewerRegressionTest(unittest.TestCase):
                     + re.escape(name) + r"\s*\n",
                     text) for text in texts))
 
-    def test_invalid_kubeconfig_fails_before_mutation(self):
-        for content in ("kind: Config\n", "contexts: [broken]\ncurrent-context: missing\n"):
-            with self.subTest(content=content), self.assertRaises(ValueError):
-                tool.execution_kubeconfig(content)
-        self.assertEqual([], self.state()["mutations"])
-
     def test_pending_step_ignores_configuration_template_and_image_changes(self):
         self.make_plan()
         before = json.loads(self.updater.path.read_text())

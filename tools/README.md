@@ -87,9 +87,14 @@ commit or deploy automatically.
 
 ## Restart running PAI services
 
-Requires Linux procfs, Python 3 with PyYAML, Git, kubectl, and paictl's
-dependencies. Select the intended Kubernetes context first. `<cluster-name>`
-must match the ID returned by `./paictl.py config get-id`.
+Requires Linux procfs, Python 3, Git, kubectl, and paictl's dependencies.
+Select the intended Kubernetes context and namespace `default` before running.
+`<cluster-name>` must match the ID returned by `./paictl.py config get-id`.
+The updater uses the commands' existing kubeconfig behavior without creating a
+snapshot, passing a kubeconfig override to paictl, or changing `KUBECONFIG`.
+If `KUBECONFIG` is set, ensure its target matches `~/.kube/config`, which paictl
+and REST user migration use by default. Do not switch configurations or run
+updates concurrently in the same checkout during an update.
 
 ```bash
 # Preview before executing.
@@ -104,8 +109,8 @@ tools/updatePaiService.py --cluster-name <cluster-name> --timeout 600
 
 The updater stops supported deployed services in reverse dependency order and
 starts them in forward order, using `paictl.py`. Ordinary services are selected
-in `default`; explicit `kube-system` targets remain there. The user's kubeconfig
-is not changed. Internal storage is stop-only.
+in `default`; explicit `kube-system` targets remain there.
+Internal storage is stop-only.
 
 | Option | Usage |
 | --- | --- |

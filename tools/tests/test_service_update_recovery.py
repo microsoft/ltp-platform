@@ -31,7 +31,7 @@ def controller(service, namespace="default", kind="DaemonSet", name=None):
 
 
 FAKE_COMMAND = r'''#!/usr/bin/env python3
-import copy, json, os, sys, yaml
+import copy, json, os, sys
 from pathlib import Path
 args = sys.argv[1:]
 state_path = Path(os.environ["FAKE_CLUSTER"])
@@ -40,6 +40,8 @@ with open(os.environ["FAKE_CALLS"], "a") as log:
     log.write(json.dumps([Path(sys.argv[0]).name] + args) + "\n")
 def save():
     state_path.write_text(json.dumps(state))
+state.setdefault("command_kubeconfigs", []).append(os.environ.get("KUBECONFIG"))
+save()
 def record(service, action):
     journal = json.loads(Path(os.environ["FAKE_JOURNAL"]).read_text())
     assert any(step["service"] == service and step["action"] == action and step["state"] == "running"
@@ -47,11 +49,8 @@ def record(service, action):
     assert Path.cwd() == Path(os.environ["FAKE_ROOT"])
     state["mutations"].append([service, action])
     state["saved_plans"].append(journal["service_order"])
-    cfg = yaml.safe_load(Path(os.environ["KUBECONFIG"]).read_text())
-    context = next(item["context"] for item in cfg["contexts"] if item["name"] == cfg["current-context"])
-    assert context["namespace"] == "default"
-    assert Path(os.environ["KUBECONFIG"]).stat().st_mode & 0o777 == 0o600
 if Path(sys.argv[0]).name == "paictl.py":
+    assert "-c" not in args
     if args[:2] == ["config", "get-id"]:
         print(os.environ.get("FAKE_ID_OUTPUT", "Cluster-id is: " + os.environ.get("FAKE_ID", "test")))
         sys.exit(int(os.environ.get("FAKE_ID_EXIT", "0")))
@@ -74,12 +73,6 @@ if Path(sys.argv[0]).name == "paictl.py":
             state["resources"].extend(copy.deepcopy(
                 json.loads(Path(os.environ["FAKE_TARGETS"]).read_text()).get(service, [])))
     save()
-elif args == ["config", "view", "--minify", "--flatten", "--raw"]:
-    print(json.dumps({"apiVersion": "v1", "kind": "Config", "current-context": "selected",
-        "contexts": [{"name": "selected", "context": {"cluster": "cluster", "user": "user",
-            "namespace": os.environ.get("FAKE_NAMESPACE", "default")}}],
-        "clusters": [{"name": "cluster", "cluster": {"server": "https://cluster.invalid"}}],
-        "users": [{"name": "user", "user": {"token": "synthetic-token"}}]}))
 elif args == ["get", "deployment,statefulset,daemonset", "-A", "-o", "json"]:
     if os.environ.get("DISCOVERY_ERROR"):
         sys.exit(9)
@@ -257,17 +250,34 @@ class ServiceRecoveryTest(unittest.TestCase):
                 self.updater.run()
         self.assertFalse(self.updater.path.exists())
 
-    def test_original_namespace_is_unchanged_and_wrong_namespace_is_not_selected(self):
+    def test_existing_kubeconfig_is_inherited_unchanged_and_other_namespaces_are_not_selected(self):
         original = self.root / "original-kubeconfig"
         original.write_text("original content must not be changed")
         state = self.state()
         state["resources"].append(controller("job-exporter", "sandbox"))
         self.cluster.write_text(json.dumps(state))
-        with patch.dict(os.environ, KUBECONFIG=str(original), FAKE_NAMESPACE="sandbox"):
+        with patch.dict(os.environ, KUBECONFIG=str(original)):
             self.updater.run()
             self.assertEqual(str(original), os.environ["KUBECONFIG"])
+        self.assertEqual([str(original)] * len(self.calls_made()), self.state()["command_kubeconfigs"])
         self.assertEqual("original content must not be changed", original.read_text())
         self.assertTrue(any(item["metadata"]["namespace"] == "sandbox" for item in self.state()["resources"]))
+
+    def test_unset_kubeconfig_remains_unset_for_all_commands(self):
+        with patch.dict(os.environ):
+            os.environ.pop("KUBECONFIG", None)
+            self.updater.run()
+            self.assertNotIn("KUBECONFIG", os.environ)
+        self.assertEqual([None] * len(self.calls_made()), self.state()["command_kubeconfigs"])
+        self.assertFalse(any(call[1:3] == ["config", "view"] for call in self.calls_made()))
+
+    def test_kubeconfig_is_not_overridden_when_cluster_gate_fails(self):
+        with patch.dict(os.environ, KUBECONFIG="caller-config", FAKE_ID="wrong"):
+            with self.assertRaisesRegex(RuntimeError, "cluster ID"):
+                self.updater.run()
+            self.assertEqual("caller-config", os.environ["KUBECONFIG"])
+        self.assertEqual(["caller-config"], self.state()["command_kubeconfigs"])
+        self.assertEqual([], self.state()["mutations"])
 
     def test_storage_and_hived_vcs_deduplicate_and_preserve_dependency_order(self):
         resources = [
