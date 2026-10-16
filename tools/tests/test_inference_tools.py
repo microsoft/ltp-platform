@@ -256,6 +256,18 @@ class PylonRenderingTests(unittest.TestCase):
         self.assertNotIn("model_proxy_upstream", outputs["/root/nginx.conf"])
         self.assertNotIn("model_proxy_upstream", outputs["/root/location.conf"])
 
+    def test_job_server_keeps_existing_behavior(self):
+        location = self.render(None)["/root/location.conf"]
+        job_server = location.split(
+            r"location ~ ^/job-server/([^/]+):(\d+)/(.*)$ {", 1,
+        )[1].split("\n}", 1)[0]
+        self.assertIn("proxy_pass http://$1:$2/$3$is_args$args;", job_server)
+        self.assertNotIn("proxy_next_upstream", job_server)
+        for directive in ("proxy_connect_timeout", "proxy_read_timeout", "proxy_send_timeout"):
+            self.assertIn(f"{directive} 180m;", job_server)
+        self.assertIn("proxy_buffering off;", job_server)
+        self.assertIn("proxy_cache off;", job_server)
+
     def test_invalid_backend_urls_fail(self):
         for uri in [
             "ftp://backend.example", "https:///missing-host",

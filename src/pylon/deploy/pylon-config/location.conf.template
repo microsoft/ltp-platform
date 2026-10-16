@@ -46,17 +46,9 @@ location ~ ^/log-manager/([^/]+):(\d+)/(.*)$ {
 # job server
 location ~ ^/job-server/([^/]+):(\d+)/(.*)$ {
   proxy_pass http://$1:$2/$3$is_args$args;
-  proxy_http_version 1.1;
-  proxy_set_header Connection "";
   proxy_connect_timeout 180m;
   proxy_read_timeout 180m;
   proxy_send_timeout 180m;
-
-  # Retries depend on available upstream peers and cannot resume response streams.
-  # non_idempotent allows replaying sent POST requests and may repeat backend work.
-  proxy_next_upstream error timeout non_idempotent;
-  proxy_next_upstream_tries 2;
-  proxy_next_upstream_timeout 5s;
 
   # Disable buffering based on content type
   proxy_buffering off;
@@ -75,8 +67,6 @@ location ~ ^/copilot/api/operation(.*)$ {
 {%- if MODEL_PROXY_URI %}
 location ~ ^/model-proxy/(.*)$ {
   proxy_pass {{MODEL_PROXY_UPSTREAM_SCHEME}}://model_proxy_upstream{{MODEL_PROXY_UPSTREAM_PATH}}/$1$is_args$args;
-  proxy_http_version 1.1;
-  proxy_set_header Connection "";
   proxy_set_header Host {{MODEL_PROXY_UPSTREAM_ADDRESS}};
   {% if MODEL_PROXY_UPSTREAM_SCHEME == 'https' %}
   proxy_ssl_server_name on;

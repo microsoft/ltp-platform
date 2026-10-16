@@ -15,7 +15,7 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-worker_processes 1;
+worker_processes  1;
 
 events {
   worker_connections  65535;
@@ -68,13 +68,10 @@ http {
 
   {%- if MODEL_PROXY_URI %}
   # Reuse connections from Pylon to model-proxy.
-  # This does not guarantee recovery from resets or interrupted streams.
   upstream model_proxy_upstream {
     zone model_proxy_upstream 64k;
     server {{MODEL_PROXY_UPSTREAM_ADDRESS}} resolve;
     keepalive 32;
-    keepalive_requests 1000;
-    keepalive_timeout 60s;
   }
   {%- endif %}
 
