@@ -70,7 +70,8 @@ http {
   # Reuse connections from Pylon to model-proxy.
   # This does not guarantee recovery from resets or interrupted streams.
   upstream model_proxy_upstream {
-    server {{MODEL_PROXY_UPSTREAM_ADDRESS}};
+    zone model_proxy_upstream 64k;
+    server {{MODEL_PROXY_UPSTREAM_ADDRESS}} resolve;
     keepalive 32;
     keepalive_requests 1000;
     keepalive_timeout 60s;

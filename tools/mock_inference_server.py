@@ -104,6 +104,20 @@ async def stream_response(model: str, full_text: str):
         yield f"data: {json.dumps(data)}\n\n"
         await asyncio.sleep(0.05)
 
+    data = {
+        "id": completion_id,
+        "object": "chat.completion.chunk",
+        "created": created,
+        "model": model,
+        "choices": [
+            {
+                "delta": {},
+                "index": 0,
+                "finish_reason": "stop",
+            }
+        ],
+    }
+    yield f"data: {json.dumps(data)}\n\n"
     yield "data: [DONE]\n\n"
 
 

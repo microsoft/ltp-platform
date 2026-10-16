@@ -136,23 +136,36 @@ class AsyncInferenceToolsTests(unittest.IsolatedAsyncioTestCase):
     async def test_stream_metadata_is_stable_per_completion(self):
         module = runpy.run_path(str(ROOT / "tools" / "mock_inference_server.py"))
 
-        async def collect():
+        async def collect(content):
             events = [
                 event async for event in
-                module["stream_response"]("mock-gpt-4", "abcdefghijk")
+                module["stream_response"]("mock-gpt-4", content)
             ]
             self.assertEqual(events[-1], "data: [DONE]\n\n")
-            return [json.loads(event[6:]) for event in events[:-1]]
+            chunks = [json.loads(event[6:]) for event in events[:-1]]
+            self.assertEqual(chunks[-1]["choices"], [
+                {"delta": {}, "index": 0, "finish_reason": "stop"},
+            ])
+            self.assertTrue(all(
+                chunk["choices"][0]["finish_reason"] is None for chunk in chunks[:-1]
+            ))
+            self.assertEqual(len({chunk["id"] for chunk in chunks}), 1)
+            self.assertEqual(len({chunk["created"] for chunk in chunks}), 1)
+            self.assertTrue(all(
+                chunk["object"] == "chat.completion.chunk"
+                and chunk["model"] == "mock-gpt-4" for chunk in chunks
+            ))
+            self.assertEqual("".join(
+                chunk["choices"][0]["delta"].get("content", "") for chunk in chunks
+            ), content)
+            return chunks
 
-        first = await collect()
-        second = await collect()
-        self.assertEqual(len(first), 3)
-        self.assertEqual(len({chunk["id"] for chunk in first}), 1)
-        self.assertEqual(len({chunk["created"] for chunk in first}), 1)
+        first = await collect("abcdefghijk")
+        second = await collect("abcdefghijk")
+        empty = await collect("")
+        self.assertEqual(len(first), 4)
+        self.assertEqual(len(empty), 1)
         self.assertNotEqual(first[0]["id"], second[0]["id"])
-        self.assertEqual("".join(
-            chunk["choices"][0]["delta"]["content"] for chunk in first
-        ), "abcdefghijk")
 
     async def test_connection_reuse_and_force_close(self):
         module = runpy.run_path(str(ROOT / "tools" / "test_inference.py"))
@@ -226,7 +239,9 @@ class PylonRenderingTests(unittest.TestCase):
                 outputs = self.render(uri)
                 nginx = outputs["/root/nginx.conf"]
                 location = outputs["/root/location.conf"]
-                self.assertIn(f"server {address};", nginx)
+                self.assertIn("zone model_proxy_upstream 64k;", nginx)
+                self.assertIn(f"server {address} resolve;", nginx)
+                self.assertIn("resolver 127.0.0.1;", nginx)
                 self.assertIn(
                     f"proxy_pass {scheme}://model_proxy_upstream{path}/$1$is_args$args;",
                     location,
