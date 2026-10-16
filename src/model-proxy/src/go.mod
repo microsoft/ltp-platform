@@ -1,3 +1,3 @@
 module modelproxy
 
-go 1.25
+go 1.26.9

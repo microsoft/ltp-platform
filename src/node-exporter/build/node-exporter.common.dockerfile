@@ -21,6 +21,7 @@ ARG TARGETOS
 ARG TARGETARCH
 
 FROM ${PROMETHEUS_BUILDER_IMAGE} AS builder
+ENV GOTOOLCHAIN=go1.26.9
 ARG NODE_EXPORTER_VERSION
 ARG TARGETOS
 ARG TARGETARCH
@@ -30,6 +31,7 @@ RUN git clone --depth 1 --branch ${NODE_EXPORTER_VERSION} \
     https://github.com/prometheus/node_exporter.git .
 
 RUN go get golang.org/x/crypto@v0.56.0 && \
+    go get golang.org/x/net@v0.60.0 && \
     go mod tidy && \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} make build PREFIX=/out
 

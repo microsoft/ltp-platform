@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.26.6 AS build
+FROM golang:1.26.9 AS build
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -18,6 +18,7 @@ RUN mkdir /artifacts
 WORKDIR /usr/src/k8s-nvidia-device-plugin
 
 RUN go get google.golang.org/grpc@v1.83.2 && \
+    go get golang.org/x/net@v0.60.0 && \
     go mod tidy && \
     go mod vendor
 

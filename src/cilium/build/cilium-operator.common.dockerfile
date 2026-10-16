@@ -16,12 +16,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Build cilium-operator-generic from source with updated Go.
-# This fixes Go stdlib and grpc vulnerabilities by compiling with Go 1.26.8.
+# Compile with Go 1.26.9 and the dependencies from the matching Cilium release.
 # The operator is a pure Go binary (CGO_ENABLED=0, scratch base).
 #
 
-ARG GOLANG_VERSION=1.26.8
-ARG CILIUM_VERSION=v1.20.2
+ARG GOLANG_VERSION=1.26.9
+ARG CILIUM_VERSION=v1.20.3
 
 # Stage 1: Build operator binary
 FROM golang:${GOLANG_VERSION} AS builder
@@ -35,12 +35,7 @@ WORKDIR /go/src/github.com/cilium/cilium
 RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
     https://github.com/cilium/cilium.git .
 
-RUN go get \
-      golang.org/x/crypto@v0.56.0 \
-      golang.org/x/net@v0.58.0 \
-      golang.org/x/text@v0.41.0 \
-      google.golang.org/grpc@v1.83.2 && \
-    go mod tidy && \
+RUN go mod tidy && \
     go mod vendor
 
 RUN mkdir -p /out && \

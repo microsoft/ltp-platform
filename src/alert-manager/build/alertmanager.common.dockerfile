@@ -22,6 +22,7 @@ RUN git clone --depth 1 --branch ${ALERTMANAGER_VERSION} \
 RUN make -C ui/app build
 
 FROM ${PROMETHEUS_BUILDER_IMAGE} AS builder
+ENV GOTOOLCHAIN=go1.26.9
 ARG ALERTMANAGER_VERSION
 ARG TARGETOS
 ARG TARGETARCH
@@ -33,8 +34,9 @@ RUN git clone --depth 1 --branch ${ALERTMANAGER_VERSION} \
 COPY --from=ui /go/src/github.com/prometheus/alertmanager/ui/app/dist ./ui/app/dist
 RUN touch ui/app/dist/.build_stamp
 
-RUN go get golang.org/x/crypto@v0.56.0 \
-      google.golang.org/grpc@v1.83.2 && \
+RUN go get golang.org/x/crypto@v0.57.0 \
+      google.golang.org/grpc@v1.83.2 \
+      golang.org/x/net@v0.60.0 && \
     go mod tidy && \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} make build PREFIX=/out
 

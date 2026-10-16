@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 
-FROM golang:1.26.6 AS azcopy-builder
+FROM golang:1.26.9 AS azcopy-builder
 
 ARG AZCOPY_VERSION=10.32.8
 
@@ -10,6 +10,7 @@ WORKDIR /src
 RUN git clone --depth 1 --branch "v${AZCOPY_VERSION}" \
         https://github.com/Azure/azure-storage-azcopy.git . && \
     go get golang.org/x/crypto@v0.56.0 && \
+    go get golang.org/x/net@v0.60.0 && \
     go mod tidy && \
     CGO_ENABLED=0 go build -tags netgo -o /azcopy
 

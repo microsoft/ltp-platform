@@ -16,12 +16,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Rebuild cilium-envoy image with latest OS security patches.
-# Base: official cilium-envoy matching cilium v1.20.2
+# Base: official cilium-envoy matching cilium v1.20.3
 # This patches OS-level CVEs (libc6, libgnutls30t64, libsystemd0).
 #
 
-ARG CILIUM_ENVOY_TAG=v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82
-FROM quay.io/cilium/cilium-envoy:${CILIUM_ENVOY_TAG}@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463
+ARG CILIUM_ENVOY_TAG=v1.38.6-1791537840-00e749f11f69334c625e53fc1ce2fc6c7f34a51f
+FROM quay.io/cilium/cilium-envoy:${CILIUM_ENVOY_TAG}@sha256:d6c8c0c91954d1885026d82a31b341f37dcd34a4b127fdaf1587e43ddd224cef
 
 # Apply latest Ubuntu security updates
 RUN apt-get update && \

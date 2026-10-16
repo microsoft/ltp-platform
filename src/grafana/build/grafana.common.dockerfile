@@ -19,7 +19,7 @@ FROM node:24 AS build
 ARG TARGETOS
 ARG TARGETARCH
 
-ENV GOVERSION=1.26.6
+ENV GOVERSION=1.26.9
 ENV PLUGINVERSION=v3.11.3
 
 ENV GOPATH=/usr/local/go
@@ -35,6 +35,7 @@ RUN git clone --branch ${PLUGINVERSION} --depth 1 https://github.com/grafana/gra
 
 RUN go get golang.org/x/crypto@v0.56.0 && \
     go get google.golang.org/grpc@v1.83.2 && \
+    go get golang.org/x/net@v0.60.0 && \
     go mod tidy
 
 RUN go install github.com/magefile/mage@latest

@@ -15,19 +15,19 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Build Cilium-owned binaries from source with the official v1.20.2 builder,
-# which provides Go 1.26.8 and the required BPF/LLVM build toolchain.
+# Build Cilium-owned binaries from source with the official v1.20.3 builder,
+# which provides Go 1.26.9 and the required BPF/LLVM build toolchain.
 # Runtime utilities such as gops and the loopback CNI plugin remain from the
 # matching official runtime image; Pebble is replaced with its patched release.
 #
 
-ARG CILIUM_VERSION=v1.20.2
+ARG CILIUM_VERSION=v1.20.3
 ARG PEBBLE_VERSION=v1.32.2
-ARG CILIUM_BUILDER_IMAGE=quay.io/cilium/cilium-builder:e631dcf9a2cbbeb01852013a0262d045e9b23d72@sha256:03c3cd535844e38e9fe61f6715d5991446bb93c8ef5ce60169e8fa4f5c5afbfe
-ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:13953be3b88431ba8d71634e240280b1148e6d20@sha256:9f0f69b62f64cc2ce7668c2f07332dd3fc7523e39446f185aa34f26c8f760af9
-ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463
+ARG CILIUM_BUILDER_IMAGE=quay.io/cilium/cilium-builder:2cc44e177a66d543be19c012f7925dea7aeae750@sha256:6cc5b7a4e22595269988b50f5531ae00fd8ec9266c966a0099c86aaebee6cc70
+ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:3e883791a0a491f1c3b926e68e0a9b2f0486189d@sha256:0fc05e78f02d344e36766b9ff146ac3c78ff5341bd051efcdcbd650baa0971f5
+ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.38.6-1791537840-00e749f11f69334c625e53fc1ce2fc6c7f34a51f@sha256:d6c8c0c91954d1885026d82a31b341f37dcd34a4b127fdaf1587e43ddd224cef
 
-# Stage 1: Build Cilium with the builder and commands pinned by upstream v1.20.2.
+# Stage 1: Build Cilium with the builder and commands pinned by upstream v1.20.3.
 FROM --platform=${BUILDPLATFORM} ${CILIUM_BUILDER_IMAGE} AS builder
 ARG CILIUM_VERSION
 ARG PEBBLE_VERSION
@@ -39,15 +39,8 @@ WORKDIR /workspace/cilium
 RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
     https://github.com/cilium/cilium.git .
 
-RUN go get golang.org/x/net@v0.56.0 && \
-    go get golang.org/x/text@v0.39.0 && \
-    go get google.golang.org/grpc@v1.83.2 && \
-    go get github.com/go-openapi/swag/jsonutils@v0.27.1 && \
-    go get github.com/google/cel-go@v0.29.0 && \
-    go get go.mongodb.org/mongo-driver@v1.17.7 && \
+RUN go get github.com/go-openapi/swag/jsonutils@v0.27.1 && \
     go get github.com/gopacket/gopacket@v1.7.1 && \
-    go get github.com/cilium/ebpf@v0.22.0 && \
-    go get golang.org/x/crypto@v0.56.0 && \
     go mod tidy && \
     go mod vendor
 

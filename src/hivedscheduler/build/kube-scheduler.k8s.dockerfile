@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.26.6 AS builder
+FROM golang:1.26.9 AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -13,10 +13,10 @@ RUN git clone --branch v1.33.12 --depth 1 https://github.com/kubernetes/kubernet
 
 WORKDIR /go/kubernetes
 
-RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
+RUN go work edit -go=1.26.9 && \
+    for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       dir=$(dirname "$modfile"); \
       (cd "$dir" && \
-        go get golang.org/x/net@v0.56.0 && \
         go get golang.org/x/text@v0.39.0 && \
         go get go.opentelemetry.io/otel/sdk@v1.43.0 \
       ) || true; \
@@ -27,9 +27,11 @@ RUN for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       (cd "$dir" && go get github.com/google/cel-go@v0.29.0) || true; \
       (cd "$dir" && go get golang.org/x/crypto@v0.56.0) || true; \
     done && \
+    go get golang.org/x/net@v0.60.0 && \
+    go work sync && \
     go work vendor
 
-RUN GOTOOLCHAIN=go1.26.6 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
+RUN GOTOOLCHAIN=go1.26.9 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
     make WHAT=cmd/kube-scheduler
 
 RUN git init /go/release && \
@@ -42,6 +44,7 @@ RUN git init /go/release && \
       go build -ldflags '-s -w -buildid= -extldflags "-static"' \
       -o /go-runner .
 
+# Both Go binaries are rebuilt above; the base image's Go version is not retained.
 FROM registry.k8s.io/build-image/go-runner:v2.4.0-go1.26.5-bookworm.0
 COPY --from=builder /go-runner /go-runner
 COPY --from=builder /go/kubernetes/_output/local/go/bin/kube-scheduler /usr/local/bin/kube-scheduler
