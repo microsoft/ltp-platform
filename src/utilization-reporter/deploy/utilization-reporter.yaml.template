@@ -43,6 +43,7 @@ spec:
       containers:
       - name: prometheus
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}utilization-reporter:{{cluster_cfg["cluster"]["docker-registry"]["tag"]}}
+        imagePullPolicy: Always
         resources:
           limits:
             cpu: "2"
