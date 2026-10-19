@@ -26,7 +26,7 @@ tools/build_and_push_images.sh all --status --skip-cilium
 The script discovers Kubernetes/common Dockerfiles under `src/*/build`.
 It excludes `base-image`, `dev-box`, `internal-storage`, and these standalone
 images: `cleaning-image`, `kubernetes-dashboard-amd64`, `marketplace-db`,
-`postgresql-sdk`, `prometheus`, and `prometheus-pushgateway`.
+`postgresql-sdk`, and `prometheus-pushgateway`.
 
 | Option | Usage |
 | --- | --- |

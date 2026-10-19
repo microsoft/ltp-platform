@@ -49,7 +49,6 @@ EXCLUDED_IMAGES=(
     "marketplace-db/marketplace-db"
     "postgresql-sdk/postgresql-sdk"
     "prometheus-pushgateway/prometheus-pushgateway"
-    "prometheus/prometheus"
 )
 
 TASKS=()
