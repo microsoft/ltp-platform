@@ -51,3 +51,17 @@ grafana:
     <td>URL</td>
 </tr>
 </table>
+
+#### Image build
+
+The image installs the official Grafana OSS `12.4.13` Debian package from the
+patch-supported 12.4 branch, including its matching backend and frontend assets.
+The `grafana`, `grafana-cli`, and `grafana-server` binaries use Go `1.26.9`;
+the main binary uses `golang.org/x/net v0.60.0`. The Infinity plugin remains
+at `v3.11.3` and is built separately with the same Go and x/net versions.
+
+Before deploying an upgrade from Grafana 10, verify existing dashboards and
+plugins against Grafana 12, including migration of legacy Graph and Singlestat
+panels. Back up any persistent Grafana database before upgrading; startup can
+migrate the database, so rolling back the image alone is not sufficient
+to roll back the database.

@@ -54,7 +54,7 @@ FROM ubuntu:22.04
 
 ARG TARGETARCH
 ENV \
-  GRAFANA_VERSION=10.4.18+security~01 \
+  GRAFANA_VERSION=12.4.13 \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
@@ -65,7 +65,7 @@ RUN \
   apt-get update && \
   apt-get -y --force-yes --no-install-recommends install libfontconfig wget ca-certificates adduser libfontconfig1 musl curl jq && \
   wget -O /tmp/grafana.deb https://dl.grafana.com/oss/release/grafana_${GRAFANA_VERSION}_${TARGETARCH}.deb && \
-  dpkg -i /tmp/grafana.deb && \
+  apt-get -y --no-install-recommends install /tmp/grafana.deb && \
   rm -f /tmp/grafana.deb && \
   ### branding && \
   apt-get autoremove -y --force-yes && \
