@@ -218,8 +218,19 @@ Keep the old application credential or SN+I trust until all callers have migrate
 and the rollback window has closed. Remove only the retired trust afterward;
 adding an MI trust alone does not remove unsafe credentials from the application.
 Existing user data does not need to be cleared for this credential migration.
+Do not run the data cleanup or full-cluster restart below when only changing the
+credential of an existing AAD deployment. Push the service configuration and
+reapply REST Server and Alert Manager instead.
 
-### Clean Previous Data
+Before production rollout, validate with real administrator and nonadministrator
+accounts on the test cluster. Confirm that both can sign in, receive an OpenPAI
+JWT, and use it to list jobs, submit a small job, read its logs, and stop it.
+Confirm that a nonadministrator cannot stop another user's job or perform
+administrator-only operations. Complete this acceptance for each migrated
+cluster; mocked authentication tests do not establish real group membership,
+job permissions, scheduling, or log access.
+
+### Clean Previous Data (Initial Basic-to-AAD Migration Only)
 
 Please clean all users' data. Because in this mode, the user's permission will be managed by the Azure active directory. The local data is useless.
 
@@ -227,7 +238,7 @@ Please clean all users' data. Because in this mode, the user's permission will b
 ./paictl.py service delete -n rest-server
 ```
 
-### Restart All OpenPAI Services
+### Restart All OpenPAI Services (Initial AAD Setup Only)
 
 After all the steps above, push the configuration and restart all OpenPAI services:
 
