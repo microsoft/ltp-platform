@@ -25,6 +25,38 @@ You need to create all required resources in your cloud provider.
     az deployment group create --resource-group <rg_name> --template-file contrib/aks/aks.bicep --parameters @contrib/aks/aks.bicepparam
     ```
 
+    For native MI+FIC login, use the following command instead. It deploys the
+    Bicep parameter file and assigns an **existing shared UAMI** only to VMSSes
+    belonging to User node pools labeled `pai-master=true`, preserving existing
+    identities. It rejects pools also labeled `pai-worker=true`.
+    Run with Python 3 and an authenticated Azure CLI that supports Bicep parameter
+    files. Select the target subscription with `az account set` first.
+
+    ```bash
+    python3 contrib/aks/scripts/ensure-service-identity.py \
+      --resource-group <rg_name> \
+      --identity-resource-id <existing_uami_resource_id> \
+      --deploy-parameters contrib/aks/aks.bicepparam
+    ```
+
+    The operator needs deployment permissions, VMSS identity write access in the
+    AKS node resource group, and permission to assign the shared UAMI (for example,
+    Managed Identity Operator on that identity). The script does not create the MI,
+    grant RBAC roles, or configure the application's FIC. Configure MI+FIC login as
+    described in [the authentication guide](../../../manual/cluster-admin/how-to-manage-users-and-groups.md#aks-managed-identity-authentication).
+    Do not assign the login identity to the external training worker VMSS.
+
+    For an existing cluster, omit `--deploy-parameters`. After every service pool
+    replacement or upgrade, run the same command with `--check-only` to detect a
+    missing binding; omit `--check-only` to restore it. This is an operator-run
+    lifecycle step, not an automatic upgrade hook. The template enables automatic
+    patch upgrades, so creation-time automation alone does not guarantee persistence
+    or availability. Direct AKS VMSS changes retain their AKS support limitations;
+    confirm support and an upgrade validation process before production rollout.
+    The check verifies the VMSS model, not per-instance IMDS availability.
+    Validate native MI token acquisition and login on every REST Server node;
+    the script never reimages or restarts nodes.
+
     * To avoid SFI items, you may need to set a NSG to the storage account. You can do this manually in the portal.
 
 2. Configure required parameters in `contrib/aks/vmss.bicepparam` file, and deploy a vmss and related resources by using `contrib/aks/vmss.bicep`.
