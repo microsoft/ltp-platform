@@ -76,7 +76,26 @@ class Authentication:
                 return False, "tenantID is missing. If you wanna configure AAD-OIDC, you should configure service-configuration.yaml->authentication->AAD->tenantID"
             if "clientID" not in self.service_configuration["AAD"]:
                 return False, "clientID is missing. If you wanna configure AAD-OIDC, you should configure service-configuration.yaml->authentication->AAD->clientID"
-            if "clientSecret" not in self.service_configuration["AAD"] and "certificate" not in self.service_configuration["AAD"]:
+            aad = self.service_configuration["AAD"]
+            credential_type = aad.get("credentialType")
+            if credential_type not in (None, "clientSecret", "certificate", "managedIdentity"):
+                return False, "Unsupported authentication->AAD->credentialType"
+            if credential_type == "managedIdentity":
+                guid_pattern = r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}"
+                for field in ("tenantID", "clientID"):
+                    if not isinstance(aad[field], str) or re.fullmatch(guid_pattern, aad[field]) is None:
+                        return False, "Managed identity authentication requires a valid authentication->AAD->" + field
+                identity = aad.get("managedIdentity")
+                if not isinstance(identity, dict) or not isinstance(identity.get("clientID"), str) \
+                        or re.fullmatch(guid_pattern, identity["clientID"]) is None:
+                    return False, "A managed identity client ID is required in authentication->AAD->managedIdentity->clientID"
+                if "clientSecret" in aad or "certificate" in aad:
+                    return False, "Managed identity authentication cannot be combined with clientSecret or certificate"
+            elif credential_type == "clientSecret" and not aad.get("clientSecret"):
+                return False, "clientSecret is required for authentication->AAD->credentialType: clientSecret"
+            elif credential_type == "certificate" and not aad.get("certificate"):
+                return False, "certificate is required for authentication->AAD->credentialType: certificate"
+            elif credential_type is None and "clientSecret" not in aad and "certificate" not in aad:
                 return False, "ClientSecret or Certificate is missing. If you wanna configure AAD-OIDC, you should configure service-configuration.yaml->authentication->AAD->ClientSecret/Certificate"
         return True, None
 
@@ -96,6 +115,10 @@ class Authentication:
     def validation_post(self, cluster_object_model):
         if self.service_configuration["OIDC"] is False:
             return True, None
+        if self.service_configuration.get("AAD", {}).get("credentialType") == "managedIdentity":
+            common = cluster_object_model["cluster"]["common"]
+            if common["cluster-type"] != "k8s" or common["k8s-rbac"] != "true":
+                return False, "Managed identity authentication requires a Kubernetes cluster with k8s-rbac enabled"
         if "uri" not in cluster_object_model["pylon"]:
             return False, "property named uri is missed in pylon configuration. Please check it."
         return True, None

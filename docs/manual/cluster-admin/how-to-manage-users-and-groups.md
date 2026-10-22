@@ -151,6 +151,65 @@ authentication:
       externalName: "team_alias_d"
 ```
 
+### AKS managed identity authentication
+
+For AKS, the REST Server can authenticate the existing Entra application using a
+user-assigned managed identity instead of a client secret or certificate. User
+sign-in, application permissions, and redirect URIs remain unchanged.
+
+Enable the AKS OIDC issuer and Workload Identity. Enabling the OIDC issuer on an
+existing cluster restarts the API server and cannot be undone; schedule this
+cluster change separately.
+
+Configure two federated identity credentials:
+
+| Credential location | Issuer | Subject | Audience |
+| --- | --- | --- | --- |
+| Managed identity | The exact AKS OIDC issuer URL | `system:serviceaccount:default:rest-server-account` | `api://AzureADTokenExchange` |
+| Entra application | `https://login.microsoftonline.com/<tenant-id>/v2.0` | Managed identity **principal/object ID**, not client ID | `api://AzureADTokenExchange` |
+
+The application and managed identity must be in the same tenant. If several
+clusters share a managed identity, add one AKS trust per cluster on that identity;
+the application needs only one trust for the identity. All these clusters can
+authenticate as the same application, so restrict each trust to the intended
+ServiceAccount. No Azure RBAC role assignment to the identity is needed solely
+for this authentication flow.
+
+In `services-configuration.yaml`, replace `clientSecret` or `certificate` with:
+
+```yaml
+authentication:
+  OIDC: true
+  OIDC-type: AAD
+  AAD:
+    wellKnownURL: https://login.microsoftonline.com/<tenant-id>/v2.0/.well-known/openid-configuration
+    tenantID: <tenant-id>
+    clientID: <existing-application-client-id>
+    credentialType: managedIdentity
+    managedIdentity:
+      clientID: <user-assigned-managed-identity-client-id>
+    # Preserve the remaining OIDC and group-manager settings.
+```
+
+This mode requires `cluster.common.k8s-rbac: "true"`. The deployment annotates
+`default/rest-server-account` with the managed identity client ID and tenant, and
+labels the REST Server pods for the Workload Identity webhook. The webhook
+projects the ServiceAccount token and sets `AZURE_FEDERATED_TOKEN_FILE`.
+
+The REST Server uses `WorkloadIdentityCredential` to obtain a token for
+`api://AzureADTokenExchange/.default`, then uses it as the application credential
+when exchanging the user's authorization code. It does not use node identity,
+developer credentials, or a secret/certificate fallback. MI mode does not
+distribute certificate files, and the certificate checker continues checking
+the portal's HTTPS certificate without mounting an OIDC certificate.
+
+Configurations without `credentialType` retain the existing secret/certificate
+behavior. Explicit `clientSecret` and `certificate` types are also supported.
+Keep the old application credential or SN+I trust until all callers have migrated
+and the rollback window has closed. Remove only the retired trust afterward;
+adding an MI trust alone does not remove unsafe credentials from the application.
+Existing user data does not need to be cleared for this credential migration.
+
 ### Clean Previous Data
 
 Please clean all users' data. Because in this mode, the user's permission will be managed by the Azure active directory. The local data is useless.

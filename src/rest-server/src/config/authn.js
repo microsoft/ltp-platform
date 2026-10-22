@@ -36,15 +36,6 @@ if (authnConfig.authnMethod === 'OIDC') {
         response.data.authorization_endpoint;
       authnConfig.OIDCConfig.token_endpoint = response.data.token_endpoint;
       authnConfig.OIDCConfig.msgraph_host = response.data.msgraph_host;
-      authnConfig.OIDCConfig.privateKey = fs.readFileSync(
-        '/auth-configuration/private.pem',
-        'utf8',
-      );
-      authnConfig.OIDCConfig.publicKey = fs
-        .readFileSync('/auth-configuration/public.crt', 'utf8')
-        .replace(/-----BEGIN CERTIFICATE-----/g, '')
-        .replace(/-----END CERTIFICATE-----/g, '')
-        .replace(/\n/g, '');
     } catch (error) {
       logger.error('Failed to init OIDC endpoint and graph resource.');
       // eslint-disable-next-line no-console
@@ -56,9 +47,52 @@ if (authnConfig.authnMethod === 'OIDC') {
   if (process.env.OIDC_CONFIG_PATH) {
     odicConfigPath = process.env.OIDC_CONFIG_PATH;
   }
-  authnConfig.OIDCConfig = yaml.load(
-    fs.readFileSync(odicConfigPath, 'utf8'),
-  );
+  authnConfig.OIDCConfig = yaml.load(fs.readFileSync(odicConfigPath, 'utf8'));
+  const oidc = authnConfig.OIDCConfig;
+  if (oidc.credentialType === undefined) {
+    oidc.credentialType =
+      'clientSecret' in oidc ? 'clientSecret' : 'certificate';
+  }
+  if (
+    !['clientSecret', 'certificate', 'managedIdentity'].includes(
+      oidc.credentialType,
+    )
+  ) {
+    throw new Error('Unsupported OIDC credential type.');
+  }
+  if (oidc.credentialType === 'managedIdentity') {
+    const { error } = Joi.object({
+      tenantID: Joi.string().guid().required(),
+      clientID: Joi.string().guid().required(),
+      managedIdentity: Joi.object({
+        clientID: Joi.string().guid().required(),
+      }).required(),
+      clientSecret: Joi.forbidden(),
+      thumbprint: Joi.forbidden(),
+    })
+      .unknown(true)
+      .validate(oidc);
+    if (error) {
+      throw new Error(
+        `Invalid managed identity configuration: ${error.message}`,
+      );
+    }
+    if (!process.env.AZURE_FEDERATED_TOKEN_FILE) {
+      throw new Error(
+        'Managed identity authentication requires AZURE_FEDERATED_TOKEN_FILE.',
+      );
+    }
+  } else if (oidc.credentialType === 'certificate') {
+    oidc.privateKey = fs.readFileSync(
+      '/auth-configuration/private.pem',
+      'utf8',
+    );
+    oidc.publicKey = fs
+      .readFileSync('/auth-configuration/public.crt', 'utf8')
+      .replace(/-----BEGIN CERTIFICATE-----/g, '')
+      .replace(/-----END CERTIFICATE-----/g, '')
+      .replace(/\n/g, '');
+  }
   (async function () {
     await initOIDCEndpointAndGroupUrl();
   })();
@@ -69,9 +103,7 @@ try {
   if (process.env.GROUP_CONFIG_PATH) {
     groupConfigPath = process.env.GROUP_CONFIG_PATH;
   }
-  authnConfig.groupConfig = yaml.load(
-    fs.readFileSync(groupConfigPath, 'utf8'),
-  );
+  authnConfig.groupConfig = yaml.load(fs.readFileSync(groupConfigPath, 'utf8'));
 } catch (error) {
   logger.error('Failed to load group config from configmap file.');
   throw error;

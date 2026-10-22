@@ -212,6 +212,11 @@ rest-server:
 #  # If app key contains '\', replace it with '\\'.
 #  clientSecret: '${your_client_secret}'
 #
+#  # For AKS Workload Identity, omit clientSecret/certificate and use:
+#  # credentialType: managedIdentity
+#  # managedIdentity:
+#  #   clientID: ${managed_identity_client_id}
+#
 #  # Optional. The lifetime of nonce in session or cookie, the default value is 3600 (seconds).
 #  nonceLifetime: null
 #
