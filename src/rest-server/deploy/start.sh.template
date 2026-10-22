@@ -33,9 +33,8 @@ python3 user_v2_migrate.py  -a {{ cluster_cfg['authentication']['group-manager']
 {% if cluster_cfg['cluster']['common']['k8s-rbac'] == 'true' %}
 kubectl apply --overwrite=true -f rbac.yaml || exit $?
 {% if cluster_cfg['authentication']['OIDC'] and cluster_cfg['authentication'].get('AAD', {}).get('credentialType') == 'managedIdentity' %}
-kubectl annotate serviceaccount rest-server-account --namespace default --overwrite \
-  azure.workload.identity/client-id="{{ cluster_cfg['authentication']['AAD']['managedIdentity']['clientID'] }}" \
-  azure.workload.identity/tenant-id="{{ cluster_cfg['authentication']['AAD']['tenantID'] }}" || exit $?
+kubectl annotate serviceaccount rest-server-account --namespace default \
+  azure.workload.identity/client-id- azure.workload.identity/tenant-id- || exit $?
 {% endif %}
 {% endif %}
 

@@ -65,39 +65,35 @@ describe('OIDC client credentials', () => {
     const exchanges = [];
     const credentials = [];
     const scopes = [];
-    const controller = loadModule(
-      'src/controllers/v2/azureAD.js',
-      {
-        '@pai/config/authn': {
-          OIDCConfig: oidc,
-          groupConfig: { groupDataSource: 'ms-graph' },
-        },
-        '@azure/identity': {
-          WorkloadIdentityCredential: class {
-            constructor(options) {
-              credentials.push(options);
-            }
-            async getToken(scope) {
-              scopes.push(scope);
-              return getToken();
-            }
-          },
-        },
-        axios: {
-          post: async (url, body) => {
-            exchanges.push({ url, body: querystring.parse(body) });
-            return {
-              data: {
-                id_token: jwt.sign({ sub: 'user' }, 'test-key'),
-                access_token: jwt.sign({ oid: 'user' }, 'test-key'),
-                refresh_token: 'opaque-refresh-token',
-              },
-            };
-          },
+    const controller = loadModule('src/controllers/v2/azureAD.js', {
+      '@pai/config/authn': {
+        OIDCConfig: oidc,
+        groupConfig: { groupDataSource: 'ms-graph' },
+      },
+      '@azure/identity': {
+        ManagedIdentityCredential: class {
+          constructor(options) {
+            credentials.push(options);
+          }
+          async getToken(scope) {
+            scopes.push(scope);
+            return getToken();
+          }
         },
       },
-      { AZURE_FEDERATED_TOKEN_FILE: tokenFilePath },
-    );
+      axios: {
+        post: async (url, body) => {
+          exchanges.push({ url, body: querystring.parse(body) });
+          return {
+            data: {
+              id_token: jwt.sign({ sub: 'user' }, 'test-key'),
+              access_token: jwt.sign({ oid: 'user' }, 'test-key'),
+              refresh_token: 'opaque-refresh-token',
+            },
+          };
+        },
+      },
+    });
     const exchange = async (state = { redirect: completion }) => {
       const req = {
         body: { code: 'test-code', state: JSON.stringify(state) },
@@ -111,7 +107,7 @@ describe('OIDC client credentials', () => {
     return { exchanges, credentials, scopes, exchange };
   };
 
-  it('uses the MI assertion while preserving the app and delegated auth-code request', async () => {
+  it('uses the native MI assertion while preserving the app and delegated auth-code request', async () => {
     const test = setup({
       ...baseConfig(),
       credentialType: 'managedIdentity',
@@ -135,9 +131,7 @@ describe('OIDC client credentials', () => {
       'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
     );
     assert.strictEqual(body.client_secret, undefined);
-    assert.strictEqual(test.credentials[0].tenantId, tenantID);
-    assert.strictEqual(test.credentials[0].clientId, miClientID);
-    assert.strictEqual(test.credentials[0].tokenFilePath, tokenFilePath);
+    assert.deepStrictEqual(test.credentials[0], { clientId: miClientID });
     assert.deepStrictEqual(test.scopes, [
       'api://AzureADTokenExchange/.default',
     ]);
@@ -193,11 +187,11 @@ describe('OIDC client credentials', () => {
         clientSecret: 'must-not-be-used',
       },
       async () => {
-        throw new Error('Federation failed');
+        throw new Error('IMDS unavailable');
       },
     );
     const { failure } = await test.exchange();
-    assert.strictEqual(failure.message, 'Federation failed');
+    assert.strictEqual(failure.message, 'IMDS unavailable');
     assert.strictEqual(test.exchanges.length, 0);
   });
 
@@ -303,15 +297,12 @@ describe('OIDC credential configuration loading', () => {
     return { config, reads };
   };
 
-  it('loads MI configuration without reading a certificate or private key', () => {
-    const { config, reads } = loadConfig(
-      {
-        ...baseConfig(),
-        credentialType: 'managedIdentity',
-        managedIdentity: { clientID: miClientID },
-      },
-      { AZURE_FEDERATED_TOKEN_FILE: tokenFilePath },
-    );
+  it('loads native MI configuration without a projected token, certificate, or private key', () => {
+    const { config, reads } = loadConfig({
+      ...baseConfig(),
+      credentialType: 'managedIdentity',
+      managedIdentity: { clientID: miClientID },
+    });
     assert.strictEqual(config.OIDCConfig.managedIdentity.clientID, miClientID);
     assert.strictEqual(reads.length, 2);
     assert.strictEqual(config.OIDCConfig.privateKey, undefined);
@@ -326,15 +317,18 @@ describe('OIDC credential configuration loading', () => {
     assert.strictEqual(reads.length, 2);
   });
 
-  it('rejects MI mode without a projected token file configuration', () => {
+  it('rejects leftover Workload Identity injection instead of silently chaining federation', () => {
     assert.throws(
       () =>
-        loadConfig({
-          ...baseConfig(),
-          credentialType: 'managedIdentity',
-          managedIdentity: { clientID: miClientID },
-        }),
-      /AZURE_FEDERATED_TOKEN_FILE/,
+        loadConfig(
+          {
+            ...baseConfig(),
+            credentialType: 'managedIdentity',
+            managedIdentity: { clientID: miClientID },
+          },
+          { AZURE_FEDERATED_TOKEN_FILE: tokenFilePath },
+        ),
+      /Native managed identity authentication requires redeploying REST Server/,
     );
   });
 

@@ -117,8 +117,8 @@ class Authentication:
             return True, None
         if self.service_configuration.get("AAD", {}).get("credentialType") == "managedIdentity":
             common = cluster_object_model["cluster"]["common"]
-            if common["cluster-type"] != "k8s" or common["k8s-rbac"] != "true":
-                return False, "Managed identity authentication requires a Kubernetes cluster with k8s-rbac enabled"
+            if common["cluster-type"] != "k8s":
+                return False, "Managed identity authentication requires a Kubernetes cluster"
         if "uri" not in cluster_object_model["pylon"]:
             return False, "property named uri is missed in pylon configuration. Please check it."
         return True, None

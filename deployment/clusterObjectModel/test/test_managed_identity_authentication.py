@@ -120,9 +120,13 @@ class TestManagedIdentityAuthentication(unittest.TestCase):
         self.authentication["AAD"]["credentialType"] = "invalid"
         self.assertFalse(self.parser.validation_pre()[0])
 
-    def test_requires_service_account_deployment(self):
+    def test_native_identity_does_not_require_workload_identity_service_account(self):
         self.cluster["cluster"]["common"]["k8s-rbac"] = "false"
-        self.assertFalse(self.parser.validation_post(self.cluster)[0])
+        self.assertEqual(self.parser.validation_post(self.cluster), (True, None))
+        pod = yaml.safe_load(self.render(
+            "rest-server/deploy/rest-server.yaml.template"))["spec"]["template"]
+        self.assertNotIn("serviceAccountName", pod["spec"])
+        self.assertNotIn("azure.workload.identity/use", pod["metadata"]["labels"])
         self.cluster["cluster"]["common"]["k8s-rbac"] = "true"
         self.cluster["cluster"]["common"]["cluster-type"] = "yarn"
         self.assertFalse(self.parser.validation_post(self.cluster)[0])
@@ -136,16 +140,17 @@ class TestManagedIdentityAuthentication(unittest.TestCase):
         self.assertNotIn("clientSecret", config)
         self.assertNotIn("thumbprint", config)
 
-    def test_labels_pods_and_binds_existing_service_account(self):
+    def test_uses_native_identity_and_removes_previous_workload_identity_annotations(self):
         manifest = yaml.safe_load(self.render(
             "rest-server/deploy/rest-server.yaml.template"))
         pod = manifest["spec"]["template"]
-        self.assertEqual(pod["metadata"]["labels"]["azure.workload.identity/use"], "true")
+        self.assertNotIn("azure.workload.identity/use", pod["metadata"]["labels"])
         self.assertEqual(pod["spec"]["serviceAccountName"], "rest-server-account")
         script = self.render("rest-server/deploy/start.sh.template")
         self.assertIn("kubectl annotate serviceaccount rest-server-account --namespace default", script)
-        self.assertIn('azure.workload.identity/client-id="' + MI_CLIENT_ID + '"', script)
-        self.assertIn('azure.workload.identity/tenant-id="' + TENANT_ID + '"', script)
+        self.assertIn("azure.workload.identity/client-id-", script)
+        self.assertIn("azure.workload.identity/tenant-id-", script)
+        self.assertNotIn('azure.workload.identity/client-id="', script)
         self.assertLess(script.index("kubectl annotate serviceaccount"),
                         script.index("-f rest-server.yaml"))
 

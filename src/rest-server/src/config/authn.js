@@ -77,9 +77,10 @@ if (authnConfig.authnMethod === 'OIDC') {
         `Invalid managed identity configuration: ${error.message}`,
       );
     }
-    if (!process.env.AZURE_FEDERATED_TOKEN_FILE) {
+    // ManagedIdentityCredential also selects token exchange when Workload Identity is injected.
+    if (process.env.AZURE_FEDERATED_TOKEN_FILE) {
       throw new Error(
-        'Managed identity authentication requires AZURE_FEDERATED_TOKEN_FILE.',
+        'Native managed identity authentication requires redeploying REST Server without azure.workload.identity/use.',
       );
     }
   } else if (oidc.credentialType === 'certificate') {

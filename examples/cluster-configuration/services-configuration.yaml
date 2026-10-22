@@ -212,7 +212,7 @@ rest-server:
 #  # If app key contains '\', replace it with '\\'.
 #  clientSecret: '${your_client_secret}'
 #
-#  # For AKS Workload Identity, omit clientSecret/certificate and use:
+#  # For a native node-assigned managed identity, omit clientSecret/certificate and use:
 #  # credentialType: managedIdentity
 #  # managedIdentity:
 #  #   clientID: ${managed_identity_client_id}

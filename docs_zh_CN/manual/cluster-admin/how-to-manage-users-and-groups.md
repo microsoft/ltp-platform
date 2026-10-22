@@ -131,19 +131,24 @@ authentication:
 REST Server 支持通过用户分配的托管身份（UAMI）认证现有 Entra 应用，
 替代客户端密钥或证书。用户登录流程、应用权限和回调地址保持不变。
 
-先为 AKS 启用 OIDC issuer 和 Workload Identity。现有集群启用 OIDC issuer
-会重启 API Server，且启用后不能关闭，应单独安排该集群变更。
+先将 MI 分配到承载每个 REST Server 实例的计算资源，使其可以通过原生托管身份端点
+（Azure VM 上为 IMDS）获取令牌。在 AKS 上应使用隔离的服务节点池，不应绑定到运行
+用户训练任务的节点。同节点上其他能访问 IMDS 的工作负载也可能使用该身份。
+生产部署前，需确认身份绑定方式的 AKS 支持边界和节点升级生命周期；
+直接修改 VMSS 不等同于 AKS 管理的工作负载身份绑定。
 
-需要配置两条联合身份凭据（FIC）：
+只需在应用上配置一条联合身份凭据（FIC）：
 
 | 配置位置 | Issuer | Subject | Audience |
 | --- | --- | --- | --- |
-| 托管身份 | AKS 的完整 OIDC issuer URL | `system:serviceaccount:default:rest-server-account` | `api://AzureADTokenExchange` |
 | Entra 应用 | `https://login.microsoftonline.com/<tenant-id>/v2.0` | 托管身份的 **principal/object ID**，不是 client ID | `api://AzureADTokenExchange` |
 
-应用与托管身份必须属于同一个租户。多个集群共用 MI 时，在 MI 上分别添加各集群的
-ServiceAccount 信任；应用上只需添加一条对该 MI 的信任。这些集群都能代表同一应用认证，
-因此必须限制到指定的 ServiceAccount。仅为完成此认证流程，不需要向 MI 分配 Azure RBAC 角色。
+应用与托管身份必须属于同一个租户。多个集群共用 MI 时，将 MI 分配到各集群的服务计算资源，
+应用上只需添加一条对该 MI 的信任。仅为完成此认证流程，不需要向 MI 分配 Azure RBAC 角色。
+
+不要通过 AKS Workload Identity 获取此 MI 令牌：Entra 不允许将通过一条 FIC 获取的令牌
+再作为另一条 FIC 的凭据（`AADSTS700231`）。此模式不依赖 AKS OIDC、投射的
+ServiceAccount token 或 AKS 到 MI 的 FIC。
 
 在 `services-configuration.yaml` 中移除 `clientSecret` 或 `certificate`，改为：
 
@@ -161,14 +166,16 @@ authentication:
     # 其余 OIDC 和 group-manager 配置保持不变。
 ```
 
-该模式要求 `cluster.common.k8s-rbac: "true"`。部署脚本会为
-`default/rest-server-account` 添加 MI client ID 和 tenant 注解，并为 REST Server
-Pod 添加 Workload Identity 标签。Webhook 负责投射 ServiceAccount token 并设置
-`AZURE_FEDERATED_TOKEN_FILE`。
+部署不再为 REST Server Pod 添加 Workload Identity 标签，并会移除
+`rest-server-account` 上之前的 MI client ID 和 tenant 注解。
+重新应用 REST Server 部署以替换仍带有旧 Webhook 注入的 Pod。
+如果仍注入 `AZURE_FEDERATED_TOKEN_FILE`，REST Server 会拒绝启动，
+避免 SDK 在使用 `ManagedIdentityCredential` 时仍自动选择联合认证。
+删除已有 AKS 到 MI 的 FIC 前，需确认没有其他调用方。
 
-REST Server 通过 `WorkloadIdentityCredential` 获取
+REST Server 通过 `ManagedIdentityCredential` 显式选择配置的用户分配托管身份，获取
 `api://AzureADTokenExchange/.default` 的令牌，再将其作为应用凭据交换用户的授权码。
-它不会使用节点身份、开发者凭据，也不会在失败时回退到密钥或证书。
+它使用节点原生托管身份，不使用开发者凭据，也不会在失败时回退到密钥或证书。
 MI 模式不再分发 OIDC 证书；证书检查组件不再挂载 OIDC 证书，但保留网站 HTTPS 证书检查。
 
 未设置 `credentialType` 的配置保持原有密钥/证书行为，也可显式指定 `clientSecret` 或

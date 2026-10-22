@@ -12,9 +12,9 @@ const {
   getLoginRedirect,
   getFromRedirect,
 } = require('@pai/utils/oidcRedirect');
-const { WorkloadIdentityCredential } = require('@azure/identity');
+const { ManagedIdentityCredential } = require('@azure/identity');
 
-let workloadIdentityCredential;
+let managedIdentityCredential;
 
 const requestAuthCode = async (req, res, next) => {
   let state;
@@ -97,14 +97,12 @@ const requestTokenWithCode = async (req, res, next) => {
       grant_type: grantType,
     };
     if (credentialType === 'managedIdentity') {
-      if (!workloadIdentityCredential) {
-        workloadIdentityCredential = new WorkloadIdentityCredential({
-          tenantId: authnConfig.OIDCConfig.tenantID,
+      if (!managedIdentityCredential) {
+        managedIdentityCredential = new ManagedIdentityCredential({
           clientId: authnConfig.OIDCConfig.managedIdentity.clientID,
-          tokenFilePath: process.env.AZURE_FEDERATED_TOKEN_FILE,
         });
       }
-      const token = await workloadIdentityCredential.getToken(
+      const token = await managedIdentityCredential.getToken(
         'api://AzureADTokenExchange/.default',
       );
       if (!token || !token.token) {

@@ -28,9 +28,6 @@ spec:
       name: rest-server
       labels:
         app: rest-server
-{% if cluster_cfg['authentication']['OIDC'] and cluster_cfg['authentication'].get('AAD', {}).get('credentialType') == 'managedIdentity' %}
-        azure.workload.identity/use: "true"
-{% endif %}
     spec:
       hostNetwork: false
       hostPID: false

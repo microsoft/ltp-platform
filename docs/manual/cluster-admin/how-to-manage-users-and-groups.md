@@ -157,23 +157,29 @@ For AKS, the REST Server can authenticate the existing Entra application using a
 user-assigned managed identity instead of a client secret or certificate. User
 sign-in, application permissions, and redirect URIs remain unchanged.
 
-Enable the AKS OIDC issuer and Workload Identity. Enabling the OIDC issuer on an
-existing cluster restarts the API server and cannot be undone; schedule this
-cluster change separately.
+Assign the managed identity to the compute hosting every REST Server replica so
+it is available through the native managed identity endpoint (IMDS on Azure VMs).
+On AKS, use an isolated service node pool, not nodes running user training jobs.
+Other workloads with IMDS access on those nodes can also use the identity.
+Confirm the AKS support and node upgrade lifecycle for the identity assignment
+before production rollout; a direct VMSS change is not an AKS-managed workload
+identity binding.
 
-Configure two federated identity credentials:
+Configure one federated identity credential on the application:
 
 | Credential location | Issuer | Subject | Audience |
 | --- | --- | --- | --- |
-| Managed identity | The exact AKS OIDC issuer URL | `system:serviceaccount:default:rest-server-account` | `api://AzureADTokenExchange` |
 | Entra application | `https://login.microsoftonline.com/<tenant-id>/v2.0` | Managed identity **principal/object ID**, not client ID | `api://AzureADTokenExchange` |
 
 The application and managed identity must be in the same tenant. If several
-clusters share a managed identity, add one AKS trust per cluster on that identity;
-the application needs only one trust for the identity. All these clusters can
-authenticate as the same application, so restrict each trust to the intended
-ServiceAccount. No Azure RBAC role assignment to the identity is needed solely
-for this authentication flow.
+clusters share a managed identity, assign it to the service compute in each
+cluster; the application needs only one trust for the identity. No Azure RBAC
+role assignment to the identity is needed solely for this authentication flow.
+
+Do not acquire the MI token through AKS Workload Identity: Entra rejects using
+a token obtained through one FIC as the credential for another FIC
+(`AADSTS700231`). This mode does not require AKS OIDC, a projected ServiceAccount
+token, or an AKS-to-MI FIC.
 
 In `services-configuration.yaml`, replace `clientSecret` or `certificate` with:
 
@@ -191,15 +197,18 @@ authentication:
     # Preserve the remaining OIDC and group-manager settings.
 ```
 
-This mode requires `cluster.common.k8s-rbac: "true"`. The deployment annotates
-`default/rest-server-account` with the managed identity client ID and tenant, and
-labels the REST Server pods for the Workload Identity webhook. The webhook
-projects the ServiceAccount token and sets `AZURE_FEDERATED_TOKEN_FILE`.
+The deployment does not label REST Server pods for Workload Identity and removes
+the previous MI client ID and tenant annotations from `rest-server-account`.
+Reapply the REST Server deployment to replace pods with old webhook injection.
+REST Server rejects startup if `AZURE_FEDERATED_TOKEN_FILE` is still injected,
+because the SDK would otherwise use federation even with `ManagedIdentityCredential`.
+Do not delete an existing AKS-to-MI FIC until any other consumers are checked.
 
-The REST Server uses `WorkloadIdentityCredential` to obtain a token for
+The REST Server uses `ManagedIdentityCredential`, explicitly selecting the
+configured user-assigned identity, to obtain a token for
 `api://AzureADTokenExchange/.default`, then uses it as the application credential
-when exchanging the user's authorization code. It does not use node identity,
-developer credentials, or a secret/certificate fallback. MI mode does not
+when exchanging the user's authorization code. It uses the native node-assigned
+identity, not developer credentials or a secret/certificate fallback. MI mode does not
 distribute certificate files, and the certificate checker continues checking
 the portal's HTTPS certificate without mounting an OIDC certificate.
 
