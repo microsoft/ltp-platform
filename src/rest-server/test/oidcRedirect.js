@@ -177,11 +177,14 @@ const defineLoginCompatibilityTests = (credentialType) => {
   }
   const savedModules = new Map();
   const tokenCalls = [];
+  const tokenSecrets = new Map();
+  const tokenSecret = 'oidc-jwt-regression-key';
   const warnings = [];
   let originalPortal;
   let server;
   let port;
   let tokenController;
+  let tokenModel;
   let identityFailure;
 
   const replaceModule = (name, exports) => {
@@ -199,7 +202,7 @@ const defineLoginCompatibilityTests = (credentialType) => {
     return require(name);
   };
 
-  const request = (method, path, body) =>
+  const request = (method, path, body, headers = {}) =>
     new Promise((resolve, reject) => {
       const data =
         body === undefined ? undefined : new URLSearchParams(body).toString();
@@ -209,13 +212,15 @@ const defineLoginCompatibilityTests = (credentialType) => {
           port,
           method,
           path,
-          headers:
-            data === undefined
+          headers: {
+            ...headers,
+            ...(data === undefined
               ? {}
               : {
                   'Content-Type': 'application/x-www-form-urlencoded',
                   'Content-Length': Buffer.byteLength(data),
-                },
+                }),
+          },
         },
         (res) => {
           let text = '';
@@ -303,6 +308,8 @@ const defineLoginCompatibilityTests = (credentialType) => {
     replaceModule('@pai/config/authn', authnConfig);
     replaceModule('@pai/config/logger', {
       warn: (error) => warnings.push(error),
+      info: () => {},
+      debug: () => {},
     });
     replaceModule('@pai/models/v2/user', {
       getUser: async (username) => ({
@@ -312,25 +319,35 @@ const defineLoginCompatibilityTests = (credentialType) => {
         extension: { githubPAT: username === 'admin' },
       }),
       checkAdmin: async (username) => username === 'admin',
+      checkVirtualClusterAdmin: async () => [],
     });
     replaceModule('@pai/models/v2/group', {
       getGroupsAdmin: async () => false,
     });
-    replaceModule('@pai/models/token', {
-      create: async (username) => {
-        tokenCalls.push(username);
-        return 'cluster-token-' + username;
+    replaceModule('@pai/models/kubernetes/k8s-secret', {
+      get: async (namespace, username) => tokenSecrets.get(username) || null,
+      create: async (namespace, username, tokens) => {
+        tokenSecrets.set(username, { ...tokens });
       },
+      replace: async (namespace, username, tokens) => {
+        tokenSecrets.set(username, { ...tokens });
+      },
+      deleteAll: async () => tokenSecrets.clear(),
     });
+    replaceModule('@pai/models/kubernetes/kubernetes', {
+      createNamespace: async () => {},
+    });
+    replaceModule('@pai/utils/dbUtils', {});
     replaceModule('@pai/utils/manager/user/user', {
       encrypt: async () => 'hashed-password',
     });
-    replaceModule('@pai/config/token', {});
+    replaceModule('@pai/config/token', {
+      secret: tokenSecret,
+      tokenExpireTime: '1h',
+      userProperty: 'user',
+    });
     replaceModule('@pai/middlewares/parameter', {
       validate: () => (req, res, next) => next(),
-    });
-    replaceModule('@pai/middlewares/token', {
-      checkNotApplication: (req, res, next) => next(),
     });
     replaceModule('@pai/controllers/v2/user', {
       createUserIfUserNotExist: (req, res, next) => {
@@ -347,6 +364,13 @@ const defineLoginCompatibilityTests = (credentialType) => {
       },
       updateUserGroupListFromExternal: (req, res, next) => next(),
     });
+    tokenModel = reloadModule('@pai/models/token');
+    const createToken = tokenModel.create;
+    tokenModel.create = async (...args) => {
+      tokenCalls.push(args[0]);
+      return createToken(...args);
+    };
+    const tokenMiddleware = reloadModule('@pai/middlewares/token');
     reloadModule('@pai/controllers/v2/azureAD');
     tokenController = reloadModule('@pai/controllers/v2/token');
     const router = reloadModule('@pai/routes/authn');
@@ -356,6 +380,15 @@ const defineLoginCompatibilityTests = (credentialType) => {
     app.use(express.urlencoded({ extended: true }));
     app.use('/api/v1/authn', router);
     app.use('/api/v2/authn', router);
+    app.get('/test-authenticated', tokenMiddleware.check, (req, res) => {
+      res.json(req.user);
+    });
+    app.get(
+      '/test-admin',
+      tokenMiddleware.check,
+      tokenMiddleware.checkAdmin,
+      (req, res) => res.json({ admin: req.user.admin }),
+    );
     app.get('/test-error', (req, res, next) => {
       const error = createError(
         'Forbidden',
@@ -381,7 +414,8 @@ const defineLoginCompatibilityTests = (credentialType) => {
     nock.enableNetConnect('127.0.0.1');
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await tokenModel.revokeAll();
     tokenCalls.length = 0;
     warnings.length = 0;
     identityFailure = undefined;
@@ -496,10 +530,13 @@ const defineLoginCompatibilityTests = (credentialType) => {
           completion,
         );
         assert.strictEqual(destination.searchParams.get('user'), username);
-        assert.strictEqual(
-          destination.searchParams.get('token'),
-          'cluster-token-' + username,
-        );
+        const token = destination.searchParams.get('token');
+        const payload = jwt.verify(token, tokenSecret);
+        assert.strictEqual(payload.username, username);
+        assert.strictEqual(payload.application, false);
+        assert.strictEqual(payload.jobSpecific, false);
+        assert.strictEqual(payload.exp - payload.iat, 3600);
+        assert.ok(Object.values(tokenSecrets.get(username)).includes(token));
         assert.strictEqual(
           destination.searchParams.get('admin'),
           String(username === 'admin'),
@@ -511,6 +548,24 @@ const defineLoginCompatibilityTests = (credentialType) => {
         assert.strictEqual(destination.searchParams.get('from'), jobPage);
         assert.deepStrictEqual(tokenCalls, [username]);
         assert.ok(exchange.isDone());
+        const authenticated = await request(
+          'GET',
+          '/test-authenticated',
+          undefined,
+          { Authorization: `Bearer ${token}` },
+        );
+        assert.strictEqual(authenticated.status, 200);
+        assert.strictEqual(authenticated.body.username, username);
+        assert.strictEqual(authenticated.body.admin, username === 'admin');
+        const admin = await request('GET', '/test-admin', undefined, {
+          Authorization: `Bearer ${token}`,
+        });
+        assert.strictEqual(admin.status, username === 'admin' ? 200 : 403);
+        await tokenModel.revoke(token);
+        const revoked = await request('GET', '/test-authenticated', undefined, {
+          Authorization: `Bearer ${token}`,
+        });
+        assert.strictEqual(revoked.status, 401);
       });
     }
 
@@ -692,13 +747,48 @@ const defineLoginCompatibilityTests = (credentialType) => {
       password: 'password',
     });
     assert.strictEqual(response.status, 200);
-    assert.deepStrictEqual(response.body, {
+    const { token, ...fields } = response.body;
+    assert.deepStrictEqual(fields, {
       user: 'alice',
-      token: 'cluster-token-alice',
       admin: false,
       hasGitHubPAT: false,
     });
+    assert.strictEqual(jwt.verify(token, tokenSecret).username, 'alice');
+    const authenticated = await request(
+      'GET',
+      '/test-authenticated',
+      undefined,
+      { Authorization: `Bearer ${token}` },
+    );
+    assert.strictEqual(authenticated.status, 200);
+    assert.strictEqual(authenticated.body.username, 'alice');
     assert.strictEqual(response.location, undefined);
+  });
+
+  for (const [label, token] of [
+    ['MI assertion', 'native-mi-assertion'],
+    ['incorrect signature', jwt.sign({ username: 'alice' }, 'wrong-key')],
+    [
+      'expired token',
+      jwt.sign({ username: 'alice' }, tokenSecret, { expiresIn: -1 }),
+    ],
+    [
+      'unregistered token',
+      jwt.sign({ username: 'alice' }, tokenSecret, { expiresIn: '1h' }),
+    ],
+  ]) {
+    it(`rejects a ${label} as an OpenPAI Bearer credential`, async () => {
+      const response = await request('GET', '/test-authenticated', undefined, {
+        Authorization: `Bearer ${token}`,
+      });
+      assert.strictEqual(response.status, 401);
+      assert.strictEqual(response.body.code, 'UnauthorizedUserError');
+    });
+  }
+
+  it('rejects authenticated routes without a Bearer credential', async () => {
+    const response = await request('GET', '/test-authenticated');
+    assert.strictEqual(response.status, 401);
   });
 };
 
