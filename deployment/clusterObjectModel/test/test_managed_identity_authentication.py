@@ -127,6 +127,8 @@ class TestManagedIdentityAuthentication(unittest.TestCase):
             "rest-server/deploy/rest-server.yaml.template"))["spec"]["template"]
         self.assertNotIn("serviceAccountName", pod["spec"])
         self.assertNotIn("azure.workload.identity/use", pod["metadata"]["labels"])
+        self.assertNotIn("kubectl annotate serviceaccount",
+                         self.render("rest-server/deploy/start.sh.template"))
         self.cluster["cluster"]["common"]["k8s-rbac"] = "true"
         self.cluster["cluster"]["common"]["cluster-type"] = "yarn"
         self.assertFalse(self.parser.validation_post(self.cluster)[0])
@@ -159,6 +161,41 @@ class TestManagedIdentityAuthentication(unittest.TestCase):
         self.assertIn("configmap auth-configuration", script)
         self.assertNotIn("private.pem", script)
         self.assertNotIn("public.crt", script)
+
+    def test_preserves_oidc_endpoints_and_nonce_configuration_for_every_credential(self):
+        original = copy.deepcopy(self.authentication)
+        for credential_type in ("managedIdentity", "clientSecret", "certificate"):
+            with self.subTest(credential_type=credential_type):
+                self.authentication.clear()
+                self.authentication.update(copy.deepcopy(original))
+                if credential_type != "managedIdentity":
+                    self.use_legacy_credential(credential_type, explicit=True)
+                self.authentication["AAD"].update({
+                    "nonceLifetime": 600,
+                    "nonceMaxAmount": 20,
+                    "clockSkew": 30,
+                })
+                oidc = yaml.safe_load(self.render(
+                    "rest-server/deploy/auth-configmap/oidc.yaml.template"))
+                self.assertEqual(oidc["clientID"], APP_CLIENT_ID)
+                self.assertEqual(oidc["tenantID"], TENANT_ID)
+                self.assertEqual(oidc["wellKnownURL"],
+                                 "https://idp.example/.well-known/openid-configuration")
+                self.assertEqual(oidc["redirectUrl"],
+                                 "https://portal.example/rest-server/api/v1/authn/oidc/return")
+                self.assertEqual(oidc["destroySessionUrl"],
+                                 "https://login.microsoftonline.com/common/oauth2/logout?"
+                                 "post_logout_redirect_uri=http://portal.example")
+                self.assertEqual(oidc["nonceLifetime"], 600)
+                self.assertEqual(oidc["nonceMaxAmount"], 20)
+                self.assertEqual(oidc["clockSkew"], 30)
+
+    def test_rejects_explicit_legacy_modes_without_their_selected_credential(self):
+        self.authentication["AAD"].pop("managedIdentity")
+        for credential_type in ("clientSecret", "certificate"):
+            with self.subTest(credential_type=credential_type):
+                self.authentication["AAD"]["credentialType"] = credential_type
+                self.assertFalse(self.parser.validation_pre()[0])
 
     def test_managed_identity_keeps_https_checker_without_oidc_certificate_mount(self):
         manifest = yaml.safe_load(self.render(
@@ -196,6 +233,11 @@ class TestManagedIdentityAuthentication(unittest.TestCase):
                         self.assertIn("thumbprint", oidc)
                         self.assertIn("--from-file=\"private.pem\"", configmap_script)
                         self.assertIn("OIDC_CERT_FILE_PATH", checker)
+                        checker_pod = yaml.safe_load(checker)["spec"]["jobTemplate"]["spec"]["template"]["spec"]
+                        self.assertEqual(checker_pod["volumes"][0]["configMap"]["name"],
+                                         "oidc-cert")
+                        self.assertEqual(checker_pod["containers"][0]["volumeMounts"][0]["mountPath"],
+                                         "/oidc-cert")
                     else:
                         self.assertEqual(oidc["clientSecret"], "test-secret")
                         self.assertNotIn("private.pem", configmap_script)
@@ -212,6 +254,16 @@ class TestManagedIdentityAuthentication(unittest.TestCase):
         self.assertNotIn("azure.workload.identity/use", pod["metadata"]["labels"])
         self.assertNotIn("configmap auth-configuration",
                          self.render("rest-server/deploy/configmap-create.sh.template"))
+        checker = yaml.safe_load(self.render(
+            "alert-manager/deploy/alert-manager-cert-expiration-check-cronjob.yaml.template"))
+        checker_pod = checker["spec"]["jobTemplate"]["spec"]["template"]["spec"]
+        checker_env = {entry["name"]: entry["value"]
+                       for entry in checker_pod["containers"][0]["env"]}
+        self.assertEqual(checker_env["PAI_URI"], "https://portal.example")
+        self.assertNotIn("OIDC_CERT_FILE_PATH", checker_env)
+        self.assertNotIn("volumes", checker_pod)
+        self.assertNotIn("configmap oidc-cert",
+                         self.render("alert-manager/deploy/start.sh.template"))
 
 
 if __name__ == "__main__":

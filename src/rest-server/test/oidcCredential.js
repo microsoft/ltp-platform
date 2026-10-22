@@ -61,14 +61,18 @@ describe('OIDC client credentials', () => {
     }
   });
 
-  const setup = (oidc, getToken = async () => ({ token: 'mi-assertion' })) => {
+  const setup = (
+    oidc,
+    getToken = async () => ({ token: 'mi-assertion' }),
+    groupDataSource = 'ms-graph',
+  ) => {
     const exchanges = [];
     const credentials = [];
     const scopes = [];
     const controller = loadModule('src/controllers/v2/azureAD.js', {
       '@pai/config/authn': {
         OIDCConfig: oidc,
-        groupConfig: { groupDataSource: 'ms-graph' },
+        groupConfig: { groupDataSource },
       },
       '@azure/identity': {
         ManagedIdentityCredential: class {
@@ -104,8 +108,62 @@ describe('OIDC client credentials', () => {
       });
       return { req, failure };
     };
-    return { exchanges, credentials, scopes, exchange };
+    return { controller, exchanges, credentials, scopes, exchange };
   };
+
+  for (const groupDataSource of ['basic', 'ms-graph']) {
+    it(`preserves authorization and token scopes for ${groupDataSource} groups`, async () => {
+      const test = setup(
+        {
+          ...baseConfig(),
+          authorization_endpoint: 'https://idp.example/authorize',
+          credentialType: 'managedIdentity',
+          managedIdentity: { clientID: miClientID },
+        },
+        undefined,
+        groupDataSource,
+      );
+      let authorization;
+      await test.controller.requestAuthCode(
+        { query: {} },
+        { redirect: (url) => (authorization = new URL(url)) },
+        (error) => assert.fail(error),
+      );
+      const scope =
+        'https://graph.example/user.read' +
+        (groupDataSource === 'ms-graph'
+          ? ' https://graph.example/directory.read.all'
+          : '');
+      assert.strictEqual(
+        authorization.searchParams.get('scope'),
+        'openid offline_access ' + scope,
+      );
+      const { failure } = await test.exchange();
+      assert.strictEqual(failure, undefined);
+      assert.strictEqual(test.exchanges[0].body.scope, scope);
+    });
+  }
+
+  for (const claim of ['upn', 'email', 'unique_name']) {
+    it(`preserves username and object ID extraction from the ${claim} claim`, async () => {
+      const test = setup(baseConfig());
+      const req = {
+        accessToken: { [claim]: 'alice@example.com', oid: 'user-object-id' },
+      };
+      let failure;
+      await test.controller.parseTokenData(req, {}, (error) => {
+        failure = error;
+      });
+      assert.strictEqual(failure, undefined);
+      assert.strictEqual(req.username, 'alice');
+      assert.deepStrictEqual(req.userData, {
+        email: 'alice@example.com',
+        username: 'alice',
+        oid: 'user-object-id',
+      });
+      assert.strictEqual(test.credentials.length, 0);
+    });
+  }
 
   it('uses the native MI assertion while preserving the app and delegated auth-code request', async () => {
     const test = setup({
@@ -264,7 +322,7 @@ describe('OIDC client credentials', () => {
 });
 
 describe('OIDC credential configuration loading', () => {
-  const loadConfig = (oidc, env = {}) => {
+  const loadConfig = (oidc, env = {}, files = {}) => {
     const reads = [];
     const config = loadModule(
       'src/config/authn.js',
@@ -277,6 +335,9 @@ describe('OIDC credential configuration loading', () => {
             }
             if (filename === '/group-configuration/group.yaml') {
               return yaml.dump({ groupDataSource: 'basic' });
+            }
+            if (Object.hasOwn(files, filename)) {
+              return files[filename];
             }
             throw new Error(`Unexpected certificate read: ${filename}`);
           },
@@ -315,6 +376,50 @@ describe('OIDC credential configuration loading', () => {
     });
     assert.strictEqual(config.OIDCConfig.credentialType, 'clientSecret');
     assert.strictEqual(reads.length, 2);
+  });
+
+  for (const credentialType of [undefined, 'certificate']) {
+    it(`preserves certificate loading and normalization (${credentialType || 'legacy'})`, async () => {
+      const { config, reads } = loadConfig(
+        { ...baseConfig(), credentialType, thumbprint: '0123456789abcdef' },
+        {},
+        {
+          '/auth-configuration/private.pem': 'private-key',
+          '/auth-configuration/public.crt':
+            '-----BEGIN CERTIFICATE-----\ncertificate-data\n-----END CERTIFICATE-----\n',
+        },
+      );
+      await new Promise((resolve) => setImmediate(resolve));
+      assert.strictEqual(config.OIDCConfig.credentialType, 'certificate');
+      assert.strictEqual(config.OIDCConfig.privateKey, 'private-key');
+      assert.strictEqual(config.OIDCConfig.publicKey, 'certificate-data');
+      assert.strictEqual(reads.length, 4);
+      assert.strictEqual(
+        config.OIDCConfig.authorization_endpoint,
+        'https://idp.example/authorize',
+      );
+      assert.strictEqual(
+        config.OIDCConfig.token_endpoint,
+        'https://idp.example/token',
+      );
+    });
+  }
+
+  it('fails explicitly when the configured legacy certificate files are missing', () => {
+    assert.throws(
+      () => loadConfig({ ...baseConfig(), credentialType: 'certificate' }),
+      /Unexpected certificate read/,
+    );
+  });
+
+  it('leaves Basic authentication independent of OIDC credentials and injection', () => {
+    const { config, reads } = loadConfig(undefined, {
+      AUTHN_METHOD: 'basic',
+      AZURE_FEDERATED_TOKEN_FILE: tokenFilePath,
+    });
+    assert.strictEqual(config.authnMethod, 'basic');
+    assert.strictEqual(config.OIDCConfig, undefined);
+    assert.deepStrictEqual(reads, ['/group-configuration/group.yaml']);
   });
 
   it('rejects leftover Workload Identity injection instead of silently chaining federation', () => {
