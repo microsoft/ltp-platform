@@ -45,6 +45,42 @@ const baseConfig = () => ({
   msgraph_host: 'graph.example',
 });
 
+const loadConfig = (oidc, env = {}, files = {}) => {
+  const reads = [];
+  const config = loadModule(
+    'src/config/authn.js',
+    {
+      fs: {
+        readFileSync: (filename) => {
+          reads.push(filename);
+          if (filename === '/auth-configuration/oidc.yaml') {
+            return yaml.dump(oidc);
+          }
+          if (filename === '/group-configuration/group.yaml') {
+            return yaml.dump({ groupDataSource: 'basic' });
+          }
+          if (Object.hasOwn(files, filename)) {
+            return files[filename];
+          }
+          throw new Error(`Unexpected certificate read: ${filename}`);
+        },
+      },
+      '@pai/config/logger': { error: () => {} },
+      axios: {
+        get: async () => ({
+          data: {
+            authorization_endpoint: 'https://idp.example/authorize',
+            token_endpoint: 'https://idp.example/token',
+            msgraph_host: 'graph.example',
+          },
+        }),
+      },
+    },
+    { AUTHN_METHOD: 'OIDC', ...env },
+  );
+  return { config, reads };
+};
+
 describe('OIDC client credentials', () => {
   let originalPortal;
 
@@ -269,11 +305,12 @@ describe('OIDC client credentials', () => {
 
   for (const credentialType of [undefined, 'clientSecret']) {
     it(`preserves client-secret authentication (${credentialType || 'legacy'})`, async () => {
-      const test = setup({
+      const { config } = loadConfig({
         ...baseConfig(),
         credentialType,
         clientSecret: 'test-secret',
       });
+      const test = setup(config.OIDCConfig);
       const { failure } = await test.exchange();
       assert.strictEqual(failure, undefined);
       assert.strictEqual(test.exchanges[0].body.client_secret, 'test-secret');
@@ -285,12 +322,21 @@ describe('OIDC client credentials', () => {
   for (const credentialType of [undefined, 'certificate']) {
     it(`preserves certificate authentication (${credentialType || 'legacy'})`, async () => {
       const keys = generateKeyPairSync('rsa', { modulusLength: 2048 });
+      const { config } = loadConfig(
+        {
+          ...baseConfig(),
+          credentialType,
+          thumbprint: '0123456789abcdef',
+        },
+        {},
+        {
+          '/auth-configuration/private.pem': 'private-key',
+          '/auth-configuration/public.crt': 'test-certificate',
+        },
+      );
       const test = setup({
-        ...baseConfig(),
-        credentialType,
+        ...config.OIDCConfig,
         privateKey: keys.privateKey,
-        publicKey: 'test-certificate',
-        thumbprint: '0123456789abcdef',
       });
       const { failure } = await test.exchange();
       assert.strictEqual(failure, undefined);
@@ -322,42 +368,6 @@ describe('OIDC client credentials', () => {
 });
 
 describe('OIDC credential configuration loading', () => {
-  const loadConfig = (oidc, env = {}, files = {}) => {
-    const reads = [];
-    const config = loadModule(
-      'src/config/authn.js',
-      {
-        fs: {
-          readFileSync: (filename) => {
-            reads.push(filename);
-            if (filename === '/auth-configuration/oidc.yaml') {
-              return yaml.dump(oidc);
-            }
-            if (filename === '/group-configuration/group.yaml') {
-              return yaml.dump({ groupDataSource: 'basic' });
-            }
-            if (Object.hasOwn(files, filename)) {
-              return files[filename];
-            }
-            throw new Error(`Unexpected certificate read: ${filename}`);
-          },
-        },
-        '@pai/config/logger': { error: () => {} },
-        axios: {
-          get: async () => ({
-            data: {
-              authorization_endpoint: 'https://idp.example/authorize',
-              token_endpoint: 'https://idp.example/token',
-              msgraph_host: 'graph.example',
-            },
-          }),
-        },
-      },
-      { AUTHN_METHOD: 'OIDC', ...env },
-    );
-    return { config, reads };
-  };
-
   it('loads native MI configuration without a projected token, certificate, or private key', () => {
     const { config, reads } = loadConfig({
       ...baseConfig(),

@@ -84,11 +84,7 @@ const requestTokenWithCode = async (req, res, next) => {
     const redirectUri = authnConfig.OIDCConfig.redirectUrl;
     const grantType = 'authorization_code';
     const requestUrl = authnConfig.OIDCConfig.token_endpoint;
-    const credentialType =
-      authnConfig.OIDCConfig.credentialType ||
-      ('clientSecret' in authnConfig.OIDCConfig
-        ? 'clientSecret'
-        : 'certificate');
+    const credentialType = authnConfig.OIDCConfig.credentialType;
     const data = {
       client_id: clientId,
       scope: scope,
