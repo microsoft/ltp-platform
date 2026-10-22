@@ -28,7 +28,9 @@ spec:
               value: "{{ cluster_cfg["alert-manager"]["cert-expiration-checker"]["alert-residual-days"] }}"
             - name: ALERT_GROUP_EMAIL
               value: "{{ cluster_cfg["alert-manager"]["cert-expiration-checker"]["alert_group_email"] }}"
-    {% if cluster_cfg['authentication']['OIDC'] %}
+    {% if cluster_cfg['authentication']['OIDC']
+       and cluster_cfg['authentication'].get('AAD', {}).get('certificate')
+       and cluster_cfg['authentication']['AAD'].get('credentialType') in [none, 'certificate'] %}
             - name: OIDC_CERT_FILE_PATH
               value: /oidc-cert/public.crt
             volumeMounts:

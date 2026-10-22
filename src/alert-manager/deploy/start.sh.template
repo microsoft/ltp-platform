@@ -42,7 +42,9 @@ kubectl create configmap icm-certs --from-file=icm-certs/ --dry-run=client -o ya
 {% endif -%}
 
 {% if cluster_cfg["alert-manager"]["cert-expiration-checker"] %}
-{% if cluster_cfg['authentication']['AAD'] and cluster_cfg['authentication']['AAD']['certificate'] %}
+{% if cluster_cfg['authentication']['OIDC']
+   and cluster_cfg['authentication'].get('AAD', {}).get('certificate')
+   and cluster_cfg['authentication']['AAD'].get('credentialType') in [none, 'certificate'] %}
 kubectl create configmap oidc-cert \
     --from-file="public.crt"={{ cluster_cfg['authentication']['AAD']['certificate']['certPath'] }} \
     --dry-run=client -o yaml | kubectl apply --overwrite=true -f - || exit $?

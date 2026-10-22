@@ -6,6 +6,7 @@ const http = require('http');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const nock = require('nock');
+const { generateKeyPairSync } = require('crypto');
 const {
   getPortalUrl,
   getLoginRedirect,
@@ -144,26 +145,47 @@ describe('OIDC redirect restrictions', () => {
   });
 });
 
-describe('OIDC login and callback compatibility', () => {
+const defineLoginCompatibilityTests = (credentialType) => {
   const authnConfig = {
     authnMethod: 'OIDC',
     OIDCConfig: {
       clientID: 'test-client',
       clientSecret: 'test-secret',
+      credentialType,
       redirectUrl: portal + '/rest-server/api/v1/authn/oidc/return',
       authorization_endpoint: 'https://idp.example/authorize',
       token_endpoint: 'https://idp.example/token',
       msgraph_host: 'graph.example',
+      destroySessionUrl: 'https://idp.example/logout',
     },
     groupConfig: { groupDataSource: 'basic' },
   };
+  let certificateKeys;
+  if (credentialType === 'managedIdentity') {
+    delete authnConfig.OIDCConfig.clientSecret;
+    authnConfig.OIDCConfig.managedIdentity = {
+      clientID: '33333333-3333-4333-8333-333333333333',
+    };
+  } else if (credentialType === 'certificate') {
+    delete authnConfig.OIDCConfig.clientSecret;
+    certificateKeys = generateKeyPairSync('rsa', { modulusLength: 2048 });
+    Object.assign(authnConfig.OIDCConfig, {
+      privateKey: certificateKeys.privateKey,
+      publicKey: 'test-certificate',
+      thumbprint: '0123456789abcdef',
+    });
+  }
   const savedModules = new Map();
   const tokenCalls = [];
+  const tokenSecrets = new Map();
+  const tokenSecret = 'oidc-jwt-regression-key';
   const warnings = [];
   let originalPortal;
   let server;
   let port;
   let tokenController;
+  let tokenModel;
+  let identityFailure;
 
   const replaceModule = (name, exports) => {
     const path = require.resolve(name);
@@ -180,7 +202,7 @@ describe('OIDC login and callback compatibility', () => {
     return require(name);
   };
 
-  const request = (method, path, body) =>
+  const request = (method, path, body, headers = {}) =>
     new Promise((resolve, reject) => {
       const data =
         body === undefined ? undefined : new URLSearchParams(body).toString();
@@ -190,13 +212,15 @@ describe('OIDC login and callback compatibility', () => {
           port,
           method,
           path,
-          headers:
-            data === undefined
+          headers: {
+            ...headers,
+            ...(data === undefined
               ? {}
               : {
                   'Content-Type': 'application/x-www-form-urlencoded',
                   'Content-Length': Buffer.byteLength(data),
-                },
+                }),
+          },
         },
         (res) => {
           let text = '';
@@ -223,12 +247,35 @@ describe('OIDC login and callback compatibility', () => {
 
   const mockExchange = (username = 'alice') =>
     nock('https://idp.example')
-      .post(
-        '/token',
-        (body) =>
-          body.code === 'test-code' &&
-          body.redirect_uri === authnConfig.OIDCConfig.redirectUrl,
-      )
+      .post('/token', (body) => {
+        assert.strictEqual(body.code, 'test-code');
+        assert.strictEqual(
+          body.redirect_uri,
+          authnConfig.OIDCConfig.redirectUrl,
+        );
+        assert.strictEqual(body.client_id, 'test-client');
+        if (credentialType === 'clientSecret') {
+          assert.strictEqual(body.client_secret, 'test-secret');
+          assert.strictEqual(body.client_assertion, undefined);
+        } else {
+          assert.strictEqual(body.client_secret, undefined);
+          assert.strictEqual(
+            body.client_assertion_type,
+            'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+          );
+          if (credentialType === 'managedIdentity') {
+            assert.strictEqual(body.client_assertion, 'native-mi-assertion');
+          } else {
+            jwt.verify(body.client_assertion, certificateKeys.publicKey, {
+              algorithms: ['RS256'],
+              audience: authnConfig.OIDCConfig.token_endpoint,
+              issuer: 'test-client',
+              subject: 'test-client',
+            });
+          }
+        }
+        return true;
+      })
       .reply(200, {
         id_token: jwt.sign({ sub: username }, 'test-key'),
         access_token: jwt.sign(
@@ -241,9 +288,28 @@ describe('OIDC login and callback compatibility', () => {
   before(async () => {
     originalPortal = process.env.WEBPORTAL_URL;
     process.env.WEBPORTAL_URL = portal + ':443';
+    replaceModule('@azure/identity', {
+      ManagedIdentityCredential: class {
+        constructor(options) {
+          assert.strictEqual(credentialType, 'managedIdentity');
+          assert.deepStrictEqual(options, {
+            clientId: authnConfig.OIDCConfig.managedIdentity.clientID,
+          });
+        }
+        async getToken(scope) {
+          assert.strictEqual(scope, 'api://AzureADTokenExchange/.default');
+          if (identityFailure) {
+            throw identityFailure;
+          }
+          return { token: 'native-mi-assertion' };
+        }
+      },
+    });
     replaceModule('@pai/config/authn', authnConfig);
     replaceModule('@pai/config/logger', {
       warn: (error) => warnings.push(error),
+      info: () => {},
+      debug: () => {},
     });
     replaceModule('@pai/models/v2/user', {
       getUser: async (username) => ({
@@ -253,25 +319,35 @@ describe('OIDC login and callback compatibility', () => {
         extension: { githubPAT: username === 'admin' },
       }),
       checkAdmin: async (username) => username === 'admin',
+      checkVirtualClusterAdmin: async () => [],
     });
     replaceModule('@pai/models/v2/group', {
       getGroupsAdmin: async () => false,
     });
-    replaceModule('@pai/models/token', {
-      create: async (username) => {
-        tokenCalls.push(username);
-        return 'cluster-token-' + username;
+    replaceModule('@pai/models/kubernetes/k8s-secret', {
+      get: async (namespace, username) => tokenSecrets.get(username) || null,
+      create: async (namespace, username, tokens) => {
+        tokenSecrets.set(username, { ...tokens });
       },
+      replace: async (namespace, username, tokens) => {
+        tokenSecrets.set(username, { ...tokens });
+      },
+      deleteAll: async () => tokenSecrets.clear(),
     });
+    replaceModule('@pai/models/kubernetes/kubernetes', {
+      createNamespace: async () => {},
+    });
+    replaceModule('@pai/utils/dbUtils', {});
     replaceModule('@pai/utils/manager/user/user', {
       encrypt: async () => 'hashed-password',
     });
-    replaceModule('@pai/config/token', {});
+    replaceModule('@pai/config/token', {
+      secret: tokenSecret,
+      tokenExpireTime: '1h',
+      userProperty: 'user',
+    });
     replaceModule('@pai/middlewares/parameter', {
       validate: () => (req, res, next) => next(),
-    });
-    replaceModule('@pai/middlewares/token', {
-      checkNotApplication: (req, res, next) => next(),
     });
     replaceModule('@pai/controllers/v2/user', {
       createUserIfUserNotExist: (req, res, next) => {
@@ -288,6 +364,13 @@ describe('OIDC login and callback compatibility', () => {
       },
       updateUserGroupListFromExternal: (req, res, next) => next(),
     });
+    tokenModel = reloadModule('@pai/models/token');
+    const createToken = tokenModel.create;
+    tokenModel.create = async (...args) => {
+      tokenCalls.push(args[0]);
+      return createToken(...args);
+    };
+    const tokenMiddleware = reloadModule('@pai/middlewares/token');
     reloadModule('@pai/controllers/v2/azureAD');
     tokenController = reloadModule('@pai/controllers/v2/token');
     const router = reloadModule('@pai/routes/authn');
@@ -297,6 +380,15 @@ describe('OIDC login and callback compatibility', () => {
     app.use(express.urlencoded({ extended: true }));
     app.use('/api/v1/authn', router);
     app.use('/api/v2/authn', router);
+    app.get('/test-authenticated', tokenMiddleware.check, (req, res) => {
+      res.json(req.user);
+    });
+    app.get(
+      '/test-admin',
+      tokenMiddleware.check,
+      tokenMiddleware.checkAdmin,
+      (req, res) => res.json({ admin: req.user.admin }),
+    );
     app.get('/test-error', (req, res, next) => {
       const error = createError(
         'Forbidden',
@@ -322,9 +414,11 @@ describe('OIDC login and callback compatibility', () => {
     nock.enableNetConnect('127.0.0.1');
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await tokenModel.revokeAll();
     tokenCalls.length = 0;
     warnings.length = 0;
+    identityFailure = undefined;
   });
 
   afterEach(() => {
@@ -353,6 +447,20 @@ describe('OIDC login and callback compatibility', () => {
   });
 
   for (const version of ['v1', 'v2']) {
+    it(`${version}: preserves OIDC authentication metadata and logout`, async () => {
+      const info = await request('GET', `/api/${version}/authn/info`);
+      assert.strictEqual(info.status, 200);
+      assert.deepStrictEqual(info.body, {
+        authn_type: 'OIDC',
+        loginURI: '/api/v1/authn/oidc/login',
+        loginURIMethod: 'get',
+      });
+      const logout = await request('GET', `/api/${version}/authn/oidc/logout`);
+      assert.strictEqual(logout.status, 302);
+      assert.strictEqual(logout.location, 'https://idp.example/logout');
+      assert.deepStrictEqual(tokenCalls, []);
+    });
+
     it(`${version}: preserves the default completion and registered IdP callback`, async () => {
       const response = await request('GET', `/api/${version}/authn/oidc/login`);
       assert.strictEqual(response.status, 302);
@@ -422,10 +530,13 @@ describe('OIDC login and callback compatibility', () => {
           completion,
         );
         assert.strictEqual(destination.searchParams.get('user'), username);
-        assert.strictEqual(
-          destination.searchParams.get('token'),
-          'cluster-token-' + username,
-        );
+        const token = destination.searchParams.get('token');
+        const payload = jwt.verify(token, tokenSecret);
+        assert.strictEqual(payload.username, username);
+        assert.strictEqual(payload.application, false);
+        assert.strictEqual(payload.jobSpecific, false);
+        assert.strictEqual(payload.exp - payload.iat, 3600);
+        assert.ok(Object.values(tokenSecrets.get(username)).includes(token));
         assert.strictEqual(
           destination.searchParams.get('admin'),
           String(username === 'admin'),
@@ -437,6 +548,24 @@ describe('OIDC login and callback compatibility', () => {
         assert.strictEqual(destination.searchParams.get('from'), jobPage);
         assert.deepStrictEqual(tokenCalls, [username]);
         assert.ok(exchange.isDone());
+        const authenticated = await request(
+          'GET',
+          '/test-authenticated',
+          undefined,
+          { Authorization: `Bearer ${token}` },
+        );
+        assert.strictEqual(authenticated.status, 200);
+        assert.strictEqual(authenticated.body.username, username);
+        assert.strictEqual(authenticated.body.admin, username === 'admin');
+        const admin = await request('GET', '/test-admin', undefined, {
+          Authorization: `Bearer ${token}`,
+        });
+        assert.strictEqual(admin.status, username === 'admin' ? 200 : 403);
+        await tokenModel.revoke(token);
+        const revoked = await request('GET', '/test-authenticated', undefined, {
+          Authorization: `Bearer ${token}`,
+        });
+        assert.strictEqual(revoked.status, 401);
       });
     }
 
@@ -536,6 +665,34 @@ describe('OIDC login and callback compatibility', () => {
         assert.strictEqual(response.body.code, 'UnknownError');
       }
     });
+
+    if (credentialType === 'managedIdentity') {
+      it(`${version}: does not issue a cluster token or contact the IdP when IMDS fails`, async () => {
+        identityFailure = new Error('IMDS unavailable');
+        const response = await request(
+          'POST',
+          `/api/${version}/authn/oidc/return`,
+          {
+            code: 'test-code',
+            state: JSON.stringify({ redirect: completion }),
+          },
+        );
+        assert.deepStrictEqual(tokenCalls, []);
+        if (version === 'v1') {
+          assert.strictEqual(response.status, 302);
+          const destination = new URL(response.location);
+          assert.strictEqual(destination.origin, portal);
+          assert.strictEqual(destination.searchParams.has('token'), false);
+          assert.strictEqual(
+            destination.searchParams.get('errorMessage'),
+            'IMDS unavailable',
+          );
+        } else {
+          assert.strictEqual(response.status, 500);
+          assert.strictEqual(response.body.code, 'UnknownError');
+        }
+      });
+    }
   }
 
   it('checks the final token redirect before minting any credential', async () => {
@@ -590,12 +747,57 @@ describe('OIDC login and callback compatibility', () => {
       password: 'password',
     });
     assert.strictEqual(response.status, 200);
-    assert.deepStrictEqual(response.body, {
+    const { token, ...fields } = response.body;
+    assert.deepStrictEqual(fields, {
       user: 'alice',
-      token: 'cluster-token-alice',
       admin: false,
       hasGitHubPAT: false,
     });
+    assert.strictEqual(jwt.verify(token, tokenSecret).username, 'alice');
+    const authenticated = await request(
+      'GET',
+      '/test-authenticated',
+      undefined,
+      { Authorization: `Bearer ${token}` },
+    );
+    assert.strictEqual(authenticated.status, 200);
+    assert.strictEqual(authenticated.body.username, 'alice');
     assert.strictEqual(response.location, undefined);
   });
-});
+
+  for (const [label, token] of [
+    ['MI assertion', 'native-mi-assertion'],
+    ['incorrect signature', jwt.sign({ username: 'alice' }, 'wrong-key')],
+    [
+      'expired token',
+      jwt.sign({ username: 'alice' }, tokenSecret, { expiresIn: -1 }),
+    ],
+    [
+      'unregistered token',
+      jwt.sign({ username: 'alice' }, tokenSecret, { expiresIn: '1h' }),
+    ],
+  ]) {
+    it(`rejects a ${label} as an OpenPAI Bearer credential`, async () => {
+      const response = await request('GET', '/test-authenticated', undefined, {
+        Authorization: `Bearer ${token}`,
+      });
+      assert.strictEqual(response.status, 401);
+      assert.strictEqual(response.body.code, 'UnauthorizedUserError');
+    });
+  }
+
+  it('rejects authenticated routes without a Bearer credential', async () => {
+    const response = await request('GET', '/test-authenticated');
+    assert.strictEqual(response.status, 401);
+  });
+};
+
+for (const credentialType of [
+  'clientSecret',
+  'certificate',
+  'managedIdentity',
+]) {
+  describe(`OIDC login and callback compatibility (${credentialType})`, () => {
+    defineLoginCompatibilityTests(credentialType);
+  });
+}
