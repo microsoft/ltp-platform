@@ -21,8 +21,6 @@ metadata:
   name: watchdog
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: watchdog
