@@ -86,25 +86,6 @@ spec:
         - containerPort: {{ cluster_cfg["job-exporter"]["job-port"] }}
           hostPort: {{ cluster_cfg["job-exporter"]["job-port"] }}
           name: main
-      - name: moneo-gpu-exporter
-        image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
-        imagePullPolicy: Always
-        securityContext:
-          privileged: true
-          capabilities:
-            add:
-              - SYS_ADMIN
-        volumeMounts:
-          - mountPath: /dev
-            name: device-mount
-        command:
-        - "bash"
-        - "moneo-gpu-exporter_entrypoint.sh"
-        - "{{ cluster_cfg["job-exporter"]["gpu-port"] }}"
-        ports:
-        - containerPort: {{ cluster_cfg["job-exporter"]["gpu-port"] }}
-          hostPort: {{ cluster_cfg["job-exporter"]["gpu-port"] }}
-          name: gpu
       - name: moneo-net-exporter
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         imagePullPolicy: Always

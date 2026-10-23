@@ -82,7 +82,24 @@ class service_template_generate:
                     match_expression['values'] = ['true']
                     match_expressions_arr.append(match_expression)
 
-                config['spec']['template']['spec']['affinity'] = {'nodeAffinity': {'requiredDuringSchedulingIgnoredDuringExecution': {'nodeSelectorTerms': [{'matchExpressions': match_expressions_arr}]}}}
+            if match_expressions_arr:
+                pod_spec = config['spec']['template']['spec']
+                if pod_spec.get('affinity') is None:
+                    pod_spec['affinity'] = {}
+                affinity = pod_spec['affinity']
+                if affinity.get('nodeAffinity') is None:
+                    affinity['nodeAffinity'] = {}
+                node_affinity = affinity['nodeAffinity']
+                required_key = 'requiredDuringSchedulingIgnoredDuringExecution'
+                if node_affinity.get(required_key) is None:
+                    node_affinity[required_key] = {
+                        'nodeSelectorTerms': [{'matchExpressions': match_expressions_arr}]
+                    }
+                else:
+                    for term in node_affinity[required_key].get('nodeSelectorTerms') or []:
+                        # Empty selector terms match no nodes and must stay empty.
+                        if term.get('matchExpressions') or term.get('matchFields'):
+                            term.setdefault('matchExpressions', []).extend(match_expressions_arr)
         else:
             logging.info("It is not a service deploy file! Only support " + str(service_deploy_kind_list))
             return str_src_yaml
