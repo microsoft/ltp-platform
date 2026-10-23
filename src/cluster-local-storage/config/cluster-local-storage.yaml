@@ -5,6 +5,9 @@
 service_type: "k8s"
 
 port-base: 17000
+# VC controllers expose only their HTTP API and use SSH clients to orchestrate
+# worker-to-worker transfers. SSH (23333) and rsync (8873) listeners run only on
+# workers; manual rsync/SSH operations should target a worker, not a controller.
 host-path: /mntext/clstore
 job-path: /clstore
 sync-interval: 600
