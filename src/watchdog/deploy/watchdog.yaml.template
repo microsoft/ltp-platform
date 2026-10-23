@@ -21,6 +21,8 @@ metadata:
   name: watchdog
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: watchdog
@@ -49,7 +51,7 @@ spec:
         {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}
         resources:
           limits:
-            memory: "1Gi"
+            memory: "2Gi"
         {%- endif %}
         env:
         - name: LOGGING_LEVEL
