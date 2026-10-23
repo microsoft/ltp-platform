@@ -31,6 +31,21 @@ job-exporter:
 
 the interface field is comma separated string, and job-exporter will listen to the one that found in your node. If none of interfaces found, job-exporter will select one that can access the internet.
 
+#### GPU endpoint applicability
+
+The GPU container runs on all job-exporter nodes. Loaded AMD/NVIDIA drivers select
+their existing GPU exporter. On nodes without either driver, startup inspects PCI
+devices: only nodes with no supported display/processing accelerator expose a
+non-GPU `/metrics` endpoint on `gpu-port` (default `8000`). This endpoint reports
+only `gpu_exporter_applicable 0`, not fabricated GPU utilization or health.
+Prometheus `up=1` then means the explicitly non-GPU endpoint is reachable.
+
+If supported GPU hardware is present without its driver, or PCI inspection fails,
+startup fails visibly instead of serving the non-GPU endpoint. Failures of a
+selected GPU exporter are not replaced with a non-GPU endpoint. GPU, job, node,
+and network target discovery is unchanged, so genuine GPU exporter failures remain
+visible while non-GPU nodes retain their other monitoring.
+
 
 #### Generated Configuration <a name="G_Config"></a>
 

@@ -100,6 +100,7 @@ spec:
         command:
         - "bash"
         - "moneo-gpu-exporter_entrypoint.sh"
+        - "{{ cluster_cfg["job-exporter"]["gpu-port"] }}"
         ports:
         - containerPort: {{ cluster_cfg["job-exporter"]["gpu-port"] }}
           hostPort: {{ cluster_cfg["job-exporter"]["gpu-port"] }}
