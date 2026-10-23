@@ -79,7 +79,7 @@ function deleteHandler(snapshot, pollingTs) {
         }
       }),
     )
-    .catch((err) => {
+    .catch(err => {
       logger.error(
         `An error happened when delete framework ${frameworkName} and pollingTs=${pollingTs}:`,
         err,
@@ -101,7 +101,7 @@ function synchronizeHandler(snapshot, addOns, pollingTs) {
         );
       }),
     )
-    .catch((err) => {
+    .catch(err => {
       // if we are sure the error is not recoverable, we will mock a failed framework, and record this in events.
       if (isUnrecoverableResponse(err)) {
         logger.warn(
@@ -127,7 +127,7 @@ function synchronizeHandler(snapshot, addOns, pollingTs) {
               ),
             );
           })
-          .catch((err) =>
+          .catch(err =>
             logger.error(
               `An error happened when mock failed event for framework ${frameworkName} and pollingTs=${pollingTs}:`,
               err,
@@ -138,7 +138,7 @@ function synchronizeHandler(snapshot, addOns, pollingTs) {
         throw err;
       }
     })
-    .catch((err) => {
+    .catch(err => {
       logger.error(
         `An error happened when synchronize request for framework ${frameworkName} and pollingTs=${pollingTs}:`,
         err,
