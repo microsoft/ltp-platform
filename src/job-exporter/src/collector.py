@@ -659,6 +659,7 @@ class ContainerCollector(Collector):
         "grafana",
         "prometheus-pushgateway",
         "prometheus",
+        "utilization-reporter",
         "alertmanager",
         "watchdog",
         "frameworkcontroller",
