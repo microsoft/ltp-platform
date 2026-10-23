@@ -38,11 +38,8 @@ if (config.rbacEnabled) {
   kc.loadFromClusterAndUser(cluster, user);
 }
 
-// If API server reports a non-200 status code, the client will
-// throw an error. In such case, error.name will be "HttpError",
-// and error.response.statusCode is the actual status code.
-// If network is disconnected, the error will be a different one,
-// and you cannot get error.name and error.statusCode.
+// API failures use ApiException.code for the HTTP status and .body for details.
+// Transport failures may instead have a string code, such as ECONNREFUSED.
 const customObjectsClient = kc.makeApiClient(k8s.CustomObjectsApi);
 
 async function getFramework(name, namespace = 'default') {
