@@ -659,6 +659,7 @@ class ContainerCollector(Collector):
         "grafana",
         "prometheus-pushgateway",
         "prometheus",
+        "utilization-reporter",
         "alertmanager",
         "watchdog",
         "frameworkcontroller",
@@ -774,9 +775,14 @@ class ContainerCollector(Collector):
         return gpu_ids, result_labels
 
     @classmethod
-    def infer_service_name(cls, container_name):
+    def infer_service_name(cls, container_name, pod_name=None):
         """ try to infer service name from container_name, if it's container not belongs
         to pai service, will return None """
+        # Recognize reporter Pods created before the container-name correction.
+        if container_name == "prometheus" and pod_name and \
+                pod_name.startswith("utilization-reporter-deployment-"):
+            return "utilization-reporter"
+
         if container_name in cls.pai_services:
             return container_name
 
@@ -784,7 +790,8 @@ class ContainerCollector(Collector):
 
     def process_one_container(self, container_id, stats, gpu_infos, gauges):
         container_name = utils.walk_json_field_safe(stats, "name", "container")
-        pai_service_name = ContainerCollector.infer_service_name(container_name)
+        pod_name = utils.walk_json_field_safe(stats, "name", "pod")
+        pai_service_name = ContainerCollector.infer_service_name(container_name, pod_name)
         if container_name is None:
             logger.debug("ignore k8s pause container %s", container_id)
             return

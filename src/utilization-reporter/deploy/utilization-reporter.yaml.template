@@ -41,7 +41,7 @@ spec:
                 values:
                 - "true"
       containers:
-      - name: prometheus
+      - name: utilization-reporter
         image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}utilization-reporter:{{cluster_cfg["cluster"]["docker-registry"]["tag"]}}
         resources:
           limits:

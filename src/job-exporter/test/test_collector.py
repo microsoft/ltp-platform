@@ -8,6 +8,7 @@ import unittest
 import datetime
 import time
 import logging
+from unittest.mock import patch
 
 import base
 
@@ -55,6 +56,61 @@ class TestContainerCollector(base.TestBase):
         self.assertIsNone(ContainerCollector.infer_service_name("autoscaler"))
         self.assertEqual("prometheus", ContainerCollector.infer_service_name("prometheus"))
         self.assertIsNone(ContainerCollector.infer_service_name("coredns"))
+        self.assertEqual("utilization-reporter",
+                         ContainerCollector.infer_service_name("utilization-reporter"))
+        self.assertEqual("utilization-reporter",
+                         ContainerCollector.infer_service_name(
+                             "prometheus", "utilization-reporter-deployment-abc-123"))
+        self.assertEqual("prometheus",
+                         ContainerCollector.infer_service_name(
+                             "prometheus", "prometheus-deployment-abc-123"))
+
+    def test_distinct_prometheus_and_reporter_metrics(self):
+        container_collector = object.__new__(ContainerCollector)
+        container_collector.gpu_vendor = collector.GpuVendor.UNKNOWN
+        inspect_result = container_inspect.InspectResult(
+            None, None, None, None, None, None, None, 12345)
+        for reporter_name in ("prometheus", "utilization-reporter"):
+            with self.subTest(reporter_name=reporter_name):
+                stats = {}
+                for service, container_name in (
+                        ("prometheus", "prometheus"),
+                        ("utilization-reporter", reporter_name)):
+                    stats[service] = {
+                        "name": {
+                            "container": container_name,
+                            "pod": service + "-deployment-abc-123",
+                        },
+                        "cpuPerc": 1,
+                        "memUsage": {"usage": 2},
+                        "memPerc": 3,
+                        "netIO": {"in": 4, "out": 5},
+                        "blockIO": {"in": 6, "out": 7},
+                    }
+                with patch.object(container_inspect, "inspect",
+                                  return_value=inspect_result):
+                    metrics = container_collector.collect_container_metrics(stats, None)
+                service_metrics = [
+                    metric for metric in metrics
+                    if metric.name.startswith("service_") and metric.samples]
+                self.assertEqual(7, len(service_metrics))
+                for metric in service_metrics:
+                    samples = metric.samples
+                    self.assertEqual(2, len(samples))
+                    self.assertEqual(
+                        {"prometheus", "utilization-reporter"},
+                        {sample.labels["name"] for sample in samples})
+                    self.assertEqual(
+                        2, len({tuple(sorted(sample.labels.items())) for sample in samples}))
+
+    def test_reporter_manifest_uses_distinct_container_name(self):
+        template = os.path.join(
+            os.path.dirname(__file__),
+            "../../utilization-reporter/deploy/utilization-reporter.yaml.template")
+        with open(template) as stream:
+            manifest = stream.read()
+        self.assertIn("      - name: utilization-reporter\n", manifest)
+        self.assertNotIn("      - name: prometheus\n", manifest)
 
 
 class TestContainerdDaemonCollector(base.TestBase):
