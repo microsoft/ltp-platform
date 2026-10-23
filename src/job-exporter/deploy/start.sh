@@ -23,10 +23,7 @@ pushd $(dirname "$0") > /dev/null
 
 kubectl apply --overwrite=true -f job-exporter.yaml || exit $?
 
-# Finish removing the old GPU containers before reusing their host ports.
-kubectl rollout status daemonset/job-exporter --timeout=3600s || exit $?
-
-kubectl apply --overwrite=true -f moneo-gpu-exporter.yaml || exit $?
-kubectl rollout status daemonset/moneo-gpu-exporter --timeout=3600s || exit $?
+# Wait until the service is ready.
+PYTHONPATH="../../../deployment" python -m  k8sPaiLibrary.monitorTool.check_pod_ready_status -w -k app -v job-exporter || exit $?
 
 popd > /dev/null

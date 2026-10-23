@@ -25,7 +25,6 @@ prerequisite:
 
 template-list:
   - job-exporter.yaml
-  - moneo-gpu-exporter.yaml
 
 start-script: start.sh
 stop-script: stop.sh
