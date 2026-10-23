@@ -29,6 +29,7 @@ metadata:
   name: prometheus-deployment
 spec:
   replicas: 1
+  progressDeadlineSeconds: 3600
   selector:
     matchLabels:
       app: prometheus
@@ -106,6 +107,12 @@ spec:
         ports:
         - name: web
           containerPort: {{prometheus_port}}
+        readinessProbe:
+          httpGet:
+            path: /prometheus/-/ready
+            port: web
+          periodSeconds: 10
+          timeoutSeconds: 5
         volumeMounts:
         - name: config-volume
           mountPath: /etc/prometheus
