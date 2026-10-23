@@ -12,14 +12,26 @@ function getStatusCode(error) {
   );
 }
 
+function getErrorMessage(error, defaultMessage = '') {
+  let body = _.get(error, 'body', _.get(error, 'response.body'));
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (err) {
+      if (!(err instanceof SyntaxError)) {
+        throw err;
+      }
+      return body || defaultMessage;
+    }
+  }
+  const message = _.get(body, 'message');
+  return typeof message === 'string' ? message : defaultMessage;
+}
+
 function isUnrecoverableResponse(response) {
   // indentify if the response is recoverable
   const statusCode = getStatusCode(response);
-  const message = _.get(
-    response,
-    'body.message',
-    _.get(response, 'response.body.message', ''),
-  );
+  const message = getErrorMessage(response);
   if (statusCode === 413) {
     // Code 413 means Payload Too Large.
     // It happens when we PATCH a framework, and the PATCH's payload is too large.
@@ -74,6 +86,7 @@ function generateClusterEventUpdate(snapshot, type, reason, message) {
 
 module.exports = {
   getStatusCode,
+  getErrorMessage,
   isUnrecoverableResponse,
   generateClusterEventUpdate,
 };

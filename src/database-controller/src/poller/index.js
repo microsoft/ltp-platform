@@ -18,9 +18,9 @@ const interval = require('interval-promise');
 const config = require('@dbc/poller/config');
 const fetch = require('node-fetch');
 const { deleteFramework } = require('@dbc/common/k8s');
-const _ = require('lodash');
 const {
   getStatusCode,
+  getErrorMessage,
   isUnrecoverableResponse,
   generateClusterEventUpdate,
 } = require('@dbc/poller/utils');
@@ -119,11 +119,7 @@ function synchronizeHandler(snapshot, addOns, pollingTs) {
                 snapshot,
                 'Warning',
                 'CreateFrameworkPermanentFailed',
-                _.get(
-                  err,
-                  'body.message',
-                  _.get(err, 'response.body.message', 'unknown'),
-                ),
+                getErrorMessage(err, 'unknown'),
               ),
             );
           })
