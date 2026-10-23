@@ -20,6 +20,7 @@ const fetch = require('node-fetch');
 const { deleteFramework } = require('@dbc/common/k8s');
 const _ = require('lodash');
 const {
+  getStatusCode,
   isUnrecoverableResponse,
   generateClusterEventUpdate,
 } = require('@dbc/poller/utils');
@@ -64,7 +65,7 @@ function deleteHandler(snapshot, pollingTs) {
             `Framework ${frameworkName} is successfully deleted. PollingTs=${pollingTs}.`,
           );
         } catch (err) {
-          if (err.response && err.response.statusCode === 404) {
+          if (getStatusCode(err) === 404) {
             // for 404 error, mock a delete to write merger
             logger.warn(
               `Cannot find framework ${frameworkName} in API Server. Will mock a deletion to write merger. Error:`,
@@ -78,7 +79,7 @@ function deleteHandler(snapshot, pollingTs) {
         }
       }),
     )
-    .catch(err => {
+    .catch((err) => {
       logger.error(
         `An error happened when delete framework ${frameworkName} and pollingTs=${pollingTs}:`,
         err,
@@ -100,9 +101,9 @@ function synchronizeHandler(snapshot, addOns, pollingTs) {
         );
       }),
     )
-    .catch(err => {
+    .catch((err) => {
       // if we are sure the error is not recoverable, we will mock a failed framework, and record this in events.
-      if (_.has(err, 'response') && isUnrecoverableResponse(err.response)) {
+      if (isUnrecoverableResponse(err)) {
         logger.warn(
           `An error happened when synchronize request for framework ${frameworkName} and pollingTs=${pollingTs}. We are sure the error is not recoverable. Will mock a failed framework.`,
           err,
@@ -118,11 +119,15 @@ function synchronizeHandler(snapshot, addOns, pollingTs) {
                 snapshot,
                 'Warning',
                 'CreateFrameworkPermanentFailed',
-                _.get(err, 'response.body.message', 'unknown'),
+                _.get(
+                  err,
+                  'body.message',
+                  _.get(err, 'response.body.message', 'unknown'),
+                ),
               ),
             );
           })
-          .catch(err =>
+          .catch((err) =>
             logger.error(
               `An error happened when mock failed event for framework ${frameworkName} and pollingTs=${pollingTs}:`,
               err,
@@ -133,7 +138,7 @@ function synchronizeHandler(snapshot, addOns, pollingTs) {
         throw err;
       }
     })
-    .catch(err => {
+    .catch((err) => {
       logger.error(
         `An error happened when synchronize request for framework ${frameworkName} and pollingTs=${pollingTs}:`,
         err,

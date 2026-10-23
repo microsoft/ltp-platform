@@ -4,10 +4,22 @@ require('module-alias/register');
 const _ = require('lodash');
 const { v4: uuidv4 } = require('uuid');
 
+function getStatusCode(error) {
+  return _.get(
+    error,
+    'code',
+    _.get(error, 'response.statusCode', _.get(error, 'statusCode')),
+  );
+}
+
 function isUnrecoverableResponse(response) {
   // indentify if the response is recoverable
-  const statusCode = _.get(response, 'statusCode', 0);
-  const message = _.get(response, 'body.message', '');
+  const statusCode = getStatusCode(response);
+  const message = _.get(
+    response,
+    'body.message',
+    _.get(response, 'response.body.message', ''),
+  );
   if (statusCode === 413) {
     // Code 413 means Payload Too Large.
     // It happens when we PATCH a framework, and the PATCH's payload is too large.
@@ -61,6 +73,7 @@ function generateClusterEventUpdate(snapshot, type, reason, message) {
 }
 
 module.exports = {
+  getStatusCode,
   isUnrecoverableResponse,
   generateClusterEventUpdate,
 };
