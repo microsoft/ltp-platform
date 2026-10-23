@@ -28,7 +28,12 @@ kubectl apply --overwrite=true -f rbac.yaml || exit $?
 kubectl apply --overwrite=true -f prometheus-deployment.yaml || exit $?
 
 sleep 10
-# Wait until the service is ready.
-PYTHONPATH="../../../deployment" python -m  k8sPaiLibrary.monitorTool.check_pod_ready_status -w -k app -v prometheus || exit $?
+# TSDB/WAL recovery may take time; readiness failures must not restart Prometheus.
+echo "Waiting up to 3600 seconds for Prometheus TSDB/WAL recovery and readiness."
+PYTHONPATH="../../../deployment" python -m k8sPaiLibrary.monitorTool.check_pod_ready_status -w -k app -v prometheus --timeout 3600 || {
+  status=$?
+  echo "Prometheus did not become ready within 3600 seconds. Inspect its logs for TSDB/WAL recovery progress; the process has not been restarted." >&2
+  exit "$status"
+}
 
 popd > /dev/null

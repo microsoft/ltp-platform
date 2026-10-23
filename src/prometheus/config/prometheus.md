@@ -13,6 +13,14 @@
 
 All configurations in this section are optional. If you want to customize these values, you can configure it in service-configuration.yaml.
 
+The main container becomes Ready only after `/prometheus/-/ready` succeeds on its
+configured web port. TSDB block loading and WAL replay keep the Pod NotReady without
+a startup or liveness probe restarting a legitimately recovering process. Service
+startup waits up to 3600 seconds, matching the Deployment progress deadline; a
+timeout fails the start command without deleting or restarting Prometheus. Inspect
+the container logs for recovery progress before taking further action. The optional
+remote-write sidecar must also pass its own readiness check.
+
 For example, if you want to use different a port than the default 9091, add following to your service-configuration.yaml as following:
 ```yaml
 prometheus:
