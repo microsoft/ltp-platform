@@ -23,9 +23,10 @@ configmap/prometheus-configmap
 configmap/prometheus-alert
 serviceaccount/prometheus-account
 clusterrolebinding/prometheus-role-binding
+clusterrolebinding/prometheus-node-discovery-binding
+clusterrole/prometheus-node-discovery
 "
 
 for instance in ${INSTANCES}; do
   kubectl delete --ignore-not-found --now ${instance} || exit $?
 done
-
