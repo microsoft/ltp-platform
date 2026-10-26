@@ -17,7 +17,9 @@
 
 
 import os
+import shutil
 import sys
+import tempfile
 import unittest
 import yaml
 import logging
@@ -81,3 +83,80 @@ class TestTemplateGenerate(unittest.TestCase):
             service_template_cleaner = service_template_clean(serv, service_conf)
             service_template_cleaner.run()
 
+
+class TestPaiNodePlacement(unittest.TestCase):
+
+    def render_service(self, service, optional_features=False):
+        cluster_cfg = {
+            'cluster': {
+                'common': {
+                    'cluster-type': 'k8s',
+                    'qos-switch': 'true' if optional_features else 'false',
+                },
+                'docker-registry': {
+                    'prefix': 'example.invalid/pai/',
+                    'tag': 'test',
+                    'secret-name': 'pull-secret' if optional_features else '',
+                },
+            },
+            'prometheus': {'scrape_interval': 30},
+            'job-exporter': {
+                'job-port': 9102,
+                'gpu-port': 8000,
+                'net-port': 8001,
+                'node-port': 8002,
+                'logging-level': 'INFO',
+                'net_exporter_interval': 10,
+            },
+            'log-manager': {
+                'port': 9103,
+                'remote_storage_pvc': 'log-pvc' if optional_features else '',
+                'admin_name': 'test-admin',
+                'admin_password': 'test-only-password',
+                'jwt_secret': 'test-only-secret',
+                'token_expired_second': 3600,
+            },
+            'node-exporter': {'port': 9100},
+        }
+        src = os.path.abspath(os.path.join(package_directory_com, '../../../src'))
+        deploy_dir = os.path.join(src, service, 'deploy')
+        service_conf = file_handler.load_yaml_config(os.path.join(deploy_dir, 'service.yaml'))
+        with tempfile.TemporaryDirectory() as temporary_src:
+            target_dir = os.path.join(temporary_src, service, 'deploy')
+            os.makedirs(target_dir)
+            for output in service_conf['template-list']:
+                shutil.copyfile(
+                    os.path.join(deploy_dir, output + '.template'),
+                    os.path.join(target_dir, output + '.template'))
+            generator = service_template_generate(cluster_cfg, service, service_conf)
+            generator.src_path = temporary_src
+            generator.run()
+            with open(os.path.join(target_dir, service + '.yaml')) as manifest:
+                return yaml.safe_load(manifest)
+
+    def test_master_or_worker_with_service_opt_out(self):
+        for service, excluded_label in (
+                ('job-exporter', 'no-jobexporter'),
+                ('log-manager', 'no-logmanager')):
+            for optional_features in (False, True):
+                with self.subTest(service=service, optional_features=optional_features):
+                    manifest = self.render_service(service, optional_features)
+                    affinity = manifest['spec']['template']['spec']['affinity']['nodeAffinity']
+                    self.assertEqual(
+                        affinity['requiredDuringSchedulingIgnoredDuringExecution']['nodeSelectorTerms'],
+                        [
+                            {'matchExpressions': [
+                                {'key': role, 'operator': 'In', 'values': ['true']},
+                                {'key': excluded_label, 'operator': 'NotIn', 'values': ['true']},
+                            ]}
+                            for role in ('pai-master', 'pai-worker')
+                        ])
+
+    def test_node_exporter_remains_available_on_system_nodes(self):
+        manifest = self.render_service('node-exporter')
+        affinity = manifest['spec']['template']['spec']['affinity']['nodeAffinity']
+        self.assertEqual(
+            affinity['requiredDuringSchedulingIgnoredDuringExecution']['nodeSelectorTerms'],
+            [{'matchExpressions': [
+                {'key': 'no-nodeexporter', 'operator': 'NotIn', 'values': ['true']},
+            ]}])

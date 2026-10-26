@@ -33,6 +33,24 @@ spec:
       name: job-exporter
     spec:
       priorityClassName: pai-daemon-priority
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: pai-master
+                operator: In
+                values: ["true"]
+              - key: no-jobexporter
+                operator: NotIn
+                values: ["true"]
+            - matchExpressions:
+              - key: pai-worker
+                operator: In
+                values: ["true"]
+              - key: no-jobexporter
+                operator: NotIn
+                values: ["true"]
       containers:
       - image: {{ cluster_cfg["cluster"]["docker-registry"]["prefix"] }}job-exporter:{{ cluster_cfg["cluster"]["docker-registry"]["tag"] }}
         imagePullPolicy: Always

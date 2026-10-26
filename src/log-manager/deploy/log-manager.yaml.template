@@ -32,6 +32,24 @@ spec:
         port: "{{ cluster_cfg["log-manager"]["port"] }}"
     spec:
       priorityClassName: pai-daemon-priority
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: pai-master
+                operator: In
+                values: ["true"]
+              - key: no-logmanager
+                operator: NotIn
+                values: ["true"]
+            - matchExpressions:
+              - key: pai-worker
+                operator: In
+                values: ["true"]
+              - key: no-logmanager
+                operator: NotIn
+                values: ["true"]
       hostNetwork: false
       containers:
       - name: log-cleaner
