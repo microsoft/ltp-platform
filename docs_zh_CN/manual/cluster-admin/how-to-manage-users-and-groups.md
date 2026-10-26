@@ -168,7 +168,8 @@ authentication:
 
 部署不再为 REST Server Pod 添加 Workload Identity 标签，并会移除
 `rest-server-account` 上之前的 MI client ID 和 tenant 注解。
-重新应用 REST Server 部署以替换仍带有旧 Webhook 注入的 Pod。
+重新应用 REST Server 部署后，还需按下方步骤显式滚动重启并等待完成，
+以替换仍带有旧 Webhook 注入的 Pod；仅重新应用部署不保证 Pod 会被替换。
 如果仍注入 `AZURE_FEDERATED_TOKEN_FILE`，REST Server 会拒绝启动，
 避免 SDK 在使用 `ManagedIdentityCredential` 时仍自动选择联合认证。
 删除已有 AKS 到 MI 的 FIC 前，需确认没有其他调用方。
@@ -182,7 +183,16 @@ MI 模式不再分发 OIDC 证书；证书检查组件不再挂载 OIDC 证书�
 `certificate`。所有调用方迁移完成、回滚窗口结束后，才移除旧凭据或旧 SN+I 信任。
 仅添加 MI 信任不会清理应用上的不安全凭据。此次凭据迁移不需要清除现有用户数据。
 如果只是更换现有 AAD 部署的应用凭据，不要执行下面的数据清理或全服务重启步骤；
-推送服务配置，重新应用 REST Server 和 Alert Manager 部署即可。
+推送服务配置，重新应用 REST Server 和 Alert Manager 部署，
+然后显式滚动重启 REST Server 并等待完成：
+
+```bash
+kubectl -n default rollout restart daemonset/rest-server-ds
+kubectl -n default rollout status daemonset/rest-server-ds
+```
+
+REST Server 在进程启动时读取凭据，仅修改 ConfigMap 不保证 Pod 会重启。
+必须先等待滚动更新完成，再验证登录或停用任何旧凭据。
 
 生产切换前，在测试集群分别使用真实管理员和普通用户账号验收：
 确认二者都能登录、获得 OpenPAI JWT，并用它查询任务、提交一个小任务、读取日志和停止任务。

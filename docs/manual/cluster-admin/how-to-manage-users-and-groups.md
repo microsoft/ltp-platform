@@ -199,7 +199,9 @@ authentication:
 
 The deployment does not label REST Server pods for Workload Identity and removes
 the previous MI client ID and tenant annotations from `rest-server-account`.
-Reapply the REST Server deployment to replace pods with old webhook injection.
+After reapplying the REST Server deployment, explicitly restart it and wait for
+the rollout as shown below to replace pods with old webhook injection.
+Reapplying alone does not guarantee Pod replacement.
 REST Server rejects startup if `AZURE_FEDERATED_TOKEN_FILE` is still injected,
 because the SDK would otherwise use federation even with `ManagedIdentityCredential`.
 Do not delete an existing AKS-to-MI FIC until any other consumers are checked.
@@ -219,8 +221,18 @@ and the rollback window has closed. Remove only the retired trust afterward;
 adding an MI trust alone does not remove unsafe credentials from the application.
 Existing user data does not need to be cleared for this credential migration.
 Do not run the data cleanup or full-cluster restart below when only changing the
-credential of an existing AAD deployment. Push the service configuration and
-reapply REST Server and Alert Manager instead.
+credential of an existing AAD deployment. Push the service configuration,
+reapply REST Server and Alert Manager, then explicitly restart REST Server and
+wait for the rollout:
+
+```bash
+kubectl -n default rollout restart daemonset/rest-server-ds
+kubectl -n default rollout status daemonset/rest-server-ds
+```
+
+REST Server reads credentials at process startup; a ConfigMap-only change does
+not guarantee a Pod restart. Complete the rollout before validating login or
+retiring any old credentials.
 
 Before production rollout, validate with real administrator and nonadministrator
 accounts on the test cluster. Confirm that both can sign in, receive an OpenPAI
