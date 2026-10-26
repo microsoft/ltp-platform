@@ -84,6 +84,12 @@ echo "kubectl label --overwrite=true nodes {{ hostname }} vendor=cpu || exit \$?
 echo "kubectl label nodes {{ hostname }} pai-worker- || exit \$?"
     {%- endif %}
 
+    {%- if cluster_cfg['layout']['machine-list'][host].get('pai-ib') == 'true' %}
+echo "kubectl label --overwrite=true nodes {{ hostname }} pai-ib=true || exit \$?"
+    {%- else %}
+echo "kubectl label nodes {{ hostname }} pai-ib- || exit \$?"
+    {%- endif %}
+
     {%- if 'pai-storage' in cluster_cfg['layout']['machine-list'][host] and cluster_cfg['layout']['machine-list'][host]['pai-storage'] == 'true' %}
 echo "kubectl label --overwrite=true nodes {{ hostname }} pai-storage=true || exit \$?"
     {%- else %}
