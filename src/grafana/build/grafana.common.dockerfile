@@ -53,11 +53,14 @@ FROM ubuntu:22.04
 
 ARG TARGETARCH
 ARG GRAFANA_BUILD_ID=40412481033
+ARG GRAFANA_JAEGER_PLUGIN_VERSION=13.0.7
+ARG GRAFANA_PROMETHEUS_PLUGIN_VERSION=13.2.5
 ENV \
   GRAFANA_VERSION=13.3.0 \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
+  GF_PLUGINS_DISABLE_PLUGINS=stackdriver \
   UPGRADEALL=false
 
 
@@ -73,6 +76,19 @@ RUN \
   rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get upgrade -y
+
+# Remove both bundled copies, including the unused Cloud Monitoring plugin.
+RUN rm -rf \
+      /usr/share/grafana/data/plugins-bundled/jaeger \
+      /usr/share/grafana/data/plugins-bundled/prometheus \
+      /usr/share/grafana/data/plugins-bundled/stackdriver \
+      /var/lib/grafana/plugins-bundled/jaeger \
+      /var/lib/grafana/plugins-bundled/prometheus \
+      /var/lib/grafana/plugins-bundled/stackdriver && \
+    /usr/share/grafana/bin/grafana cli --homepath=/usr/share/grafana \
+      --pluginsDir="${GF_PLUGIN_DIR}" plugins install jaeger "${GRAFANA_JAEGER_PLUGIN_VERSION}" && \
+    /usr/share/grafana/bin/grafana cli --homepath=/usr/share/grafana \
+      --pluginsDir="${GF_PLUGIN_DIR}" plugins install prometheus "${GRAFANA_PROMETHEUS_PLUGIN_VERSION}"
 
 COPY --from=build /usr/src/plugin/dist ${GF_PLUGIN_DIR}/yesoreyeram-infinity-datasource
 
