@@ -138,7 +138,11 @@ output scripts object = reduce(
           '[[ -f "/var/lib/kubelet/kubeconfig" ]] && echo "please reimage to trigger newer kube ext" && exit 0'
           'echo NEXUS: ${extversion}, HASH ${uniqueString(join(entity.value, '\n'))}'
         ],
-        entity.value,
+        take(entity.value, 1),
+        [
+          'apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list -o Dir::Etc::sourceparts=- -o APT::Update::Error-Mode=any -o Acquire::Retries=3 update; DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -o DPkg::Lock::Timeout=300 --assume-yes --no-install-recommends --no-remove install --only-upgrade libbrotli1'
+        ],
+        skip(entity.value, 1),
         [
           'shutdown -r +1'
           'echo ${extversion} > /etc/nexus-kube-version'
