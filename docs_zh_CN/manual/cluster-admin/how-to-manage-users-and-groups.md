@@ -126,7 +126,81 @@ authentication:
       externalName: "team_alias_d"
 ```
 
-### 清除旧数据
+### 使用 AKS 托管身份认证
+
+REST Server 支持通过用户分配的托管身份（UAMI）认证现有 Entra 应用，
+替代客户端密钥或证书。用户登录流程、应用权限和回调地址保持不变。
+
+先将 MI 分配到承载每个 REST Server 实例的计算资源，使其可以通过原生托管身份端点
+（Azure VM 上为 IMDS）获取令牌。在 AKS 上应使用隔离的服务节点池，不应绑定到运行
+用户训练任务的节点。同节点上其他能访问 IMDS 的工作负载也可能使用该身份。
+生产部署前，需确认身份绑定方式的 AKS 支持边界和节点升级生命周期；
+直接修改 VMSS 不等同于 AKS 管理的工作负载身份绑定。
+
+只需在应用上配置一条联合身份凭据（FIC）：
+
+| 配置位置 | Issuer | Subject | Audience |
+| --- | --- | --- | --- |
+| Entra 应用 | `https://login.microsoftonline.com/<tenant-id>/v2.0` | 托管身份的 **principal/object ID**，不是 client ID | `api://AzureADTokenExchange` |
+
+应用与托管身份必须属于同一个租户。多个集群共用 MI 时，将 MI 分配到各集群的服务计算资源，
+应用上只需添加一条对该 MI 的信任。仅为完成此认证流程，不需要向 MI 分配 Azure RBAC 角色。
+
+不要通过 AKS Workload Identity 获取此 MI 令牌：Entra 不允许将通过一条 FIC 获取的令牌
+再作为另一条 FIC 的凭据（`AADSTS700231`）。此模式不依赖 AKS OIDC、投射的
+ServiceAccount token 或 AKS 到 MI 的 FIC。
+
+在 `services-configuration.yaml` 中移除 `clientSecret` 或 `certificate`，改为：
+
+```yaml
+authentication:
+  OIDC: true
+  OIDC-type: AAD
+  AAD:
+    wellKnownURL: https://login.microsoftonline.com/<tenant-id>/v2.0/.well-known/openid-configuration
+    tenantID: <tenant-id>
+    clientID: <existing-application-client-id>
+    credentialType: managedIdentity
+    managedIdentity:
+      clientID: <user-assigned-managed-identity-client-id>
+    # 其余 OIDC 和 group-manager 配置保持不变。
+```
+
+部署不再为 REST Server Pod 添加 Workload Identity 标签，并会移除
+`rest-server-account` 上之前的 MI client ID 和 tenant 注解。
+重新应用 REST Server 部署后，还需按下方步骤显式滚动重启并等待完成，
+以替换仍带有旧 Webhook 注入的 Pod；仅重新应用部署不保证 Pod 会被替换。
+如果仍注入 `AZURE_FEDERATED_TOKEN_FILE`，REST Server 会拒绝启动，
+避免 SDK 在使用 `ManagedIdentityCredential` 时仍自动选择联合认证。
+删除已有 AKS 到 MI 的 FIC 前，需确认没有其他调用方。
+
+REST Server 通过 `ManagedIdentityCredential` 显式选择配置的用户分配托管身份，获取
+`api://AzureADTokenExchange/.default` 的令牌，再将其作为应用凭据交换用户的授权码。
+它使用节点原生托管身份，不使用开发者凭据，也不会在失败时回退到密钥或证书。
+MI 模式不再分发 OIDC 证书；证书检查组件不再挂载 OIDC 证书，但保留网站 HTTPS 证书检查。
+
+未设置 `credentialType` 的配置保持原有密钥/证书行为，也可显式指定 `clientSecret` 或
+`certificate`。所有调用方迁移完成、回滚窗口结束后，才移除旧凭据或旧 SN+I 信任。
+仅添加 MI 信任不会清理应用上的不安全凭据。此次凭据迁移不需要清除现有用户数据。
+如果只是更换现有 AAD 部署的应用凭据，不要执行下面的数据清理或全服务重启步骤；
+推送服务配置，重新应用 REST Server 和 Alert Manager 部署，
+然后显式滚动重启 REST Server 并等待完成：
+
+```bash
+kubectl -n default rollout restart daemonset/rest-server-ds
+kubectl -n default rollout status daemonset/rest-server-ds
+```
+
+REST Server 在进程启动时读取凭据，仅修改 ConfigMap 不保证 Pod 会重启。
+必须先等待滚动更新完成，再验证登录或停用任何旧凭据。
+
+生产切换前，在测试集群分别使用真实管理员和普通用户账号验收：
+确认二者都能登录、获得 OpenPAI JWT，并用它查询任务、提交一个小任务、读取日志和停止任务。
+确认普通用户不能停止其他用户的任务，也不能执行仅限管理员的操作。
+每个迁移集群都需要完成这些验收；使用 mock 的认证测试不能证明真实组成员关系、
+任务权限、调度或日志访问正常。
+
+### 清除旧数据（仅限首次从基础认证迁移到 AAD）
 
 请删除老的用户数据（即基础认证模式中的用户登录信息）。在AAD模式中，老用户数据已经用不到了。
 
@@ -134,7 +208,7 @@ authentication:
 ./paictl.py service delete -n rest-server
 ```
 
-### 更新配置并重启集群
+### 更新配置并重启集群（仅限首次配置 AAD）
 
 完成上述所有步骤之后，请更新配置并重新启动所有OpenPAI服务： 
 

@@ -151,7 +151,98 @@ authentication:
       externalName: "team_alias_d"
 ```
 
-### Clean Previous Data
+### AKS managed identity authentication
+
+For AKS, the REST Server can authenticate the existing Entra application using a
+user-assigned managed identity instead of a client secret or certificate. User
+sign-in, application permissions, and redirect URIs remain unchanged.
+
+Assign the managed identity to the compute hosting every REST Server replica so
+it is available through the native managed identity endpoint (IMDS on Azure VMs).
+On AKS, use an isolated service node pool, not nodes running user training jobs.
+Other workloads with IMDS access on those nodes can also use the identity.
+Confirm the AKS support and node upgrade lifecycle for the identity assignment
+before production rollout; a direct VMSS change is not an AKS-managed workload
+identity binding.
+
+Configure one federated identity credential on the application:
+
+| Credential location | Issuer | Subject | Audience |
+| --- | --- | --- | --- |
+| Entra application | `https://login.microsoftonline.com/<tenant-id>/v2.0` | Managed identity **principal/object ID**, not client ID | `api://AzureADTokenExchange` |
+
+The application and managed identity must be in the same tenant. If several
+clusters share a managed identity, assign it to the service compute in each
+cluster; the application needs only one trust for the identity. No Azure RBAC
+role assignment to the identity is needed solely for this authentication flow.
+
+Do not acquire the MI token through AKS Workload Identity: Entra rejects using
+a token obtained through one FIC as the credential for another FIC
+(`AADSTS700231`). This mode does not require AKS OIDC, a projected ServiceAccount
+token, or an AKS-to-MI FIC.
+
+In `services-configuration.yaml`, replace `clientSecret` or `certificate` with:
+
+```yaml
+authentication:
+  OIDC: true
+  OIDC-type: AAD
+  AAD:
+    wellKnownURL: https://login.microsoftonline.com/<tenant-id>/v2.0/.well-known/openid-configuration
+    tenantID: <tenant-id>
+    clientID: <existing-application-client-id>
+    credentialType: managedIdentity
+    managedIdentity:
+      clientID: <user-assigned-managed-identity-client-id>
+    # Preserve the remaining OIDC and group-manager settings.
+```
+
+The deployment does not label REST Server pods for Workload Identity and removes
+the previous MI client ID and tenant annotations from `rest-server-account`.
+After reapplying the REST Server deployment, explicitly restart it and wait for
+the rollout as shown below to replace pods with old webhook injection.
+Reapplying alone does not guarantee Pod replacement.
+REST Server rejects startup if `AZURE_FEDERATED_TOKEN_FILE` is still injected,
+because the SDK would otherwise use federation even with `ManagedIdentityCredential`.
+Do not delete an existing AKS-to-MI FIC until any other consumers are checked.
+
+The REST Server uses `ManagedIdentityCredential`, explicitly selecting the
+configured user-assigned identity, to obtain a token for
+`api://AzureADTokenExchange/.default`, then uses it as the application credential
+when exchanging the user's authorization code. It uses the native node-assigned
+identity, not developer credentials or a secret/certificate fallback. MI mode does not
+distribute certificate files, and the certificate checker continues checking
+the portal's HTTPS certificate without mounting an OIDC certificate.
+
+Configurations without `credentialType` retain the existing secret/certificate
+behavior. Explicit `clientSecret` and `certificate` types are also supported.
+Keep the old application credential or SN+I trust until all callers have migrated
+and the rollback window has closed. Remove only the retired trust afterward;
+adding an MI trust alone does not remove unsafe credentials from the application.
+Existing user data does not need to be cleared for this credential migration.
+Do not run the data cleanup or full-cluster restart below when only changing the
+credential of an existing AAD deployment. Push the service configuration,
+reapply REST Server and Alert Manager, then explicitly restart REST Server and
+wait for the rollout:
+
+```bash
+kubectl -n default rollout restart daemonset/rest-server-ds
+kubectl -n default rollout status daemonset/rest-server-ds
+```
+
+REST Server reads credentials at process startup; a ConfigMap-only change does
+not guarantee a Pod restart. Complete the rollout before validating login or
+retiring any old credentials.
+
+Before production rollout, validate with real administrator and nonadministrator
+accounts on the test cluster. Confirm that both can sign in, receive an OpenPAI
+JWT, and use it to list jobs, submit a small job, read its logs, and stop it.
+Confirm that a nonadministrator cannot stop another user's job or perform
+administrator-only operations. Complete this acceptance for each migrated
+cluster; mocked authentication tests do not establish real group membership,
+job permissions, scheduling, or log access.
+
+### Clean Previous Data (Initial Basic-to-AAD Migration Only)
 
 Please clean all users' data. Because in this mode, the user's permission will be managed by the Azure active directory. The local data is useless.
 
@@ -159,7 +250,7 @@ Please clean all users' data. Because in this mode, the user's permission will b
 ./paictl.py service delete -n rest-server
 ```
 
-### Restart All OpenPAI Services
+### Restart All OpenPAI Services (Initial AAD Setup Only)
 
 After all the steps above, push the configuration and restart all OpenPAI services:
 

@@ -6,9 +6,17 @@ OIDC-type: aad
 wellKnownURL: {{cluster_cfg['authentication']['AAD']['wellKnownURL']}}
 tenantID: {{ cluster_cfg['authentication']['AAD']['tenantID'] }}
 clientID: {{ cluster_cfg['authentication']['AAD']['clientID'] }}
-{% if cluster_cfg['authentication']['AAD']['certificate'] %}
+{% if cluster_cfg['authentication']['AAD'].get('credentialType') == 'managedIdentity' %}
+credentialType: managedIdentity
+managedIdentity:
+  clientID: {{ cluster_cfg['authentication']['AAD']['managedIdentity']['clientID'] }}
+{% elif cluster_cfg['authentication']['AAD'].get('credentialType') == 'certificate'
+     or (cluster_cfg['authentication']['AAD'].get('credentialType') != 'clientSecret'
+         and cluster_cfg['authentication']['AAD'].get('certificate')) %}
+credentialType: certificate
 thumbprint: {{ cluster_cfg['authentication']['AAD']['certificate']['thumbprint'] }}
 {% else %}
+credentialType: clientSecret
 clientSecret: {{ cluster_cfg['authentication']['AAD']['clientSecret'] }}
 {% endif %}
 redirectUrl: '{{ cluster_cfg['pylon']['uri-https'] }}/rest-server/api/v1/authn/oidc/return'

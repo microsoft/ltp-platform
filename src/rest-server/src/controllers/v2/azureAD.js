@@ -8,7 +8,13 @@ const querystring = require('querystring');
 const axios = require('axios');
 const createError = require('@pai/utils/error');
 const jwt = require('jsonwebtoken');
-const { getLoginRedirect, getFromRedirect } = require('@pai/utils/oidcRedirect');
+const {
+  getLoginRedirect,
+  getFromRedirect,
+} = require('@pai/utils/oidcRedirect');
+const { ManagedIdentityCredential } = require('@azure/identity');
+
+let managedIdentityCredential;
 
 const requestAuthCode = async (req, res, next) => {
   let state;
@@ -78,20 +84,36 @@ const requestTokenWithCode = async (req, res, next) => {
     const redirectUri = authnConfig.OIDCConfig.redirectUrl;
     const grantType = 'authorization_code';
     const requestUrl = authnConfig.OIDCConfig.token_endpoint;
-    const useSecret = 'clientSecret' in authnConfig.OIDCConfig;
-    var data = {};
-    if (useSecret) {
-      const clientSecret = authnConfig.OIDCConfig.clientSecret
-      data = {
-        client_id: clientId,
-        scope: scope,
-        code: authCode,
-        redirect_uri: redirectUri,
-        grant_type: grantType,
-        client_secret: clientSecret,
-      };
-    } else {
-      const client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+    const credentialType = authnConfig.OIDCConfig.credentialType;
+    const data = {
+      client_id: clientId,
+      scope: scope,
+      code: authCode,
+      redirect_uri: redirectUri,
+      grant_type: grantType,
+    };
+    if (credentialType === 'managedIdentity') {
+      if (!managedIdentityCredential) {
+        managedIdentityCredential = new ManagedIdentityCredential({
+          clientId: authnConfig.OIDCConfig.managedIdentity.clientID,
+        });
+      }
+      const token = await managedIdentityCredential.getToken(
+        'api://AzureADTokenExchange/.default',
+      );
+      if (!token || !token.token) {
+        throw createError(
+          'Internal Server Error',
+          'ManagedIdentityTokenError',
+          'Failed to acquire a managed identity assertion.',
+        );
+      }
+      data.client_assertion_type =
+        'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+      data.client_assertion = token.token;
+    } else if (credentialType === 'clientSecret') {
+      data.client_secret = authnConfig.OIDCConfig.clientSecret;
+    } else if (credentialType === 'certificate') {
       const privateKey = authnConfig.OIDCConfig.privateKey;
       const publicKey = authnConfig.OIDCConfig.publicKey;
 
@@ -101,28 +123,32 @@ const requestTokenWithCode = async (req, res, next) => {
         iss: clientId,
         sub: clientId,
         jti: Math.random().toString(36).substring(2),
-        exp: Math.floor(Date.now() / 1000) + (60 * 10) // Token expires in 10 minutes
+        exp: Math.floor(Date.now() / 1000) + 60 * 10, // Token expires in 10 minutes
       };
 
       // Define the JWT headers
       const headers = {
         alg: 'RS256',
         typ: 'JWT',
-        x5t: Buffer.from(authnConfig.OIDCConfig.thumbprint, 'hex').toString('base64url'),
-        x5c: [publicKey]
+        x5t: Buffer.from(authnConfig.OIDCConfig.thumbprint, 'hex').toString(
+          'base64url',
+        ),
+        x5c: [publicKey],
       };
 
       // Sign the JWT
-      const jwtAssertion = jwt.sign(payload, privateKey, { algorithm: 'RS256', header: headers });
-      data = {
-        client_id: clientId,
-        scope: scope,
-        code: authCode,
-        redirect_uri: redirectUri,
-        grant_type: grantType,
-        client_assertion_type: client_assertion_type,
-        client_assertion: jwtAssertion,
-      };
+      data.client_assertion_type =
+        'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+      data.client_assertion = jwt.sign(payload, privateKey, {
+        algorithm: 'RS256',
+        header: headers,
+      });
+    } else {
+      throw createError(
+        'Internal Server Error',
+        'InvalidOidcCredentialType',
+        'Unsupported OIDC credential type.',
+      );
     }
     const response = await axios.post(requestUrl, querystring.stringify(data));
     req.undecodedIDToken = response.data.id_token;
@@ -142,8 +168,8 @@ const parseTokenData = async (req, res, next) => {
     const email = req.accessToken.upn
       ? req.accessToken.upn
       : req.accessToken.email
-      ? req.accessToken.email
-      : req.accessToken.unique_name;
+        ? req.accessToken.email
+        : req.accessToken.unique_name;
     const userBasicInfo = {
       email: email,
       username: email.substring(0, email.lastIndexOf('@')),

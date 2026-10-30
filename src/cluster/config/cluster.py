@@ -16,6 +16,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+import base64
 import sys
 import subprocess
 import logging
@@ -146,7 +147,7 @@ class Cluster:
         else:
             self.logger.info("docker registry authentication not provided")
 
-            base64code = "{}".encode("base64").decode("utf-8")
+            base64code = base64.b64encode(b"{}").decode("ascii")
 
         docker_registry_configuration["base64code"] = base64code.replace("\n", "")
 
