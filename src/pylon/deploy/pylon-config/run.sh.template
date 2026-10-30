@@ -17,9 +17,20 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-python3 /pylon-config/render.py
+python3 /pylon-config/render.py || exit $?
 cp /root/nginx.conf /etc/nginx/nginx.conf
 cp /root/location.conf /etc/nginx/location.conf
+
+nofile_limit=$(ulimit -n)
+if [ "$nofile_limit" != "unlimited" ] && [ "$nofile_limit" -lt 65536 ]; then
+  echo "Warning: nofile=$nofile_limit may limit worker_connections=65535; configure container runtime limits with headroom for other file descriptors." >&2
+fi
+
+if ! somaxconn=$(cat /proc/sys/net/core/somaxconn); then
+  echo "Warning: unable to check net.core.somaxconn; the effective listen backlog is unknown." >&2
+elif [ "$somaxconn" -lt 4096 ]; then
+  echo "Warning: net.core.somaxconn=$somaxconn limits backlog=4096; configure pod sysctls and the node's allowed unsafe sysctls if required." >&2
+fi
 
 {% if 'ssl' in cluster_cfg['pylon'] %}
 cp /https-config/{{cluster_cfg['pylon']['ssl']['crt_name']}} /root/{{cluster_cfg['pylon']['ssl']['crt_name']}}
