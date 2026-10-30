@@ -34,6 +34,10 @@ class Layout:
         if duplicate_host_list:
             return False, "duplicate hostname [{}] in kubernetes-configuration".format(", ".join(duplicate_host_list))
 
+        for host in self.layout_configuration["machine-list"]:
+            if 'pai-ib' in host and host['pai-ib'] not in ('true', 'false'):
+                return False, 'pai-ib must be "true" or "false" for node [{}]'.format(host['hostname'])
+
         # validate unique master machine
         masters = [host for host in self.layout_configuration["machine-list"] if 'pai-master' in host and host['pai-master'] == 'true']
         if len(masters) == 0:

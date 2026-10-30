@@ -59,10 +59,25 @@ data:
           regex: true
           action: keep
         - source_labels: [__meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_name, __meta_kubernetes_node_label_vendor]
-          regex: 'job-exporter;moneo-gpu-exporter;cpu'
+          regex: 'job-exporter;moneo-gpu-exporter;(amd|nvidia)'
+          target_label: __tmp_pai_gpu_exporter_enabled
+          replacement: 'true'
+          action: replace
+        - source_labels: [__meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_name, __tmp_pai_gpu_exporter_enabled]
+          regex: 'job-exporter;moneo-gpu-exporter;'
           action: drop
-        - source_labels: [__meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_name, __meta_kubernetes_node_label_pai_master]
-          regex: 'job-exporter;moneo-gpu-exporter;true'
+        - source_labels: [__meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_name, __meta_kubernetes_node_label_vendor]
+          regex: 'job-exporter;moneo-net-exporter;(amd|nvidia)'
+          target_label: __tmp_pai_net_exporter_enabled
+          replacement: 'true'
+          action: replace
+        - source_labels: [__meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_name, __meta_kubernetes_node_label_pai_ib]
+          regex: 'job-exporter;moneo-net-exporter;true'
+          target_label: __tmp_pai_net_exporter_enabled
+          replacement: 'true'
+          action: replace
+        - source_labels: [__meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_name, __tmp_pai_net_exporter_enabled]
+          regex: 'job-exporter;moneo-net-exporter;'
           action: drop
         - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
           regex: (.+)
