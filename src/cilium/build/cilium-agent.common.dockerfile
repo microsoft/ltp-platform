@@ -15,19 +15,19 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Build Cilium-owned binaries from source with the official v1.20.2 builder,
-# which provides Go 1.26.8 and the required BPF/LLVM build toolchain.
+# Build Cilium-owned binaries from source with the official v1.20.4 builder,
+# which provides Go 1.26.10 and the required BPF/LLVM build toolchain.
 # Runtime utilities such as gops and the loopback CNI plugin remain from the
 # matching official runtime image; Pebble is replaced with its patched release.
 #
 
-ARG CILIUM_VERSION=v1.20.2
+ARG CILIUM_VERSION=v1.20.4
 ARG PEBBLE_VERSION=v1.32.2
-ARG CILIUM_BUILDER_IMAGE=quay.io/cilium/cilium-builder:e631dcf9a2cbbeb01852013a0262d045e9b23d72@sha256:03c3cd535844e38e9fe61f6715d5991446bb93c8ef5ce60169e8fa4f5c5afbfe
-ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:13953be3b88431ba8d71634e240280b1148e6d20@sha256:9f0f69b62f64cc2ce7668c2f07332dd3fc7523e39446f185aa34f26c8f760af9
-ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.37.6-1789133542-cbec91f666af0bf742da986d43832932dbb26b82@sha256:af7382699576b9e65e9184efa52eeca0b58aea70ad6e511bf260c91d9f740463
+ARG CILIUM_BUILDER_IMAGE=quay.io/cilium/cilium-builder:66897bc214ae487c12578033551e0404996a88e7@sha256:3e560a0977aecc72f1dca43d0e8e101fbc5415e22a638dd61ebf29f44f43920f
+ARG CILIUM_RUNTIME_IMAGE=quay.io/cilium/cilium-runtime:d3ef3d6b993da541b58cb69b832f432d8d753059@sha256:577a057256325f139db1acb598d73c0cf7cd081f4bcc8ecb942c271a8ca32dbd
+ARG CILIUM_ENVOY_IMAGE=quay.io/cilium/cilium-envoy:v1.39.5-1792733054-8c73b2816bc8239e27f1fd53b271884688137459@sha256:547ab45f6092f681d9f54f3be9fa8fb1e705c9c5dc2df388efe3a52aa6965629
 
-# Stage 1: Build Cilium with the builder and commands pinned by upstream v1.20.2.
+# Stage 1: Build Cilium with the builder and commands pinned by upstream v1.20.4.
 FROM --platform=${BUILDPLATFORM} ${CILIUM_BUILDER_IMAGE} AS builder
 ARG CILIUM_VERSION
 ARG PEBBLE_VERSION

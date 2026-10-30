@@ -52,19 +52,23 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
 FROM ubuntu:22.04
 
 ARG TARGETARCH
+ARG GRAFANA_BUILD_ID=40412481033
+ARG GRAFANA_JAEGER_PLUGIN_VERSION=13.0.7
+ARG GRAFANA_PROMETHEUS_PLUGIN_VERSION=13.2.5
 ENV \
-  GRAFANA_VERSION=10.4.18+security~01 \
+  GRAFANA_VERSION=13.3.0 \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
+  GF_PLUGINS_DISABLE_PLUGINS=stackdriver \
   UPGRADEALL=false
 
 
 RUN \
   apt-get update && \
   apt-get -y --force-yes --no-install-recommends install libfontconfig wget ca-certificates adduser libfontconfig1 musl curl jq && \
-  wget -O /tmp/grafana.deb https://dl.grafana.com/oss/release/grafana_${GRAFANA_VERSION}_${TARGETARCH}.deb && \
-  dpkg -i /tmp/grafana.deb && \
+  wget -O /tmp/grafana.deb https://dl.grafana.com/grafana/release/${GRAFANA_VERSION}/grafana_${GRAFANA_VERSION}_${GRAFANA_BUILD_ID}_linux_${TARGETARCH}.deb && \
+  apt-get -y --no-install-recommends install /tmp/grafana.deb && \
   rm -f /tmp/grafana.deb && \
   ### branding && \
   apt-get autoremove -y --force-yes && \
@@ -72,6 +76,19 @@ RUN \
   rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get upgrade -y
+
+# Remove both bundled copies, including the unused Cloud Monitoring plugin.
+RUN rm -rf \
+      /usr/share/grafana/data/plugins-bundled/jaeger \
+      /usr/share/grafana/data/plugins-bundled/prometheus \
+      /usr/share/grafana/data/plugins-bundled/stackdriver \
+      /var/lib/grafana/plugins-bundled/jaeger \
+      /var/lib/grafana/plugins-bundled/prometheus \
+      /var/lib/grafana/plugins-bundled/stackdriver && \
+    /usr/share/grafana/bin/grafana cli --homepath=/usr/share/grafana \
+      --pluginsDir="${GF_PLUGIN_DIR}" plugins install jaeger "${GRAFANA_JAEGER_PLUGIN_VERSION}" && \
+    /usr/share/grafana/bin/grafana cli --homepath=/usr/share/grafana \
+      --pluginsDir="${GF_PLUGIN_DIR}" plugins install prometheus "${GRAFANA_PROMETHEUS_PLUGIN_VERSION}"
 
 COPY --from=build /usr/src/plugin/dist ${GF_PLUGIN_DIR}/yesoreyeram-infinity-datasource
 

@@ -21,6 +21,9 @@ metadata:
   name: grafana
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
+    rollingUpdate: null
   selector:
     matchLabels:
       app: grafana
@@ -58,7 +61,7 @@ spec:
         resources:
           limits:
             cpu: 2000m
-            memory: "256Mi"
+            memory: "1Gi"
         {%- endif %}
 {%- if cluster_cfg["cluster"]["docker-registry"]["secret-name"] %}
       imagePullSecrets:
