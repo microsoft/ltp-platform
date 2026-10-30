@@ -1,0 +1,90 @@
+name: paicicd migration smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: paicicd-migration-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: [self-hosted, Linux, X64, paicicd]
+    timeout-minutes: 10
+    steps:
+      - name: Verify migrated storage and local Docker
+        shell: bash
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          
+          expected_uuid=5745d1ca-fa21-46ee-8860-fbfd2b18883c
+          test "$(hostname -s)" = paicicd
+          test "$(id -u)" = 1000
+          test "$(findmnt -rn -o UUID --target "$HOME")" = "$expected_uuid"
+          test "$(findmnt -rn -o UUID --mountpoint /var/lib/docker)" = "$expected_uuid"
+          export DOCKER_HOST=unix:///var/run/docker.sock
+          test "$(docker info --format '{{.Driver}}')" = overlay2
+          test "$(docker info --format '{{.DockerRootDir}}')" = /var/lib/docker
+          
+          if [[ "${GITHUB_ACTIONS:-}" == true ]]; then
+              key="gh-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          elif [[ -n "${BUILD_BUILDID:-}" ]]; then
+              test "${AGENT_NAME}" = paicicd
+              key="az-${BUILD_BUILDID}"
+          else
+              echo "This smoke test must run as an actual GitHub Actions or Azure Pipelines job." >&2
+              exit 1
+          fi
+          
+          directory=$(mktemp -d "$HOME/paicicd-ci-smoke-${key}.XXXXXX")
+          image="paicicd-ci-smoke:${key}"
+          container="paicicd-ci-smoke-${key}"
+          image_created=0
+          container_created=0
+          
+          cleanup() {
+              result=$?
+              trap - EXIT
+              if (( container_created )); then
+                  if ! docker container rm "$container"; then
+                      echo "Failed to remove the smoke-test container: $container" >&2
+                      result=1
+                  fi
+              fi
+              if (( image_created )); then
+                  if ! docker image rm "$image"; then
+                      echo "Failed to remove the smoke-test image: $image" >&2
+                      result=1
+                  fi
+              fi
+              for name in marker Dockerfile recovered; do
+                  if [[ -f "$directory/$name" ]]; then
+                      if ! rm -- "$directory/$name"; then
+                          echo "Failed to remove smoke-test file: $directory/$name" >&2
+                          result=1
+                      fi
+                  fi
+              done
+              if ! rmdir -- "$directory"; then
+                  echo "Smoke-test directory is not empty or could not be removed: $directory" >&2
+                  result=1
+              fi
+              exit "$result"
+          }
+          trap cleanup EXIT
+          
+          printf 'paicicd-ci-smoke:%s\n' "$key" > "$directory/marker"
+          test "$(cat "$directory/marker")" = "paicicd-ci-smoke:$key"
+          printf 'FROM scratch\nCOPY marker /paicicd-smoke-marker\n' > "$directory/Dockerfile"
+          docker build --network=none --tag "$image" "$directory"
+          image_created=1
+          docker create --network=none --name "$container" "$image" /not-executed
+          container_created=1
+          docker cp "$container:/paicicd-smoke-marker" "$directory/recovered"
+          cmp "$directory/marker" "$directory/recovered"
+          printf 'PAICICD_CI_SMOKE_OK host=%s uid=%s data_uuid=%s run=%s\n' \
+              "$(hostname -s)" "$(id -u)" "$expected_uuid" "$key"
