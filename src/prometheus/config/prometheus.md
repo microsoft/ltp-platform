@@ -67,3 +67,33 @@ prometheus:
     <td>URL</td>
 </tr>
 </table>
+
+#### GPU and InfiniBand exporter targets
+
+Prometheus scrapes `job-exporter`'s `moneo-gpu-exporter` container only on nodes
+labeled `vendor=nvidia` or `vendor=amd`. Missing or other vendor labels do not
+enable GPU scraping. Node roles do not override these label-based rules.
+
+Prometheus scrapes `job-exporter`'s `moneo-net-exporter` container on nodes labeled
+`vendor=nvidia` or `vendor=amd` by default. Other nodes must explicitly opt in
+with `pai-ib=true`. This selects scrape targets only; it does not change Pod
+placement or exporter startup behavior. Ordinary node/network monitoring and
+other containers are unaffected.
+
+No service configuration change is required for GPU nodes. To enable IB
+monitoring on another PAI node, add the optional string field to its existing
+`layout.yaml` machine-list entry:
+
+```yaml
+pai-ib: "true"
+```
+
+`cluster-configuration` applies the `pai-ib=true` node label when this field is
+`"true"` and removes the label when it is absent or `"false"`. Apply the updated
+cluster configuration and run `cluster-configuration` before relying on this
+opt-in; restarting Prometheus alone does not generate node labels.
+
+`pai-ib: "false"` removes the explicit opt-in; it does not disable the GPU-node
+default. A selected node without IB devices or with a failed exporter remains
+Down. In particular, labeling a CPU test node `vendor=nvidia` deliberately
+retains its IB target even if the node has no real IB hardware.
