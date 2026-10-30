@@ -140,7 +140,13 @@ output scripts object = reduce(
         ],
         take(entity.value, 1),
         [
-          'apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list -o Dir::Etc::sourceparts=- -o APT::Update::Error-Mode=any -o Acquire::Retries=3 update; DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -o DPkg::Lock::Timeout=300 --assume-yes --no-install-recommends --no-remove install --only-upgrade libbrotli1'
+          'apt_update_attempt=0'
+          'until apt-get -o Dir::Etc::sourcelist=/etc/apt/sources.list -o Dir::Etc::sourceparts=- -o APT::Update::Error-Mode=any -o Acquire::Retries=3 update; do'
+          '  apt_update_attempt=$((apt_update_attempt + 1))'
+          '  if [ "$apt_update_attempt" -ge 30 ]; then echo "APT update failed after 30 attempts" >&2; exit 1; fi'
+          '  sleep 10'
+          'done'
+          'DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=l apt-get -o DPkg::Lock::Timeout=300 --assume-yes --no-install-recommends --no-remove install --only-upgrade libbrotli1'
         ],
         skip(entity.value, 1),
         [
