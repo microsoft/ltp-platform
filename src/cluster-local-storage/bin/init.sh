@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+set -e
 
 if [ -n "$CLUSTER_LOCAL_STORAGE_WORKER" ]; then
   CLUSTER_LOCAL_STORAGE_IPOIB_NUM=${CLUSTER_LOCAL_STORAGE_IPOIB_NUM:-8}
@@ -30,7 +31,6 @@ env | grep CLUSTER_LOCAL_STORAGE >> /etc/environment
 # ssh
 cat /secret/ssh_host_ed25519_key > /etc/ssh/ssh_host_ed25519_key
 cat /secret/ssh_host_ed25519_key.pub > /etc/ssh/ssh_host_ed25519_key.pub
-cat /secret/ssh_host_ed25519_key.pub > /root/.ssh/authorized_keys
 
 cat > /root/.ssh/config << EOL
 Host *
@@ -38,9 +38,13 @@ Host *
     IdentityFile /etc/ssh/ssh_host_ed25519_key
     StrictHostKeyChecking no
 EOL
-service ssh restart
 
-# rsync
+# Controllers run transfers on workers over SSH, including manual operations.
+# Only workers serve storage; controller listeners collide on shared host ports.
+if [ -n "$CLUSTER_LOCAL_STORAGE_WORKER" ]; then
+  cat /secret/ssh_host_ed25519_key.pub > /root/.ssh/authorized_keys
+  service ssh restart
+
 cat > /etc/rsyncd.conf << EOL
 port = $RSYNC_PORT
 use chroot = yes
@@ -57,4 +61,5 @@ log file = /var/log/rsync.log
     read only = false
     list = yes
 EOL
-service rsync restart
+  service rsync restart
+fi
