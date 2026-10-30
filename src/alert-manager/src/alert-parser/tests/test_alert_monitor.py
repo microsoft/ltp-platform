@@ -8,6 +8,7 @@ from unittest.mock import Mock, patch
 import pandas as pd
 from datetime import datetime, timezone
 import time
+from requests.exceptions import ConnectionError, Timeout
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
 
@@ -365,4 +366,75 @@ def test_check_availability(monitor):
         mock_monitor.assert_called_once()
         assert monitor.last_update_time is not None
         # Verify is_running is properly managed
-        assert monitor.is_running == False 
+        assert monitor.is_running == False
+
+
+@pytest.mark.parametrize("error_type", [ConnectionError, Timeout])
+@pytest.mark.parametrize("previous_update", [None, datetime(2026, 10, 26, 6, tzinfo=timezone.utc)])
+def test_check_availability_retries_after_prometheus_failure(
+        monitor, mock_request_util, mock_node_updater, caplog, error_type, previous_update):
+    monitor.last_update_time = previous_update
+    mock_node_updater.get_last_actions_update_time.return_value = None
+    mock_node_updater.get_nodes_by_status.return_value = []
+    error = error_type("Prometheus unavailable")
+    mock_request_util.prometheus_query.side_effect = [error, {"result": []}, {"result": []}]
+    failed_time = datetime(2026, 10, 26, 7, tzinfo=timezone.utc)
+    recovered_time = datetime(2026, 10, 26, 7, 10, tzinfo=timezone.utc)
+
+    with patch('node_alert_monitor.datetime') as mock_datetime:
+        mock_datetime.now.side_effect = [failed_time, recovered_time]
+        monitor.check_availability()
+
+        assert monitor.last_update_time == previous_update
+        assert not monitor.is_running
+        mock_node_updater.get_nodes_by_status.assert_not_called()
+        mock_node_updater.update_status_action.assert_not_called()
+        assert any(record.exc_info and record.exc_info[1] is error for record in caplog.records)
+
+        monitor.check_availability()
+
+    assert monitor.last_update_time == recovered_time
+    assert not monitor.is_running
+    expected_offset = (
+        f'{int(recovered_time.timestamp() - previous_update.timestamp())}s'
+        if previous_update else f'{monitor.update_interval}m'
+    )
+    retry_query = mock_request_util.prometheus_query.call_args_list[1].kwargs["query"]
+    assert f"[{expected_offset}:30s] @ {recovered_time.timestamp()}" in retry_query
+
+
+def test_check_availability_aborts_if_second_prometheus_query_fails(
+        monitor, mock_request_util, mock_node_updater):
+    mock_node_updater.get_last_actions_update_time.return_value = None
+    mock_request_util.prometheus_query.side_effect = [
+        {"result": []}, ConnectionError("Prometheus unavailable")
+    ]
+
+    monitor.check_availability()
+
+    assert monitor.last_update_time is None
+    assert not monitor.is_running
+    mock_node_updater.get_nodes_by_status.assert_not_called()
+    mock_node_updater.update_status_action.assert_not_called()
+
+
+def test_check_availability_propagates_unexpected_errors(monitor):
+    with patch.object(monitor, 'monitor_status_changes', side_effect=ValueError("Invalid data")):
+        with pytest.raises(ValueError, match="Invalid data"):
+            monitor.check_availability()
+
+    assert monitor.last_update_time is None
+    assert not monitor.is_running
+
+
+def test_start_monitoring_keeps_polling_after_initial_connection_failure(monitor):
+    with patch.object(monitor, 'monitor_status_changes', side_effect=ConnectionError("Unavailable")), \
+         patch('node_alert_monitor.schedule') as mock_schedule, \
+         patch('node_alert_monitor.time.sleep', side_effect=RuntimeError("Stop test loop")):
+        with pytest.raises(RuntimeError, match="Stop test loop"):
+            monitor.start_monitoring()
+
+    mock_schedule.every.return_value.minutes.do.assert_called_once_with(monitor.check_availability)
+    mock_schedule.run_pending.assert_called_once_with()
+    assert monitor.last_update_time is None
+    assert not monitor.is_running

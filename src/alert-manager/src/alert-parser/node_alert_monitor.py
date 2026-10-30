@@ -11,6 +11,8 @@ from datetime import datetime
 from typing import Dict, List, Tuple, Optional
 import logging
 
+from requests.exceptions import ConnectionError, Timeout
+
 from ltp_storage.utils.request_util import RequestUtil
 from ltp_storage.utils.time_util import convert_timestamp, parse_duration
 from ltp_storage.data_schema.node_status import NodeStatus, NodeStatusRecord
@@ -362,6 +364,8 @@ class NodeAvailabilityMonitor:
             logger.info(f"Checking node availability status at {current_time}")
             self.monitor_status_changes(current_time.timestamp(), f'{self.update_interval}m')
             self.last_update_time = current_time
+        except (ConnectionError, Timeout):
+            logger.exception("Prometheus request failed; will retry at the next monitoring interval.")
         finally:
             self.is_running = False
 
