@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.26.9-alpine3.23 as builder
+FROM golang:1.26.10-alpine3.23 as builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -24,7 +24,7 @@ WORKDIR /usr/src/k8s-rdma-shared-dp
 RUN go get golang.org/x/text@v0.39.0 && \
     go get golang.org/x/mod@v0.40.0 && \
     go get google.golang.org/grpc@v1.83.2 && \
-    go get golang.org/x/net@v0.60.0
+    go get golang.org/x/net@v0.62.0
 
 RUN CGO_ENABLED=0 go build -o build/k8s-rdma-shared-dp -tags no_openssl -mod=mod -ldflags "-s -w" ./cmd/k8s-rdma-shared-dp
 

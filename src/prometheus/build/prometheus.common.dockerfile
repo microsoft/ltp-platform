@@ -21,7 +21,7 @@ ARG TARGETOS
 ARG TARGETARCH
 
 FROM ${PROMETHEUS_BUILDER_IMAGE} AS builder
-ENV GOTOOLCHAIN=go1.26.9
+ENV GOTOOLCHAIN=go1.26.10
 ARG PROMETHEUS_VERSION
 ARG TARGETOS
 ARG TARGETARCH
@@ -31,9 +31,9 @@ RUN git clone --depth 1 --branch ${PROMETHEUS_VERSION} \
     https://github.com/prometheus/prometheus.git .
 
 RUN go get github.com/go-openapi/swag/jsonutils@v0.27.1 \
-      golang.org/x/crypto@v0.57.0 \
+      golang.org/x/crypto@v0.58.0 \
       google.golang.org/grpc@v1.83.2 \
-      golang.org/x/net@v0.60.0 && \
+      golang.org/x/net@v0.62.0 && \
     go mod tidy && \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} make build PREFIX=/out
 

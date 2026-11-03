@@ -58,7 +58,7 @@ The image installs the official Grafana OSS `13.3.0` Debian package with build
 ID `40412481033`, including its matching backend and frontend assets. These
 binaries are supplied by the package, not rebuilt by the Infinity plugin stage.
 The Infinity plugin remains at `v3.11.3` and is built separately with Go
-`1.26.9` and `golang.org/x/net v0.60.0`.
+`1.26.10` and `golang.org/x/net v0.62.0`.
 
 The Jaeger and Prometheus plugins are installed separately at `13.0.7` and
 `13.2.5`; both bundled copies are removed. The unused Cloud Monitoring

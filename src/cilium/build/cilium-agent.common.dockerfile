@@ -41,6 +41,7 @@ RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
 
 RUN go get github.com/go-openapi/swag/jsonutils@v0.27.1 && \
     go get github.com/gopacket/gopacket@v1.7.1 && \
+    go get golang.org/x/net@v0.62.0 && \
     go mod tidy && \
     go mod vendor
 
