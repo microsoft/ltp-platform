@@ -15,12 +15,38 @@
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# Rebuild cilium-envoy image with latest OS security patches.
+# Rebuild the bundled Go components and apply the latest OS security patches.
 # Base: official cilium-envoy matching cilium v1.20.4, with the Brotli decoder fix.
-# This patches OS-level CVEs (libc6, libgnutls30t64, libsystemd0).
+# Keep the upstream Envoy and starter binaries unchanged.
 #
 
 ARG CILIUM_ENVOY_TAG=v1.39.5-1792733054-8c73b2816bc8239e27f1fd53b271884688137459
+FROM golang:1.27.3 AS healthcheck-builder
+ARG CILIUM_ENVOY_TAG
+ARG TARGETOS
+ARG TARGETARCH
+ENV GOTOOLCHAIN=local
+WORKDIR /src
+
+RUN git init . && \
+    git fetch --depth 1 https://github.com/cilium/proxy.git "${CILIUM_ENVOY_TAG##*-}" && \
+    git checkout --detach FETCH_HEAD && \
+    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+      go build -trimpath -ldflags="-s -w" \
+      -o /out/cilium-envoy-healthcheck ./healthcheck/main.go
+
+# Keep the upstream proxylib toolchain and a glibc baseline below Ubuntu 24.04.
+FROM golang:1.27.3-bookworm AS proxylib-builder
+ARG TARGETOS
+ARG TARGETARCH
+ENV GOTOOLCHAIN=local
+WORKDIR /src
+COPY --from=healthcheck-builder /src/ ./
+
+RUN go get golang.org/x/net@v0.60.0 && \
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+      make -C proxylib GO_BUILD_FLAGS="-mod=mod -trimpath"
+
 FROM quay.io/cilium/cilium-envoy:${CILIUM_ENVOY_TAG}@sha256:547ab45f6092f681d9f54f3be9fa8fb1e705c9c5dc2df388efe3a52aa6965629
 
 # Apply latest Ubuntu security updates
@@ -28,3 +54,6 @@ RUN apt-get update && \
     apt-get upgrade -y --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+COPY --from=healthcheck-builder /out/cilium-envoy-healthcheck /usr/bin/cilium-envoy-healthcheck
+COPY --from=proxylib-builder /src/proxylib/libcilium.so /usr/lib/libcilium.so

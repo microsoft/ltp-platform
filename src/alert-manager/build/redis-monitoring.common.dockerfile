@@ -1,16 +1,16 @@
 # Redis with Built-in Monitoring Tools for Node Failure Detection
 # Based on official Redis Debian image with custom monitoring capabilities
-FROM golang:1.26.8 AS gosu
+FROM golang:1.26.9 AS gosu
 
 WORKDIR /src
 
 RUN git clone --branch 1.19 --depth 1 https://github.com/tianon/gosu.git .
 
-RUN go mod edit -go=1.26.8 \
- && go mod edit -toolchain=go1.26.8 \
- && go mod tidy -compat=1.26.8
+RUN go mod edit -go=1.26.9 \
+ && go mod edit -toolchain=go1.26.9 \
+ && go mod tidy -compat=1.26.9
 
-RUN go get -u ./... && go mod tidy -compat=1.26.8
+RUN go get -u ./... && go mod tidy -compat=1.26.9
 
 RUN go mod download
 

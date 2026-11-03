@@ -51,3 +51,21 @@ grafana:
     <td>URL</td>
 </tr>
 </table>
+
+#### Image build
+
+The image installs the official Grafana OSS `13.3.0` Debian package with build
+ID `40412481033`, including its matching backend and frontend assets. These
+binaries are supplied by the package, not rebuilt by the Infinity plugin stage.
+The Infinity plugin remains at `v3.11.3` and is built separately with Go
+`1.26.9` and `golang.org/x/net v0.60.0`.
+
+The Jaeger and Prometheus plugins are installed separately at `13.0.7` and
+`13.2.5`; both bundled copies are removed. The unused Cloud Monitoring
+(`stackdriver`) plugin is removed and disabled.
+
+Before deploying an upgrade from Grafana 10, verify existing dashboards and
+plugins against Grafana 13, including migration of legacy Graph and Singlestat
+panels. Back up any persistent Grafana database before upgrading; startup can
+migrate the database, so rolling back the image alone is not sufficient
+to roll back the database.
