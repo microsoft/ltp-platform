@@ -40,7 +40,7 @@ COPY requirements.txt /w/requirements.txt
 RUN python3 -m pip install --no-cache-dir -U pip wheel && \
     python3 -m pip wheel --no-cache-dir --wheel-dir /w/wheels \
         -r /w/requirements.txt \
-        prometheus_client psutil filelock
+        prometheus_client psutil
 
 
 ############################
@@ -137,7 +137,7 @@ RUN set -eux; \
         -r /job_exporter/requirements.txt && \
     python3 -m pip install --no-cache-dir \
         --no-index --find-links=/wheels \
-        prometheus_client psutil filelock && \
+        prometheus_client psutil && \
     dpkg --purge --force-depends python3-pip && \
     apt-get clean; \
     rm -rf /wheels /root/.cache /var/lib/apt/lists/* /var/cache/apt/* /tmp/* /var/tmp/*
