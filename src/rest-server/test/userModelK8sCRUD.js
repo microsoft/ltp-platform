@@ -17,6 +17,7 @@
 
 // test
 const userK8sCRUD = require('@pai/utils/manager/user/crudK8sSecret');
+const { passwordHashPattern } = require('./utils/nock');
 
 describe('User model k8s secret get function test', () => {
   afterEach(function() {
@@ -148,7 +149,7 @@ describe('User model k8s secret set function test', () => {
         'metadata': {'name': '657869737475736572'},
         'data': {
           'username': 'ZXhpc3R1c2Vy',
-          'password': 'ODBiMWFkYmFmM2FhZDI4MjJiMDRjYzJhODRkNWNlNGU1MDBlMWY3MTBmNThhZWEwYzc1OTkzYTQ1NmI5N2U2MGI2MjJjMjM3YTUzNGVjMDVkZmE0MmQ0NjIzNTAxMDE1Y2JlZWM0OWZjMzNjMzI0ZGNiMmY5M2MwMDZjMmVmOWM=',
+          'password': passwordHashPattern,
           'grouplist': 'WyJ0ZXN0Il0=',
           'email': 'dGVzdEBwYWkuY29t',
           'extension': 'eyJqb2JTU0giOiIifQ==',
@@ -181,7 +182,7 @@ describe('User model k8s secret set function test', () => {
         'metadata': {'name': '6e657775736572'},
         'data': {
           'username': 'bmV3dXNlcg==',
-          'password': 'YTFiYzYyYzExNTk4ZDdkMDE3MGQwZDIyYjdjNDNjN2FlNWJkODFjNmEzOGJlOTk1YzkyNzQzNDEwODg2YzJiY2NjOWUxYjQwYmIyNGY3NTM1MTRiZGNkOWQ1Njk5N2I4ZjdiNmE5OTM2OGNiOTNmMjYwYzRiNDhhNjg1NTlmOTk=',
+          'password': passwordHashPattern,
           'grouplist': 'WyJ0ZXN0Il0=',
           'email': 'dGVzdEBwYWkuY29t',
           'extension': 'eyJqb2JTU0giOiIifQ==',

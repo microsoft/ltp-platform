@@ -52,8 +52,27 @@ class DockerClient:
 
     def docker_login(self):
         if self.docker_username and self.docker_password:
-            shell_cmd = "docker login -u {0} -p {1} {2}".format(self.docker_username, self.docker_password, self.docker_registry)
-            execute_shell(shell_cmd)
+            command = [
+                "docker", "login", "--username", self.docker_username,
+                "--password-stdin",
+            ]
+            if self.docker_registry:
+                command.append(self.docker_registry)
+            logger.info("Logging in to Docker registry")
+            try:
+                subprocess.run(
+                    command,
+                    input=self.docker_password,
+                    text=True,
+                    check=True,
+                )
+            except subprocess.CalledProcessError:
+                logger.error("Docker registry login failed")
+                sys.exit(1)
+            except OSError as error:
+                logger.error("Unable to execute Docker login: {0}".format(error))
+                sys.exit(1)
+            logger.info("Docker registry login succeeded")
         else:
             # Check if already logged in to Azure CLI
             try:

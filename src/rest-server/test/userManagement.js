@@ -155,7 +155,7 @@ describe('Add new user: post /api/v2/user', () => {
       .post('/api/v1/namespaces/pai-user-v2/secrets', {
         'metadata': {'name': '6e657775736572'},
         'data': {
-          'password': 'MDkxZjc0YzZjNTYyOWExZTlmN2Y3N2ZlMjc1Mjk1NmNkYmQ4ZmNlMjRlZmM4NmUxODJlMzQ5ZmI3MzJhMjRkNTU5ZmQ5NWExYzVjZjZiNzNhZWQzNjA3ZDcxYmU3YjA0ZDMyZjcwNTJjMzdlMTEwNTUzMDliNWIwMjczNmFjNDE=',
+          'password': nockUtils.passwordHashPattern,
           'username': 'bmV3dXNlcg==',
           'email': 'dGVzdEBwYWkuY29t',
           'grouplist': 'WyJkZWZhdWx0IiwidmMxIiwidmMyIiwiYWRtaW5Hcm91cCJd', // ["default","vc1","vc2","adminGroup"]
@@ -189,7 +189,7 @@ describe('Add new user: post /api/v2/user', () => {
         'metadata': {'name': '6e6f6e5f61646d696e'},
         'data': {
           'username': 'bm9uX2FkbWlu',
-          'password': 'ZmFmZTk5ZGZlOWQzNzZlOTllYzFkMjlmN2ZlZWZhNmViYjZkYWYwM2RkYWYyNmRlNTdiMWFlYWIyNzU2ZGNiN2FjYTk5Y2Y1Y2E4YjQ1ZGM5OWI3YjM5NTE5ZGM3YjZlMzZmODlhOTY0NzUyNTZkOWE5MTdlZTQxMTc4ZGEzZGI=',
+          'password': nockUtils.passwordHashPattern,
           'grouplist': 'WyJkZWZhdWx0IiwidmMxIiwidmMyIl0=', // ["default","vc1","vc2"]
           'email': 'dGVzdEBwYWkuY29t',
           'extension': 'eyJqb2JTU0giOiIifQ==',
@@ -223,7 +223,7 @@ describe('Add new user: post /api/v2/user', () => {
         'metadata': {'name': '657869737475736572'},
         'data': {
           'username': 'ZXhpc3R1c2Vy',
-          'password': 'NGY3YzdlMDBlNzU3YzUzZjYwOTI1YTE5OWVlOTZjODMxMjlmMzgwYjRjMmQ2NzA5OWM3OThhNDg2ZjQ2ZGY4NjlmZjMxYWVkODZiOTg2NGIyMTI2OWZkYmM2YTkzMjNiZDY5MWZhNGZkN2JjZTAyNWE0M2ZlZGM5N2I2NWU0ZjQ=',
+          'password': nockUtils.passwordHashPattern,
           'grouplist': 'WyJkZWZhdWx0IiwidmMxIiwidmMyIl0=',
           'email': 'dGVzdEBwYWkuY29t',
           'extension': 'eyJqb2JTU0giOiIifQ==',
@@ -383,7 +383,7 @@ describe('update user: put /api/v2/user', () => {
     .put('/api/v1/namespaces/pai-user-v2/secrets/7570646174655f75736572', {
       'metadata': {'name': '7570646174655f75736572'},
       'data': {
-        'password': 'NWU4ZjY5N2FkNzkxOGQ3NTdlN2MyMWM4OTdiYjRmY2NhYTViYTFmM2VjZDExZDNlNjFjNmRiN2UxNDEwZjRkOWFlNDc0NWFjY2I5NzYyMmVhZDZlMzhmOTFjMzI4MTU0YWY4MzgwOThmNTc5NmMzZGU4MWZlN2Y2YzE0YjgxN2I=',
+        'password': nockUtils.passwordHashPattern,
         'username': 'dXBkYXRlX3VzZXI=',
         'grouplist': 'WyJkZWZhdWx0IiwidmMxIiwidmMyIiwiYWRtaW5Hcm91cCJd', // ["default","vc1","vc2","adminGroup"]
         'email': 'dGVzdEBwYWkuY29t',
@@ -1129,4 +1129,3 @@ describe('get user info list : get /api/v1/user', () => {
   //     });
   // });
 });
-

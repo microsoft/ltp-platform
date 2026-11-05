@@ -339,7 +339,7 @@ const defineLoginCompatibilityTests = (credentialType) => {
     });
     replaceModule('@pai/utils/dbUtils', {});
     replaceModule('@pai/utils/manager/user/user', {
-      encrypt: async () => 'hashed-password',
+      verifyPassword: async () => true,
     });
     replaceModule('@pai/config/token', {
       secret: tokenSecret,

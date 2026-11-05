@@ -26,6 +26,8 @@ import {
   getTheme,
 } from '@fluentui/react';
 
+import { generateRandomPassword } from './random-password';
+
 function CustomPassword(props) {
   const { onChange, onFocus, onBlur, componentRef, ...otherProps } = props;
 
@@ -78,13 +80,6 @@ function CustomPassword(props) {
     if (onChange) {
       onChange(event, newValue);
     }
-  };
-
-  const generateRandomPassword = () => {
-    return Array(8)
-      .fill('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
-      .map(x => x[Math.floor(Math.random() * x.length)])
-      .join('');
   };
 
   let randomPassword = '';

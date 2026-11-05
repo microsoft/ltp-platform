@@ -24,12 +24,17 @@ const nock = require('nock');
 
 const groupTemplate = path.join(__dirname, '../data/nock/group-template.yaml');
 const userTemplate = path.join(__dirname, '../data/nock/user-template.yaml');
+const passwordHashPattern = new RegExp(
+  `^${Buffer.from('pbkdf2-sha512$220000$').toString('base64')}`,
+);
 
-const encrypt = (username, password) => {
-  const iterations = 10000;
+const encrypt = (password) => {
+  const iterations = 220000;
   const keylen = 64;
-  const salt = crypto.createHash('md5').update(username).digest('hex');
-  return crypto.pbkdf2Sync(password, salt, iterations, keylen, 'sha512').toString('hex');
+  // A fixed salt makes test user payloads deterministic.
+  const salt = Buffer.alloc(16);
+  const key = crypto.pbkdf2Sync(password, salt, iterations, keylen, 'sha512');
+  return `pbkdf2-sha512$${iterations}$${salt.toString('hex')}$${key.toString('hex')}`;
 };
 
 /**
@@ -45,7 +50,7 @@ const getUserPayload = (data = {}) => {
   const grouplist = data.grouplist || [];
   payload.metadata.name = Buffer.from(username).toString('hex');
   payload.data.username = Buffer.from(username).toString('base64');
-  payload.data.password = Buffer.from(encrypt(username, password)).toString('base64');
+  payload.data.password = Buffer.from(encrypt(password)).toString('base64');
   payload.data.grouplist = Buffer.from(JSON.stringify(grouplist)).toString('base64');
   return payload;
 };
@@ -147,6 +152,7 @@ const registerAdminTokenCheck = (username, options={}) => {
 };
 
 module.exports = {
+  passwordHashPattern,
   getUserPayload,
   getGroupPayload,
   registerUser,

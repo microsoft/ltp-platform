@@ -21,7 +21,6 @@ import 'whatwg-fetch';
 
 import { FontClassNames, ColorClassNames } from '@fluentui/react/lib/Styling';
 import c from 'classnames';
-import { isEmpty } from 'lodash';
 import querystring from 'querystring';
 import React, { useState, useCallback, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -30,13 +29,12 @@ import Bottom from './index/bottom';
 import { login } from './index/conn';
 import Jumbotron from './index/jumbotron';
 import LoginModal from './index/login-modal';
+import { getLoginTarget } from './login-target';
 import { checkToken } from '../user/user-auth/user-auth.component';
 import config from '../config/webportal.config';
 import { SpinnerLoading } from '../components/loading';
 import { initializeIconsOnce } from '../utils/icon-initializer';
 import t from 'tachyons-sass/tachyons.scss';
-
-let loginTarget = '/home.html';
 
 const query = new URLSearchParams(window.location.search);
 
@@ -46,10 +44,7 @@ if (query.has('errorMessage')) {
   location.href = '/index.html';
 }
 
-const from = query.get('from');
-if (!isEmpty(from)) {
-  loginTarget = from;
-}
+const loginTarget = getLoginTarget(query.get('from'), window.location.href);
 
 if (config.authnMethod === 'OIDC') {
   const expiration = 7;

@@ -21,7 +21,7 @@ const userModel = require('@pai/models/v2/user');
 const groupModel = require('@pai/models/v2/group');
 const tokenModel = require('@pai/models/token');
 const createError = require('@pai/utils/error');
-const { encrypt } = require('@pai/utils/manager/user/user');
+const { verifyPassword } = require('@pai/utils/manager/user/user');
 const { getLoginRedirect, getFromRedirect } = require('@pai/utils/oidcRedirect');
 
 /**
@@ -30,7 +30,6 @@ const { getLoginRedirect, getFromRedirect } = require('@pai/utils/oidcRedirect')
 const get = async (req, res, next) => {
   const username = req.body.username;
   const password = req.body.password;
-  const hash = await encrypt(username, password);
   let userItem;
   try {
     userItem = await userModel.getUser(username);
@@ -45,7 +44,7 @@ const get = async (req, res, next) => {
       );
     }
   }
-  if (hash !== userItem.password) {
+  if (!(await verifyPassword(password, userItem.password))) {
     return next(
       createError(
         'Bad Request',

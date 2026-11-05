@@ -17,6 +17,12 @@
 
 const Joi = require('joi');
 const crypto = require('crypto');
+const { promisify } = require('util');
+
+const pbkdf2 = promisify(crypto.pbkdf2);
+const passwordIterations = 220000;
+const passwordKeyLength = 64;
+const passwordHashPrefix = 'pbkdf2-sha512';
 
 const userSchema = Joi.object()
   .keys({
@@ -39,23 +45,58 @@ function userValidate(userValue) {
   return res.value;
 }
 
-function encrypt(username, password) {
-  const iterations = 10000;
-  const keylen = 64;
-  const salt = crypto.createHash('md5').update(username).digest('hex');
-  return new Promise((resolve, reject) => {
-    crypto.pbkdf2(password, salt, iterations, keylen, 'sha512', (err, key) => {
-      err ? reject(err) : resolve(key.toString('hex'));
-    });
-  });
+async function encrypt(password) {
+  const salt = crypto.randomBytes(16);
+  const key = await pbkdf2(
+    password,
+    salt,
+    passwordIterations,
+    passwordKeyLength,
+    'sha512',
+  );
+  return [
+    passwordHashPrefix,
+    passwordIterations,
+    salt.toString('hex'),
+    key.toString('hex'),
+  ].join('$');
+}
+
+async function verifyPassword(password, passwordHash) {
+  if (typeof password !== 'string' || typeof passwordHash !== 'string') {
+    return false;
+  }
+  const parts = passwordHash.split('$');
+  if (
+    parts.length !== 4 ||
+    parts[0] !== passwordHashPrefix ||
+    parts[1] !== String(passwordIterations) ||
+    !/^[a-f0-9]{32}$/.test(parts[2]) ||
+    !/^[a-f0-9]{128}$/.test(parts[3])
+  ) {
+    return false;
+  }
+  const key = await pbkdf2(
+    password,
+    Buffer.from(parts[2], 'hex'),
+    passwordIterations,
+    passwordKeyLength,
+    'sha512',
+  );
+  return crypto.timingSafeEqual(key, Buffer.from(parts[3], 'hex'));
 }
 
 async function encryptPassword(userValue) {
-  userValue.password = await encrypt(userValue.username, userValue.password);
+  userValue.password = await encrypt(userValue.password);
 }
 
 async function encryptUserPassword(userValue) {
   await encryptPassword(userValue);
 }
 
-module.exports = { encrypt, encryptUserPassword, createUser: userValidate };
+module.exports = {
+  encrypt,
+  verifyPassword,
+  encryptUserPassword,
+  createUser: userValidate,
+};

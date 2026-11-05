@@ -22,8 +22,7 @@ import {
   mergeStyleSets,
 } from "office-ui-fabric-react";
 import Cookies from "js-cookie";
-
-type MarketplaceUriType = ("GitHub" | "DevOps" | null);
+import { fetchMarketplace, MarketplaceUriType, parseMarketplaceUri } from "./marketplace-uri";
 
 interface IProtocolItem {
   name: string;
@@ -219,17 +218,8 @@ export default class MarketplaceForm extends React.Component<IMarketplaceProps, 
 
   private setMarketplaceURI = (event: React.FormEvent<HTMLElement>, uri?: string) => {
     if (uri !== undefined) {
-      if (uri.includes("github.com")) {
-        // https://github.com/{owner}/{repo}/tree/{branch}/{path}
-        // https://api.github.com/repos/{owner}/{repo}/contents/{path}?ref={branch}
-        this.setState({uri, uriType: "GitHub"});
-      } else if (uri.includes("visualstudio.com") || uri.includes("dev.azure.com")) {
-        // https://{org}.visualstudio.com/{project}/_git/{repoId}?path={path}&version=GB{branch}
-        // https://dev.azure.com/{org}/{project}/_apis/git/repositories/{repoId}/items?path={path}&api-version=5.0
-        this.setState({uri, uriType: "DevOps"});
-      } else {
-        this.setState({uri, uriType: null});
-      }
+      const endpoint = parseMarketplaceUri(uri);
+      this.setState({uri, uriType: endpoint ? endpoint.type : null});
     }
   }
 
@@ -271,7 +261,7 @@ export default class MarketplaceForm extends React.Component<IMarketplaceProps, 
           );
         }
         try {
-          const res = await fetch(option.data, {headers: requestHeaders});
+          const res = await fetchMarketplace(option.data, this.state.uriType, requestHeaders);
           const data = await res.text();
           this.props.onSelectProtocol(data);
           this.setState({selectedOption: option.key});
@@ -292,7 +282,7 @@ export default class MarketplaceForm extends React.Component<IMarketplaceProps, 
     }
     if (uriType === "GitHub") {
       try {
-        const res = await fetch(uri, {headers: requestHeaders});
+        const res = await fetchMarketplace(uri, uriType, requestHeaders);
         const data = await res.json();
         if (Array.isArray(data)) {
           const protocolList: IProtocolItem[] = [];
@@ -314,10 +304,10 @@ export default class MarketplaceForm extends React.Component<IMarketplaceProps, 
     } else if (uriType === "DevOps") {
       let res;
       try {
-        res = await fetch(uri, {headers: requestHeaders});
+        res = await fetchMarketplace(uri, uriType, requestHeaders);
         let data = await res.json();
         if (data.isFolder && "tree" in data._links) {
-          res = await fetch(data._links.tree.href, {headers: requestHeaders});
+          res = await fetchMarketplace(data._links.tree.href, uriType, requestHeaders);
           data = await res.json();
         }
         if ("treeEntries" in data && Array.isArray(data.treeEntries)) {

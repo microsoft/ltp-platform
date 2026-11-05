@@ -24,6 +24,7 @@ const logger = require('@pai/config/logger');
 const groupModel = require('@pai/models/v2/group');
 const vcModel = require('@pai/models/v2/virtual-cluster');
 const tokenModel = require('@pai/models/token');
+const { verifyPassword } = require('@pai/utils/manager/user/user');
 
 const getUserVCs = async (username) => {
   const userInfo = await userModel.getUser(username);
@@ -475,10 +476,11 @@ const updateUserPassword = async (req, res, next) => {
       }
       return next(createError.unknown(error));
     }
-    let newUserValue = JSON.parse(JSON.stringify(userValue));
-    newUserValue.password = oldPassword;
-    newUserValue = await userModel.getEncryptPassword(newUserValue);
-    if (req.user.admin || newUserValue.password === userValue.password) {
+    const newUserValue = JSON.parse(JSON.stringify(userValue));
+    if (
+      req.user.admin ||
+      (await verifyPassword(oldPassword, userValue.password))
+    ) {
       newUserValue.password = newPassword;
       await userModel.updateUser(username, newUserValue, true);
       // try to revoke browser tokens
@@ -692,10 +694,10 @@ const basicUserUpdate = async (req, res, next) => {
     if ('email' in req.body.data) {
       userInfo.email = req.body.data.email;
     }
-    if ('password' in req.body.data) {
-      let newUserValue = JSON.parse(JSON.stringify(userInfo));
-      newUserValue = await userModel.getEncryptPassword(newUserValue);
-      if (newUserValue.password !== userInfo.password) {
+    if (req.body.data.newPassword) {
+      if (
+        !(await verifyPassword(req.body.data.oldPassword, userInfo.password))
+      ) {
         return next(
           createError(
             'Forbidden',
@@ -704,7 +706,7 @@ const basicUserUpdate = async (req, res, next) => {
           ),
         );
       }
-      userInfo.password = req.body.data.password;
+      userInfo.password = req.body.data.newPassword;
       updatePassword = true;
     }
     if ('extension' in req.body.data) {

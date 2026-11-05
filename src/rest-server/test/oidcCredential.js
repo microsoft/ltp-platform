@@ -2,13 +2,11 @@
 // Licensed under the MIT License.
 
 const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
-const vm = require('vm');
 const { generateKeyPairSync } = require('crypto');
 const querystring = require('querystring');
 const jwt = require('jsonwebtoken');
 const yaml = require('js-yaml');
+const loadModule = require('./utils/loadModule');
 
 const tenantID = '11111111-1111-4111-8111-111111111111';
 const clientID = '22222222-2222-4222-8222-222222222222';
@@ -16,25 +14,6 @@ const miClientID = '33333333-3333-4333-8333-333333333333';
 const portal = 'https://portal.example';
 const completion = portal + '/index.html';
 const tokenFilePath = '/var/run/secrets/azure/tokens/azure-identity-token';
-
-const loadModule = (relativePath, mocks, env = {}) => {
-  const filename = path.join(__dirname, '..', relativePath);
-  const module = { exports: {} };
-  const wrapper = vm.runInThisContext(
-    `(function(require, module, exports, process, Buffer) {
-      ${fs.readFileSync(filename, 'utf8')}
-    })`,
-    { filename },
-  );
-  wrapper(
-    (name) => (name in mocks ? mocks[name] : require(name)),
-    module,
-    module.exports,
-    { env },
-    Buffer,
-  );
-  return module.exports;
-};
 
 const baseConfig = () => ({
   tenantID,
