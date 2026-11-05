@@ -172,6 +172,13 @@ def port_validation(port):
 
 
 
+def _create_ssh_client():
+    ssh = paramiko.SSHClient()
+    ssh.load_system_host_keys()
+    ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
+    return ssh
+
+
 def sftp_paramiko(src, dst, filename, host_config):
     hostip = str(host_config['hostip'])
     if ipv4_address_validation(hostip) == False:
@@ -197,8 +204,7 @@ def sftp_paramiko(src, dst, filename, host_config):
         else:
             logger.warn("The key file: {0} specified doesn't exist".format(host_config['keyfile-path']))
     # First make sure the folder exist.
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh = _create_ssh_client()
     ssh.connect(hostname=hostip, port=port, key_filename=key_filename, username=username, password=password, allow_agent=True)
 
     password = password if password is not None else ''
@@ -251,8 +257,7 @@ def ssh_shell_paramiko_with_result(host_config, commandline):
         else:
             logger.warn("The key file: {0} specified doesn't exist".format(host_config['keyfile-path']))
     logger.info("Start executing the command on host [{0}]: {1}".format(hostip, commandline))
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh = _create_ssh_client()
     ssh.connect(hostname=hostip, port=port, key_filename=key_filename, username=username, password=password)
     stdin, stdout, stderr = ssh.exec_command(commandline, get_pty=True)
     logger.info("Finished executing the command on host [{0}]: {1}".format(hostip, commandline))
@@ -296,8 +301,7 @@ def ssh_shell_with_password_input_paramiko(host_config, commandline):
         else:
             logger.warn("The key file: {0} specified doesn't exist".format(host_config['keyfile-path']))
 
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh = _create_ssh_client()
     ssh.connect(hostname=hostip, port=port, key_filename=key_filename, username=username, password=password)
     password = password if password is not None else ''
     if (commandline.strip().startswith('sudo')):

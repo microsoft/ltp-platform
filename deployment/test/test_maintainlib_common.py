@@ -24,6 +24,8 @@ import shutil
 import sys
 import logging
 import logging.config
+import tempfile
+from unittest import mock
 
 from k8sPaiLibrary.maintainlib import common
 
@@ -266,6 +268,100 @@ class TestMaintainlibCommon(unittest.TestCase):
 
 
 
+
+
+class TestSSHHostKeyValidation(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.trusted_key = common.paramiko.RSAKey.generate(2048)
+        cls.other_key = common.paramiko.RSAKey.generate(2048)
+
+    def setUp(self):
+        home = tempfile.TemporaryDirectory()
+        self.addCleanup(home.cleanup)
+        home_patch = mock.patch.dict(os.environ, {"HOME": home.name})
+        home_patch.start()
+        self.addCleanup(home_patch.stop)
+        ssh_directory = os.path.join(home.name, ".ssh")
+        os.mkdir(ssh_directory)
+        self.known_hosts_path = os.path.join(ssh_directory, "known_hosts")
+
+    def _trust_host(self, hostname, key):
+        host_keys = common.paramiko.HostKeys()
+        host_keys.add(hostname, key.get_name(), key)
+        host_keys.save(self.known_hosts_path)
+
+    def _connect(self, server_key, port=22):
+        transport = mock.Mock()
+        transport.gss_kex_used = False
+        transport.get_security_options.return_value.key_types = common.paramiko.Transport._preferred_keys
+        transport.get_remote_server_key.return_value = server_key
+        with common._create_ssh_client() as client:
+            with mock.patch("paramiko.client.Transport", return_value=transport):
+                with mock.patch.object(client, "_auth") as authentication:
+                    self.authentication = authentication
+                    client.connect(
+                        hostname="192.0.2.10", port=port, username="test-user",
+                        sock=mock.Mock())
+
+    def test_trusted_key_allows_authentication_on_standard_and_custom_ports(self):
+        for port, hostname in [(22, "192.0.2.10"), (2222, "[192.0.2.10]:2222")]:
+            with self.subTest(port=port):
+                self._trust_host(hostname, self.trusted_key)
+                self._connect(self.trusted_key, port)
+                self.authentication.assert_called_once()
+
+    def test_missing_known_hosts_rejects_connection_before_authentication(self):
+        with self.assertRaises(common.paramiko.SSHException):
+            self._connect(self.other_key)
+        self.authentication.assert_not_called()
+        self.assertFalse(os.path.exists(self.known_hosts_path))
+
+    def test_unknown_host_rejected_without_changing_trust_records(self):
+        self._trust_host("192.0.2.11", self.trusted_key)
+        with open(self.known_hosts_path) as f:
+            original = f.read()
+        with self.assertRaises(common.paramiko.SSHException):
+            self._connect(self.other_key)
+        self.authentication.assert_not_called()
+        with open(self.known_hosts_path) as f:
+            self.assertEqual(f.read(), original)
+
+    def test_changed_key_rejected_before_authentication(self):
+        self._trust_host("192.0.2.10", self.trusted_key)
+        with self.assertRaises(common.paramiko.BadHostKeyException):
+            self._connect(self.other_key)
+        self.authentication.assert_not_called()
+
+    def test_invalid_known_hosts_is_not_ignored(self):
+        with open(self.known_hosts_path, "w") as f:
+            f.write("192.0.2.10 ssh-rsa a\n")
+        with self.assertRaises(common.paramiko.hostkeys.InvalidHostKey):
+            common._create_ssh_client()
+
+    def test_all_ssh_entry_points_configure_trust_before_connecting(self):
+        host_config = {"hostip": "192.0.2.10", "username": "test-user", "password": ""}
+        operations = [
+            (common.sftp_paramiko, (".", ".", "test.txt", host_config)),
+            (common.ssh_shell_paramiko_with_result, (host_config, "hostname")),
+            (common.ssh_shell_with_password_input_paramiko, (host_config, "hostname")),
+        ]
+        for operation, args in operations:
+            with self.subTest(operation=operation.__name__):
+                with mock.patch.object(common.paramiko, "SSHClient") as factory:
+                    client = factory.return_value
+                    client.connect.side_effect = common.paramiko.SSHException("connection stopped for test")
+                    with self.assertRaises(common.paramiko.SSHException):
+                        operation(*args)
+                    self.assertEqual(client.method_calls[0], mock.call.load_system_host_keys())
+                    self.assertEqual(
+                        client.method_calls[1], mock.call.set_missing_host_key_policy(mock.ANY))
+                    self.assertIsInstance(
+                        client.set_missing_host_key_policy.call_args[0][0], common.paramiko.RejectPolicy)
+                    self.assertEqual(client.method_calls[2][0], "connect")
+                    client.exec_command.assert_not_called()
+                    client.open_sftp.assert_not_called()
 
 
 if __name__ == '__main__':

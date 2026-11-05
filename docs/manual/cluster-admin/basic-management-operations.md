@@ -163,6 +163,16 @@ Another example is to restart the whole cluster:
 
 You can use `exit` to leave the dev-box container, and use `sudo docker exec -it dev-box bash` to re-enter it if you desire so. If you don't need it anymore, use `sudo docker stop dev-box` and `sudo docker rm dev-box` to delete the docker container.
 
+### SSH Host Key Verification for Node Maintenance
+
+Node maintenance commands that use SSH/SFTP, including node deployment, adding or removing nodes, remote commands, `config generate`, and node OS checks, verify the server's host key against `~/.ssh/known_hosts` of the user running `paictl`. Unknown hosts and changed host keys are rejected before user authentication.
+
+Before using these commands, obtain each node's public SSH host key through a trusted channel, such as the node console, verify its fingerprint, and provision it in that user's `known_hosts`. Because these commands connect by IP address, use the node IP for port 22, or `[node-ip]:port` for a non-default SSH port. A hostname-only entry is not sufficient. Do not blindly trust the output of `ssh-keyscan`; collecting a key over the network does not verify its identity.
+
+For new or rebuilt nodes and host-key rotation, verify the new key through a trusted channel before updating the entry. If running `paictl` inside the dev-box container, make the verified `known_hosts` file available in the container user's `~/.ssh` directory.
+
+Normal `config push/pull` and Kubernetes-based `service start/stop` operations do not use these SSH helpers and do not require SSH host-key provisioning.
+
 ## How To Set Up HTTPS
 
 To configure https certificate for pylon, you need to obtain a digital certificate first, and then save the digital certificate-related files in the dev-box container. In the dev-box container, you can find the configuration file `services-configuration.yaml`, and then you need to add the file path of the saved digital certificate into the `services-configuration.yaml` file. You can choose a self-signed certificate or a certificate issued by a CA. Next, we will first demonstrate the configuration process of a self-signed certificate. The configuration processes for the two types of certificates are similar.
