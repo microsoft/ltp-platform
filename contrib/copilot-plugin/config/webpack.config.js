@@ -332,7 +332,6 @@ module.exports = function (webpackEnv) {
       ),
       // Polyfill for Node.js core modules in browser environment
       fallback: {
-        "crypto": require.resolve("crypto-browserify"),
         "stream": require.resolve("stream-browserify")
       },
       // These are the reasonable defaults supported by the Node ecosystem.
@@ -368,7 +367,6 @@ module.exports = function (webpackEnv) {
           babelRuntimeEntry,
           babelRuntimeEntryHelpers,
           babelRuntimeRegenerator,
-          require.resolve('crypto-browserify'),
           require.resolve('stream-browserify'),
         ]),
       ],
