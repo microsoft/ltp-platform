@@ -15,6 +15,7 @@ import { PAIV2 } from "@microsoft/openpai-js-sdk";
 
 import monacoStyles from "./monaco.scss";
 import MarketplaceForm from "./MarketplaceForm";
+import { parseMarketplaceCookie } from "./marketplace-cookie";
 import { initializeIconsOnce } from "../utils/icon-initializer";
 
 const MonacoEditor = lazy(() => import("react-monaco-editor"));
@@ -249,7 +250,7 @@ export default class ProtocolForm extends React.Component<IProtocolProps, IProto
         key: "marketplace",
         text: "",
         onRenderField: (props?: IChoiceGroupOption, render?: IRenderFunction<IChoiceGroupOption>) => {
-          const marketplaceCookie = Cookies.getJSON("marketplace");
+          const marketplaceCookie = parseMarketplaceCookie(Cookies.get("marketplace"));
           return (
             <Stack gap={10} horizontal={true} verticalAlign="baseline">
               {render!(props)}

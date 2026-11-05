@@ -22,6 +22,7 @@ import {
   mergeStyleSets,
 } from "office-ui-fabric-react";
 import Cookies from "js-cookie";
+import { parseMarketplaceCookie } from "./marketplace-cookie";
 import { fetchMarketplace, MarketplaceUriType, parseMarketplaceUri } from "./marketplace-uri";
 
 interface IProtocolItem {
@@ -152,7 +153,7 @@ export default class MarketplaceForm extends React.Component<IMarketplaceProps, 
   }
 
   private discardConfigCallout = () => {
-    const marketplaceCookie = Cookies.getJSON("marketplace");
+    const marketplaceCookie = parseMarketplaceCookie(Cookies.get("marketplace"));
     if (marketplaceCookie) {
       this.setState({
         uri: marketplaceCookie.uri,
@@ -242,11 +243,11 @@ export default class MarketplaceForm extends React.Component<IMarketplaceProps, 
         });
       }
       this.setState({ protocolOptions });
-      Cookies.set("marketplace", {
+      Cookies.set("marketplace", JSON.stringify({
         uri: this.state.uri,
         type: this.state.uriType,
         token: this.state.uriToken,
-      });
+      }));
     }
   }
 
