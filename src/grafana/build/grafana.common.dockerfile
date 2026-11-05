@@ -61,7 +61,7 @@ ENV \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
-  GF_PLUGINS_DISABLE_PLUGINS=stackdriver \
+  GF_PLUGINS_DISABLE_PLUGINS=stackdriver,tempo \
   UPGRADEALL=false
 
 
@@ -78,14 +78,16 @@ RUN \
 
 RUN apt-get update && apt-get upgrade -y
 
-# Remove both bundled copies, including the unused Cloud Monitoring plugin.
+# Remove both bundled copies, including unused Cloud Monitoring and Tempo plugins.
 RUN rm -rf \
       /usr/share/grafana/data/plugins-bundled/jaeger \
       /usr/share/grafana/data/plugins-bundled/prometheus \
       /usr/share/grafana/data/plugins-bundled/stackdriver \
+      /usr/share/grafana/data/plugins-bundled/tempo \
       /var/lib/grafana/plugins-bundled/jaeger \
       /var/lib/grafana/plugins-bundled/prometheus \
-      /var/lib/grafana/plugins-bundled/stackdriver && \
+      /var/lib/grafana/plugins-bundled/stackdriver \
+      /var/lib/grafana/plugins-bundled/tempo && \
     /usr/share/grafana/bin/grafana cli --homepath=/usr/share/grafana \
       --pluginsDir="${GF_PLUGIN_DIR}" plugins install jaeger "${GRAFANA_JAEGER_PLUGIN_VERSION}" && \
     /usr/share/grafana/bin/grafana cli --homepath=/usr/share/grafana \
