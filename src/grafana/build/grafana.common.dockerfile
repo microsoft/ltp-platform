@@ -54,14 +54,13 @@ FROM ubuntu:22.04
 
 ARG TARGETARCH
 ARG GRAFANA_BUILD_ID=40412481033
-ARG GRAFANA_JAEGER_PLUGIN_VERSION=13.0.7
 ARG GRAFANA_PROMETHEUS_PLUGIN_VERSION=13.2.5
 ENV \
   GRAFANA_VERSION=13.3.0 \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
-  GF_PLUGINS_DISABLE_PLUGINS=stackdriver,tempo \
+  GF_PLUGINS_DISABLE_PLUGINS=cloudwatch,elasticsearch,grafana-postgresql-datasource,grafana-pyroscope-datasource,influxdb,jaeger,loki,mssql,mysql,opentsdb,stackdriver,tempo,zipkin \
   UPGRADEALL=false
 
 
@@ -78,18 +77,36 @@ RUN \
 
 RUN apt-get update && apt-get upgrade -y
 
-# Remove both bundled copies, including unused Cloud Monitoring and Tempo plugins.
+# Remove unused plugins and replace bundled Prometheus with the selected release.
 RUN rm -rf \
+      /usr/share/grafana/data/plugins-bundled/cloudwatch \
+      /usr/share/grafana/data/plugins-bundled/elasticsearch \
+      /usr/share/grafana/data/plugins-bundled/grafana-postgresql-datasource \
+      /usr/share/grafana/data/plugins-bundled/grafana-pyroscope-datasource \
+      /usr/share/grafana/data/plugins-bundled/influxdb \
       /usr/share/grafana/data/plugins-bundled/jaeger \
+      /usr/share/grafana/data/plugins-bundled/loki \
+      /usr/share/grafana/data/plugins-bundled/mssql \
+      /usr/share/grafana/data/plugins-bundled/mysql \
+      /usr/share/grafana/data/plugins-bundled/opentsdb \
       /usr/share/grafana/data/plugins-bundled/prometheus \
       /usr/share/grafana/data/plugins-bundled/stackdriver \
       /usr/share/grafana/data/plugins-bundled/tempo \
+      /usr/share/grafana/data/plugins-bundled/zipkin \
+      /var/lib/grafana/plugins-bundled/cloudwatch \
+      /var/lib/grafana/plugins-bundled/elasticsearch \
+      /var/lib/grafana/plugins-bundled/grafana-postgresql-datasource \
+      /var/lib/grafana/plugins-bundled/grafana-pyroscope-datasource \
+      /var/lib/grafana/plugins-bundled/influxdb \
       /var/lib/grafana/plugins-bundled/jaeger \
+      /var/lib/grafana/plugins-bundled/loki \
+      /var/lib/grafana/plugins-bundled/mssql \
+      /var/lib/grafana/plugins-bundled/mysql \
+      /var/lib/grafana/plugins-bundled/opentsdb \
       /var/lib/grafana/plugins-bundled/prometheus \
       /var/lib/grafana/plugins-bundled/stackdriver \
-      /var/lib/grafana/plugins-bundled/tempo && \
-    /usr/share/grafana/bin/grafana cli --homepath=/usr/share/grafana \
-      --pluginsDir="${GF_PLUGIN_DIR}" plugins install jaeger "${GRAFANA_JAEGER_PLUGIN_VERSION}" && \
+      /var/lib/grafana/plugins-bundled/tempo \
+      /var/lib/grafana/plugins-bundled/zipkin && \
     /usr/share/grafana/bin/grafana cli --homepath=/usr/share/grafana \
       --pluginsDir="${GF_PLUGIN_DIR}" plugins install prometheus "${GRAFANA_PROMETHEUS_PLUGIN_VERSION}"
 

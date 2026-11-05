@@ -27,15 +27,7 @@ COPY . .
 
 RUN corepack enable && corepack install -g yarn@4.2.2
 
-# Install all dependencies including devDependencies
-RUN yarn install
-
-# Manually remove devDependencies from node_modules
-# This is more reliable than trying to reinstall
-RUN yarn plugin import https://raw.githubusercontent.com/yarnpkg/berry/master/packages/plugin-production-install/bin/%40yarnpkg/plugin-production-install.js || true
-RUN for dep in $(node -pe "Object.keys(require('./package.json').devDependencies || {}).join(' ')"); do \
-      rm -rf node_modules/$dep; \
-    done
+RUN YARN_ENABLE_IMMUTABLE_INSTALLS=true yarn workspaces focus --all --production
 
 # Production stage - use slim image
 FROM node:24-slim
