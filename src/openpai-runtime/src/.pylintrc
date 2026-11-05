@@ -10,10 +10,11 @@ ignored-modules=responses
 max-line-length=130
 
 [MASTER]
-init-hook="from pylint.config import find_pylintrc;\
+init-hook="from pylint.config import find_default_config_files;\
            import os, sys;\
-           sys.path.append(os.path.join(os.path.dirname(find_pylintrc()), './src/init.d'));\
-           sys.path.append(os.path.join(os.path.dirname(find_pylintrc()), './src'));"
+           config_dir = os.path.dirname(next(find_default_config_files()));\
+           sys.path.append(os.path.join(config_dir, './src/init.d'));\
+           sys.path.append(os.path.join(config_dir, './src'));"
 
 # Disable docstring check
 disable=C0111
