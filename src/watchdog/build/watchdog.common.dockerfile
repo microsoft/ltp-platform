@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.26.10-alpine3.23 as builder
+FROM golang:1.26.10-alpine3.24 as builder
 
 ENV PROJECT_DIR=/src
 ENV INSTALL_DIR=/opt/watchdog
@@ -12,7 +12,7 @@ COPY src ${PROJECT_DIR}
 RUN ${PROJECT_DIR}/build/watchdog/go-build.sh && \
   mv ${PROJECT_DIR}/dist/watchdog/* ${INSTALL_DIR}
 
-FROM alpine:3.23
+FROM alpine:3.24
 
 ENV INSTALL_DIR=/opt/watchdog
 

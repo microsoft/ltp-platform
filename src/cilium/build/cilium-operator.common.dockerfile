@@ -44,7 +44,7 @@ RUN mkdir -p /out && \
     mv operator/cilium-operator-generic /out/cilium-operator-generic
 
 # Stage 2: CA certificates
-FROM alpine:3.23 AS certs
+FROM alpine:3.24 AS certs
 RUN apk --update add ca-certificates
 
 # Stage 3: Minimal runtime (scratch)

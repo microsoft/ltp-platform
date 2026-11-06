@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.26.10-alpine3.23 as builder
+FROM golang:1.26.10-alpine3.24 as builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -28,7 +28,7 @@ RUN go get golang.org/x/text@v0.39.0 && \
 
 RUN CGO_ENABLED=0 go build -o build/k8s-rdma-shared-dp -tags no_openssl -mod=mod -ldflags "-s -w" ./cmd/k8s-rdma-shared-dp
 
-FROM alpine:3.23
+FROM alpine:3.24
 RUN apk add --no-cache hwdata-pci
 COPY --from=builder /usr/src/k8s-rdma-shared-dp/build/k8s-rdma-shared-dp /bin/
 

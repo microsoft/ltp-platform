@@ -55,7 +55,7 @@ RUN ${PROJECT_DIR}/build/runtime/go-build.sh && \
 
 COPY --from=multilog-builder /usr/local/bin/multilog ${INSTALL_DIR}/multilog
 
-FROM golang:1.26.10-alpine3.23 as barrier-builder
+FROM golang:1.26.10-alpine3.24 as barrier-builder
 
 ENV GOPATH=/go
 ENV PROJECT_DIR=/src
@@ -67,7 +67,7 @@ COPY src/frameworkcontroller ${PROJECT_DIR}
 RUN ${PROJECT_DIR}/build/frameworkbarrier/go-build.sh && \
   mv ${PROJECT_DIR}/dist/frameworkbarrier/* ${INSTALL_DIR}
 
-FROM python:3.12-alpine
+FROM python:3.12-alpine3.24
 
 RUN mkdir -p /opt/package_cache
 COPY --from=ubuntu_22_04_cache /package_cache /opt/package_cache/
