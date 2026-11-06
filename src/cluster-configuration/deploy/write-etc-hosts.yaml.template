@@ -36,18 +36,32 @@ spec:
               HOSTS="/host/etc/hosts"
               BACKUP="${HOSTS}.k8s.bak.$(date +%s)"
               TMP="$(mktemp)"
+              trap 'rm -f "$TMP"' EXIT
               echo "Backing up $HOSTS -> $BACKUP"
               cp "$HOSTS" "$BACKUP"
-              if grep -qF "$MARKER_START" "$HOSTS"; then
-                awk "/$MARKER_START/{exit} {print}" "$HOSTS" > "$TMP"
-              else
-                cat "$HOSTS" > "$TMP"
-              fi
+              awk -v start="$MARKER_START" -v end="$MARKER_END" '
+                $0 == start {
+                  if (in_block) invalid = 1
+                  in_block = 1
+                  next
+                }
+                $0 == end {
+                  if (!in_block) invalid = 1
+                  in_block = 0
+                  next
+                }
+                !in_block { print }
+                END {
+                  if (in_block || invalid) {
+                    print "Invalid managed hosts block markers; hosts file was not changed" > "/dev/stderr"
+                    exit 1
+                  }
+                }
+              ' "$HOSTS" > "$TMP"
               echo "$MARKER_START" >> "$TMP"
               cat /etc/k8s-etc-hosts.txt >> "$TMP"
               echo "$MARKER_END" >> "$TMP"
               cp "$TMP" "$HOSTS"
-              rm -f "$TMP"
               echo "Wrote managed block into $HOSTS; backup at $BACKUP"
           volumeMounts:
             - name: host-etc
