@@ -56,7 +56,7 @@ spec:
         - name: GF_USERS_DEFAULT_THEME
           value: light
         - name: GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS
-          value: yesoreyeram-infinity-datasource
+          value: yesoreyeram-infinity-datasource,prometheus
         {%- if cluster_cfg['cluster']['common']['qos-switch'] == "true" %}
         resources:
           limits:

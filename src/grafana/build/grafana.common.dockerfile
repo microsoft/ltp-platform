@@ -14,13 +14,13 @@
 # NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 # DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-FROM node:24 AS build
+FROM node:24 AS infinity-build
 
 ARG TARGETOS
 ARG TARGETARCH
 
 ENV GOVERSION=1.26.10
-ENV PLUGINVERSION=v3.11.3
+ENV GRAFANA_INFINITY_PLUGIN_VERSION=v3.11.3
 
 ENV GOPATH=/usr/local/go
 ENV GOBIN=$GOPATH/bin
@@ -31,7 +31,7 @@ RUN wget https://go.dev/dl/go${GOVERSION}.linux-${TARGETARCH}.tar.gz && \
 
 WORKDIR /usr/src/plugin
 
-RUN git clone --branch ${PLUGINVERSION} --depth 1 https://github.com/grafana/grafana-infinity-datasource.git /usr/src/plugin
+RUN git clone --branch ${GRAFANA_INFINITY_PLUGIN_VERSION} --depth 1 https://github.com/grafana/grafana-infinity-datasource.git /usr/src/plugin
 
 RUN go get golang.org/x/crypto@v0.56.0 && \
     go get google.golang.org/grpc@v1.83.2 && \
@@ -50,16 +50,52 @@ RUN if [ "$TARGETARCH" = "amd64" ]; then \
   echo "Unsupported architecture: $TARGETARCH" && exit 1; \
     fi
 
+FROM node:24 AS prometheus-build
+
+ARG TARGETARCH
+ARG GRAFANA_PROMETHEUS_PLUGIN_VERSION=13.2.5
+ARG GRAFANA_PROMETHEUS_GO_VERSION=1.27.3
+
+ENV GOPATH=/go
+ENV GOBIN=$GOPATH/bin
+ENV PATH=/usr/local/go/bin:$GOBIN:$PATH
+
+RUN case "${TARGETARCH}" in \
+      amd64|arm64) ;; \
+      *) echo "Unsupported architecture: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac && \
+    wget https://go.dev/dl/go${GRAFANA_PROMETHEUS_GO_VERSION}.linux-${TARGETARCH}.tar.gz && \
+    tar -C /usr/local -xzf go${GRAFANA_PROMETHEUS_GO_VERSION}.linux-${TARGETARCH}.tar.gz
+
+WORKDIR /usr/src/prometheus
+
+RUN git clone --branch v${GRAFANA_PROMETHEUS_PLUGIN_VERSION} --depth 1 \
+    https://github.com/grafana/grafana-prometheus-datasource.git .
+
+RUN go -C pkg/promlib get golang.org/x/net@v0.62.0 && \
+    go -C pkg/promlib mod tidy && \
+    go get golang.org/x/net@v0.62.0 && \
+    go mod tidy
+
+RUN corepack enable npm && npm ci --no-audit --no-fund && npm run build
+
+# Expose a single Linux target through the upstream SDK.
+RUN go install github.com/magefile/mage@v1.17.2 && \
+    printf '\nfunc BuildLinux() error { return build.Build{}.Custom("linux", "%s") }\n' \
+      "${TARGETARCH}" >> Magefile.go && \
+    mage buildLinux && \
+    test ! -e dist/MANIFEST.txt
+
 FROM ubuntu:22.04
 
 ARG TARGETARCH
 ARG GRAFANA_BUILD_ID=40412481033
-ARG GRAFANA_PROMETHEUS_PLUGIN_VERSION=13.2.5
 ENV \
   GRAFANA_VERSION=13.3.0 \
   GF_PLUGIN_DIR=/grafana-plugins \
   GF_PATHS_LOGS=/var/log/grafana \
   GF_PATHS_DATA=/var/lib/grafana \
+  GF_PLUGINS_PREINSTALL_DISABLED=true \
   GF_PLUGINS_DISABLE_PLUGINS=cloudwatch,elasticsearch,grafana-postgresql-datasource,grafana-pyroscope-datasource,influxdb,jaeger,loki,mssql,mysql,opentsdb,stackdriver,tempo,zipkin \
   UPGRADEALL=false
 
@@ -77,7 +113,7 @@ RUN \
 
 RUN apt-get update && apt-get upgrade -y
 
-# Remove unused plugins and replace bundled Prometheus with the selected release.
+# Remove unused plugins and replace bundled Prometheus with the patched source build.
 RUN rm -rf \
       /usr/share/grafana/data/plugins-bundled/cloudwatch \
       /usr/share/grafana/data/plugins-bundled/elasticsearch \
@@ -106,11 +142,10 @@ RUN rm -rf \
       /var/lib/grafana/plugins-bundled/prometheus \
       /var/lib/grafana/plugins-bundled/stackdriver \
       /var/lib/grafana/plugins-bundled/tempo \
-      /var/lib/grafana/plugins-bundled/zipkin && \
-    /usr/share/grafana/bin/grafana cli --homepath=/usr/share/grafana \
-      --pluginsDir="${GF_PLUGIN_DIR}" plugins install prometheus "${GRAFANA_PROMETHEUS_PLUGIN_VERSION}"
+      /var/lib/grafana/plugins-bundled/zipkin
 
-COPY --from=build /usr/src/plugin/dist ${GF_PLUGIN_DIR}/yesoreyeram-infinity-datasource
+COPY --from=infinity-build /usr/src/plugin/dist ${GF_PLUGIN_DIR}/yesoreyeram-infinity-datasource
+COPY --from=prometheus-build /usr/src/prometheus/dist ${GF_PLUGIN_DIR}/prometheus
 
 COPY src/run-grafana.sh /usr/local/bin
 
