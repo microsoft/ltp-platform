@@ -7,7 +7,8 @@ import sys
 
 def modify(yaml_url):
     # Download the YAML file
-    response = requests.get(yaml_url)
+    response = requests.get(yaml_url, timeout=30)
+    response.raise_for_status()
     yaml_content = response.text
 
     # Load all YAML documents
@@ -21,6 +22,23 @@ def modify(yaml_url):
             data['metadata']['name'] = "csi-blob-node-unmanaged"
             data['spec']['selector']['matchLabels']['app'] = "csi-blob-node-unmanaged"
             data['spec']['template']['metadata']['labels']['app'] = "csi-blob-node-unmanaged"
+
+            for container in data['spec']['template']['spec'].get('initContainers', []):
+                if container['name'] == 'install-blobfuse-proxy':
+                    overrides = {
+                        'BLOBFUSE2_VERSION': '',
+                        'ALLOW_PACKAGE_INSTALL_DOWNGRADE': 'false'
+                    }
+                    container['env'] = [
+                        entry for entry in container.get('env', [])
+                        if entry['name'] not in overrides
+                    ] + [
+                        {'name': name, 'value': value}
+                        for name, value in overrides.items()
+                    ]
+                    break
+            else:
+                raise ValueError('CSI manifest is missing install-blobfuse-proxy')
 
             # Create the new node affinity configuration
             node_affinity_config = {
@@ -48,7 +66,7 @@ def modify(yaml_url):
     return modified_yaml_content
 
 if __name__ == "__main__":
-    url = sys.argv[1] if len(sys.argv) > 1 else "https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/tags/v1.27.4/deploy/csi-blob-node.yaml"
+    url = sys.argv[1] if len(sys.argv) > 1 else "https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/tags/v1.27.11/deploy/csi-blob-node.yaml"
     output_file = sys.argv[2] if len(sys.argv) > 2 else "modified_csi-blob-node.yaml"
     modified_yaml_content = modify(url)
     with open(output_file, 'w') as yaml_file:

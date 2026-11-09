@@ -21,12 +21,12 @@ wait_for_dpkg_lock() {
         echo "Timed out waiting for dpkg lock."
         exit 124
     fi
-    dpkg --configure -a || true
+    dpkg --configure -a
     bash -c 'exec "$@"' -- "$@"
 }
 
 echo "=== Step 1: Update apt cache ==="
-wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get update -y'
+wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get update -y -o APT::Update::Error-Mode=any'
 
 echo "=== Step 2: Install required tools ==="
 wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get install curl apt-transport-https ca-certificates -y'
@@ -34,10 +34,10 @@ wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get install curl 
 echo "=== Step 3: Add Microsoft blobfuse2 official repository ==="
 curl -fsSL https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb -o packages-microsoft-prod.deb
 wait_for_dpkg_lock bash -c 'dpkg -i packages-microsoft-prod.deb'
-wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get update -y'
+wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get update -y -o APT::Update::Error-Mode=any'
 
-echo "=== Step 4: Install dependencies and blobfuse2 specific version (2.5.0) ==="
-wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get install libfuse3-dev fuse3 blobfuse2=2.5.0 -y || echo "Failed to install blobfuse2 2.5.0"'
+echo "=== Step 4: Install dependencies and latest blobfuse2 ==="
+wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get install libfuse3-dev fuse3 blobfuse2 -y'
 
 echo "=== Step 5: Verify blobfuse2 installation ==="
 if ! command -v blobfuse2 >/dev/null 2>&1; then
@@ -57,8 +57,8 @@ fi
 echo "Installed version: $INSTALLED_VERSION, Required version: $REQUIRED_VERSION"
 
 if dpkg --compare-versions "$INSTALLED_VERSION" "lt" "$REQUIRED_VERSION"; then
-    echo "Current version is lower than $REQUIRED_VERSION, attempting upgrade..."
-    wait_for_dpkg_lock bash -c 'DEBIAN_FRONTEND=noninteractive apt-get install --only-upgrade blobfuse2 -y || echo "Failed to upgrade blobfuse2"'
+    echo "Current version is lower than $REQUIRED_VERSION, exiting."
+    exit 1
 else
     echo "blobfuse2 meets the required version (>= $REQUIRED_VERSION)"
 fi
