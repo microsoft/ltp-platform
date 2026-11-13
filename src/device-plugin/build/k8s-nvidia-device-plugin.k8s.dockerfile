@@ -30,7 +30,7 @@ RUN mkdir /busybox && \
     /busybox/busybox --install -s /busybox
 
 # Also supplies the Go-based sleep and shelless_ulimit utilities.
-FROM nvcr.io/nvidia/distroless/go:v4.1.6 AS application
+FROM nvcr.io/nvidia/distroless/go:v4.2.1 AS application
 
 USER 0:0
 
