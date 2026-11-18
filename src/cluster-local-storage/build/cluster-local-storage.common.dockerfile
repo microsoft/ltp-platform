@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 
-FROM golang:1.26.10 AS azcopy-builder
+FROM golang:1.26.11 AS azcopy-builder
 
 ARG AZCOPY_VERSION=10.32.8
 

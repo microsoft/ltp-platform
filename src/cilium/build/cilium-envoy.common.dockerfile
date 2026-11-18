@@ -21,7 +21,7 @@
 #
 
 ARG CILIUM_ENVOY_TAG=v1.39.5-1792733054-8c73b2816bc8239e27f1fd53b271884688137459
-FROM golang:1.27.3 AS healthcheck-builder
+FROM golang:1.27.4 AS healthcheck-builder
 ARG CILIUM_ENVOY_TAG
 ARG TARGETOS
 ARG TARGETARCH
@@ -36,7 +36,7 @@ RUN git init . && \
       -o /out/cilium-envoy-healthcheck ./healthcheck/main.go
 
 # Keep the upstream proxylib toolchain and a glibc baseline below Ubuntu 24.04.
-FROM golang:1.27.3-bookworm AS proxylib-builder
+FROM golang:1.27.4-bookworm AS proxylib-builder
 ARG TARGETOS
 ARG TARGETARCH
 ENV GOTOOLCHAIN=local
