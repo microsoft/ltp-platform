@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.26.10 AS builder
+FROM golang:1.26.11 AS builder
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -13,7 +13,7 @@ RUN git clone --branch v1.33.12 --depth 1 https://github.com/kubernetes/kubernet
 
 WORKDIR /go/kubernetes
 
-RUN go work edit -go=1.26.10 && \
+RUN go work edit -go=1.26.11 && \
     for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       dir=$(dirname "$modfile"); \
       (cd "$dir" && \
@@ -31,7 +31,7 @@ RUN go work edit -go=1.26.10 && \
     go work sync && \
     go work vendor
 
-RUN GOTOOLCHAIN=go1.26.10 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
+RUN GOTOOLCHAIN=go1.26.11 KUBE_BUILD_PLATFORMS=linux/${TARGETARCH} \
     make WHAT=cmd/kube-scheduler
 
 RUN git init /go/release && \
