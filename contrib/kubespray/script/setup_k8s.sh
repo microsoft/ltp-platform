@@ -8,8 +8,8 @@ set -e
 script_path=$(dirname "$(readlink -f "$0")")
 echo "Script path: $script_path"
 # install blob csi driver, whcih is in this repo: https://github.com/kubernetes-sigs/blob-csi-driver
-csi_driver_config_file="https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/heads/master/deploy/csi-blob-driver.yaml"
-csi_node_config_url="https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/heads/master/deploy/csi-blob-node.yaml"
+csi_driver_config_file="https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/tags/v1.27.11/deploy/csi-blob-driver.yaml"
+csi_node_config_url="https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/tags/v1.27.11/deploy/csi-blob-node.yaml"
 
 csi_node_config_file="$script_path/csi-blob-node-tmp.yaml"
 python $script_path/modify_csi_blob_node_yaml.py $csi_node_config_url $csi_node_config_file
