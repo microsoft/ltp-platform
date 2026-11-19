@@ -4,6 +4,7 @@
 import requests
 import yaml
 import sys
+from pathlib import Path
 
 def modify(yaml_url):
     # Download the YAML file
@@ -66,7 +67,11 @@ def modify(yaml_url):
     return modified_yaml_content
 
 if __name__ == "__main__":
-    url = sys.argv[1] if len(sys.argv) > 1 else "https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/tags/v1.27.11/deploy/csi-blob-node.yaml"
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+    else:
+        csi_version = Path(__file__).with_name('blob-csi-version').read_text().strip()
+        url = f"https://raw.githubusercontent.com/kubernetes-sigs/blob-csi-driver/refs/tags/{csi_version}/deploy/csi-blob-node.yaml"
     output_file = sys.argv[2] if len(sys.argv) > 2 else "modified_csi-blob-node.yaml"
     modified_yaml_content = modify(url)
     with open(output_file, 'w') as yaml_file:
