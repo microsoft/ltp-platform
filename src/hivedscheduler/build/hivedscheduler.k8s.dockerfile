@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM golang:1.26.10-alpine3.24 AS builder
+FROM golang:1.26.11-alpine3.24 AS builder
 
 ARG TEST=false
 ENV GOPATH=/go

@@ -16,9 +16,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # Build Cilium-owned binaries from source with the official v1.20.4 builder,
-# which provides Go 1.26.10 and the required BPF/LLVM build toolchain.
-# Runtime utilities such as gops and the loopback CNI plugin remain from the
-# matching official runtime image; Pebble is replaced with its patched release.
+# retaining its BPF/LLVM tools while selecting the patched Go toolchain.
+# Rebuild the runtime's Go utilities with the same patch release.
 #
 
 ARG CILIUM_VERSION=v1.20.4
@@ -34,6 +33,7 @@ ARG PEBBLE_VERSION
 ARG TARGETOS
 ARG TARGETARCH
 ARG BUILDARCH
+ENV GOTOOLCHAIN=go1.26.11
 
 WORKDIR /workspace/cilium
 RUN git clone --depth 1 --branch ${CILIUM_VERSION} \
@@ -83,6 +83,15 @@ RUN cp images/cilium/init-container.sh \
       plugins/cilium-cni/cni-uninstall.sh \
       /tmp/install/${TARGETOS}/${TARGETARCH}/
 
+# Reuse the matching release's source versions and build flags for runtime tools.
+FROM golang:1.26.11 AS runtime-go-builder
+ARG TARGETARCH
+ENV GOTOOLCHAIN=local
+COPY --from=builder /workspace/cilium/images/runtime/ /src/
+RUN /src/build-gops.sh && \
+    /src/build-cni.sh && \
+    /src/build-iptables-wrapper.sh
+
 # Stage 2: Envoy binaries from official image
 FROM ${CILIUM_ENVOY_IMAGE} AS cilium-envoy
 
@@ -100,6 +109,7 @@ RUN echo ". /etc/profile.d/bash_completion.sh" >> /etc/bash.bashrc
 COPY --from=cilium-envoy /usr/bin/cilium-envoy /usr/bin/cilium-envoy-starter /usr/bin/
 ENV HUBBLE_SERVER=unix:///var/run/cilium/hubble.sock
 COPY --from=builder /tmp/install/${TARGETOS}/${TARGETARCH} /
+COPY --from=runtime-go-builder /out/ /
 RUN /usr/bin/hubble completion bash > /etc/bash_completion.d/hubble
 WORKDIR /home/cilium
 ENV INITSYSTEM="SYSTEMD"
