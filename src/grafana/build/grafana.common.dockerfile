@@ -36,6 +36,8 @@ RUN git clone --branch ${GRAFANA_INFINITY_PLUGIN_VERSION} --depth 1 https://gith
 RUN go get golang.org/x/crypto@v0.56.0 && \
     go get google.golang.org/grpc@v1.83.2 && \
     go get golang.org/x/net@v0.62.0 && \
+    go get go.opentelemetry.io/otel/sdk@v1.47.0 \
+      go.opentelemetry.io/otel/trace@v1.47.0 && \
     go mod tidy
 
 RUN go install github.com/magefile/mage@latest

@@ -17,8 +17,7 @@ RUN go work edit -go=1.26.11 && \
     for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
       dir=$(dirname "$modfile"); \
       (cd "$dir" && \
-        go get golang.org/x/text@v0.39.0 && \
-        go get go.opentelemetry.io/otel/sdk@v1.43.0 \
+        go get golang.org/x/text@v0.39.0 \
       ) || true; \
     done && \
     for modfile in $(find . -name 'go.mod' -not -path './vendor/*'); do \
@@ -28,6 +27,8 @@ RUN go work edit -go=1.26.11 && \
       (cd "$dir" && go get golang.org/x/crypto@v0.56.0) || true; \
     done && \
     go get golang.org/x/net@v0.62.0 && \
+    go get go.opentelemetry.io/otel/sdk@v1.47.0 \
+      go.opentelemetry.io/otel/trace@v1.47.0 && \
     go work sync && \
     go work vendor
 

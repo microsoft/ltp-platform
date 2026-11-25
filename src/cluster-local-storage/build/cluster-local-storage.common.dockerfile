@@ -11,6 +11,8 @@ RUN git clone --depth 1 --branch "v${AZCOPY_VERSION}" \
         https://github.com/Azure/azure-storage-azcopy.git . && \
     go get golang.org/x/crypto@v0.56.0 && \
     go get golang.org/x/net@v0.62.0 && \
+    go get go.opentelemetry.io/otel/sdk@v1.47.0 \
+      go.opentelemetry.io/otel/trace@v1.47.0 && \
     go mod tidy && \
     CGO_ENABLED=0 go build -tags netgo -o /azcopy
 

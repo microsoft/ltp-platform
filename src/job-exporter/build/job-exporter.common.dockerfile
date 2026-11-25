@@ -58,10 +58,12 @@ RUN set -eux; \
     go get github.com/cilium/ebpf@v0.22.0 && \
     go get golang.org/x/mod@v0.40.0 && \
     go get golang.org/x/text@v0.39.0 && \
-    go get github.com/containerd/containerd/v2@v2.3.6 && \
+    go get github.com/containerd/containerd/v2@v2.3.7 && \
     go get google.golang.org/grpc@v1.83.2 && \
     go get golang.org/x/crypto@v0.56.0 && \
     go get golang.org/x/net@v0.62.0 && \
+    go get go.opentelemetry.io/otel/sdk@v1.47.0 \
+      go.opentelemetry.io/otel/trace@v1.47.0 && \
     go mod tidy && \
     make binaries; \
     mkdir -p /opt/nerdctl; \

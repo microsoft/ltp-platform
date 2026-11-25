@@ -20,7 +20,7 @@ class PgJsonOutputTest < Test::Unit::TestCase
   TIME_COL = "time"
   TAG_COL = "tag"
   RECORD_COL = "record"
-  ENCODER = Yajl
+  ENCODER = JSON
 
   CONFIG = %[
     @type pgjson
@@ -56,6 +56,25 @@ class PgJsonOutputTest < Test::Unit::TestCase
     assert_equal TAG_COL, d.instance.tag_col
     assert_equal RECORD_COL, d.instance.record_col
     assert_equal ENCODER, d.instance.encoder
+  end
+
+  def test_record_value_serializes_json
+    record = {
+      "kind" => "Framework",
+      "metadata" => {"name" => "\u4e2d\u6587", "note" => "\"quoted\"\\path\nnext"},
+      "status" => {"attempts" => [1, 2], "completed" => false, "message" => nil}
+    }
+
+    ["", "\nencoder json\n"].each do |encoder_config|
+      instance = create_driver(CONFIG + encoder_config).instance
+      assert_equal record, JSON.parse(instance.record_value(record))
+    end
+  end
+
+  def test_rejects_yajl_encoder
+    assert_raise(Fluent::ConfigError) do
+      create_driver(CONFIG + "\nencoder yajl\n")
+    end
   end
 
   def test_invalid_chunk_keys
