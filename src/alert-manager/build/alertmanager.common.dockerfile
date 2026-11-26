@@ -36,7 +36,9 @@ RUN touch ui/app/dist/.build_stamp
 
 RUN go get golang.org/x/crypto@v0.58.0 \
       google.golang.org/grpc@v1.83.2 \
-      golang.org/x/net@v0.62.0 && \
+      golang.org/x/net@v0.62.0 \
+      go.opentelemetry.io/otel/sdk@v1.47.0 \
+      go.opentelemetry.io/otel/trace@v1.47.0 && \
     go mod tidy && \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} make build PREFIX=/out
 

@@ -1,7 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-FROM fluent/fluentd:v1.17.1-debian-1.0
+FROM ruby:3.4-slim-trixie AS ruby-runtime
+
+FROM fluent/fluentd:v1.20.1-debian-1.1
 
 USER root
 
@@ -9,10 +11,14 @@ USER root
 ENV LD_PRELOAD="" \
     DEBIAN_FRONTEND=noninteractive
 
+# Refresh Ruby within the same ABI while preserving Fluentd's application gems.
+RUN rm -rf /usr/local/lib/ruby /usr/local/include/ruby-3.4.0 && \
+    rm -f /usr/local/lib/libruby.so*
+COPY --from=ruby-runtime /usr/local/ /usr/local/
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
-    ruby-dev \
     make \
     gcc \
     libc6-dev \

@@ -5,7 +5,6 @@
 
 require "fluent/plugin/output"
 require "pg"
-require "yajl"
 require "json"
 require 'digest'
 
@@ -51,8 +50,8 @@ module Fluent::Plugin
     config_param :snapshot_col, :string, default: "snapshot"
     desc "If true, insert records formatted as msgpack"
     config_param :msgpack, :bool, default: false
-    desc "JSON encoder (yajl/json)"
-    config_param :encoder, :enum, list: [:yajl, :json], default: :yajl
+    desc "JSON encoder"
+    config_param :encoder, :enum, list: [:json], default: :json
 
     config_param :time_format, :string, default: "%F %T.%N %z"
 
@@ -75,12 +74,7 @@ module Fluent::Plugin
       unless @chunk_key_tag
         raise Fluent::ConfigError, "'tag' in chunk_keys is required."
       end
-      @encoder = case @encoder
-                 when :yajl
-                   Yajl
-                 when :json
-                   JSON
-                 end
+      @encoder = JSON
     end
 
     def init_connection

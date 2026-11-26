@@ -88,9 +88,11 @@ CREATE TABLE fluentd (
 * **record_col** (string) (optional): The column name for the record
   * Default value: `record`.
 * **msgpack** (bool) (optional): If true, insert records formatted as msgpack
-* **encoder** (enum) (optional): JSON encoder (yajl/json)
-  * Available values: yajl, json
-  * Default value: `yajl`.
+* **encoder** (enum) (optional): JSON encoder
+  * Available values: json
+  * Default value: `json`.
+
+The `yajl` encoder is no longer supported. Remove `encoder yajl` from existing configurations or replace it with `encoder json`.
 
 ## Copyright
 
